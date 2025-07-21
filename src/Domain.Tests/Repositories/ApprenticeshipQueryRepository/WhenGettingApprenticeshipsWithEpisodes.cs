@@ -143,6 +143,45 @@ public class WhenGettingApprenticeshipsWithEpisodes
         apprenticeship.WithdrawnDate.Should().Be(withdrawRecord.LastDayOfLearning);
     }
 
+    [Test]
+    public async Task ThenCompletionDataReturnedWhenCompletionExists()
+    {
+        //Arrange
+        SetUpApprenticeshipQueryRepository();
+
+        var apprenticeshipKey = _fixture.Create<Guid>();
+        var episodeKey = _fixture.Create<Guid>();
+
+        var ukprn = _fixture.Create<long>();
+        var startDate = _fixture.Create<DateTime>();
+        var endDate = startDate.AddYears(2);
+        var trainingCode = _fixture.Create<string>();
+        var completionDate = startDate.AddYears(1);
+
+        var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
+        var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
+
+        var apprenticeshipRecord = _fixture.Build<Learning.DataAccess.Entities.Learning.Learning>()
+                .With(x => x.Key, apprenticeshipKey)
+                .With(x => x.Episodes, new List<Episode>() { episode })
+                .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
+                .With(x => x.Uln, _fixture.Create<long>().ToString())
+                .With(x => x.WithdrawalRequests, new List<WithdrawalRequest>())
+                .With(x => x.CompletionDate, completionDate)
+                .Create();
+
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _sut.GetLearningsWithEpisodes(ukprn);
+
+        // Assert
+        result.Should().NotBeNull();
+        var apprenticeship = result.SingleOrDefault();
+        apprenticeship.CompletionDate.Should().Be(completionDate);
+    }
+
     private void AssertApprenticeship(
         Learning.DataAccess.Entities.Learning.Learning expected,
         DateTime startDate,
@@ -164,6 +203,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         actual.Should().NotBeNull();
         actual.TrainingCode.Should().Be(expected.TrainingCode);
         actual.Prices.Count.Should().Be(expected.Prices.Count);
+        actual.LastDayOfLearning.Should().Be(expected.LastDayOfLearning);
     }
 
     private bool AssertPrice(EpisodePrice expected, Learning.DataTransferObjects.EpisodePrice actual)

@@ -6,7 +6,14 @@ namespace SFA.DAS.Learning.DataTransferObjects;
 public class LearningWithEpisodes
 {
     public LearningWithEpisodes(
-        Guid key, string uln, DateTime startDate, DateTime plannedEndDate, List<Episode> episodes, int ageAtStartOfLearning, DateTime? withdrawnDate)
+        Guid key, 
+        string uln, 
+        DateTime startDate, 
+        DateTime plannedEndDate, 
+        List<Episode> episodes, 
+        int ageAtStartOfLearning, 
+        DateTime? withdrawnDate,
+        DateTime? completionDate)
     {
         Key = key;
         Uln = uln;
@@ -15,6 +22,7 @@ public class LearningWithEpisodes
         Episodes = episodes;
         AgeAtStartOfLearning = ageAtStartOfLearning;
         WithdrawnDate = withdrawnDate;
+        CompletionDate = completionDate;
     }
 
     public Guid Key { get; set; }
@@ -25,4 +33,5 @@ public class LearningWithEpisodes
     public int AgeAtStartOfApprenticeship => AgeAtStartOfLearning;
     public int AgeAtStartOfLearning { get; set; }
     public DateTime? WithdrawnDate { get; set; }
+    public DateTime? CompletionDate { get; set; }
 }

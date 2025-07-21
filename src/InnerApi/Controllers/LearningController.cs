@@ -13,6 +13,8 @@ using SFA.DAS.Learning.Queries.GetLearningKey;
 using SFA.DAS.Learning.Queries.GetLearningKeyByLearningId;
 using SFA.DAS.Learning.Queries.GetLearningPrice;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
+using SFA.DAS.Learning.InnerApi.Requests;
+using SFA.DAS.Learning.Command.UpdateLearner;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -197,5 +199,25 @@ public class LearningController : ControllerBase
         var response = await _queryDispatcher.Send<GetCurrentPartyIdsRequest, GetCurrentPartyIdsResponse?>(request);
         if (response == null) return NotFound();
         return Ok(response);
+    }
+
+    /// <summary>
+    /// Updates the details of a learner associated with a specific learning key.
+    /// </summary>
+    /// <param name="learningKey">The unique identifier for the learner record to update.</param>
+    /// <param name="request">The updated learner details.</param>
+    /// <returns>An array of <see cref="LearningUpdateChanges"/> values indicating the fields that were modified.</returns>
+    [HttpPut("{learningKey}")]
+    [ProducesResponseType(200)]
+    [ActionAuthorizeUserType(UserType.ServiceAccount)]
+    public async Task<IActionResult> UpdateLearning(Guid learningKey, [FromBody] UpdateLearnerRequest request)
+    {
+        _logger.LogInformation("Updating learning with key {LearningKey}", learningKey);
+
+        var command = request.ToCommand(learningKey);
+
+        var result = await _commandDispatcher.Send<UpdateLearnerCommand, LearningUpdateChanges[]>(command);
+
+        return new OkObjectResult(result);
     }
 }
