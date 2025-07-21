@@ -111,7 +111,7 @@ public class WhenAStartDateChangeIsApproved
         _messageSession.Verify(x => x.Publish(It.Is<LearningStartDateChangedEvent>(e =>
             e.StartDate == actualStartDate &&
             IsMarkedApprovedByEmployer(e, startDateChangeDomainModel, approvingUserId) &&
-            DoApprenticeshipDetailsMatchDomainModel(e, learning) &&
+            DoLearningDetailsMatchDomainModel(e, learning) &&
             ApprenticeshipDomainModelTestHelper.DoEpisodeDetailsMatchDomainModel(e, learning)
             ), It.IsAny<PublishOptions>(),
             It.IsAny<CancellationToken>()));
@@ -135,7 +135,7 @@ public class WhenAStartDateChangeIsApproved
             e.Initiator == ChangeInitiator.Employer.ToString();
     }
 
-    private static bool DoApprenticeshipDetailsMatchDomainModel(LearningStartDateChangedEvent e, LearningDomainModel learning)
+    private static bool DoLearningDetailsMatchDomainModel(LearningStartDateChangedEvent e, LearningDomainModel learning)
     {
         return
             e.LearningKey == learning.Key &&
