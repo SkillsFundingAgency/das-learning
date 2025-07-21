@@ -369,9 +369,9 @@ public class LearningDomainModel : AggregateRoot
     {
         var changes = new List<LearningUpdateChanges>();
 
-        if (updateModel.Learner.CompletionDate != _entity.CompletionDate) 
+        if (updateModel.Learner.CompletionDate?.Date != _entity.CompletionDate?.Date) 
         {
-            _entity.CompletionDate = updateModel.Learner.CompletionDate;
+            _entity.CompletionDate = updateModel.Learner.CompletionDate?.Date;
             changes.Add(LearningUpdateChanges.CompletionDate);
         }
 
