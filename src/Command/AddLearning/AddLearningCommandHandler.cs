@@ -101,7 +101,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
     private async Task SendEvent(LearningDomainModel learning)
     {
-        _logger.LogInformation("Sending LearningCreatedEvent for Approvals Learning Id: {approvalsApprenticeshipId}", learning.ApprovalsApprenticeshipId);
+        _logger.LogInformation("Sending LearningCreatedEvent for ApprovalsApprenticeshipId: {approvalsApprenticeshipId}", learning.ApprovalsApprenticeshipId);
         var learningCreatedEvent = new LearningCreatedEvent
         {
             LearningKey = learning.Key,
