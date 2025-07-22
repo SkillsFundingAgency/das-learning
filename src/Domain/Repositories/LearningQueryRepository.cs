@@ -346,11 +346,12 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                     apprenticeship.GetStartDate(),
                     apprenticeship.GetPlannedEndDate(),
                     apprenticeship.Episodes.Select(ep =>
-                            new Episode(ep.Key, ep.TrainingCode, ep.Prices.Select(p =>
+                            new Episode(ep.Key, ep.TrainingCode, ep.LastDayOfLearning, ep.Prices.Select(p =>
                                 new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice, p.FundingBandMaximum)).ToList()))
                         .ToList(),
                     apprenticeship.GetAgeAtStartOfApprenticeship(),
-                    apprenticeship.GetWithdrawnDate())
+                    apprenticeship.GetWithdrawnDate(),
+                    apprenticeship.CompletionDate)
             ).ToList();
         }
         catch (Exception e)

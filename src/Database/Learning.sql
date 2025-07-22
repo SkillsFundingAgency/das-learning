@@ -6,7 +6,8 @@
     [FirstName] NVARCHAR(100) NOT NULL,
     [LastName] NVARCHAR(100) NOT NULL,
     [DateOfBirth] DATETIME NOT NULL,
-    [ApprenticeshipHashedId] NVARCHAR(100) NULL,
+    [ApprenticeshipHashedId] NVARCHAR(100) NULL, 
+    [CompletionDate] DATETIME NULL,
     CONSTRAINT UQ_Learning_ApprovalsApprenticeshipId_Uln UNIQUE (ApprovalsApprenticeshipId, Uln)
 )
 GO

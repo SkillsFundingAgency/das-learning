@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using SFA.DAS.Learning.Domain.Extensions;
+using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -362,5 +363,18 @@ public class LearningDomainModel : AggregateRoot
         {
             LatestEpisode.UpdatePricesForApprovedPriceChange(priceChangeRequest);
         }
+    }
+
+    public LearningUpdateChanges[] UpdateLearnerDetails(LearnerUpdateModel updateModel)
+    {
+        var changes = new List<LearningUpdateChanges>();
+
+        if (updateModel.Learner.CompletionDate?.Date != _entity.CompletionDate?.Date) 
+        {
+            _entity.CompletionDate = updateModel.Learner.CompletionDate?.Date;
+            changes.Add(LearningUpdateChanges.CompletionDate);
+        }
+
+        return changes.ToArray();
     }
 }

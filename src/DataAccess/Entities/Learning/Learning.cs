@@ -26,4 +26,5 @@ public class Learning
     public List<FreezeRequest> FreezeRequests { get; set; }
     public List<Episode> Episodes { get; set; }
     public List<WithdrawalRequest> WithdrawalRequests { get; set; }
+    public DateTime? CompletionDate { get; set; }
 }
