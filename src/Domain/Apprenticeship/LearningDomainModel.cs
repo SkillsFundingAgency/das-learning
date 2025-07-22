@@ -383,7 +383,7 @@ public class LearningDomainModel : AggregateRoot
 
     private void UpdateLearningDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
-        if (updateModel.Learning.CompletionDate != _entity.CompletionDate) 
+        if (updateModel.Learning.CompletionDate?.Date != _entity.CompletionDate?.Date) 
         {
             _entity.CompletionDate = updateModel.Learning.CompletionDate;
             changes.Add(LearningUpdateChanges.CompletionDate);
@@ -408,13 +408,13 @@ public class LearningDomainModel : AggregateRoot
             }
             else
             {
-                if (course.WithdrawalDate != existingCourse.WithdrawalDate)
+                if (course.WithdrawalDate?.Date != existingCourse.WithdrawalDate?.Date)
                 {
                     existingCourse.WithdrawalDate = course.WithdrawalDate;
                     changes.Add(LearningUpdateChanges.EnglishAndMathsWithdrawal);
                 }
 
-                if (course.CompletionDate != existingCourse.CompletionDate)
+                if (course.CompletionDate?.Date != existingCourse.CompletionDate?.Date)
                 {
                     existingCourse.CompletionDate = course.CompletionDate;
                     changes.Add(LearningUpdateChanges.EnglishAndMathsCompletion);
