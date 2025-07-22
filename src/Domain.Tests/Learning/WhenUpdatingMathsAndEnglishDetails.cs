@@ -45,7 +45,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         if (changed)
         {
             entity.MathsAndEnglishCourses.Should().Contain(x => x.Course == newCourse.Course);
-            result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsNewCourse);
+            result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
         }
     }
 
@@ -67,7 +67,7 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         //Assert
         learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).CompletionDate.Should().Be(mathsAndEnglishUpdateModel.CompletionDate?.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsCompletion);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
     }
 
     [TestCase(true)]
@@ -89,6 +89,6 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         //Assert
         learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsWithdrawal);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
     }
 }

@@ -404,20 +404,20 @@ public class LearningDomainModel : AggregateRoot
                     CompletionDate = course.CompletionDate,
                     WithdrawalDate = course.WithdrawalDate
                 });
-                changes.Add(LearningUpdateChanges.EnglishAndMathsNewCourse);
+                changes.Add(LearningUpdateChanges.MathsAndEnglish);
             }
             else
             {
                 if (course.WithdrawalDate?.Date != existingCourse.WithdrawalDate?.Date)
                 {
                     existingCourse.WithdrawalDate = course.WithdrawalDate?.Date;
-                    changes.Add(LearningUpdateChanges.EnglishAndMathsWithdrawal);
+                    changes.Add(LearningUpdateChanges.MathsAndEnglish);
                 }
 
                 if (course.CompletionDate?.Date != existingCourse.CompletionDate?.Date)
                 {
                     existingCourse.CompletionDate = course.CompletionDate?.Date;
-                    changes.Add(LearningUpdateChanges.EnglishAndMathsCompletion);
+                    changes.Add(LearningUpdateChanges.MathsAndEnglish);
                 }
             }
         }
