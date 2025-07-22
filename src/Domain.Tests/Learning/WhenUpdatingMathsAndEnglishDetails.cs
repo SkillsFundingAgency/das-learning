@@ -55,6 +55,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     {
         //Arrange
         var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.MathsAndEnglishCourses.ForEach(x => x.CompletionDate = x.CompletionDate?.Date);
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.FirstOrDefault();
@@ -65,7 +66,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         var result = learning.UpdateLearnerDetails(updateModel);
 
         //Assert
-        learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).CompletionDate.Should().Be(mathsAndEnglishUpdateModel.CompletionDate);
+        learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).CompletionDate.Should().Be(mathsAndEnglishUpdateModel.CompletionDate?.Date);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsCompletion);
     }
 
@@ -75,9 +76,11 @@ public class WhenUpdatingMathsAndEnglishDetails
     {
         //Arrange
         var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.MathsAndEnglishCourses.ForEach(x => x.WithdrawalDate = x.WithdrawalDate?.Date);
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.FirstOrDefault();
+        mathsAndEnglishUpdateModel.WithdrawalDate = mathsAndEnglishUpdateModel.WithdrawalDate?.Date;
 
         if (changed) mathsAndEnglishUpdateModel.WithdrawalDate = _fixture.Create<DateTime>();
 
@@ -85,7 +88,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         var result = learning.UpdateLearnerDetails(updateModel);
 
         //Assert
-        learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate);
+        learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsWithdrawal);
     }
 }

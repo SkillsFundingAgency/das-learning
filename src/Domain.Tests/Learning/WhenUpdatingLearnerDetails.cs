@@ -25,16 +25,17 @@ public class WhenUpdatingLearnerDetails
     {
         //Arrange
         var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.CompletionDate = entity.CompletionDate?.Date;
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
 
-        if(changed) updateModel.Learning.CompletionDate = _fixture.Create<DateTime>();
+        if (changed) updateModel.Learning.CompletionDate = _fixture.Create<DateTime>();
 
         //Act
         var result = learning.UpdateLearnerDetails(updateModel);
 
         //Assert
-        learning.CompletionDate.Should().Be(updateModel.Learning.CompletionDate);
+        learning.CompletionDate.Should().Be(updateModel.Learning.CompletionDate?.Date);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.CompletionDate);
     }
 }

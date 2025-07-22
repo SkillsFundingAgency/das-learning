@@ -385,7 +385,7 @@ public class LearningDomainModel : AggregateRoot
     {
         if (updateModel.Learning.CompletionDate?.Date != _entity.CompletionDate?.Date) 
         {
-            _entity.CompletionDate = updateModel.Learning.CompletionDate;
+            _entity.CompletionDate = updateModel.Learning.CompletionDate?.Date;
             changes.Add(LearningUpdateChanges.CompletionDate);
         }
     }
@@ -410,13 +410,13 @@ public class LearningDomainModel : AggregateRoot
             {
                 if (course.WithdrawalDate?.Date != existingCourse.WithdrawalDate?.Date)
                 {
-                    existingCourse.WithdrawalDate = course.WithdrawalDate;
+                    existingCourse.WithdrawalDate = course.WithdrawalDate?.Date;
                     changes.Add(LearningUpdateChanges.EnglishAndMathsWithdrawal);
                 }
 
                 if (course.CompletionDate?.Date != existingCourse.CompletionDate?.Date)
                 {
-                    existingCourse.CompletionDate = course.CompletionDate;
+                    existingCourse.CompletionDate = course.CompletionDate?.Date;
                     changes.Add(LearningUpdateChanges.EnglishAndMathsCompletion);
                 }
             }
