@@ -2,5 +2,8 @@
 
 public enum LearningUpdateChanges
 {
-    CompletionDate
+    CompletionDate,
+    EnglishAndMathsCompletion,
+    EnglishAndMathsWithdrawal,
+    EnglishAndMathsNewCourse
 }

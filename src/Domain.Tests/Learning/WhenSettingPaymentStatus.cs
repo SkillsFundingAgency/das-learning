@@ -8,7 +8,7 @@ using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Apprenticeship;
+namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
 
 public class WhenSettingPaymentStatus
 {

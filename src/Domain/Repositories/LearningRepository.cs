@@ -40,6 +40,7 @@ public class LearningRepository : ILearningRepository
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
+            .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
             .SingleAsync(x => x.Key == key);
@@ -53,6 +54,7 @@ public class LearningRepository : ILearningRepository
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
+            .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
             .SingleOrDefaultAsync(x => x.Uln == uln && x.ApprovalsApprenticeshipId == approvalsApprenticeshipId);
@@ -65,6 +67,7 @@ public class LearningRepository : ILearningRepository
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
+            .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
             .SingleOrDefaultAsync(x => x.Uln == uln);

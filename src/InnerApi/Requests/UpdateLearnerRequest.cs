@@ -14,6 +14,12 @@ public class UpdateLearnerRequest
     /// Learner details to be updated
     /// </summary>
     public LearnerUpdateDetails Learner { get; set; }
+
+
+    /// <summary>
+    /// Maths and English course details
+    /// </summary>
+    public List<MathsAndEnglish> MathsAndEnglishCourses { get; set; }
 }
 
 /// <summary>
@@ -25,6 +31,27 @@ public class  LearnerUpdateDetails
     /// Date the learning completes, this will be null until completion is confirmed
     /// </summary>
     public DateTime? CompletionDate { get; set; }
+}
+
+/// <summary>
+/// Maths and English course details
+/// </summary>
+public class MathsAndEnglish
+{
+    /// <summary>
+    /// The maths and english course
+    /// </summary>
+    public string Course { get; set; }
+
+    /// <summary>
+    /// Date the maths and english course completes, this will be null until completion is confirmed
+    /// </summary>
+    public DateTime? CompletionDate { get; set; }
+
+    /// <summary>
+    /// Withdrawal date for the maths and english course, this will be null until a withdrawal is confirmed
+    /// </summary>
+    public DateTime? WithdrawalDate { get; set; }
 }
 
 #pragma warning restore CS8618 // Required properties must be set in the constructor
@@ -39,8 +66,12 @@ public static class UpdateLearnerRequestExtensions
     /// <returns>A command to update the learner</returns>
     public static UpdateLearnerCommand ToCommand(this UpdateLearnerRequest request, Guid learnerKey)
     {
-        var learnerDetails = new Domain.Models.LearnerUpdateDetails(request.Learner.CompletionDate);
-        var learnerUpdateModel = new LearnerUpdateModel(learnerDetails);
+        var learningDetails = new Domain.Models.LearningUpdateDetails(request.Learner.CompletionDate);
+        var mathsAndEnglishCourses = request.MathsAndEnglishCourses
+            .Select(x => new MathsAndEnglishUpdateDetails(x.CompletionDate, x.WithdrawalDate, x.Course))
+            .ToList();
+
+        var learnerUpdateModel = new LearnerUpdateModel(learningDetails, mathsAndEnglishCourses);
         return new UpdateLearnerCommand(learnerKey, learnerUpdateModel);
     }
 }

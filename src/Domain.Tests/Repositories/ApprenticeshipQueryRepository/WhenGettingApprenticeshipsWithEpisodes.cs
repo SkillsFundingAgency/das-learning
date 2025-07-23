@@ -10,6 +10,7 @@ using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.DataTransferObjects;
+using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.TestHelpers;
 using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
 using EpisodePrice = SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodePrice;
@@ -18,7 +19,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
 
 public class WhenGettingApprenticeshipsWithEpisodes
 {
-    private Learning.Domain.Repositories.LearningQueryRepository _sut = null!;
+    private LearningQueryRepository _sut = null!;
     private Fixture _fixture = null!;
     private LearningDataContext _dbContext = null!;
 
@@ -71,7 +72,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice4 = CreateEpisodePrice(episode2Key, startDate.AddYears(1), endDate);
         var episode2 = CreateEpisode(episode2Key, ukprn, trainingCode, episodePrice3, episodePrice4);
 
-        var apprenticeshipRecord = _fixture.Build<Learning.DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
                 .With(x => x.Key, apprenticeshipKey)
                 .With(x => x.Episodes, new List<Episode>() { episode1, episode2 })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
@@ -123,7 +124,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
             .With(x => x.LastDayOfLearning, startDate.AddYears(1))
             .Create();
 
-        var apprenticeshipRecord = _fixture.Build<Learning.DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
                 .With(x => x.Key, apprenticeshipKey)
                 .With(x => x.Episodes, new List<Episode>() { episode })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
@@ -161,7 +162,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-        var apprenticeshipRecord = _fixture.Build<Learning.DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
                 .With(x => x.Key, apprenticeshipKey)
                 .With(x => x.Episodes, new List<Episode>() { episode })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
@@ -183,7 +184,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
     }
 
     private void AssertApprenticeship(
-        Learning.DataAccess.Entities.Learning.Learning expected,
+        DataAccess.Entities.Learning.Learning expected,
         DateTime startDate,
         DateTime endDate,
         int age,
@@ -198,7 +199,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         actual.Episodes.Count.Should().Be(expected.Episodes.Count);
     }
 
-    private void AssertEpisode(Episode expected, Learning.DataTransferObjects.Episode actual)
+    private void AssertEpisode(Episode expected, DataTransferObjects.Episode actual)
     {
         actual.Should().NotBeNull();
         actual.TrainingCode.Should().Be(expected.TrainingCode);
@@ -206,7 +207,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         actual.LastDayOfLearning.Should().Be(expected.LastDayOfLearning);
     }
 
-    private bool AssertPrice(EpisodePrice expected, Learning.DataTransferObjects.EpisodePrice actual)
+    private bool AssertPrice(EpisodePrice expected, DataTransferObjects.EpisodePrice actual)
     {
         return actual.EndDate == expected.EndDate
             && actual.EndPointAssessmentPrice == expected.EndPointAssessmentPrice
@@ -219,8 +220,8 @@ public class WhenGettingApprenticeshipsWithEpisodes
     private void SetUpApprenticeshipQueryRepository()
     {
         _dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
-        var logger = Mock.Of<ILogger<Learning.Domain.Repositories.LearningQueryRepository>>();
-        _sut = new Learning.Domain.Repositories.LearningQueryRepository(new Lazy<LearningDataContext>(_dbContext), logger);
+        var logger = Mock.Of<ILogger<LearningQueryRepository>>();
+        _sut = new LearningQueryRepository(new Lazy<LearningDataContext>(_dbContext), logger);
     }
 
     private EpisodePrice CreateEpisodePrice(Guid episodeKey, DateTime start, DateTime end)

@@ -8,7 +8,7 @@ using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Apprenticeship;
+namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
 
 [TestFixture]
 public class WhenAPriceChangeIsApproved

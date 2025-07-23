@@ -5,10 +5,10 @@ using NUnit.Framework;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Apprenticeship;
+namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
 
 [TestFixture]
-public class WhenAStartDateChangeIsRejected
+public class WhenAStartDateChangeIsCancelled
 {
     private Fixture _fixture;
 
@@ -26,11 +26,11 @@ public class WhenAStartDateChangeIsRejected
         var apprenticeship = ApprenticeshipDomainModelTestHelper.BuildApprenticeshipWithPendingStartDateChange();
 
         //Act
-        apprenticeship.RejectStartDateChange(rejectReason);
+        apprenticeship.CancelPendingStartDateChange();
 
         //Assert
         var entity = apprenticeship.GetEntity();
         entity.StartDateChanges.Any(x => x.RequestStatus == ChangeRequestStatus.Created).Should().BeFalse();
-        entity.StartDateChanges.Should().Contain(x => x.RequestStatus == ChangeRequestStatus.Rejected && x.RejectReason == rejectReason);
+        entity.StartDateChanges.Should().Contain(x => x.RequestStatus == ChangeRequestStatus.Cancelled);
     }
 }
