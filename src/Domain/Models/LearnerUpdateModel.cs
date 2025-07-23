@@ -24,14 +24,26 @@ public class LearningUpdateDetails
 
 public class MathsAndEnglishUpdateDetails
 {
+    public string Course { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime PlannedEndDate { get; set; }
     public DateTime? CompletionDate { get; set; }
     public DateTime? WithdrawalDate { get; set; }
-    public string Course { get; set; }
+    public int? PriorLearningPercentage { get; set; }
 
-    public MathsAndEnglishUpdateDetails(DateTime? completionDate, DateTime? withdrawalDate, string course)
+    public MathsAndEnglishUpdateDetails(
+        string course,
+        DateTime startDate,
+        DateTime plannedEndDate,
+        DateTime? completionDate,
+        DateTime? withdrawalDate,
+        int? priorLearningPercentage)
     {
+        Course = course;
+        StartDate = startDate;
+        PlannedEndDate = plannedEndDate;
         CompletionDate = completionDate;
         WithdrawalDate = withdrawalDate;
-        Course = course;
+        PriorLearningPercentage = priorLearningPercentage;
     }
 }
