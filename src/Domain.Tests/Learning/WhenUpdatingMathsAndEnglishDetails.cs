@@ -91,4 +91,61 @@ public class WhenUpdatingMathsAndEnglishDetails
         learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
     }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void ThenStartDateIsUpdated(bool changed)
+    {
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.MathsAndEnglishCourses.ForEach(x => x.StartDate = x.StartDate.Date);
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+
+        if (changed) mathsAndEnglishUpdateModel.StartDate = _fixture.Create<DateTime>().Date;
+
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).StartDate.Should().Be(mathsAndEnglishUpdateModel.StartDate.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void ThenPlannedEndDateIsUpdated(bool changed)
+    {
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.MathsAndEnglishCourses.ForEach(x => x.PlannedEndDate = x.PlannedEndDate.Date);
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+
+        if (changed) mathsAndEnglishUpdateModel.PlannedEndDate = _fixture.Create<DateTime>().Date;
+
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PlannedEndDate.Should().Be(mathsAndEnglishUpdateModel.PlannedEndDate.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void ThenPriorLearningPercentageIsUpdated(bool changed)
+    {
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+
+        if (changed)
+        {
+            var newValue = (mathsAndEnglishUpdateModel.PriorLearningPercentage ?? 0) + 10;
+            mathsAndEnglishUpdateModel.PriorLearningPercentage = newValue;
+        }
+
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PriorLearningPercentage.Should().Be(mathsAndEnglishUpdateModel.PriorLearningPercentage);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+    }
 }

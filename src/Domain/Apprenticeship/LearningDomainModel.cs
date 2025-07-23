@@ -395,31 +395,55 @@ public class LearningDomainModel : AggregateRoot
         foreach (var course in updateModel.MathsAndEnglishCourses)
         {
             var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x => x.Course == course.Course);
+            bool hasChanges = false;
 
             if (existingCourse == null)
             {
                 _entity.MathsAndEnglishCourses.Add(new MathsAndEnglish
                 {
                     Course = course.Course,
+                    StartDate = course.StartDate,
+                    PlannedEndDate = course.PlannedEndDate,
                     CompletionDate = course.CompletionDate,
-                    WithdrawalDate = course.WithdrawalDate
+                    WithdrawalDate = course.WithdrawalDate,
+                    PriorLearningPercentage = course.PriorLearningPercentage
                 });
-                changes.Add(LearningUpdateChanges.MathsAndEnglish);
+                hasChanges = true;
             }
             else
             {
-                if (course.WithdrawalDate?.Date != existingCourse.WithdrawalDate?.Date)
+                if (course.StartDate.Date != existingCourse.StartDate.Date)
                 {
-                    existingCourse.WithdrawalDate = course.WithdrawalDate?.Date;
-                    changes.Add(LearningUpdateChanges.MathsAndEnglish);
+                    existingCourse.StartDate = course.StartDate;
+                    hasChanges = true;
+                }
+
+                if (course.PlannedEndDate.Date != existingCourse.PlannedEndDate.Date)
+                {
+                    existingCourse.PlannedEndDate = course.PlannedEndDate;
+                    hasChanges = true;
                 }
 
                 if (course.CompletionDate?.Date != existingCourse.CompletionDate?.Date)
                 {
                     existingCourse.CompletionDate = course.CompletionDate?.Date;
-                    changes.Add(LearningUpdateChanges.MathsAndEnglish);
+                    hasChanges = true;
+                }
+
+                if (course.WithdrawalDate?.Date != existingCourse.WithdrawalDate?.Date)
+                {
+                    existingCourse.WithdrawalDate = course.WithdrawalDate?.Date;
+                    hasChanges = true;
+                }
+
+                if (course.PriorLearningPercentage != existingCourse.PriorLearningPercentage)
+                {
+                    existingCourse.PriorLearningPercentage = course.PriorLearningPercentage;
+                    hasChanges = true;
                 }
             }
+
+            if (hasChanges) changes.Add(LearningUpdateChanges.MathsAndEnglish);
         }
     }
 }
