@@ -38,7 +38,8 @@ public class WhenIGetApprenticeshipsByAcademicYear
         {
             Items = queryResult.Data.Select(x => new GetLearningsByDatesResponseItem
             {
-                Uln = x.Uln
+                Uln = x.Uln,
+                Key = x.Key
             }),
             Page = pageNumber,
             PageSize = pageSize,
