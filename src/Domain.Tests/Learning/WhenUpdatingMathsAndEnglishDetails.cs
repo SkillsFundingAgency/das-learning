@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
@@ -90,5 +92,37 @@ public class WhenUpdatingMathsAndEnglishDetails
         //Assert
         learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsWithdrawal);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void ThenOldCoursesAreRemoved(bool changed)
+    {
+        //Arrange
+        var course = _fixture.Create<MathsAndEnglishUpdateDetails>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.MathsAndEnglishCourses = [new MathsAndEnglish { Course = course.Course }];
+
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+
+        if (changed)
+        {
+            updateModel.MathsAndEnglishCourses.RemoveAll(_ => true);
+        }
+
+        //Act
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        //Assert
+        if (changed)
+        {
+            entity.MathsAndEnglishCourses.Count.Should().Be(0);
+            result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsNewCourse);
+        }
+        else
+        {
+            entity.MathsAndEnglishCourses.Should().Contain(x => x.Course == course.Course);
+        }
     }
 }

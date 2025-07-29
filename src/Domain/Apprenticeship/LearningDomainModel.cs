@@ -402,7 +402,9 @@ public class LearningDomainModel : AggregateRoot
                 {
                     Course = course.Course,
                     CompletionDate = course.CompletionDate,
-                    WithdrawalDate = course.WithdrawalDate
+                    WithdrawalDate = course.WithdrawalDate,
+                    StartDate = course.StartDate,
+                    PlannedEndDate = course.PlannedEndDate
                 });
                 changes.Add(LearningUpdateChanges.EnglishAndMathsNewCourse);
             }
@@ -420,6 +422,19 @@ public class LearningDomainModel : AggregateRoot
                     changes.Add(LearningUpdateChanges.EnglishAndMathsCompletion);
                 }
             }
+        }
+
+        var incomingCourses = updateModel.MathsAndEnglishCourses
+            .Select(c => c.Course);
+
+        var coursesToRemove = _entity.MathsAndEnglishCourses
+            .Where(existing => !incomingCourses.Contains(existing.Course))
+            .ToList();
+
+        foreach (var removed in coursesToRemove)
+        {
+            _entity.MathsAndEnglishCourses.Remove(removed);
+            changes.Add(LearningUpdateChanges.EnglishAndMathsNewCourse); //todo Intentionally left this as EnglishAndMathsNewCourse as all of these will be replaced by a simple enum for all E&M changes in the next ticket
         }
     }
 }

@@ -27,11 +27,15 @@ public class MathsAndEnglishUpdateDetails
     public DateTime? CompletionDate { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public string Course { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime PlannedEndDate { get; set; }
 
-    public MathsAndEnglishUpdateDetails(DateTime? completionDate, DateTime? withdrawalDate, string course)
+    public MathsAndEnglishUpdateDetails(DateTime? completionDate, DateTime? withdrawalDate, string course, DateTime startDate, DateTime plannedEndDate)
     {
         CompletionDate = completionDate;
         WithdrawalDate = withdrawalDate;
         Course = course;
+        StartDate = startDate;
+        PlannedEndDate = plannedEndDate;
     }
 }
