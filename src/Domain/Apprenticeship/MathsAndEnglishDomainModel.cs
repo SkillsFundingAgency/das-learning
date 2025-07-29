@@ -11,6 +11,7 @@ public class MathsAndEnglishDomainModel
     public DateTime PlannedEndDate => _entity.PlannedEndDate;
     public string Course => _entity.Course;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
+    public DateTime? CompletionDate => _entity.CompletionDate;
     public int? PriorLearningPercentage => _entity.PriorLearningPercentage;
     public decimal Amount => _entity.Amount;
 

@@ -53,6 +53,27 @@ public class WhenUpdatingMathsAndEnglishDetails
 
     [TestCase(true)]
     [TestCase(false)]
+    public void ThenCompletionDateIsUpdated(bool changed)
+    {
+        //Arrange
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.MathsAndEnglishCourses.ForEach(x => x.CompletionDate = x.CompletionDate?.Date);
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.FirstOrDefault();
+
+        if (changed) mathsAndEnglishUpdateModel.CompletionDate = _fixture.Create<DateTime>();
+
+        //Act
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        //Assert
+        learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).CompletionDate.Should().Be(mathsAndEnglishUpdateModel.CompletionDate?.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
     public void ThenWithdrawalDateIsUpdated(bool changed)
     {
         //Arrange
