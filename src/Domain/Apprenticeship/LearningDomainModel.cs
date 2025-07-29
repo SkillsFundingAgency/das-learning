@@ -405,7 +405,6 @@ public class LearningDomainModel : AggregateRoot
                     Course = course.Course,
                     StartDate = course.StartDate,
                     PlannedEndDate = course.PlannedEndDate,
-                    CompletionDate = course.CompletionDate,
                     WithdrawalDate = course.WithdrawalDate,
                     PriorLearningPercentage = course.PriorLearningPercentage
                     
@@ -423,12 +422,6 @@ public class LearningDomainModel : AggregateRoot
                 if (course.PlannedEndDate.Date != existingCourse.PlannedEndDate.Date)
                 {
                     existingCourse.PlannedEndDate = course.PlannedEndDate;
-                    hasChanges = true;
-                }
-
-                if (course.CompletionDate?.Date != existingCourse.CompletionDate?.Date)
-                {
-                    existingCourse.CompletionDate = course.CompletionDate?.Date;
                     hasChanges = true;
                 }
 

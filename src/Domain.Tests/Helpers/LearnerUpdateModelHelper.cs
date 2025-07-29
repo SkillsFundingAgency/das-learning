@@ -9,6 +9,6 @@ public static class LearnerUpdateModelHelper
     {
         return new LearnerUpdateModel(
             new LearningUpdateDetails(learning.CompletionDate),
-            learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.CompletionDate, x.WithdrawalDate, x.PriorLearningPercentage)).ToList());
+            learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.WithdrawalDate, x.PriorLearningPercentage)).ToList());
     }
 }

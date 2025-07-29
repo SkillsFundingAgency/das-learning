@@ -6,7 +6,6 @@
     [PlannedEndDate] DATETIME NOT NULL,
     [Course] NCHAR(50) NOT NULL,
     [WithdrawalDate] DATETIME NULL,
-    [CompletionDate] DATETIME NULL, 
     [PriorLearningPercentage] INT NULL
 )
 GO

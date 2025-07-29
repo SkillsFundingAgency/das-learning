@@ -11,6 +11,5 @@ public class MathsAndEnglish
     public DateTime PlannedEndDate { get; set; }
     public string Course { get; set; } = null!;
     public DateTime? WithdrawalDate { get; set; }
-    public DateTime? CompletionDate { get; set; }
     public int? PriorLearningPercentage { get; set; }
 }

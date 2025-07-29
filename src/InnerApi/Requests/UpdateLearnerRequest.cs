@@ -54,11 +54,6 @@ public class MathsAndEnglish
     public DateTime PlannedEndDate { get; set; }
 
     /// <summary>
-    /// Date the maths and english course completes, this will be null until completion is confirmed
-    /// </summary>
-    public DateTime? CompletionDate { get; set; }
-
-    /// <summary>
     /// Withdrawal date for the maths and english course, this will be null until a withdrawal is confirmed
     /// </summary>
     public DateTime? WithdrawalDate { get; set; }
@@ -83,7 +78,7 @@ public static class UpdateLearnerRequestExtensions
     {
         var learningDetails = new Domain.Models.LearningUpdateDetails(request.Learner.CompletionDate);
         var mathsAndEnglishCourses = request.MathsAndEnglishCourses
-            .Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.CompletionDate, x.WithdrawalDate, x.PriorLearningPercentage))
+            .Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.WithdrawalDate, x.PriorLearningPercentage))
             .ToList();
 
         var learnerUpdateModel = new LearnerUpdateModel(learningDetails, mathsAndEnglishCourses);
