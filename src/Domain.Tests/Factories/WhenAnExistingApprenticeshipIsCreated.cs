@@ -21,7 +21,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Factories
         [Test]
         public void ThenAnApprenticeshipCreatedEventIsAdded()
         {
-            var expectedModel = _fixture.Create<Learning.DataAccess.Entities.Learning.Learning>();
+            var expectedModel = _fixture.Create<DataAccess.Entities.Learning.Learning>();
             var apprenticeship = _learningFactory.GetExisting(expectedModel);
             apprenticeship.GetEntity().Should().BeSameAs(expectedModel);
         }

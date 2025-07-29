@@ -7,6 +7,7 @@ using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
+using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 
@@ -14,7 +15,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
 {
     public class WhenGettingAnApprenticeship
     {
-        private Learning.Domain.Repositories.LearningRepository _sut;
+        private LearningRepository _sut;
         private Fixture _fixture;
         private LearningDataContext _dbContext;
         private Mock<IDomainEventDispatcher> _domainEventDispatcher;
@@ -39,9 +40,9 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         {
             // Arrange
             SetUpApprenticeshipRepository();
-            var expectedApprenticeship = LearningDomainModel.Get(_fixture.Create<Learning.DataAccess.Entities.Learning.Learning>());
+            var expectedApprenticeship = LearningDomainModel.Get(_fixture.Create<DataAccess.Entities.Learning.Learning>());
             _apprenticeshipFactory
-                .Setup(x => x.GetExisting(It.IsAny<Learning.DataAccess.Entities.Learning.Learning>())).Returns(expectedApprenticeship);
+                .Setup(x => x.GetExisting(It.IsAny<DataAccess.Entities.Learning.Learning>())).Returns(expectedApprenticeship);
 
             // Act
             await _sut.Add(expectedApprenticeship);
@@ -58,7 +59,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             _accountIdAuthorizer = new Mock<IAccountIdAuthorizer>();
             _dbContext =
                 InMemoryDbContextCreator.SetUpInMemoryDbContext();
-            _sut = new Learning.Domain.Repositories.LearningRepository(new Lazy<LearningDataContext>(_dbContext),
+            _sut = new LearningRepository(new Lazy<LearningDataContext>(_dbContext),
                 _domainEventDispatcher.Object, _apprenticeshipFactory.Object, _accountIdAuthorizer.Object);
         }
     }

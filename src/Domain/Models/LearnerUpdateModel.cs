@@ -2,20 +2,51 @@
 
 public class LearnerUpdateModel
 {
-    public LearnerUpdateDetails Learner { get; }
+    public LearningUpdateDetails Learning { get; }
+    public List<MathsAndEnglishUpdateDetails> MathsAndEnglishCourses { get; }
 
-    public LearnerUpdateModel(LearnerUpdateDetails learner)
+    public LearnerUpdateModel(LearningUpdateDetails learning, List<MathsAndEnglishUpdateDetails> mathsAndEnglishCourses)
     {
-        Learner = learner;
+        Learning = learning;
+        MathsAndEnglishCourses = mathsAndEnglishCourses;
     }
 }
 
-public class LearnerUpdateDetails
+public class LearningUpdateDetails
 {
-    public DateTime? CompletionDate { get; }
+    public DateTime? CompletionDate { get; set; }
 
-    public LearnerUpdateDetails(DateTime? completionDate)
+    public LearningUpdateDetails(DateTime? completionDate)
     {
         CompletionDate = completionDate;
+    }
+}
+
+public class MathsAndEnglishUpdateDetails
+{
+    public string Course { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime PlannedEndDate { get; set; }
+    public DateTime? CompletionDate { get; set; }
+    public DateTime? WithdrawalDate { get; set; }
+    public int? PriorLearningPercentage { get; set; }
+    public decimal Amount { get; set; }
+
+    public MathsAndEnglishUpdateDetails(
+        string course,
+        DateTime startDate,
+        DateTime plannedEndDate,
+        DateTime? completionDate,
+        DateTime? withdrawalDate,
+        int? priorLearningPercentage,
+        decimal amount)
+    {
+        Course = course;
+        StartDate = startDate;
+        PlannedEndDate = plannedEndDate;
+        CompletionDate = completionDate;
+        WithdrawalDate = withdrawalDate;
+        PriorLearningPercentage = priorLearningPercentage;
+        Amount = amount;
     }
 }

@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.TestHelpers;
 
@@ -15,7 +16,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
 
 public class WhenGettingLearnerStatus
 {
-    private Learning.Domain.Repositories.LearningQueryRepository _sut;
+    private LearningQueryRepository _sut;
     private Fixture _fixture;
     private LearningDataContext _dbContext;
 
@@ -84,7 +85,7 @@ public class WhenGettingLearnerStatus
     private void SetUpApprenticeshipQueryRepository()
     {
         _dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
-        var logger = Mock.Of<ILogger<Learning.Domain.Repositories.LearningQueryRepository>>();
-        _sut = new Learning.Domain.Repositories.LearningQueryRepository(new Lazy<LearningDataContext>(_dbContext), logger);
+        var logger = Mock.Of<ILogger<LearningQueryRepository>>();
+        _sut = new LearningQueryRepository(new Lazy<LearningDataContext>(_dbContext), logger);
     }
 }
