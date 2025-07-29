@@ -62,6 +62,11 @@ public class MathsAndEnglish
     /// Percentage of prior learning recognised for the course, if applicable
     /// </summary>
     public int? PriorLearningPercentage { get; set; }
+
+    /// <summary>
+    /// Amount associated with the maths and english course
+    /// </summary>
+    public decimal Amount { get; set; }
 }
 
 #pragma warning restore CS8618 // Required properties must be set in the constructor
@@ -78,7 +83,7 @@ public static class UpdateLearnerRequestExtensions
     {
         var learningDetails = new Domain.Models.LearningUpdateDetails(request.Learner.CompletionDate);
         var mathsAndEnglishCourses = request.MathsAndEnglishCourses
-            .Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.WithdrawalDate, x.PriorLearningPercentage))
+            .Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.WithdrawalDate, x.PriorLearningPercentage, x.Amount))
             .ToList();
 
         var learnerUpdateModel = new LearnerUpdateModel(learningDetails, mathsAndEnglishCourses);

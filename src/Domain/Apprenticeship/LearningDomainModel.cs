@@ -396,7 +396,7 @@ public class LearningDomainModel : AggregateRoot
 
         foreach (var course in updateModel.MathsAndEnglishCourses)
         {
-            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x => x.Course == course.Course);
+            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x => x.Course.Trim() == course.Course.Trim());
 
             if (existingCourse == null)
             {
@@ -406,8 +406,8 @@ public class LearningDomainModel : AggregateRoot
                     StartDate = course.StartDate,
                     PlannedEndDate = course.PlannedEndDate,
                     WithdrawalDate = course.WithdrawalDate,
-                    PriorLearningPercentage = course.PriorLearningPercentage
-                    
+                    PriorLearningPercentage = course.PriorLearningPercentage,
+                    Amount = course.Amount
                 });
                 hasChanges = true;
             }
@@ -436,6 +436,12 @@ public class LearningDomainModel : AggregateRoot
                     existingCourse.PriorLearningPercentage = course.PriorLearningPercentage;
                     hasChanges = true;
                 }
+
+                if (course.Amount != existingCourse.Amount)
+                {
+                    existingCourse.Amount = course.Amount;
+                    hasChanges = true;
+                }
             }
         }
         
@@ -443,7 +449,7 @@ public class LearningDomainModel : AggregateRoot
             .Select(c => c.Course);
 
         var coursesToRemove = _entity.MathsAndEnglishCourses
-            .Where(existing => !incomingCourses.Contains(existing.Course))
+            .Where(existing => !incomingCourses.Any(incoming => incoming.Trim() == existing.Course.Trim()))
             .ToList();
 
         foreach (var removed in coursesToRemove)

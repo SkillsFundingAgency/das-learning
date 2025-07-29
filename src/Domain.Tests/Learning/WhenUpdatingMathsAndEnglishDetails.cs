@@ -161,4 +161,25 @@ public class WhenUpdatingMathsAndEnglishDetails
             entity.MathsAndEnglishCourses.Should().Contain(x => x.Course == course.Course);
         }
     }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void ThenAmountIsUpdated(bool changed)
+    {
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+
+        if (changed)
+        {
+            var newValue = mathsAndEnglishUpdateModel.Amount + 10;
+            mathsAndEnglishUpdateModel.Amount = newValue;
+        }
+
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).Amount.Should().Be(mathsAndEnglishUpdateModel.Amount);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+    }
 }

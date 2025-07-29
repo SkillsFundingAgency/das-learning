@@ -12,6 +12,7 @@ public class MathsAndEnglishDomainModel
     public string Course => _entity.Course;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public int? PriorLearningPercentage => _entity.PriorLearningPercentage;
+    public decimal Amount => _entity.Amount;
 
     internal MathsAndEnglishDomainModel(MathsAndEnglish entity)
     {

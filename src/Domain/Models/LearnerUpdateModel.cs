@@ -29,18 +29,21 @@ public class MathsAndEnglishUpdateDetails
     public DateTime PlannedEndDate { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public int? PriorLearningPercentage { get; set; }
+    public decimal Amount { get; set; }
 
     public MathsAndEnglishUpdateDetails(
         string course,
         DateTime startDate,
         DateTime plannedEndDate,
         DateTime? withdrawalDate,
-        int? priorLearningPercentage)
+        int? priorLearningPercentage,
+        decimal amount)
     {
         Course = course;
         StartDate = startDate;
         PlannedEndDate = plannedEndDate;
         WithdrawalDate = withdrawalDate;
         PriorLearningPercentage = priorLearningPercentage;
+        Amount = amount;
     }
 }
