@@ -392,10 +392,11 @@ public class LearningDomainModel : AggregateRoot
 
     private void UpdateMathsAndEnglishDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
+        bool hasChanges = false;
+
         foreach (var course in updateModel.MathsAndEnglishCourses)
         {
             var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x => x.Course == course.Course);
-            bool hasChanges = false;
 
             if (existingCourse == null)
             {
@@ -407,6 +408,7 @@ public class LearningDomainModel : AggregateRoot
                     CompletionDate = course.CompletionDate,
                     WithdrawalDate = course.WithdrawalDate,
                     PriorLearningPercentage = course.PriorLearningPercentage
+                    
                 });
                 hasChanges = true;
             }
@@ -442,8 +444,21 @@ public class LearningDomainModel : AggregateRoot
                     hasChanges = true;
                 }
             }
-
-            if (hasChanges) changes.Add(LearningUpdateChanges.MathsAndEnglish);
         }
+        
+        var incomingCourses = updateModel.MathsAndEnglishCourses
+            .Select(c => c.Course);
+
+        var coursesToRemove = _entity.MathsAndEnglishCourses
+            .Where(existing => !incomingCourses.Contains(existing.Course))
+            .ToList();
+
+        foreach (var removed in coursesToRemove)
+        {
+            _entity.MathsAndEnglishCourses.Remove(removed);
+            hasChanges = true;
+        }
+
+        if (hasChanges) changes.Add(LearningUpdateChanges.MathsAndEnglish);
     }
 }

@@ -62,7 +62,7 @@ public class MathsAndEnglish
     /// Withdrawal date for the maths and english course, this will be null until a withdrawal is confirmed
     /// </summary>
     public DateTime? WithdrawalDate { get; set; }
-
+    
     /// <summary>
     /// Percentage of prior learning recognised for the course, if applicable
     /// </summary>
