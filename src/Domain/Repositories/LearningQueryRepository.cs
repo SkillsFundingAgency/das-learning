@@ -51,6 +51,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             .Select(x => new Learning.DataTransferObjects.Learning
             {
                 Uln = x.Uln,
+                Key = x.Key
             })
             .ToListAsync(cancellationToken);
 
