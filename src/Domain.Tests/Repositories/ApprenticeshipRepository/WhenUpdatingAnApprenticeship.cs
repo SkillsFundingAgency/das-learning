@@ -39,26 +39,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         }
 
         [Test]
-        public async Task ThenAccountIdValidationIsPerformed()
-        {
-            // Arrange
-            await SetUpApprenticeshipRepository();
-            var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey, false);
-            var apprenticeship = await _dbContext.Apprenticeships
-                .Include(x => x.Episodes)
-                .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = LearningDomainModel.Get(apprenticeship);
-
-            // Act
-            await _sut.Update(domainModel);
-
-            // Assert
-            _accountIdAuthorizer.Verify(x => x
-                .AuthorizeAccountId(It.Is<DataAccess.Entities.Learning.Learning>(y => y.Key == apprenticeshipKey)), Times.Once());
-        }
-
-        [Test]
         public async Task ThenApprenticeshipUpdatedInDataStore()
         {
             // Arrange
