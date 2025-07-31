@@ -58,7 +58,8 @@ public class WhenAnEpisodeIsAdded
             .Excluding(y => y.LatestPrice)
             .Excluding(y => y.EpisodePrices)
             .Excluding(y => y.FirstPrice)
-            .Excluding(y => y.ActiveEpisodePrices));
+            .Excluding(y => y.ActiveEpisodePrices)
+            .Excluding(y => y.LearningSupport));
         apprenticeship.LatestEpisode.LatestPrice.Should().BeEquivalentTo(episode.LatestPrice, x => x
             .ExcludingNestedObjects()
             .Excluding(y => y.Key));

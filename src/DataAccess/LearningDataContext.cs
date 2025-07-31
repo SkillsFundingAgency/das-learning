@@ -25,6 +25,7 @@ namespace SFA.DAS.Learning.DataAccess
         public virtual DbSet<FreezeRequest> FreezeRequests { get; set; }
         public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
         public virtual DbSet<MathsAndEnglish> MathsAndEnglish { get; set; }
+        public virtual DbSet<LearningSupport> LearningSupport { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -92,6 +93,10 @@ namespace SFA.DAS.Learning.DataAccess
 
             // MathsAndEnglish
             modelBuilder.Entity<MathsAndEnglish>()
+                .HasKey(x => x.Key);
+
+            // LearningSupport
+            modelBuilder.Entity<LearningSupport>()
                 .HasKey(x => x.Key);
 
             base.OnModelCreating(modelBuilder);

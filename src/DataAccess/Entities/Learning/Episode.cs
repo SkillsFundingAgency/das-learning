@@ -9,6 +9,7 @@ public class Episode
     public Episode()
     {
         Prices = new List<EpisodePrice>();
+        LearningSupport = new List<LearningSupport>();
     }
 
     [Key]
@@ -27,4 +28,5 @@ public class Episode
     public List<EpisodePrice> Prices { get; set; }
     public string LearningStatus { get; set; }
     public DateTime? LastDayOfLearning { get; set; }
+    public List<LearningSupport> LearningSupport { get; set; }
 }

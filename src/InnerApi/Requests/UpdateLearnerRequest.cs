@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.Learning.Command.UpdateLearner;
+using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 
 namespace SFA.DAS.Learning.InnerApi.Requests;
@@ -15,11 +16,15 @@ public class UpdateLearnerRequest
     /// </summary>
     public LearnerUpdateDetails Learner { get; set; }
 
-
     /// <summary>
     /// Maths and English course details
     /// </summary>
     public List<MathsAndEnglish> MathsAndEnglishCourses { get; set; }
+
+    /// <summary>
+    /// Learning support details
+    /// </summary>
+    public List<LearningSupportUpdatedDetails> LearningSupport { get; set; }
 }
 
 /// <summary>
@@ -74,6 +79,21 @@ public class MathsAndEnglish
     public decimal Amount { get; set; }
 }
 
+/// <summary>
+/// Combined Learning Support details (e.g. both onProgrammer and Maths and English)
+///</summary>
+public class LearningSupportUpdatedDetails
+{
+    /// <summary>
+    /// Start date of the learning support
+    /// </summary>
+    public DateTime StartDate { get; set; }
+
+    /// <summary>
+    /// End date of the learning support
+    /// </summary>
+    public DateTime EndDate { get; set; }
+}
 #pragma warning restore CS8618 // Required properties must be set in the constructor
 
 public static class UpdateLearnerRequestExtensions
@@ -87,11 +107,21 @@ public static class UpdateLearnerRequestExtensions
     public static UpdateLearnerCommand ToCommand(this UpdateLearnerRequest request, Guid learnerKey)
     {
         var learningDetails = new Domain.Models.LearningUpdateDetails(request.Learner.CompletionDate);
-        var mathsAndEnglishCourses = request.MathsAndEnglishCourses
-            .Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.CompletionDate, x.WithdrawalDate, x.PriorLearningPercentage, x.Amount))
-            .ToList();
 
-        var learnerUpdateModel = new LearnerUpdateModel(learningDetails, mathsAndEnglishCourses);
+        var mathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x => 
+            new MathsAndEnglishUpdateDetails(
+                x.Course, 
+                x.StartDate, 
+                x.PlannedEndDate, 
+                x.CompletionDate, 
+                x.WithdrawalDate, 
+                x.PriorLearningPercentage,
+                x.Amount));
+        
+        var learningSupportDetails = request.LearningSupport.SelectOrEmptyList(x =>
+            new LearningSupportDetails(x.StartDate, x.EndDate));
+
+        var learnerUpdateModel = new LearnerUpdateModel(learningDetails, mathsAndEnglishCourses, learningSupportDetails);
         return new UpdateLearnerCommand(learnerKey, learnerUpdateModel);
     }
 }

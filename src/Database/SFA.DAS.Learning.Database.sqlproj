@@ -68,6 +68,7 @@
     <Build Include="WithdrawalRequest.sql" />
     <Build Include="Learning.sql" />
     <Build Include="MathsAndEnglish.sql" />
+    <Build Include="LearningSupport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.Apprenticeships.Database.refactorlog" />

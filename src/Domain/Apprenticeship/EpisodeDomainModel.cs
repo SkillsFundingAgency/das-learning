@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Extensions;
+using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -21,7 +23,7 @@ public class EpisodeDomainModel
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public LearnerStatus LearningStatus => Enum.Parse<LearnerStatus>(_entity.LearningStatus);
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
-
+    public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.Where(x => !x.IsDeleted).ToList();
     public EpisodePriceDomainModel LatestPrice
@@ -158,6 +160,39 @@ public class EpisodeDomainModel
     internal void UpdatePaymentStatus(bool isFrozen)
     {
         _entity.PaymentsFrozen = isFrozen;
+    }
+
+    /// <summary>
+    /// Updates the learning support if there are differences and returns true. If no differences returns false.
+    /// </summary>
+    /// <param name="newLearningSupportDetails"></param>
+    /// <returns></returns>
+    internal bool UpdateLearningSupportIfChanged(List<LearningSupportDetails> newLearningSupportDetails)
+    {
+        var newLearningSupportRecordsAdded = false;
+
+        //  Remove learning support that are no longer in the new list
+        _entity.LearningSupport.RemoveWhere(x=> 
+            !newLearningSupportDetails.Any(y => y.StartDate == x.StartDate && y.EndDate == x.EndDate),
+            out var removedItems);
+
+        //  Add Learning Support that are in the new list but not in the existing list
+        foreach (var newLearningSupport in newLearningSupportDetails)
+        {
+            if (_entity.LearningSupport.All(x => x.StartDate != newLearningSupport.StartDate || x.EndDate != newLearningSupport.EndDate))
+            {
+                newLearningSupportRecordsAdded = true;
+
+                _entity.LearningSupport.Add(new LearningSupport
+                {
+                    StartDate = newLearningSupport.StartDate,
+                    EndDate = newLearningSupport.EndDate,
+                    LearningKey = _entity.LearningKey
+                });
+            }
+        }
+
+        return newLearningSupportRecordsAdded || removedItems.Count > 0;
     }
 
     public Episode GetEntity()
