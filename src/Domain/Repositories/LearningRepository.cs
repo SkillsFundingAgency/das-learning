@@ -36,7 +36,7 @@ public class LearningRepository : ILearningRepository
 
     public async Task<LearningDomainModel> Get(Guid key)
     {
-        var apprenticeship = await DbContext.Apprenticeships
+        var apprenticeship = await DbContext.ApprenticeshipsDbSet
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
