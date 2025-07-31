@@ -83,7 +83,6 @@ public class LearningRepository : ILearningRepository
     public async Task Update(LearningDomainModel learning)
     {
         var entity = learning.GetEntity();
-        _accountIdAuthorizer.AuthorizeAccountId(entity);
         DbContext.Update(entity);
 
         await DbContext.SaveChangesAsync();
