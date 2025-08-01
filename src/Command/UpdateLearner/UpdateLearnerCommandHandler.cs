@@ -34,7 +34,7 @@ public class UpdateLearnerCommandHandler : ICommandHandler<UpdateLearnerCommand,
         }
 
         _logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearnerKey, changes);
-        _learningRepository.Update(learning);
+        await _learningRepository.Update(learning);
 
         _logger.LogInformation("Successfully updated learner with key {LearnerKey}", command.LearnerKey);
         return changes;
