@@ -36,7 +36,7 @@ public class LearningRepository : ILearningRepository
 
     public async Task<LearningDomainModel> Get(Guid key)
     {
-        var apprenticeship = await DbContext.Apprenticeships
+        var apprenticeship = await DbContext.ApprenticeshipsDbSet
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
@@ -83,7 +83,6 @@ public class LearningRepository : ILearningRepository
     public async Task Update(LearningDomainModel learning)
     {
         var entity = learning.GetEntity();
-        _accountIdAuthorizer.AuthorizeAccountId(entity);
         DbContext.Update(entity);
 
         await DbContext.SaveChangesAsync();
