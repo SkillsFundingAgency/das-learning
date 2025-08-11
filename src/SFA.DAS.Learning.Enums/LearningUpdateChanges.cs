@@ -2,5 +2,6 @@
 
 public enum LearningUpdateChanges
 {
-    CompletionDate
+    CompletionDate = 0,
+    MathsAndEnglish = 1
 }

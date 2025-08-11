@@ -36,10 +36,11 @@ public class LearningRepository : ILearningRepository
 
     public async Task<LearningDomainModel> Get(Guid key)
     {
-        var apprenticeship = await DbContext.Apprenticeships
+        var apprenticeship = await DbContext.ApprenticeshipsDbSet
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
+            .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
             .SingleAsync(x => x.Key == key);
@@ -53,6 +54,7 @@ public class LearningRepository : ILearningRepository
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
+            .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
             .SingleOrDefaultAsync(x => x.Uln == uln && x.ApprovalsApprenticeshipId == approvalsApprenticeshipId);
@@ -65,6 +67,7 @@ public class LearningRepository : ILearningRepository
             .Include(x => x.PriceHistories)
             .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
+            .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
             .SingleOrDefaultAsync(x => x.Uln == uln);
@@ -80,7 +83,6 @@ public class LearningRepository : ILearningRepository
     public async Task Update(LearningDomainModel learning)
     {
         var entity = learning.GetEntity();
-        _accountIdAuthorizer.AuthorizeAccountId(entity);
         DbContext.Update(entity);
 
         await DbContext.SaveChangesAsync();

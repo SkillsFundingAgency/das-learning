@@ -9,6 +9,7 @@ using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
+using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
@@ -17,7 +18,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
 {
     public class WhenUpdatingAnApprenticeship
     {
-        private Learning.Domain.Repositories.LearningRepository _sut;
+        private LearningRepository _sut;
         private Fixture _fixture;
         private LearningDataContext _dbContext;
         private Mock<IDomainEventDispatcher> _domainEventDispatcher;
@@ -35,26 +36,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         public void CleanUp()
         {
             _dbContext.Dispose();
-        }
-
-        [Test]
-        public async Task ThenAccountIdValidationIsPerformed()
-        {
-            // Arrange
-            await SetUpApprenticeshipRepository();
-            var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey, false);
-            var apprenticeship = await _dbContext.Apprenticeships
-                .Include(x => x.Episodes)
-                .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = LearningDomainModel.Get(apprenticeship);
-
-            // Act
-            await _sut.Update(domainModel);
-
-            // Assert
-            _accountIdAuthorizer.Verify(x => x
-                .AuthorizeAccountId(It.Is<Learning.DataAccess.Entities.Learning.Learning>(y => y.Key == apprenticeshipKey)), Times.Once());
         }
 
         [Test]
@@ -128,7 +109,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             _apprenticeshipFactory = new Mock<ILearningFactory>();
             _accountIdAuthorizer = new Mock<IAccountIdAuthorizer>();
             _dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
-            _sut = new Learning.Domain.Repositories.LearningRepository(new Lazy<LearningDataContext>(_dbContext),
+            _sut = new LearningRepository(new Lazy<LearningDataContext>(_dbContext),
                 _domainEventDispatcher.Object, _apprenticeshipFactory.Object, _accountIdAuthorizer.Object);
         }
     }
