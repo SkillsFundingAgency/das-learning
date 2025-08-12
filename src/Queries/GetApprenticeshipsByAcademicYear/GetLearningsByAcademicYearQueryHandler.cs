@@ -22,7 +22,8 @@ public class GetLearningsByAcademicYearQueryHandler(
         {
             Items = response.Data.Select(apprenticeship => new GetLearningsByDatesResponseItem
             {
-                Uln = apprenticeship.Uln
+                Uln = apprenticeship.Uln,
+                Key = apprenticeship.Key
             }),
             PageSize = query.Limit,
             Page = query.Page,
