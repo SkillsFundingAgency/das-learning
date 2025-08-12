@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using SFA.DAS.Learning.Domain.Models;
+using SFA.DAS.Learning.DataAccess.Extensions;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Helpers;
 
@@ -9,6 +10,7 @@ public static class LearnerUpdateModelHelper
     {
         return new LearnerUpdateModel(
             new LearningUpdateDetails(learning.CompletionDate),
-            learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.CompletionDate, x.WithdrawalDate, x.PriorLearningPercentage, x.Amount)).ToList());
+            learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails(x.Course, x.StartDate, x.PlannedEndDate, x.CompletionDate, x.WithdrawalDate, x.PriorLearningPercentage, x.Amount)).ToList(),
+            learning.GetEpisode().LearningSupport.Select(x=>new LearningSupportDetails(x.StartDate,x.EndDate)).ToList());
     }
 }

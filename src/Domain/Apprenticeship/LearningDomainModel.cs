@@ -377,7 +377,9 @@ public class LearningDomainModel : AggregateRoot
         UpdateLearningDetails(updateModel, changes);
 
         UpdateMathsAndEnglishDetails(updateModel, changes);
-        
+
+        UpdateLearningSupport(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -466,5 +468,14 @@ public class LearningDomainModel : AggregateRoot
         }
 
         if (hasChanges) changes.Add(LearningUpdateChanges.MathsAndEnglish);
+    }
+
+    private void UpdateLearningSupport(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var learningSupportHasChanged = LatestEpisode.UpdateLearningSupportIfChanged(updateModel.LearningSupport);
+        if(learningSupportHasChanged)
+        {
+            changes.Add(LearningUpdateChanges.LearningSupport);
+        }
     }
 }

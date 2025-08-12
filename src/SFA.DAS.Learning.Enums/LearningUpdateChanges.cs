@@ -3,5 +3,6 @@
 public enum LearningUpdateChanges
 {
     CompletionDate = 0,
-    MathsAndEnglish = 1
+    MathsAndEnglish = 1,
+    LearningSupport = 2
 }
