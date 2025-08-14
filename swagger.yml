@@ -20,7 +20,7 @@ paths:
         '503':
           description: A health check has failed
           $ref: '#/components/responses/healthCheckResponse'
-  /providers/{ukprn}/academicyears/{academicyear}/apprenticeships:
+  /providers/{ukprn}/academicyears/{academicyear}/learning:
     get:
       summary: Returns a paged list of apprenticeships for this provider
       parameters:
@@ -53,7 +53,58 @@ paths:
         '200':
           $ref: '#/components/responses/pagedApprenticeshipsResponse'  
 
-  /learnings/{learningId}:
+  /providers/{ukprn}/learners:
+    get:
+      summary: Returns a paged list of learners for this provider for the academic year
+      parameters:
+        - name: ukprn
+          in: path
+          required: true
+          description: The UK Provider Reference Number for the provider entering this learner
+          schema:
+            type: string
+        - name: academicYear
+          in: query
+          required: false
+          example: 2425
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          description: Default is 1
+          schema:
+            type: integer
+        - name: pagesize
+          in: query
+          required: false
+          example: 20
+          description: Default is 20, can be between 10 and 100
+          schema:
+            type: integer
+        - name: sortColumn
+          in: query
+          required: false
+          description: The column to sort on, default is surname
+          schema:
+            type: string
+        - name: sortDescending
+          in: query
+          required: false
+          description: Default is ascending
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: a filter to be used against the ULN or surname
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/pagedLearningResponse' 
+  
+  /providers/{ukprn}/learning/{learningId}:
     get:
       summary: Returns the record for this learning Id.
       parameters:
@@ -61,6 +112,12 @@ paths:
           in: path
           required: true
           description: The id of the record in learning
+          schema:
+            type: string
+        - name: ukprn
+          in: path
+          required: true
+          description: The ukprn to filter down by provider
           schema:
             type: string
       responses:
@@ -79,6 +136,12 @@ paths:
           description: The id of the record in learning
           schema:
             type: string
+        - name: ukprn
+          in: path
+          required: true
+          description: The ukprn to filter down by provider
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/pagedApprenticeshipsResponse'  
@@ -86,10 +149,11 @@ paths:
           $ref: '#/components/responses/badRequest'  
         '404':
           $ref: '#/components/responses/badRequest'
+
 components:  
   responses:
     pagedLearningResponse:
-      description: A paged learning response
+      description: A paged learning response, containing learners from ILR and the 
       headers:
         Link:
           description: Pagination links (next, prev)
@@ -102,7 +166,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/pageLearning'
+              $ref: '#/components/schemas/pagedLearning'
 
 
     pagedApprenticeshipsResponse:
@@ -163,7 +227,7 @@ components:
         - code
         - message
     
-    pageLearning:
+    pagedLearning:
       type: object
       properties:
         learners:
@@ -294,6 +358,19 @@ components:
               type: string
               format: date
               description: The date when the event was raised on the system (effectively the POST date from DC)
+        enriched:
+          type: object
+          properties:
+            enrichedDate:
+              type: string
+              format: date
+              description: The date when the data was enriched
+            learningVersion:
+              type: string
+              description: The version of the learning the learner is doing
+            learningOption:
+              type: string
+              description: The option of the learning the learner is doing
           required:
             - uln
             - firstName
@@ -312,6 +389,7 @@ components:
             - receivedDate
             - plannedOTJTrainingHours
             - isFlexiJob
+            - enriched
 
     foundationApprenticeshipLearning:
       description: This is the exact copy of a normal apprenticeship
