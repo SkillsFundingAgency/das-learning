@@ -53,8 +53,58 @@ paths:
         '200':
           $ref: '#/components/responses/pagedApprenticeshipsResponse'  
 
+  /learnings/{learningId}:
+    get:
+      summary: Returns the record for this learning Id.
+      parameters:
+        - name: learningId
+          in: path
+          required: true
+          description: The id of the record in learning
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/pagedLearningResponse'  
+        '400':
+          $ref: '#/components/responses/badRequest'  
+        '404':
+          description: The resource was not found
+    put:
+      summary: Sets the enriched data from approvals for a specific record.
+      parameters:
+        - name: learningId
+          in: path
+          required: true
+          description: The id of the record in learning
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/pagedApprenticeshipsResponse'  
+        '400':
+          $ref: '#/components/responses/badRequest'  
+        '404':
+          $ref: '#/components/responses/badRequest'
 components:  
   responses:
+    pagedLearningResponse:
+      description: A paged learning response
+      headers:
+        Link:
+          description: Pagination links (next, prev)
+          schema:
+            type: string
+            format: url
+          example: '<https://api.example.com/items?page=2>; rel="prev", <https://api.example.com/items?page=5>; rel="next"'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/pageLearning'
+
+
     pagedApprenticeshipsResponse:
       description: A paged apprenticeship response
       headers:
@@ -113,6 +163,35 @@ components:
         - code
         - message
     
+    pageLearning:
+      type: object
+      properties:
+        learners:
+          type: array
+          items:
+              oneOf:
+                - $ref: '#/components/schemas/apprenticeshipLearning'
+                - $ref: '#/components/schemas/foundationApprenticeshipLearning'
+                - $ref: '#/components/schemas/shortApprenticeshipLearning'
+        total:
+          type: integer
+          minimum: 0
+        page: 
+          type: integer
+          minimum: 1
+        pageSize: 
+          type: integer
+          minimum: 1
+          maximum: 20
+        totalPages: 
+          type: integer
+          minimum: 1
+      required:
+        - page
+        - total
+        - pageSize  
+        - totalPages  
+    
     pagedApprenticeships:
       type: object
       properties:
@@ -157,3 +236,89 @@ components:
       properties:
         uln:
           type: string
+
+    apprenticeshipLearning:
+      type: object
+      properties:
+        learner:
+          type: object
+          properties:
+            trainingType:
+              type: string
+              enum:
+              - apprenticeship
+              - shortApprenticeship
+              - foundationApprenticeship
+              - Bootcamp
+              - HTC
+            uln:
+              type: integer
+            firstName:
+              type: string
+            lastName:
+              type: string
+            dateOfBirth:
+              type: string
+              format: date
+            learnerEmail:
+              type: string
+            priorLearningPercent:
+              description: This is the percentage of learning already complete before this course starts
+              type: integer
+              example: 10
+            ukprn:
+              type: integer
+            agreementId:
+              type: string
+            trainingPrice:
+              type: integer
+              description: This is the earliest price
+            epaoPrice:
+              type: integer
+              description: This is the earliest price
+            standardCode:
+              type: integer
+            startDate:
+              type: string
+              format: date
+            academicYear:
+              type: integer
+            plannedEndDate:
+              type: string
+              format: date
+            isFlexiJob: 
+              type: boolean
+            plannedOTJTrainingHours:
+              type: integer
+            receivedDate:
+              type: string
+              format: date
+              description: The date when the event was raised on the system (effectively the POST date from DC)
+          required:
+            - uln
+            - firstName
+            - lastName
+            - dateOfBirth
+            - learnerEmail
+            - priorLearningPercent
+            - ukprn
+            - agreementId
+            - trainingPrice
+            - epaoPrice
+            - standardCode
+            - startDate
+            - academicYear
+            - plannedEndDate
+            - receivedDate
+            - plannedOTJTrainingHours
+            - isFlexiJob
+
+    foundationApprenticeshipLearning:
+      description: This is the exact copy of a normal apprenticeship
+      allOf:
+      - $ref: "#/components/schemas/apprenticeshipLearning"
+  
+    shortApprenticeshipLearning:
+      description: This is the exact copy of a normal apprenticeship
+      allOf:
+      - $ref: "#/components/schemas/apprenticeshipLearning"
