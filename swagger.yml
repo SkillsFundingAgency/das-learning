@@ -120,6 +120,12 @@ paths:
           description: The ukprn to filter down by provider
           schema:
             type: string
+        - name: includeEnrichedData
+          in: query
+          required: false
+          description: Return the enrichedData property alongside the learning
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/pagedLearningResponse'  
@@ -127,8 +133,10 @@ paths:
           $ref: '#/components/responses/badRequest'  
         '404':
           description: The resource was not found
+    
+  /providers/{ukprn}/learning/{learningId}/enrichedData:
     put:
-      summary: Sets the enriched data from approvals for a specific record.
+      summary: Sets the enriched data from approvals for a specific learning record.
       parameters:
         - name: learningId
           in: path
@@ -142,15 +150,34 @@ paths:
           description: The ukprn to filter down by provider
           schema:
             type: string
+      requestBody:
+         $ref: '#/components/requestBodies/enrichedDataRequest'  
       responses:
+        '201':
+          $ref: '#/components/responses/createUpdateResponse'
         '200':
-          $ref: '#/components/responses/pagedApprenticeshipsResponse'  
+          $ref: '#/components/responses/createUpdateResponse'
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
-          $ref: '#/components/responses/badRequest'
+          description: Not found
 
 components:  
+  headers:
+    location:
+      schema:
+        type: string
+        format: url
+        example: /learners/guid
+  
+  requestBodies:
+    enrichedDataRequest:
+      description: The enriched Data
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/enrichedData'
   responses:
     pagedLearningResponse:
       description: A paged learning response, containing learners from ILR and the 
@@ -215,6 +242,12 @@ components:
             type: string
             example: Leaner data APIM for the apprenticeship service - Version 3.0.2
 
+    createUpdateResponse:
+      description: The update
+      headers:
+        Location:
+          $ref: '#/components/headers/location'
+  
   schemas:
     error:
       type: object
@@ -304,6 +337,8 @@ components:
     apprenticeshipLearning:
       type: object
       properties:
+        enrichedData:
+          $ref: '#/components/schemas/enrichedData'
         learner:
           type: object
           properties:
@@ -358,19 +393,6 @@ components:
               type: string
               format: date
               description: The date when the event was raised on the system (effectively the POST date from DC)
-        enriched:
-          type: object
-          properties:
-            enrichedDate:
-              type: string
-              format: date
-              description: The date when the data was enriched
-            learningVersion:
-              type: string
-              description: The version of the learning the learner is doing
-            learningOption:
-              type: string
-              description: The option of the learning the learner is doing
           required:
             - uln
             - firstName
@@ -391,6 +413,20 @@ components:
             - isFlexiJob
             - enriched
 
+    enrichedData:
+      type: object
+      properties:
+        enrichedDate:
+          type: string
+          format: date
+          description: The date when the data was enriched
+        learningVersion:
+          type: string
+          description: The version of the learning the learner is doing
+        learningOption:
+          type: string
+          description: The option of the learning the learner is doing
+    
     foundationApprenticeshipLearning:
       description: This is the exact copy of a normal apprenticeship
       allOf:
