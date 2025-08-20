@@ -20,6 +20,7 @@ paths:
         '503':
           description: A health check has failed
           $ref: '#/components/responses/healthCheckResponse'
+          
   /providers/{ukprn}/academicyears/{academicyear}/learning:
     get:
       summary: Returns a paged list of apprenticeships for this provider
@@ -120,47 +121,43 @@ paths:
           description: The ukprn to filter down by provider
           schema:
             type: string
-        - name: includeEnrichedData
-          in: query
-          required: false
-          description: Return the enrichedData property alongside the learning
-          schema:
-            type: string
       responses:
         '200':
-          $ref: '#/components/responses/pagedLearningResponse'  
+          $ref: '#/components/responses/learningResponse'  
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
           description: The resource was not found
-    
-  /providers/{ukprn}/learning/{learningId}/enrichedData:
-    put:
-      summary: Sets the enriched data from approvals for a specific learning record.
+          
+  /providers/{ukprn}/learning/{learningId}/changes/{changeId}:
+    get:
+      summary: Returns the record for this learning Id.
       parameters:
-        - name: learningId
-          in: path
-          required: true
-          description: The id of the record in learning
-          schema:
-            type: string
         - name: ukprn
           in: path
           required: true
           description: The ukprn to filter down by provider
           schema:
             type: string
-      requestBody:
-         $ref: '#/components/requestBodies/enrichedDataRequest'  
+        - name: learningId
+          in: path
+          required: true
+          description: The id of the record in learning
+          schema:
+            type: string
+        - name: changeId
+          in: path
+          required: true
+          description: The id of the change
+          schema:
+            type: string
       responses:
-        '201':
-          $ref: '#/components/responses/createUpdateResponse'
         '200':
-          $ref: '#/components/responses/createUpdateResponse'
+          $ref: '#/components/responses/changeResponse'  
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
-          description: Not found
+          description: The resource was not found
 
 components:  
   headers:
@@ -170,14 +167,6 @@ components:
         format: url
         example: /learners/guid
   
-  requestBodies:
-    enrichedDataRequest:
-      description: The enriched Data
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/enrichedData'
   responses:
     pagedLearningResponse:
       description: A paged learning response, containing learners from ILR and the 
@@ -195,6 +184,35 @@ components:
             items:
               $ref: '#/components/schemas/pagedLearning'
 
+    learningResponse:
+      description: A single record of leanring
+      headers:
+        Location:
+          description: Location of the resource
+          schema:
+            type: string
+            format: url
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/learningRecord'
+
+    changeResponse:
+      description: A list of changes applied from the ILR to a learning record
+      headers:
+        Location:
+          description: Location of the resource
+          schema:
+            type: string
+            format: url
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/changesRecord'
 
     pagedApprenticeshipsResponse:
       description: A paged apprenticeship response
@@ -260,6 +278,35 @@ components:
         - code
         - message
     
+    changesRecord:
+      type: object
+      properties:
+        changes:
+          type: array
+          items:
+            $ref: "#/components/schemas/change"
+    
+    change:
+      type: object
+      properties:
+        name:
+          type: string
+          enum: 
+          - PriceChangeIncrease
+          - PriceChangeDecrease
+          - StartDateChange
+        value:
+          type: string
+          
+    learningRecord:
+      type: object
+      properties:
+        learning:
+          oneOf:
+          - $ref: '#/components/schemas/apprenticeshipLearning'
+          - $ref: '#/components/schemas/foundationApprenticeshipLearning'
+          - $ref: '#/components/schemas/shortApprenticeshipLearning'
+          
     pagedLearning:
       type: object
       properties:
@@ -337,96 +384,76 @@ components:
     apprenticeshipLearning:
       type: object
       properties:
-        enrichedData:
-          $ref: '#/components/schemas/enrichedData'
-        learner:
-          type: object
-          properties:
-            trainingType:
-              type: string
-              enum:
-              - apprenticeship
-              - shortApprenticeship
-              - foundationApprenticeship
-              - Bootcamp
-              - HTC
-            uln:
-              type: integer
-            firstName:
-              type: string
-            lastName:
-              type: string
-            dateOfBirth:
-              type: string
-              format: date
-            learnerEmail:
-              type: string
-            priorLearningPercent:
-              description: This is the percentage of learning already complete before this course starts
-              type: integer
-              example: 10
-            ukprn:
-              type: integer
-            agreementId:
-              type: string
-            trainingPrice:
-              type: integer
-              description: This is the earliest price
-            epaoPrice:
-              type: integer
-              description: This is the earliest price
-            standardCode:
-              type: integer
-            startDate:
-              type: string
-              format: date
-            academicYear:
-              type: integer
-            plannedEndDate:
-              type: string
-              format: date
-            isFlexiJob: 
-              type: boolean
-            plannedOTJTrainingHours:
-              type: integer
-            receivedDate:
-              type: string
-              format: date
-              description: The date when the event was raised on the system (effectively the POST date from DC)
-          required:
-            - uln
-            - firstName
-            - lastName
-            - dateOfBirth
-            - learnerEmail
-            - priorLearningPercent
-            - ukprn
-            - agreementId
-            - trainingPrice
-            - epaoPrice
-            - standardCode
-            - startDate
-            - academicYear
-            - plannedEndDate
-            - receivedDate
-            - plannedOTJTrainingHours
-            - isFlexiJob
-            - enriched
-
-    enrichedData:
-      type: object
-      properties:
-        enrichedDate:
+        trainingType:
+          type: string
+          enum:
+          - apprenticeship
+          - shortApprenticeship
+          - foundationApprenticeship
+          - Bootcamp
+          - HTC
+        uln:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
           type: string
           format: date
-          description: The date when the data was enriched
-        learningVersion:
+        learnerEmail:
           type: string
-          description: The version of the learning the learner is doing
-        learningOption:
+        priorLearningPercent:
+          description: This is the percentage of learning already complete before this course starts
+          type: integer
+          example: 10
+        ukprn:
+          type: integer
+        agreementId:
           type: string
-          description: The option of the learning the learner is doing
-    
+        trainingPrice:
+          type: integer
+          description: This is the earliest price
+        epaoPrice:
+          type: integer
+          description: This is the earliest price
+        standardCode:
+          type: integer
+        startDate:
+          type: string
+          format: date
+        academicYear:
+          type: integer
+        plannedEndDate:
+          type: string
+          format: date
+        isFlexiJob: 
+          type: boolean
+        plannedOTJTrainingHours:
+          type: integer
+        receivedDate:
+          type: string
+          format: date
+          description: The date when the event was raised on the system (effectively the POST date from DC)
+      required:
+        - uln
+        - firstName
+        - lastName
+        - dateOfBirth
+        - learnerEmail
+        - priorLearningPercent
+        - ukprn
+        - agreementId
+        - trainingPrice
+        - epaoPrice
+        - standardCode
+        - startDate
+        - academicYear
+        - plannedEndDate
+        - receivedDate
+        - plannedOTJTrainingHours
+        - isFlexiJob
+
     foundationApprenticeshipLearning:
       description: This is the exact copy of a normal apprenticeship
       allOf:
