@@ -131,7 +131,7 @@ paths:
           
   /providers/{ukprn}/learning/{learningId}/changes/{changeId}:
     get:
-      summary: Returns the record for this learning Id.
+      summary: Returns the record for this learning change
       parameters:
         - name: ukprn
           in: path
@@ -185,7 +185,7 @@ components:
               $ref: '#/components/schemas/pagedLearning'
 
     learningResponse:
-      description: A single record of leanring
+      description: A single record of learning
       headers:
         Location:
           description: Location of the resource
