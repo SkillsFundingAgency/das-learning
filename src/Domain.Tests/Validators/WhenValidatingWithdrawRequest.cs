@@ -143,9 +143,7 @@ public class WhenValidatingWithdrawRequest
     }
 
     [TestCase("LastDayOfLearning cannot be before the start date", "2024-8-1")]
-    [TestCase("LastDayOfLearning cannot be after the planned end date", "2026-07-16")]
     [TestCase("LastDayOfLearning cannot be after the end of the current academic year", "2025-7-23")]
-    [TestCase("LastDayOfLearning cannot be in the future unless the start date is in the future", "2025-07-20")]
     public void WhenInvalidLastDayThenReturnsExpectedValidationError(string expectedMessage, string lastDayOfLearning)
     {
         // Arrange

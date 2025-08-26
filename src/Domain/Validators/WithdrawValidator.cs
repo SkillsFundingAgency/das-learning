@@ -41,21 +41,21 @@ public class WithdrawValidator : IValidator<WithdrawDomainRequest>
 
         // Validate if apprenticeship exists
         if (apprenticeship == null)
-            return FailwithMessage(out message, $"No apprenticeship found for ULN {request.ULN}");
+            return FailWithMessage(out message, $"No apprenticeship found for ULN {request.ULN}");
 
         if (apprenticeship.LatestEpisode.Ukprn != request.UKPRN) // This check should really be part of authorization, but is currently passedd in as part of the request body
-            return FailwithMessage(out message, $"Learning not found for ULN {request.ULN} and UKPRN {request.UKPRN}");
+            return FailWithMessage(out message, $"Learning not found for ULN {request.ULN} and UKPRN {request.UKPRN}");
 
         // Validate if already withdrawn
         if (apprenticeship.LatestEpisode.LearningStatus == LearnerStatus.Withdrawn)
-            return FailwithMessage(out message, $"Learning already withdrawn for ULN {request.ULN}");
+            return FailWithMessage(out message, $"Learning already withdrawn for ULN {request.ULN}");
 
         // Validate Reason
         if (!ValidateReason(request, out message))
             return false;
 
         // Validate Withdrawal Date
-        if (!ValidateWithdrawlDate(request, apprenticeship, currentAcademicYearEnd, out message))
+        if (!ValidateWithdrawalDate(request, apprenticeship, currentAcademicYearEnd, out message))
             return false;
 
         message = string.Empty;
@@ -67,44 +67,38 @@ public class WithdrawValidator : IValidator<WithdrawDomainRequest>
     {
         WithdrawReason reason;
 
-        if (!Enum.TryParse<WithdrawReason>(request.Reason, out reason))
+        if (!Enum.TryParse(request.Reason, out reason))
         {
             var validReasons = string.Join(", ", Enum.GetNames(typeof(WithdrawReason)));
-            return FailwithMessage(out message, $"Invalid reason, possible values are {validReasons}");
+            return FailWithMessage(out message, $"Invalid reason, possible values are {validReasons}");
         }
 
         if (reason == WithdrawReason.Other && string.IsNullOrWhiteSpace(request.ReasonText))
-            return FailwithMessage(out message, "Reason text is required for 'Other' reason");
+            return FailWithMessage(out message, "Reason text is required for 'Other' reason");
 
         if (reason == WithdrawReason.Other && request.ReasonText.Length > 100)
-            return FailwithMessage(out message, "Reason text must be less than 100 characters");
+            return FailWithMessage(out message, "Reason text must be less than 100 characters");
 
         message = string.Empty;
         return true;
     }
 
-    private bool ValidateWithdrawlDate(WithdrawDomainRequest request, LearningDomainModel learning, DateTime currentAcademicYearEnd, out string message)
+    private bool ValidateWithdrawalDate(WithdrawDomainRequest request, LearningDomainModel learning, DateTime currentAcademicYearEnd, out string message)
     {
         message = string.Empty;
         var now = _systemClockService.UtcNow;
 
         if (request.LastDayOfLearning < learning.StartDate)
-            return FailwithMessage(out message, "LastDayOfLearning cannot be before the start date");
-
-        if (request.LastDayOfLearning > learning.EndDate)
-            return FailwithMessage(out message, "LastDayOfLearning cannot be after the planned end date");
+            return FailWithMessage(out message, "LastDayOfLearning cannot be before the start date");
 
         if (request.LastDayOfLearning > currentAcademicYearEnd)
-            return FailwithMessage(out message, "LastDayOfLearning cannot be after the end of the current academic year");
-
-        if (request.LastDayOfLearning > now && learning.StartDate < now)
-            return FailwithMessage(out message, "LastDayOfLearning cannot be in the future unless the start date is in the future");
+            return FailWithMessage(out message, "LastDayOfLearning cannot be after the end of the current academic year");
 
         message = string.Empty;
         return true;
     }
 
-    private static bool FailwithMessage(out string message, string failReason)
+    private static bool FailWithMessage(out string message, string failReason)
     {
         message = failReason;
         return false;
