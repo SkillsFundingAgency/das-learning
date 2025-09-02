@@ -71,7 +71,6 @@ public static class Program
         }
 
         app.UseDasHealthChecks();
-        app.UseMiddleware<BearerTokenMiddleware>();
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();

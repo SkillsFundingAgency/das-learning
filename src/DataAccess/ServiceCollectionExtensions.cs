@@ -22,7 +22,6 @@ public static class ServiceCollectionExtensions
             provider.GetService<ILogger<SqlAzureIdentityAuthenticationDbConnectionInterceptor>>(), 
             provider.GetService<ISqlAzureIdentityTokenProvider>(), connectionNeedsAccessToken));
 
-        services.AddScoped<AccountIdClaimsHandler>();
         services.AddDbContext<LearningDataContext>((provider, options) =>
             options
                 .UseSqlServer(new SqlConnection(settings.DbConnectionString),

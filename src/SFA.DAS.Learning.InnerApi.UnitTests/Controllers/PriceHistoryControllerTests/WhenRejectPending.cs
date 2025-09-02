@@ -30,22 +30,12 @@ namespace SFA.DAS.Learning.InnerApi.UnitTests.Controllers.PriceHistoryController
             _sut.ControllerContext.HttpContext = httpContext;
         }
 
-        [TestCase(UserType.Provider)]
-        [TestCase(UserType.Employer)]
-        public async Task ThenPendingPriceChangeIsRejected(UserType expectedRejector)
+        [Test]
+        public async Task ThenPendingPriceChangeIsRejected()
         {
             //  Arrange
             var apprenticeshipKey = _fixture.Create<Guid>();
             var request = _fixture.Create<PatchRejectPriceChangeRequest>();
-            switch(expectedRejector)
-            {
-                case UserType.Provider:
-                    _sut.ControllerContext.HttpContext.User = TestAuthorizationHelper.CreateClaimsPrincipleForProvider();
-                    break;
-                case UserType.Employer:
-                    _sut.ControllerContext.HttpContext.User = TestAuthorizationHelper.CreateClaimsPrincipleForEmployer();
-                    break;
-            }
 
             //  Act
             var result = await _sut.RejectPendingPriceChange(apprenticeshipKey, request);
@@ -57,17 +47,6 @@ namespace SFA.DAS.Learning.InnerApi.UnitTests.Controllers.PriceHistoryController
                 .Verify(x =>
                     x.Send(
                         It.Is<RejectPendingPriceChangeRequest>(r => r.LearningKey == apprenticeshipKey && r.Reason == request.Reason), It.IsAny<CancellationToken>()), Times.Once);
-
-            var rejectorResult = GetValueFromAnonymousType(result, "Rejector");
-            rejectorResult.Should().Be(expectedRejector.ToString());
-
-        }
-
-        private string GetValueFromAnonymousType(IActionResult actionResult, string propertyName)
-        {
-            var anonymousObject = (OkObjectResult)actionResult;
-            var data = anonymousObject.Value;
-            return data!.GetType().GetProperty(propertyName)?.GetValue(data, null)?.ToString()!;
         }
     }
 }

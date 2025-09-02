@@ -58,8 +58,6 @@ public static class ServiceCollectionExtensions
     {
         serviceCollection.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         serviceCollection.AddScoped<ILearningRepository, LearningRepository>();
-        serviceCollection.AddScoped<IAccountIdClaimsHandler, AccountIdClaimsHandler>();
-        serviceCollection.AddScoped<IAccountIdAuthorizer, AccountIdAuthorizer>();
         return serviceCollection;
     }
 

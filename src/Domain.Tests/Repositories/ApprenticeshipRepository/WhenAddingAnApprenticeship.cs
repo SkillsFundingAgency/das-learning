@@ -23,7 +23,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         private LearningDataContext _dbContext;
         private Mock<IDomainEventDispatcher> _domainEventDispatcher;
         private Mock<ILearningFactory> _apprenticeshipFactory;
-        private Mock<IAccountIdAuthorizer> _accountIdAuthorizer;
 
         [SetUp]
         public void Arrange()
@@ -36,21 +35,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         public void CleanUp()
         {
             _dbContext.Dispose();
-        }
-
-        [Test]
-        public async Task ThenAccountIdValidationIsPerformed()
-        {
-            // Arrange
-            var apprenticeship = _fixture.Create<LearningDomainModel>();
-            SetUpApprenticeshipRepository();
-
-            // Act
-            await _sut.Add(apprenticeship);
-            
-            // Assert
-            var entity = apprenticeship.GetEntity();
-            _accountIdAuthorizer.Verify(x => x.AuthorizeAccountId(entity), Times.Once());
         }
 
         [Test]
@@ -123,11 +107,11 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         {
             _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
             _apprenticeshipFactory = new Mock<ILearningFactory>();
-            _accountIdAuthorizer = new Mock<IAccountIdAuthorizer>();
+            
             _dbContext =
                 InMemoryDbContextCreator.SetUpInMemoryDbContext();
             _sut = new LearningRepository(new Lazy<LearningDataContext>(_dbContext),
-                _domainEventDispatcher.Object, _apprenticeshipFactory.Object, _accountIdAuthorizer.Object);
+                _domainEventDispatcher.Object, _apprenticeshipFactory.Object);
         }
     }
 }

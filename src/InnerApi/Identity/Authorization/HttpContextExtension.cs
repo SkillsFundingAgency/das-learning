@@ -24,9 +24,4 @@ public static class HttpContextExtension
         return (string)userId;
 
     }
-
-    public static UserType GetUserType(this HttpContext httpContext)
-    {
-        return httpContext.User.GetUserType();
-    }
 }

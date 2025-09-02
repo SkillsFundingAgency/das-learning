@@ -17,7 +17,6 @@ public static class AuthorizationExtensions
             {
                 {
                     x.AddPolicy("default", policy =>policy.AllowAnonymousUser());
-                    x.AddAnonymousUserTypeAuthorization();
                     x.DefaultPolicy = x.GetPolicy("default")!;
                 }
             });
@@ -29,11 +28,9 @@ public static class AuthorizationExtensions
             {
                 {
                     x.AddPolicy("default", policy => policy.RequireAuthenticatedUser());
-                    x.AddUserTypeAuthorization();
                     x.DefaultPolicy = x.GetPolicy("default")!;
                 }
             });
-            services.AddSingleton<IAuthorizationHandler, UserTypeAuthorizationHandler>();
         }
 
         return services;
