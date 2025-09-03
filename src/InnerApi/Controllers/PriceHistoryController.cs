@@ -18,7 +18,6 @@ namespace SFA.DAS.Learning.InnerApi.Controllers
     /// </summary>
     [Route("")]
     [ApiController]
-    [ControllerAuthorizeUserType(UserType.Provider | UserType.Employer)]
     public class PriceHistoryController : ControllerBase
     {
         private readonly IQueryDispatcher _queryDispatcher;
@@ -118,7 +117,7 @@ namespace SFA.DAS.Learning.InnerApi.Controllers
         {
             await _commandDispatcher.Send(new RejectPendingPriceChangeRequest(learningKey, request.Reason));
 
-            return Ok(new { Rejector = HttpContext.GetUserType().ToString()});
+            return Ok(new { Rejector = "" });
         }
     }
 }

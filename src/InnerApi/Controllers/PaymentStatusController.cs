@@ -13,7 +13,6 @@ namespace SFA.DAS.Learning.InnerApi.Controllers;
 /// </summary>
 [Route("{learningKey}")]
 [ApiController]
-[ControllerAuthorizeUserType(UserType.Provider | UserType.Employer)]
 public class PaymentStatusController : ControllerBase
 {
     private readonly IQueryDispatcher _queryDispatcher;

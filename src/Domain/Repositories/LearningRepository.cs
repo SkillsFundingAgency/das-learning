@@ -10,21 +10,18 @@ public class LearningRepository : ILearningRepository
     private readonly Lazy<LearningDataContext> _lazyContext;
     private IDomainEventDispatcher _domainEventDispatcher;
     private readonly ILearningFactory _learningFactory;
-    private readonly IAccountIdAuthorizer _accountIdAuthorizer;
     private LearningDataContext DbContext => _lazyContext.Value;
 
-    public LearningRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, ILearningFactory learningFactory, IAccountIdAuthorizer accountIdAuthorizer)
+    public LearningRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, ILearningFactory learningFactory)
     {
         _lazyContext = dbContext;
         _domainEventDispatcher = domainEventDispatcher;
         _learningFactory = learningFactory;
-        _accountIdAuthorizer = accountIdAuthorizer;
     }
 
     public async Task Add(LearningDomainModel learning)
     {
         var entity = learning.GetEntity();
-        _accountIdAuthorizer.AuthorizeAccountId(entity);
         await DbContext.AddAsync(entity);
         await DbContext.SaveChangesAsync();
             

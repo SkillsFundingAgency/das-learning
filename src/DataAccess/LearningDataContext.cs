@@ -6,17 +6,9 @@ using SFA.DAS.Learning.Enums;
 namespace SFA.DAS.Learning.DataAccess
 {
     [ExcludeFromCodeCoverage]
-    public class LearningDataContext : DbContext
+    public class LearningDataContext(DbContextOptions<LearningDataContext> options) : DbContext(options)
     {
-        private readonly IAccountIdAuthorizer _accountIdAuthorizer;
-
-        public LearningDataContext(DbContextOptions<LearningDataContext> options,
-            IAccountIdAuthorizer accountIdAuthorizer) : base(options)
-        {
-            _accountIdAuthorizer = accountIdAuthorizer;
-        }
-
-        public IQueryable<Entities.Learning.Learning> Apprenticeships => _accountIdAuthorizer.ApplyAuthorizationFilterOnQueries(ApprenticeshipsDbSet);
+        public IQueryable<Entities.Learning.Learning> Apprenticeships => ApprenticeshipsDbSet;
         public virtual DbSet<Entities.Learning.Learning> ApprenticeshipsDbSet { get; set; }
         public virtual DbSet<Episode> Episodes { get; set; }
         public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }

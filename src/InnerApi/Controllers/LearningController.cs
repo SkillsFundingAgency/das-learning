@@ -18,12 +18,8 @@ using SFA.DAS.Learning.Command.UpdateLearner;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
-/// <summary>
-/// Controller for handling requests related to Apprenticeships
-/// </summary>
 [Route("")]
 [ApiController]
-[ControllerAuthorizeUserType(UserType.Provider | UserType.Employer)]
 public class LearningController : ControllerBase
 {
     private readonly IQueryDispatcher _queryDispatcher;
@@ -71,7 +67,6 @@ public class LearningController : ControllerBase
     /// <returns>GetLearningsByAcademicYearResponse</returns>
     [HttpGet("{ukprn:long}/academicyears/{academicYear:int}/learnings")]
     [ProducesResponseType(typeof(GetLearningsByAcademicYearResponse), 200)]
-    [ActionAuthorizeUserType(UserType.ServiceAccount)]
     public async Task<IActionResult> GetByAcademicYear(long ukprn, int academicYear, [FromQuery] int page = 1, [FromQuery] int? pageSize = 20)
     {
         pageSize = pageSize.HasValue ? Math.Clamp(pageSize.Value, 1, 100) : pageSize;
@@ -175,7 +170,6 @@ public class LearningController : ControllerBase
     /// <returns>GetLearningsWithEpisodesResponse containing learning, episode, & price data</returns>
     [HttpGet("{ukprn}/{collectionYear}/{collectionPeriod}")]
     [ProducesResponseType(200)]
-    [ActionAuthorizeUserType(UserType.ServiceAccount)]
     public async Task<IActionResult> GetLearningsForFm36(long ukprn, short collectionYear, byte collectionPeriod)
     {
         var request = new GetLearningsWithEpisodesRequest { Ukprn = ukprn, CollectionYear = collectionYear, CollectionPeriod = collectionPeriod };
@@ -192,7 +186,6 @@ public class LearningController : ControllerBase
     /// <returns>Provider and employer ids</returns>
     [HttpGet("{learningKey}/currentPartyIds")]
     [ProducesResponseType(200)]
-    [ActionAuthorizeUserType(UserType.ServiceAccount | UserType.Provider | UserType.Employer)]
     public async Task<IActionResult> GetCurrentPartyIds(Guid learningKey)
     {
         var request = new GetCurrentPartyIdsRequest { ApprenticeshipKey = learningKey };
@@ -209,7 +202,6 @@ public class LearningController : ControllerBase
     /// <returns>An array of <see cref="LearningUpdateChanges"/> values indicating the fields that were modified.</returns>
     [HttpPut("{learningKey}")]
     [ProducesResponseType(200)]
-    [ActionAuthorizeUserType(UserType.ServiceAccount)]
     public async Task<IActionResult> UpdateLearning(Guid learningKey, [FromBody] UpdateLearnerRequest request)
     {
         _logger.LogInformation("Updating learning with key {LearningKey}", learningKey);
