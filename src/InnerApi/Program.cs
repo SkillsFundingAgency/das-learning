@@ -65,7 +65,7 @@ public static class Program
         if (NotLocal(builder.Configuration))
         {
             var azureAdConfiguration = builder.Configuration
-                .GetSection("AzureActiveDirectoryConfiguration")
+                .GetSection("AzureAd")
                 .Get<AzureActiveDirectoryConfiguration>();
 
             var policies = new Dictionary<string, string>
