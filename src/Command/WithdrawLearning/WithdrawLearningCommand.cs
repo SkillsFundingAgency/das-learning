@@ -11,7 +11,6 @@ public class WithdrawLearningCommand : ICommand
     public string ReasonText { get; set; }
     public DateTime LastDayOfLearning { get; set; }
     public string ProviderApprovedBy { get; set; }
-    public string ServiceBearerToken { get; set; }
 }
 
 public static class WithdrawLearningCommandExtensions

@@ -55,7 +55,7 @@ public class PaymentStatusController : ControllerBase
     {
         try
         {
-            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, HttpContext.GetUserId(), SetPayments.Freeze, freezeRequest.Reason));
+            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, "", SetPayments.Freeze, freezeRequest.Reason));
             return Ok();
         }
         catch (Exception exception)
@@ -76,7 +76,7 @@ public class PaymentStatusController : ControllerBase
     {
         try
         {
-            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, HttpContext.GetUserId(), SetPayments.Unfreeze));
+            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, "", SetPayments.Unfreeze));
             return Ok();
         }
         catch (Exception exception)

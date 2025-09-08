@@ -4,7 +4,6 @@ using SFA.DAS.Learning.Command.ApproveStartDateChange;
 using SFA.DAS.Learning.Command.CancelPendingStartDateChange;
 using SFA.DAS.Learning.Command.CreateStartDateChange;
 using SFA.DAS.Learning.Command.RejectStartDateChange;
-using SFA.DAS.Learning.InnerApi.Identity.Authorization;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Queries;
 using SFA.DAS.Learning.Queries.GetPendingStartDateChange;

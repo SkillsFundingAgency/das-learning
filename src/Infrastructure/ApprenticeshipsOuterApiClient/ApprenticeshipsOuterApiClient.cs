@@ -56,15 +56,11 @@ public class ApprenticeshipsOuterApiClient : IApprenticeshipsOuterApiClient
         throw new Exception($"Status code: {response.StatusCode} returned from apprenticeships outer api.");
     }
 
-    public async Task HandleWithdrawalNotifications(Guid apprenticeshipKey, HandleWithdrawalNotificationsRequest request, string serviceBearerToken)
+    public async Task HandleWithdrawalNotifications(Guid apprenticeshipKey, HandleWithdrawalNotificationsRequest request)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{ApprenticeshipControllerUrl}/{apprenticeshipKey}/{HandleWithdrawalNotificationsUrl}");
         requestMessage.Content = new StringContent(JsonConvert.SerializeObject(request), System.Text.Encoding.UTF8, "application/json");
-
-        // This solution adds the bearer token just for this call as it is the only one triggered from the manual call from azure portal to the HttpTrigger function (for withdrawing simplified payments apprentices)
-        // It will need to be replaced when we decide on how we want to handle back end triggered actions like this that require authentication
-        requestMessage.Headers.Add("Authorization", $"Bearer {serviceBearerToken}");
-
+        
         var response = await _httpClient.SendAsync(requestMessage).ConfigureAwait(false);
 
         response.EnsureSuccessStatusCode();

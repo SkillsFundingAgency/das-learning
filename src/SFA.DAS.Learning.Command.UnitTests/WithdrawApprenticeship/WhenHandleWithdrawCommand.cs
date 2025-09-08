@@ -82,7 +82,7 @@ public class WhenHandleWithdrawCommand
             .Returns(true);
 
         _apprenticeshipsOuterApiClient.Setup(x => x.HandleWithdrawalNotifications(It.IsAny<Guid>(),
-                It.IsAny<HandleWithdrawalNotificationsRequest>(), It.IsAny<string>()))
+                It.IsAny<HandleWithdrawalNotificationsRequest>()))
             .Returns(() => Task.CompletedTask);
 
         var sut = new WithdrawLearningCommandHandler(
@@ -114,7 +114,7 @@ public class WhenHandleWithdrawCommand
             It.IsAny<CancellationToken>()));
 
         _apprenticeshipsOuterApiClient.Verify(x => x.HandleWithdrawalNotifications(_apprenticeship!.Key,
-            It.Is<HandleWithdrawalNotificationsRequest>(x => x.LastDayOfLearning == command.LastDayOfLearning && x.Reason == command.Reason), command.ServiceBearerToken));
+            It.Is<HandleWithdrawalNotificationsRequest>(x => x.LastDayOfLearning == command.LastDayOfLearning && x.Reason == command.Reason)));
     }
 
     [Test]
@@ -127,7 +127,7 @@ public class WhenHandleWithdrawCommand
             .Returns(true);
 
         _apprenticeshipsOuterApiClient.Setup(x => x.HandleWithdrawalNotifications(It.IsAny<Guid>(),
-                It.IsAny<HandleWithdrawalNotificationsRequest>(), It.IsAny<string>()))
+                It.IsAny<HandleWithdrawalNotificationsRequest>()))
             .Returns(() => Task.CompletedTask);
 
         var sut = new WithdrawLearningCommandHandler(

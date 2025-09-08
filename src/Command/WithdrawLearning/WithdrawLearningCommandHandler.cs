@@ -64,7 +64,7 @@ public class WithdrawLearningCommandHandler : ICommandHandler<WithdrawLearningCo
         }
 
         _logger.LogInformation($"Sending Notification(s) for withdrawal of learning for ULN {command.ULN}");
-        await _apprenticeshipsOuterApiClient.HandleWithdrawalNotifications(learning.Key, new HandleWithdrawalNotificationsRequest { LastDayOfLearning = command.LastDayOfLearning, Reason = command.Reason }, command.ServiceBearerToken);
+        await _apprenticeshipsOuterApiClient.HandleWithdrawalNotifications(learning.Key, new HandleWithdrawalNotificationsRequest { LastDayOfLearning = command.LastDayOfLearning, Reason = command.Reason });
 
         _logger.LogInformation($"Learning withdrawn for ULN {command.ULN}");
         return Outcome.Success();
