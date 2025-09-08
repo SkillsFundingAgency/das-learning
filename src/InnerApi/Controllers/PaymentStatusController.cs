@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.SetPaymentsFrozen;
-using SFA.DAS.Learning.InnerApi.Identity.Authorization;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Queries;
 using SFA.DAS.Learning.Queries.GetApprenticeshipPaymentStatus;

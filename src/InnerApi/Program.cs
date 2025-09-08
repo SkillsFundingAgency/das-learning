@@ -1,6 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using SFA.DAS.Api.Common.AppStart;
+using SFA.DAS.Api.Common.Configuration;
+using SFA.DAS.Api.Common.Infrastructure;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.DataAccess;
@@ -8,8 +11,6 @@ using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Infrastructure.Extensions;
 using SFA.DAS.Learning.InnerApi.Extensions;
-using SFA.DAS.Learning.InnerApi.Identity.Authentication;
-using SFA.DAS.Learning.InnerApi.Identity.Authorization;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 
@@ -59,8 +60,30 @@ public static class Program
         builder.Services.ConfigureNServiceBusForSend(applicationSettings.NServiceBusConnectionString.GetFullyQualifiedNamespace());
         builder.Services.AddCommandServices(builder.Configuration).AddEventServices().AddValidators();
         builder.Services.AddDasHealthChecks(applicationSettings);
-        builder.Services.AddApiAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
-        builder.Services.AddApiAuthorization(builder.Environment.IsDevelopment());
+
+        //Add MI authentication
+        if (NotLocal(builder.Configuration))
+        {
+            var azureAdConfiguration = builder.Configuration
+                .GetSection("AzureActiveDirectoryConfiguration")
+                .Get<AzureActiveDirectoryConfiguration>();
+
+            var policies = new Dictionary<string, string>
+            {
+                {PolicyNames.Default, "Default"}
+            };
+
+            builder.Services.AddAuthentication(azureAdConfiguration, policies);
+        }
+
+        builder.Services.AddMvc(o =>
+        {
+            if (NotLocal(builder.Configuration))
+            {
+                o.Conventions.Add(new AuthorizeControllerModelConvention(new List<string>()));
+            }
+        });
+
 
         var app = builder.Build();
         

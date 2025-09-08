@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.InnerApi.Identity.Authorization;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 using SFA.DAS.Learning.Queries.GetLearnings;

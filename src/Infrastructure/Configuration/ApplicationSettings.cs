@@ -11,6 +11,5 @@ namespace SFA.DAS.Learning.Infrastructure.Configuration
         public string LearningTransportStorageDirectory { get; set; }
         public string DbConnectionString { get; set; }
         public ApprenticeshipsOuterApiConfiguration ApprenticeshipsOuterApiConfiguration { get; set; }
-        public AzureActiveDirectoryConfiguration AzureActiveDirectoryConfiguration { get; set; } 
     }
 }
