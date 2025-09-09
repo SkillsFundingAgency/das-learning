@@ -131,7 +131,31 @@ paths:
     
   /providers/{ukprn}/learning/{learningKey}/unapproved:
     get:
-      summary: Returns the unapproved version of the record for this learning Id.
+      summary: Returns the approved version of the record for this learning Id.
+      parameters:
+        - name: learningKey
+          in: path
+          required: true
+          description: The id of the record in learning
+          schema:
+            type: string
+        - name: ukprn
+          in: path
+          required: true
+          description: The ukprn to filter down by provider
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/learningResponse'  
+        '400':
+          $ref: '#/components/responses/badRequest'  
+        '404':
+          description: The resource was not found  
+    
+  /providers/{ukprn}/learning/{learningKey}:
+    get:
+      summary: Returns a record that has currently not been through approval.
       parameters:
         - name: learningKey
           in: path
