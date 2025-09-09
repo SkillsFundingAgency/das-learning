@@ -105,11 +105,11 @@ paths:
         '200':
           $ref: '#/components/responses/pagedLearningResponse' 
   
-  /providers/{ukprn}/learning/{learningId}:
+  /providers/{ukprn}/learning/{learningKey}/approved:
     get:
-      summary: Returns the record for this learning Id.
+      summary: Returns the approved version of the record for this learning Id.
       parameters:
-        - name: learningId
+        - name: learningKey
           in: path
           required: true
           description: The id of the record in learning
@@ -128,37 +128,31 @@ paths:
           $ref: '#/components/responses/badRequest'  
         '404':
           description: The resource was not found
-          
-  /providers/{ukprn}/learning/{learningId}/changes/{changeId}:
+    
+  /providers/{ukprn}/learning/{learningKey}/unapproved:
     get:
-      summary: Returns the record for this learning change
+      summary: Returns the approved version of the record for this learning Id.
       parameters:
+        - name: learningKey
+          in: path
+          required: true
+          description: The id of the record in learning
+          schema:
+            type: string
         - name: ukprn
           in: path
           required: true
           description: The ukprn to filter down by provider
           schema:
             type: string
-        - name: learningId
-          in: path
-          required: true
-          description: The id of the record in learning
-          schema:
-            type: string
-        - name: changeId
-          in: path
-          required: true
-          description: The id of the change
-          schema:
-            type: string
       responses:
         '200':
-          $ref: '#/components/responses/changeResponse'  
+          $ref: '#/components/responses/learningResponse'  
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
-          description: The resource was not found
-
+          description: The resource was not found  
+          
 components:  
   headers:
     location:
