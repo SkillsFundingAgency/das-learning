@@ -131,7 +131,7 @@ paths:
     
   /providers/{ukprn}/learning/{learningKey}/unapproved:
     get:
-      summary: Returns the approved version of the record for this learning Id.
+      summary: Returns the unapproved version of the record for this learning Id.
       parameters:
         - name: learningKey
           in: path
