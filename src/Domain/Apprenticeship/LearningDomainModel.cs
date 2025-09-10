@@ -396,9 +396,6 @@ public class LearningDomainModel : AggregateRoot
     {
         bool hasChanges = false;
 
-        //for each course in update model, if identical course exists in entity do nothing (make note of unchanged entity identifier?), if not create one.
-        //any remaining courses that are not in the list of unchanged entity identifiers should be removed.
-
         var coursesToAdd = new List<MathsAndEnglish>();
         var courseKeysToKeep = new List<Guid>();
 
@@ -441,10 +438,12 @@ public class LearningDomainModel : AggregateRoot
         foreach (var removed in coursesToRemove)
         {
             _entity.MathsAndEnglishCourses.Remove(removed);
+            _mathsAndEnglishCourses.RemoveAll(x => x.Key == removed.Key);
             hasChanges = true;
         }
 
         _entity.MathsAndEnglishCourses.AddRange(coursesToAdd);
+        _mathsAndEnglishCourses.AddRange(coursesToAdd.Select(MathsAndEnglishDomainModel.Get));
 
         if (hasChanges) changes.Add(LearningUpdateChanges.MathsAndEnglish);
     }
