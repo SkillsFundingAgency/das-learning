@@ -5,7 +5,6 @@ using SFA.DAS.Learning.Command.CancelPendingPriceChange;
 using SFA.DAS.Learning.Command.CreatePriceChange;
 using SFA.DAS.Learning.Command.RejectPendingPriceChange;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.InnerApi.Identity.Authorization;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.Queries;

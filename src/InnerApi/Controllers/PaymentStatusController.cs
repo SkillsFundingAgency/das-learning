@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.SetPaymentsFrozen;
-using SFA.DAS.Learning.InnerApi.Identity.Authorization;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Queries;
 using SFA.DAS.Learning.Queries.GetApprenticeshipPaymentStatus;
@@ -56,7 +55,7 @@ public class PaymentStatusController : ControllerBase
     {
         try
         {
-            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, HttpContext.GetUserId(), SetPayments.Freeze, freezeRequest.Reason));
+            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, "", SetPayments.Freeze, freezeRequest.Reason));
             return Ok();
         }
         catch (Exception exception)
@@ -77,7 +76,7 @@ public class PaymentStatusController : ControllerBase
     {
         try
         {
-            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, HttpContext.GetUserId(), SetPayments.Unfreeze));
+            await _commandDispatcher.Send(new SetPaymentsFrozenCommand(learningKey, "", SetPayments.Unfreeze));
             return Ok();
         }
         catch (Exception exception)

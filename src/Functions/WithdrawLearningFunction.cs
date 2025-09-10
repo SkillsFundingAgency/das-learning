@@ -15,8 +15,6 @@ namespace SFA.DAS.Learning.Functions;
 
 public class WithdrawLearningFunction(ICommandDispatcher commandDispatcher, ILogger<WithdrawLearningFunction> logger)
 {
-    private const string ServiceBearerTokenKey = "ServiceBearerToken";
-
     [Function("WithdrawLearning")]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
@@ -51,7 +49,6 @@ public class WithdrawLearningFunction(ICommandDispatcher commandDispatcher, ILog
         using var reader = new StreamReader(req.Body);
         var body = await reader.ReadToEndAsync();
         var command = JsonConvert.DeserializeObject<WithdrawLearningCommand>(body);
-        command.ServiceBearerToken = req.Headers[ServiceBearerTokenKey];
         return command;
     }
 }

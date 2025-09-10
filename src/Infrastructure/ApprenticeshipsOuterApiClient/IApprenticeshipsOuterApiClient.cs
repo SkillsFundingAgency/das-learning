@@ -7,5 +7,5 @@ public interface IApprenticeshipsOuterApiClient
 {
     Task<GetStandardResponse> GetStandard(int courseCode);
     Task<GetAcademicYearsResponse> GetAcademicYear(DateTime searchYear);
-    Task HandleWithdrawalNotifications(Guid apprenticeshipKey, HandleWithdrawalNotificationsRequest request, string serviceBearerToken);
+    Task HandleWithdrawalNotifications(Guid apprenticeshipKey, HandleWithdrawalNotificationsRequest request);
 }

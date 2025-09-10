@@ -7,7 +7,6 @@ using Moq;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.RejectPendingPriceChange;
 using SFA.DAS.Learning.InnerApi.Controllers;
-using SFA.DAS.Learning.InnerApi.Identity.Authorization;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Queries;
 
