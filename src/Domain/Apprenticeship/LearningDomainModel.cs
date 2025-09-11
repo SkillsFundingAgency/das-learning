@@ -487,8 +487,7 @@ public class LearningDomainModel : AggregateRoot
 
         if (hasChanged)
         {
-            //todo: temp to stop other tests breaking
-            //changes.Add(LearningUpdateChanges.Prices);
+            changes.Add(LearningUpdateChanges.Prices);
         }
     }
 }

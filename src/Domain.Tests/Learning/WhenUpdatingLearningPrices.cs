@@ -16,17 +16,13 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
     public class WhenUpdatingLearningPrices
     {
         private Fixture _fixture;
+        private LearningDomainModel _learning;
 
         [SetUp]
         public void SetUp()
         {
             _fixture = new Fixture();
-        }
 
-        [Test]
-        public void ThenPricesAreNotUpdatedIfChanged()
-        {
-            //Arrange
             var existingCosts = new List<Cost>
             {
                 new()
@@ -37,9 +33,13 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
                 }
             };
 
-            var learning = CreateLearner(existingCosts, new DateTime(2025, 07, 31), 15000);
-            
-            var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+            _learning = CreateLearner(existingCosts, new DateTime(2025, 07, 31), 15000);
+        }
+
+        [Test]
+        public void ThenPricesAreUpdatedIfANewPriceIsAdded()
+        {
+            var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
 
             updateModel.OnProgrammeDetails.Costs.Add(new Cost
             {
@@ -49,35 +49,36 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
             });
 
             //Act
-            var result = learning.UpdateLearnerDetails(updateModel);
+            var result = _learning.UpdateLearnerDetails(updateModel);
 
             //Assert
             result.Should().Contain(LearningUpdateChanges.Prices);
-            learning.LatestEpisode.EpisodePrices.Count(x => !x.IsDeleted).Should().Be(2);
+
+            var prices = _learning.LatestEpisode.EpisodePrices
+                .Where(x => !x.IsDeleted)
+                .OrderBy(x => x.StartDate)
+                .ToList();
+
+            prices.Count().Should().Be(2);
+            prices.Last().Key.Should().Be(Guid.Empty);
         }
 
         [Test]
         public void ThenPricesAreNotUpdatedIfNotChanged()
         {
-            //Arrange
-            var existingCosts = new List<Cost>
-            {
-                new()
-                {
-                    FromDate = new DateTime(2024, 08, 01),
-                    TrainingPrice = 10000,
-                    EpaoPrice = 1000
-                }
-            };
-
-            var learning = CreateLearner(existingCosts, new DateTime(2025,07,31), 15000);
-            var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+            var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
 
             //Act
-            var result = learning.UpdateLearnerDetails(updateModel);
+            var result = _learning.UpdateLearnerDetails(updateModel);
 
             //Assert
-            learning.LatestEpisode.EpisodePrices.Count(x => !x.IsDeleted).Should().Be(1);
+            var prices = _learning.LatestEpisode.EpisodePrices
+                .Where(x => !x.IsDeleted)
+                .OrderBy(x => x.StartDate)
+                .ToList();
+
+            prices.Count.Should().Be(1);
+            prices.Single().Key.Should().NotBe(Guid.Empty);
             result.Should().BeEmpty();
         }
 
