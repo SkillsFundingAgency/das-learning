@@ -7,6 +7,7 @@ using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using System;
 using System.Collections.Generic;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
 
@@ -115,6 +116,12 @@ public class WhenUpdatingLearningSupport
             StartDate = x.StartDate,
             EndDate = x.EndDate
         });
+
+        episode.Prices.Clear();
+        episode.Prices.Add(_fixture.Build<EpisodePrice>()
+            .With(x => x.IsDeleted, false)
+            .Create());
+
         entity.Episodes = new List<DataAccess.Entities.Learning.Episode> { episode };
 
         return LearningDomainModel.Get(entity);

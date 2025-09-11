@@ -105,6 +105,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
 
                 episode.Prices.Add(new EpisodePrice
                 {
+                    Key = Guid.NewGuid(),
                     StartDate = cost.FromDate,
                     EndDate = endDate,
                     TrainingPrice = cost.TrainingPrice,

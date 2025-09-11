@@ -160,30 +160,46 @@ public class EpisodeDomainModel
 
     internal bool UpdatePricesIfChanged(List<Cost> costs)
     {
+        var hasChanged = false;
+
         var existingPrices = _entity.Prices
-            .Where(x => x.IsDeleted == false)
+            .Where(x => !x.IsDeleted)
             .OrderBy(x => x.StartDate)
             .ToList();
 
         var currentPlannedEndDate = existingPrices.LastOrDefault()?.EndDate ?? DateTime.MaxValue;
-        var currentFundingBandMaximum = existingPrices.First().FundingBandMaximum;
-
-        // Soft delete all existing prices
-        foreach (var price in _entity.Prices)
-        {
-            price.IsDeleted = true;
-        }
+        var currentFundingBandMaximum = existingPrices.FirstOrDefault()?.FundingBandMaximum ?? default;
 
         var orderedCosts = costs.OrderBy(x => x.FromDate).ToList();
+        var matchedStartDates = new HashSet<DateTime>();
 
         for (var i = 0; i < orderedCosts.Count; i++)
         {
             var cost = orderedCosts[i];
             var isLast = i == orderedCosts.Count - 1;
+            var endDate = isLast ? currentPlannedEndDate : orderedCosts[i + 1].FromDate.AddDays(-1);
 
-            var endDate = isLast
-                ? currentPlannedEndDate
-                : orderedCosts[i + 1].FromDate.AddDays(-1);
+            var existing = existingPrices.FirstOrDefault(p =>
+                p.StartDate == cost.FromDate &&
+                p.TrainingPrice == cost.TrainingPrice &&
+                p.EndPointAssessmentPrice == cost.EpaoPrice);
+
+            if (existing != null)
+            {
+                matchedStartDates.Add(existing.StartDate);
+
+                if (existing.EndDate != endDate)
+                {
+                    existing.EndDate = endDate;
+                }
+
+                if (existing.FundingBandMaximum != currentFundingBandMaximum)
+                {
+                    existing.FundingBandMaximum = currentFundingBandMaximum;
+                }
+
+                continue;
+            }
 
             AddEpisodePrice(
                 cost.FromDate,
@@ -193,9 +209,22 @@ public class EpisodeDomainModel
                 cost.EpaoPrice,
                 currentFundingBandMaximum,
                 false);
+
+            matchedStartDates.Add(cost.FromDate);
+            hasChanged = true;
         }
 
-        return true;
+        // Soft-delete unmatched existing prices
+        foreach (var price in _entity.Prices)
+        {
+            if (!matchedStartDates.Contains(price.StartDate))
+            {
+                price.IsDeleted = true;
+                hasChanged = true;
+            }
+        }
+
+        return hasChanged;
     }
 
     internal void UpdatePaymentStatus(bool isFrozen)
