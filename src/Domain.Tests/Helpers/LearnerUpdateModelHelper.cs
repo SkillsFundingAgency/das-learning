@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.DataAccess.Extensions;
 
@@ -28,7 +29,16 @@ public static class LearnerUpdateModelHelper
             {
                 StartDate = x.StartDate,
                 EndDate = x.EndDate
-            }).ToList()
+            }).ToList(),
+            OnProgrammeDetails = new OnProgrammeDetails
+            {
+                Costs = learning.GetEpisode().Prices.Select(x => new Cost
+                {
+                    FromDate = x.StartDate,
+                    TrainingPrice = Convert.ToInt32(x.TrainingPrice.Value),
+                    EpaoPrice = Convert.ToInt32(x.EndPointAssessmentPrice.Value)
+                }).ToList()
+            }
         };
     }
 }
