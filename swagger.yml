@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   version: '1.0'
-  title: Apprenticeships service.
+  title: Learning inner API service.
   description: 'This service will provide searching facilities to outer APIs for filtering approved apprenticeships'
 paths:
   /info:
