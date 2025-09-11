@@ -157,6 +157,46 @@ public class EpisodeDomainModel
         }
     }
 
+    internal bool UpdatePricesIfChanged(List<Cost> costs)
+    {
+        var existingPrices = _entity.Prices
+            .Where(x => x.IsDeleted == false)
+            .OrderBy(x => x.StartDate)
+            .ToList();
+
+        var currentPlannedEndDate = existingPrices.LastOrDefault()?.EndDate ?? DateTime.MaxValue;
+        var currentFundingBandMaximum = existingPrices.First().FundingBandMaximum;
+
+        // Soft delete all existing prices
+        foreach (var price in _entity.Prices)
+        {
+            price.IsDeleted = true;
+        }
+
+        var orderedCosts = costs.OrderBy(x => x.FromDate).ToList();
+
+        for (var i = 0; i < orderedCosts.Count; i++)
+        {
+            var cost = orderedCosts[i];
+            var isLast = i == orderedCosts.Count - 1;
+
+            var endDate = isLast
+                ? currentPlannedEndDate
+                : orderedCosts[i + 1].FromDate.AddDays(-1);
+
+            AddEpisodePrice(
+                cost.FromDate,
+                endDate,
+                cost.TotalPrice,
+                cost.TrainingPrice,
+                cost.EpaoPrice,
+                currentFundingBandMaximum,
+                false);
+        }
+
+        return true;
+    }
+
     internal void UpdatePaymentStatus(bool isFrozen)
     {
         _entity.PaymentsFrozen = isFrozen;

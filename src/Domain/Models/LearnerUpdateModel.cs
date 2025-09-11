@@ -42,4 +42,6 @@ public class Cost
     public int? EpaoPrice { get; set; }
 
     public DateTime FromDate { get; set; }
+
+    public int TotalPrice => TrainingPrice + (EpaoPrice ?? 0);
 }

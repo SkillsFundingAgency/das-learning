@@ -380,6 +380,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdateLearningSupport(updateModel, changes);
 
+        UpdatePrices(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -476,6 +478,16 @@ public class LearningDomainModel : AggregateRoot
         if(learningSupportHasChanged)
         {
             changes.Add(LearningUpdateChanges.LearningSupport);
+        }
+    }
+
+    private void UpdatePrices(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var hasChanged = LatestEpisode.UpdatePricesIfChanged(updateModel.OnProgrammeDetails.Costs);
+
+        if (hasChanged)
+        {
+            changes.Add(LearningUpdateChanges.Prices);
         }
     }
 }
