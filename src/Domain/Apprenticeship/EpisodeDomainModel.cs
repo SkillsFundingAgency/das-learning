@@ -180,21 +180,37 @@ public class EpisodeDomainModel
             var endDate = isLast ? currentPlannedEndDate : orderedCosts[i + 1].FromDate.AddDays(-1);
 
             var existing = existingPrices.FirstOrDefault(p =>
-                p.StartDate == cost.FromDate &&
-                p.TrainingPrice == cost.TrainingPrice &&
-                p.EndPointAssessmentPrice == cost.EpaoPrice);
+                p.StartDate == cost.FromDate);
 
             if (existing != null)
             {
                 matchedStartDates.Add(existing.StartDate);
 
+                if (cost.TrainingPrice != existing.TrainingPrice)
+                {
+                    existing.TrainingPrice = cost.TrainingPrice;
+                    hasChanged = true;
+                }
+
+                if (cost.EpaoPrice != existing.EndPointAssessmentPrice)
+                {
+                    existing.EndPointAssessmentPrice = cost.EpaoPrice;
+                    hasChanged = true;
+                }
+
                 if (existing.EndDate != endDate)
                 {
+                    //sync end date - this does not count as a change
+                    //since it must just have been truncated by a subsequent change
                     existing.EndDate = endDate;
                 }
 
                 if (existing.FundingBandMaximum != currentFundingBandMaximum)
                 {
+                    //sync funding band maximum - this does not count as a change
+                    //since it might just be due to the first price moving into another band
+                    //There is duplication/redundancy in storing FundingBandMaximum on this level since
+                    //it applies to the entire episode, not just a price.
                     existing.FundingBandMaximum = currentFundingBandMaximum;
                 }
 
