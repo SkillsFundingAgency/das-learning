@@ -215,7 +215,7 @@ public class EpisodeDomainModel
         }
 
         // Soft-delete unmatched existing prices
-        foreach (var price in _entity.Prices)
+        foreach (var price in _entity.Prices.Where(x => !x.IsDeleted))
         {
             if (!matchedStartDates.Contains(price.StartDate))
             {
