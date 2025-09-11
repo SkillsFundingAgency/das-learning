@@ -141,7 +141,7 @@ public static class UpdateLearnerRequestExtensions
     /// <param name="request">The request containing learner details</param>
     /// <param name="learnerKey">The unique identifier of the learner</param>
     /// <returns>A command to update the learner</returns>
-    public static LearnerUpdateModel ToCommand(this UpdateLearnerRequest request)
+    public static LearnerUpdateModel ToUpdateModel(this UpdateLearnerRequest request)
     {
         return new LearnerUpdateModel
         {
