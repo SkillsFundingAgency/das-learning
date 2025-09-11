@@ -56,7 +56,7 @@ paths:
 
   /providers/{ukprn}/learners:
     get:
-      summary: Returns a paged list of learners for this provider for the academic year
+      summary: Returns a paged list of learners for this provider
       parameters:
         - name: ukprn
           in: path
@@ -64,10 +64,14 @@ paths:
           description: The UK Provider Reference Number for the provider entering this learner
           schema:
             type: string
-        - name: academicYear
+        - name: startMonth
           in: query
           required: false
-          example: 2425
+          schema:
+            type: integer
+        - name: startYear
+          in: query
+          required: false
           schema:
             type: integer
         - name: page
@@ -198,9 +202,7 @@ components:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/pagedLearning'
+            $ref: '#/components/schemas/pagedLearning'
 
     learningResponse:
       description: A single record of learning
@@ -213,9 +215,7 @@ components:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/learningRecord'
+            $ref: '#/components/schemas/learningRecord'
 
     changeResponse:
       description: A list of changes applied from the ILR to a learning record
