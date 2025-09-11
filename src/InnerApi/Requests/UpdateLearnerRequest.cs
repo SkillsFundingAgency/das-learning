@@ -25,6 +25,43 @@ public class UpdateLearnerRequest
     /// Learning support details
     /// </summary>
     public List<LearningSupportUpdatedDetails> LearningSupport { get; set; }
+
+    /// <summary>
+    /// OnProgramme details
+    /// </summary>
+    public OnProgrammeDetails OnProgramme { get; set; }
+}
+
+/// <summary>
+/// OnProgramme details
+/// </summary>
+public class OnProgrammeDetails
+{
+    /// <summary>
+    /// Costs / Prices for the OnProgramme delivery
+    /// </summary>
+    public List<Cost> Costs { get; set; }
+}
+
+/// <summary>
+/// Cost details
+/// </summary>
+public class Cost
+{
+    /// <summary>
+    /// The cost of the training, aka TNP1
+    /// </summary>
+    public int TrainingPrice { get; set; }
+
+    /// <summary>
+    /// The cost of the end-point assessment, aka TNP2
+    /// </summary>
+    public int? EpaoPrice { get; set; }
+    
+    /// <summary>
+    /// The date from which this price applies
+    /// </summary>
+    public DateTime FromDate { get; set; }
 }
 
 /// <summary>
