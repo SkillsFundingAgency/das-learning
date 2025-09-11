@@ -12,5 +12,3 @@ public class UpdateLearnerCommand : ICommand
         UpdateModel = updateModel;
     }
 }
-
-

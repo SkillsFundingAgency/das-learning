@@ -45,7 +45,7 @@ public class WhenUpdatingLearningSupport
         var learning = CreateLearner(learningSupport);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
 
-        updateModel.LearningSupport.Add(new LearningSupportDetails(DateTime.Now, DateTime.Now.AddDays(30)));
+        updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)});
 
         //Act
         var result = learning.UpdateLearnerDetails(updateModel);
@@ -65,7 +65,7 @@ public class WhenUpdatingLearningSupport
         //Arrange
         var learningSupport = new List<LearningSupportDetails>
         {
-            new LearningSupportDetails(DateTime.Now, DateTime.Now.AddDays(30))
+            new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)}
         };
         var learning = CreateLearner(learningSupport);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
@@ -85,11 +85,11 @@ public class WhenUpdatingLearningSupport
         //Arrange
         var learningSupport = new List<LearningSupportDetails>
         {
-            new LearningSupportDetails(DateTime.Now, DateTime.Now.AddDays(30))
+            new LearningSupportDetails{ StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30) }
         };
         var learning = CreateLearner(learningSupport);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
-        updateModel.LearningSupport.Add(new LearningSupportDetails(DateTime.Now.AddDays(31), DateTime.Now.AddDays(60)));
+        updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now.AddDays(31), EndDate = DateTime.Now.AddDays(60) });
 
         //Act
         var result = learning.UpdateLearnerDetails(updateModel);
