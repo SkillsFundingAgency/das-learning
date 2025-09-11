@@ -53,6 +53,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
 
             //Assert
             result.Should().Contain(LearningUpdateChanges.Prices);
+            learning.LatestEpisode.EpisodePrices.Count(x => !x.IsDeleted).Should().Be(2);
         }
 
         [Test]
@@ -76,6 +77,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
             var result = learning.UpdateLearnerDetails(updateModel);
 
             //Assert
+            learning.LatestEpisode.EpisodePrices.Count(x => !x.IsDeleted).Should().Be(1);
             result.Should().BeEmpty();
         }
 
@@ -115,7 +117,5 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
             entity.Episodes = [episode];
             return LearningDomainModel.Get(entity);
         }
-
-
     }
 }

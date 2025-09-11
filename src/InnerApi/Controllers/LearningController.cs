@@ -207,7 +207,7 @@ public class LearningController : ControllerBase
 
         var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel());
 
-        var result = await _commandDispatcher.Send<UpdateLearnerCommand, LearningUpdateChanges[]>(command);
+        var result = await _commandDispatcher.Send<UpdateLearnerCommand, UpdateLearnerResult>(command);
 
         return new OkObjectResult(result);
     }

@@ -5,9 +5,9 @@ using SFA.DAS.Learning.Enums;
 namespace SFA.DAS.Learning.Command.UpdateLearner;
 
 public class UpdateLearnerCommandHandler(ILogger<UpdateLearnerCommandHandler> logger, ILearningRepository learningRepository)
-    : ICommandHandler<UpdateLearnerCommand, LearningUpdateChanges[]>
+    : ICommandHandler<UpdateLearnerCommand, UpdateLearnerResult>
 {
-    public async Task<LearningUpdateChanges[]> Handle(UpdateLearnerCommand command, CancellationToken cancellationToken = default)
+    public async Task<UpdateLearnerResult> Handle(UpdateLearnerCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Handling UpdateLearnerCommand for learner with key {LearnerKey}", command.LearnerKey);
         var learning = await learningRepository.Get(command.LearnerKey);
@@ -22,13 +22,19 @@ public class UpdateLearnerCommandHandler(ILogger<UpdateLearnerCommandHandler> lo
         if (changes.Length == 0)
         {
             logger.LogInformation("No changes detected for learner with key {LearnerKey}", command.LearnerKey);
-            return [];
+            return new UpdateLearnerResult();
         }
 
         logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearnerKey, changes);
         await learningRepository.Update(learning);
 
         logger.LogInformation("Successfully updated learner with key {LearnerKey}", command.LearnerKey);
-        return changes;
+
+        return new UpdateLearnerResult
+        {
+            Changes = changes.ToList(),
+            //todo: better conversion here:
+            Prices = learning.LatestEpisode.EpisodePrices.Where(x => !x.IsDeleted).Select(x => new DataTransferObjects.EpisodePrice(x.Key, x.StartDate, x.EndDate, x.TrainingPrice, x.EndPointAssessmentPrice, x.TotalPrice, x.FundingBandMaximum)).ToList()
+        };
     }
 }

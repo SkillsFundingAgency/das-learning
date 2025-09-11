@@ -42,11 +42,11 @@ public class WhenUpdateLearner
     {
         // Arrange
         var learnerKey = _fixture.Create<Guid>();
-        var expectedResponse = _fixture.Create<List<LearningUpdateChanges>>().ToArray();
+        var expectedResponse = _fixture.Create<UpdateLearnerResult>();
         var request = _fixture.Create<UpdateLearnerRequest>();
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<UpdateLearnerCommand, LearningUpdateChanges[]>(It.IsAny<UpdateLearnerCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(It.IsAny<UpdateLearnerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
