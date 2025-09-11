@@ -399,17 +399,11 @@ components:
         uln:
           type: string
 
-    apprenticeshipLearning:
+    learning:
       type: object
       properties:
         trainingType:
           type: string
-          enum:
-          - apprenticeship
-          - shortApprenticeship
-          - foundationApprenticeship
-          - Bootcamp
-          - HTC
         uln:
           type: integer
         firstName:
@@ -472,12 +466,35 @@ components:
         - plannedOTJTrainingHours
         - isFlexiJob
 
+    apprenticeshipLearning:
+      description: This is the exact copy of a normal apprenticeship
+      allOf:
+      - $ref: "#/components/schemas/learning"
+      - type: object
+        properties:
+          trainingType:
+            type: string
+            enum:
+            - apprenticeship
+      
     foundationApprenticeshipLearning:
       description: This is the exact copy of a normal apprenticeship
       allOf:
-      - $ref: "#/components/schemas/apprenticeshipLearning"
-  
+      - $ref: "#/components/schemas/learning"
+      - type: object
+        properties:
+          trainingType:
+            type: string
+            enum:
+            - foundationApprenticeship
+
     shortApprenticeshipLearning:
       description: This is the exact copy of a normal apprenticeship
       allOf:
-      - $ref: "#/components/schemas/apprenticeshipLearning"
+      - $ref: "#/components/schemas/learning"
+      - type: object
+        properties:
+          trainingType:
+            type: string
+            enum:
+            - shortApprenticeship
