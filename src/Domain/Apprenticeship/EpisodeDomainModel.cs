@@ -189,12 +189,14 @@ public class EpisodeDomainModel
                 if (cost.TrainingPrice != existing.TrainingPrice)
                 {
                     existing.TrainingPrice = cost.TrainingPrice;
+                    existing.TotalPrice = (existing.TrainingPrice ?? 0) + (existing.EndPointAssessmentPrice ?? 0);
                     hasChanged = true;
                 }
 
                 if (cost.EpaoPrice != existing.EndPointAssessmentPrice)
                 {
                     existing.EndPointAssessmentPrice = cost.EpaoPrice;
+                    existing.TotalPrice = (existing.TrainingPrice ?? 0) + (existing.EndPointAssessmentPrice ?? 0);
                     hasChanged = true;
                 }
 
