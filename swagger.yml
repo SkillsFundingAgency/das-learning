@@ -244,9 +244,7 @@ components:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/pagedApprenticeships'
+            $ref: '#/components/schemas/pagedApprenticeships'
 
     okResponse:
       description: OK
@@ -317,24 +315,18 @@ components:
           type: string
           
     learningRecord:
-      type: object
-      properties:
-        learning:
-          oneOf:
-          - $ref: '#/components/schemas/apprenticeshipLearning'
-          - $ref: '#/components/schemas/foundationApprenticeshipLearning'
-          - $ref: '#/components/schemas/shortApprenticeshipLearning'
-          
+      oneOf:
+      - $ref: '#/components/schemas/apprenticeshipLearning'
+      - $ref: '#/components/schemas/foundationApprenticeshipLearning'
+      - $ref: '#/components/schemas/shortApprenticeshipLearning'
+      
     pagedLearning:
+      oneOf:
+        - $ref: '#/components/schemas/apprenticeshipLearning'
+        - $ref: '#/components/schemas/foundationApprenticeshipLearning'
+        - $ref: '#/components/schemas/shortApprenticeshipLearning'
       type: object
       properties:
-        learners:
-          type: array
-          items:
-              oneOf:
-                - $ref: '#/components/schemas/apprenticeshipLearning'
-                - $ref: '#/components/schemas/foundationApprenticeshipLearning'
-                - $ref: '#/components/schemas/shortApprenticeshipLearning'
         total:
           type: integer
           minimum: 0
@@ -398,6 +390,9 @@ components:
       properties:
         uln:
           type: string
+        learningKey:
+          type: string
+          format: uuid
 
     learning:
       type: object
