@@ -3,7 +3,6 @@ using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -106,37 +105,6 @@ public class EpisodeDomainModel
 
         _episodePrices.Add(newEpisodePrice);
         _entity.Prices.Add(newEpisodePrice.GetEntity());
-    }
-
-
-    internal void UpdatePricesForApprovedStartDateChange(StartDateChangeDomainModel startDateChangeRequest)
-    {
-        var latestPrice = LatestPrice;
-        DeletePricesEndingBeforeDate(startDateChangeRequest.ActualStartDate);
-        DeletePricesStartingAfterDate(startDateChangeRequest.PlannedEndDate);
-
-        if (ActiveEpisodePrices.Count == 0)
-        {
-            AddEpisodePrice(
-                startDateChangeRequest.ActualStartDate,
-                startDateChangeRequest.PlannedEndDate,
-                latestPrice.TotalPrice,
-                latestPrice.TrainingPrice,
-                latestPrice.EndPointAssessmentPrice,
-                latestPrice.FundingBandMaximum);
-        }
-        else
-        {
-            if (FirstPrice.StartDate != startDateChangeRequest.ActualStartDate)
-            {
-                FirstPrice.UpdateStartDate(startDateChangeRequest.ActualStartDate);
-            }
-
-            if (LatestPrice.EndDate != startDateChangeRequest.PlannedEndDate)
-            {
-                LatestPrice.UpdateEndDate(startDateChangeRequest.PlannedEndDate);
-            }
-        }
     }
 
     internal bool UpdatePricesIfChanged(List<Cost> costs)

@@ -152,68 +152,6 @@ public class LearningDomainModel : AggregateRoot
         return _entity;
     }
 
-    public void AddStartDateChange(
-        DateTime actualStartDate,
-        DateTime plannedEndDate,
-        string reason,
-        string? providerApprovedBy,
-        DateTime? providerApprovedDate,
-        string? employerApprovedBy,
-        DateTime? employerApprovedDate,
-        DateTime createdDate,
-        ChangeRequestStatus requestStatus,
-        ChangeInitiator? initiator)
-    {
-        if (_startDateChanges.Any(x => x.RequestStatus == ChangeRequestStatus.Created))
-        {
-            throw new InvalidOperationException("There is already a pending start date change for this apprenticeship.");
-        }
-
-        var startDateChange = StartDateChangeDomainModel.New(this.Key,
-            actualStartDate,
-            plannedEndDate,
-            reason,
-            providerApprovedBy,
-            providerApprovedDate,
-            employerApprovedBy,
-            employerApprovedDate,
-            createdDate,
-            requestStatus,
-            initiator);
-
-        _startDateChanges.Add(startDateChange);
-        _entity.StartDateChanges.Add(startDateChange.GetEntity());
-    }
-
-    public StartDateChangeDomainModel ApproveStartDateChange(string? userApprovedBy)
-    {
-        var pendingStartDateChange = _startDateChanges.SingleOrDefault(x => x.RequestStatus == ChangeRequestStatus.Created);
-        if(pendingStartDateChange == null)
-            throw new InvalidOperationException("There is no pending start date request to approve for this apprenticeship.");
-
-        var approver = pendingStartDateChange.GetApprover();
-        pendingStartDateChange.Approve(approver, userApprovedBy, DateTime.UtcNow);
-        LatestEpisode.UpdatePricesForApprovedStartDateChange(pendingStartDateChange);
-
-       return pendingStartDateChange;
-    }
-
-    public void RejectStartDateChange(string? reason)
-    {
-        if (PendingStartDateChange == null)
-            throw new InvalidOperationException("There is no pending start date request to reject for this apprenticeship.");
-
-        PendingStartDateChange.Reject(reason);
-    }
-
-    public void CancelPendingStartDateChange()
-    {
-        if (PendingStartDateChange == null)
-            throw new InvalidOperationException("There is no pending start date request to cancel for this apprenticeship.");
-
-        PendingStartDateChange.Cancel();
-    }
-
     public void SetPaymentsFrozen(bool newPaymentsFrozenStatus, string userId, DateTime changeDateTime, string? reason = null)
     {
         if (LatestEpisode.PaymentsFrozen == newPaymentsFrozenStatus)
@@ -244,9 +182,6 @@ public class LearningDomainModel : AggregateRoot
         _entity.WithdrawalRequests.Add(withdrawRequest.GetEntity());
 
         currentEpisode.Withdraw(userId, lastDateOfLearning);
-
-        if(PendingStartDateChange != null)
-            CancelPendingStartDateChange();
     }
 
     public LearningUpdateChanges[] UpdateLearnerDetails(LearnerUpdateModel updateModel)

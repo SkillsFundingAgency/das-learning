@@ -65,55 +65,6 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<int>().ToString(),
             _fixture.Create<string?>());
     }
-    public static void AddPendingStartDateChange(LearningDomainModel learning, ChangeInitiator changeInitiator, DateTime? startDate = null)
-    {
-        var start = startDate ?? _fixture.Create<DateTime>();
-        var end = start.AddDays(_fixture.Create<int>());
-        learning.AddStartDateChange(
-            start,
-            end,
-            _fixture.Create<string>(),
-            _fixture.Create<string>(),
-            _fixture.Create<DateTime>(),
-            null,
-            null,
-            _fixture.Create<DateTime>(),
-            ChangeRequestStatus.Created,
-            changeInitiator);
-    }
-
-    public static LearningDomainModel BuildApprenticeshipWithPendingStartDateChange(
-    bool pendingProviderApproval = false,
-    DateTime? originalStartDate = null,
-    DateTime? newStartDate = null,
-    DateTime? originalEndDate = null,
-    DateTime? newEndDate = null)
-    {
-        _fixture.Customize(new ApprenticeshipCustomization());
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
-        ApprenticeshipDomainModelTestHelper.AddEpisode(apprenticeship, originalStartDate, originalEndDate);
-
-        var startDateEntity = _fixture.Build<StartDateChange>().With(x => x.ActualStartDate, newStartDate ?? _fixture.Create<DateTime>()).Create();
-        startDateEntity.PlannedEndDate = newEndDate ?? startDateEntity.ActualStartDate.AddMonths(24);
-        var startDateChange = StartDateChangeDomainModel.Get(startDateEntity);
-
-        if (pendingProviderApproval)
-        {
-            apprenticeship.AddStartDateChange(startDateChange.ActualStartDate, startDateChange.PlannedEndDate, startDateChange.Reason,
-                null, null,
-                startDateChange.EmployerApprovedBy, startDateChange.EmployerApprovedDate, startDateChange.CreatedDate,
-                ChangeRequestStatus.Created, ChangeInitiator.Employer);
-        }
-        else
-        {
-            apprenticeship.AddStartDateChange(startDateChange.ActualStartDate, startDateChange.PlannedEndDate, startDateChange.Reason,
-                startDateChange.ProviderApprovedBy, startDateChange.ProviderApprovedDate,
-                null, null, startDateChange.CreatedDate,
-                ChangeRequestStatus.Created, ChangeInitiator.Provider);
-        }
-
-        return apprenticeship;
-    }
 
     public static bool DoEpisodeDetailsMatchDomainModel(LearningEvent e, LearningDomainModel learning)
     {
