@@ -33,8 +33,10 @@ public class UpdateLearnerCommandHandler(ILogger<UpdateLearnerCommandHandler> lo
         return new UpdateLearnerResult
         {
             Changes = changes.ToList(),
-            //todo: better conversion here:
-            Prices = learning.LatestEpisode.EpisodePrices.Where(x => !x.IsDeleted).Select(x => new DataTransferObjects.EpisodePrice(x.Key, x.StartDate, x.EndDate, x.TrainingPrice, x.EndPointAssessmentPrice, x.TotalPrice, x.FundingBandMaximum)).ToList()
+
+            Prices = learning.LatestEpisode.EpisodePrices.Where(x => !x.IsDeleted)
+                .Select(x => (UpdateLearnerResult.EpisodePrice)x)
+                .ToList()
         };
     }
 }
