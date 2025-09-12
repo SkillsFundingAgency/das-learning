@@ -32,10 +32,6 @@ public static class ApprenticeshipDomainModelTestHelper
             .SetValue(apprenticeship, new List<EpisodeDomainModel>());
 
         typeof(LearningDomainModel)
-            .GetField("_priceHistories", BindingFlags.NonPublic | BindingFlags.Instance)
-            .SetValue(apprenticeship, new List<PriceHistoryDomainModel>());
-
-        typeof(LearningDomainModel)
             .GetField("_startDateChanges", BindingFlags.NonPublic | BindingFlags.Instance)
             .SetValue(apprenticeship, new List<StartDateChangeDomainModel>());
 
@@ -69,41 +65,6 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<int>().ToString(),
             _fixture.Create<string?>());
     }
-
-    public static void AddPendingPriceChangeEmployerInitiated(LearningDomainModel learning, decimal totalPrice, DateTime? effectiveFromDate = null)
-    {
-        learning.AddPriceHistory(
-            null,
-            null,
-            totalPrice,
-            effectiveFromDate ?? _fixture.Create<DateTime>(),
-            _fixture.Create<DateTime>(),
-            ChangeRequestStatus.Created,
-            null,
-            _fixture.Create<string>(),
-            _fixture.Create<string>(),
-            null,
-            _fixture.Create<DateTime>(),
-            ChangeInitiator.Employer);
-    }
-
-    public static void AddPendingPriceChangeProviderInitiated(LearningDomainModel learning, DateTime? effectiveFromDate = null)
-    {
-        learning.AddPriceHistory(
-            _fixture.Create<decimal>(),
-            _fixture.Create<decimal>(),
-            _fixture.Create<decimal>(),
-            effectiveFromDate ?? _fixture.Create<DateTime>(),
-            _fixture.Create<DateTime>(),
-            ChangeRequestStatus.Created,
-            _fixture.Create<string>(),
-            _fixture.Create<string>(),
-            null,
-            _fixture.Create<DateTime>(),
-            null,
-            ChangeInitiator.Provider);
-    }
-
     public static void AddPendingStartDateChange(LearningDomainModel learning, ChangeInitiator changeInitiator, DateTime? startDate = null)
     {
         var start = startDate ?? _fixture.Create<DateTime>();

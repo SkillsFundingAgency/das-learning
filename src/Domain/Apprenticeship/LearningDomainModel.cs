@@ -10,7 +10,6 @@ public class LearningDomainModel : AggregateRoot
 {
     private readonly Learning.DataAccess.Entities.Learning.Learning _entity;
     private readonly List<EpisodeDomainModel> _episodes;
-    private readonly List<PriceHistoryDomainModel> _priceHistories;
     private readonly List<StartDateChangeDomainModel> _startDateChanges;
     private readonly List<FreezeRequestDomainModel> _freezeRequests;
     private readonly List<MathsAndEnglishDomainModel> _mathsAndEnglishCourses;
@@ -23,7 +22,6 @@ public class LearningDomainModel : AggregateRoot
     public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
-    public IReadOnlyCollection<PriceHistoryDomainModel> PriceHistories => new ReadOnlyCollection<PriceHistoryDomainModel>(_priceHistories);
     public IReadOnlyCollection<StartDateChangeDomainModel> StartDateChanges => new ReadOnlyCollection<StartDateChangeDomainModel>(_startDateChanges);
     public IReadOnlyCollection<FreezeRequestDomainModel> FreezeRequests => new ReadOnlyCollection<FreezeRequestDomainModel>(_freezeRequests);
     public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_mathsAndEnglishCourses);
@@ -71,7 +69,6 @@ public class LearningDomainModel : AggregateRoot
         }
     }
 
-    public PriceHistoryDomainModel? PendingPriceChange => _priceHistories.SingleOrDefault(x => x.PriceChangeRequestStatus == ChangeRequestStatus.Created);
     public StartDateChangeDomainModel? PendingStartDateChange => _startDateChanges.SingleOrDefault(x => x.RequestStatus == ChangeRequestStatus.Created);
 
     public int AgeAtStartOfApprenticeship => DateOfBirth.CalculateAgeAtDate(StartDate);
@@ -105,7 +102,6 @@ public class LearningDomainModel : AggregateRoot
     {
         _entity = entity;
         _episodes = entity.Episodes.Select(EpisodeDomainModel.Get).ToList();
-        _priceHistories = entity.PriceHistories.Select(PriceHistoryDomainModel.Get).ToList();
         _startDateChanges = entity.StartDateChanges.Select(StartDateChangeDomainModel.Get).ToList();
         _freezeRequests = entity.FreezeRequests.Select(FreezeRequestDomainModel.Get).ToList();
         _mathsAndEnglishCourses = entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList();
@@ -154,104 +150,6 @@ public class LearningDomainModel : AggregateRoot
     public Learning.DataAccess.Entities.Learning.Learning GetEntity()
     {
         return _entity;
-    }
-
-    public void AddPriceHistory(
-        decimal? trainingPrice,
-        decimal? assessmentPrice,
-        decimal totalPrice,
-        DateTime effectiveFromDate,
-        DateTime createdDate,
-        ChangeRequestStatus? priceChangeRequestStatus,
-        string? providerApprovedBy,
-        string changeReason,
-        string? employerApprovedBy,
-        DateTime? providerApprovedDate,
-        DateTime? employerApprovedDate,
-        ChangeInitiator? initiator)
-    {
-        if(_priceHistories.Any(x => x.PriceChangeRequestStatus == ChangeRequestStatus.Created))
-        {
-            throw new InvalidOperationException("There is already a pending price change for this apprenticeship.");
-        }
-
-        var priceHistory = PriceHistoryDomainModel.New(
-            Key,
-            trainingPrice,
-            assessmentPrice,
-            totalPrice,
-            effectiveFromDate,
-            createdDate,
-            priceChangeRequestStatus,
-            providerApprovedBy,
-            providerApprovedDate,
-            changeReason,
-            employerApprovedBy,
-            employerApprovedDate,
-            initiator);
-            
-        _priceHistories.Add(priceHistory);
-        _entity.PriceHistories.Add(priceHistory.GetEntity());
-    }
-
-    public PriceHistoryDomainModel ApprovePriceChange(string? userApprovedBy, decimal? trainingPrice, decimal? assessmentPrice, DateTime approvedDate)
-    {
-        var pendingPriceChange = _priceHistories.SingleOrDefault(x => x.PriceChangeRequestStatus == ChangeRequestStatus.Created);
-
-        if (pendingPriceChange == null)
-            throw new InvalidOperationException("There is no pending price change to approve for this apprenticeship.");
-
-        if (pendingPriceChange.Initiator == ChangeInitiator.Provider)
-        {
-            pendingPriceChange.ApproveByEmployer(userApprovedBy, approvedDate);
-            UpdatePrices(pendingPriceChange);
-        }
-        else
-        {
-            if (trainingPrice == null || assessmentPrice == null)
-                throw new InvalidOperationException("Both training and assessment prices must be provided when " +
-                                                    "approving an employer-initiated price change request.");
-
-            if (pendingPriceChange.TotalPrice != trainingPrice + assessmentPrice)
-                throw new InvalidOperationException($"The total price ({pendingPriceChange.TotalPrice}) for this " +
-                                                    $"employer-initiated price change request does not match the sum of the " +
-                                                    $"training price ({trainingPrice}) and the assessment price ({assessmentPrice}).");
-
-            pendingPriceChange.ApproveByProvider(userApprovedBy, approvedDate, trainingPrice.Value, assessmentPrice.Value);
-            UpdatePrices(pendingPriceChange);
-        }
-
-        return pendingPriceChange;
-    }
-
-    public PriceHistoryDomainModel ProviderAutoApprovePriceChange()
-    {
-        var pendingPriceChange = _priceHistories.SingleOrDefault(x => x.PriceChangeRequestStatus == ChangeRequestStatus.Created);
-
-        if (pendingPriceChange == null)
-            throw new InvalidOperationException("There is no pending price change request to approve");
-
-        if (pendingPriceChange.Initiator != ChangeInitiator.Provider)
-            throw new InvalidOperationException($"{nameof(ProviderAutoApprovePriceChange)} is only valid for provider-initiated changes");
-
-        pendingPriceChange.AutoApprove();
-        UpdatePrices(pendingPriceChange);
-        return pendingPriceChange;
-    }
-
-    public void CancelPendingPriceChange()
-    {
-        if (PendingPriceChange == null)
-            throw new InvalidOperationException("There is no pending price change request to cancel");
-
-        PendingPriceChange.Cancel();
-    }
-
-    public void RejectPendingPriceChange(string? reason)
-    {
-        if (PendingPriceChange == null)
-            throw new InvalidOperationException("There is no pending price change request to reject");
-        PendingPriceChange.Reject(reason);
     }
 
     public void AddStartDateChange(
@@ -347,27 +245,8 @@ public class LearningDomainModel : AggregateRoot
 
         currentEpisode.Withdraw(userId, lastDateOfLearning);
 
-        if (PendingPriceChange != null)
-            CancelPendingPriceChange();
-
         if(PendingStartDateChange != null)
             CancelPendingStartDateChange();
-
-    }
-
-    private void UpdatePrices(PriceHistoryDomainModel priceChangeRequest)
-    {
-        if (priceChangeRequest!.TrainingPrice == null || priceChangeRequest!.AssessmentPrice == null)
-            throw new InvalidOperationException("Both training and assessment prices must be recorded on the pending request in order to approve it.");
-
-        if (LatestPrice.StartDate == priceChangeRequest.EffectiveFromDate)
-        {
-            LatestPrice.UpdatePrice(priceChangeRequest.TrainingPrice.Value, priceChangeRequest.AssessmentPrice.Value, priceChangeRequest.TotalPrice);
-        }
-        else
-        {
-            LatestEpisode.UpdatePricesForApprovedPriceChange(priceChangeRequest);
-        }
     }
 
     public LearningUpdateChanges[] UpdateLearnerDetails(LearnerUpdateModel updateModel)

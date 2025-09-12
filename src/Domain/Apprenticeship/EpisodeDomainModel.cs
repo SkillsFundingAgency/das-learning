@@ -108,25 +108,6 @@ public class EpisodeDomainModel
         _entity.Prices.Add(newEpisodePrice.GetEntity());
     }
 
-    internal void UpdatePricesForApprovedPriceChange(PriceHistoryDomainModel priceChangeRequest)
-    {
-        var endDate = LatestPrice.EndDate;
-        var fundingBandMaximum = LatestPrice.FundingBandMaximum;
-        DeletePricesStartingAfterDate(priceChangeRequest.EffectiveFromDate);
-
-        var remainingPrices = _entity.Prices.Where(x => !x.IsDeleted).ToList();
-        var latestActivePrice = remainingPrices.MaxBy(x => x.StartDate);
-
-        var shouldSupersedePreviousPrice = latestActivePrice != null && latestActivePrice.StartDate < priceChangeRequest.EffectiveFromDate;
-
-        AddEpisodePrice(priceChangeRequest.EffectiveFromDate,
-            endDate,
-            priceChangeRequest.TotalPrice,
-            priceChangeRequest.TrainingPrice,
-            priceChangeRequest.AssessmentPrice,
-            fundingBandMaximum,
-            shouldSupersedePreviousPrice);
-    }
 
     internal void UpdatePricesForApprovedStartDateChange(StartDateChangeDomainModel startDateChangeRequest)
     {

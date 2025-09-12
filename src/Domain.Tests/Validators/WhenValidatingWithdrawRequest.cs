@@ -106,14 +106,12 @@ public class WhenValidatingWithdrawRequest
         var apprenticeship = ApprenticeshipDomainModelTestHelper.CreateBasicTestModel();
         ApprenticeshipDomainModelTestHelper.AddEpisode(apprenticeship, ukprn: ValidUkprn);
         ApprenticeshipDomainModelTestHelper.AddPendingStartDateChange(apprenticeship, ChangeInitiator.Employer, DateTime.UtcNow);
-        ApprenticeshipDomainModelTestHelper.AddPendingPriceChangeProviderInitiated(apprenticeship, DateTime.UtcNow);
 
         // Act
         apprenticeship.WithdrawApprenticeship("ProviderApprovedBy", DateTime.UtcNow, "Reason", DateTime.UtcNow);
 
         // Assert
         apprenticeship.PendingStartDateChange.Should().BeNull();
-        apprenticeship.PendingPriceChange.Should().BeNull();
     }
 
     [TestCase("Invalid reason, possible values are", "InvalidValue", "")]
