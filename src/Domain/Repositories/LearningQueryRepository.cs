@@ -30,7 +30,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
     {
         var query = DbContext.ApprenticeshipsDbSet
             .Include(x => x.Episodes)
-            .ThenInclude(x => x.Prices.Where(y => !y.IsDeleted))
+            .ThenInclude(x => x.Prices)
             .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))
             .Where(x => x.Episodes.Any(e =>
                 e.Prices.Any(p =>
@@ -78,7 +78,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             .FirstOrDefaultAsync(x => x.Key == learningKey);
 
         var episodes = apprenticeship?.Episodes.ToList();
-        var prices = episodes?.SelectMany(x => x.Prices).Where(x => !x.IsDeleted).ToList();
+        var prices = episodes?.SelectMany(x => x.Prices).ToList();
 
         var latestPrice = prices?.MaxBy(x => x.StartDate);
         if (latestPrice == null)
@@ -86,7 +86,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             return null;
         }
 
-        var latestEpisode = episodes?.MaxBy(x => x.Prices.Where(x => !x.IsDeleted).Select(x => x.StartDate));
+        var latestEpisode = episodes?.MaxBy(x => x.Prices.Select(x => x.StartDate));
         if (latestEpisode == null)
         {
             return null;
@@ -119,7 +119,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             .FirstOrDefaultAsync(x => x.Key == learningKey);
 
         var episodes = apprenticeship?.Episodes.ToList();
-        var prices = episodes?.SelectMany(x => x.Prices).Where(x => !x.IsDeleted).ToList();
+        var prices = episodes?.SelectMany(x => x.Prices).ToList();
 
         var latestPrice = prices?.MaxBy(x => x.StartDate);
         if (latestPrice == null)
@@ -127,7 +127,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             return null;
         }
 
-        var latestEpisode = episodes?.MaxBy(x => x.Prices.Where(y => !y.IsDeleted).Max(y => y.StartDate));
+        var latestEpisode = episodes?.MaxBy(x => x.Prices.Max(y => y.StartDate));
         if (latestEpisode == null)
         {
             return null;
@@ -155,127 +155,12 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             };
     }
 
-    public async Task<PendingPriceChange?> GetPendingPriceChange(Guid learningKey)
-    {
-        logger.LogInformation("Getting pending price change for apprenticeship {learningKey}", learningKey);
-
-        PendingPriceChange? pendingPriceChange = null;
-
-        try
-        {
-            var apprenticeship = await DbContext.Apprenticeships
-                .Include(x => x.PriceHistories)
-                .Include(x => x.Episodes).ThenInclude(x => x.Prices)
-                .Where(x => x.Key == learningKey && x.PriceHistories.Any(y => y.PriceChangeRequestStatus == ChangeRequestStatus.Created))
-                .SingleOrDefaultAsync();
-
-            var episodes = apprenticeship?.Episodes.ToList();
-            var prices = episodes?.SelectMany(x => x.Prices).Where(x => !x.IsDeleted).ToList();
-
-            var latestPrice = prices?.MaxBy(x => x.StartDate);
-            if (latestPrice == null)
-            {
-                return null;
-            }
-
-            var latestEpisode = episodes?.MaxBy(x => x.Prices.Where(y => !y.IsDeleted).Max(y => y.StartDate));
-            if (latestEpisode == null)
-            {
-                return null;
-            }
-
-            var priceHistory = apprenticeship!.PriceHistories.Single(y => y.PriceChangeRequestStatus == ChangeRequestStatus.Created);
-
-            return new PendingPriceChange
-            {
-                FirstName = apprenticeship!.FirstName,
-                LastName = apprenticeship.LastName,
-                OriginalTrainingPrice = latestPrice.TrainingPrice,
-                OriginalAssessmentPrice = latestPrice.EndPointAssessmentPrice,
-                OriginalTotalPrice = latestPrice.TotalPrice,
-                PendingTrainingPrice = priceHistory.TrainingPrice,
-                PendingAssessmentPrice = priceHistory.AssessmentPrice,
-                PendingTotalPrice = priceHistory.TotalPrice,
-                EffectiveFrom = priceHistory.EffectiveFromDate,
-                Reason = priceHistory.ChangeReason,
-                Ukprn = latestEpisode.Ukprn,
-                ProviderApprovedDate = priceHistory.ProviderApprovedDate,
-                EmployerApprovedDate = priceHistory.EmployerApprovedDate,
-                AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
-                Initiator = priceHistory.Initiator.ToString()
-            };
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error getting pending price change for apprenticeship {learningKey}", learningKey);
-        }
-
-        return pendingPriceChange;
-    }
-
+    
     public async Task<Guid?> GetKey(string apprenticeshipHashedId)
     {
         var apprenticeship = await DbContext.Apprenticeships.FirstOrDefaultAsync(x =>
             x.ApprenticeshipHashedId == apprenticeshipHashedId);
         return apprenticeship?.Key;
-    }
-
-    public async Task<PendingStartDateChange?> GetPendingStartDateChange(Guid learningKey)
-    {
-        logger.LogInformation("Getting pending start date change for apprenticeship {learningKey}", learningKey);
-
-        PendingStartDateChange? pendingStartDateChange = null;
-
-        try
-        {
-            var apprenticeship = await DbContext.Apprenticeships
-                .Include(x => x.StartDateChanges)
-                .Include(x => x.Episodes).ThenInclude(x => x.Prices)
-                .Where(x => x.Key == learningKey && x.StartDateChanges.Any(y => y.RequestStatus == ChangeRequestStatus.Created))
-                .SingleOrDefaultAsync();
-            var episodes = apprenticeship?.Episodes.ToList();
-            var prices = episodes?.SelectMany(x => x.Prices).Where(x => !x.IsDeleted).ToList();
-
-            var latestPrice = prices?.MaxBy(x => x.StartDate);
-            if (latestPrice == null)
-            {
-                return null;
-            }
-
-            var latestEpisode = episodes?.MaxBy(x => x.Prices.Where(x => !x.IsDeleted).Select(x => x.StartDate));
-            if (latestEpisode == null)
-            {
-                return null;
-            }
-
-            var firstPrice = prices?.MinBy(x => x.StartDate);
-            if (firstPrice == null)
-            {
-                return null;
-            }
-
-            var startDateChange = apprenticeship!.StartDateChanges.Single(y => y.RequestStatus == ChangeRequestStatus.Created);
-
-            return new PendingStartDateChange
-            {
-                Reason = startDateChange.Reason,
-                Ukprn = latestEpisode.Ukprn,
-                ProviderApprovedDate = startDateChange.ProviderApprovedDate,
-                EmployerApprovedDate = startDateChange.EmployerApprovedDate,
-                AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
-                Initiator = startDateChange.Initiator.ToString(),
-                OriginalActualStartDate = firstPrice.StartDate,
-                PendingActualStartDate = startDateChange.ActualStartDate,
-                OriginalPlannedEndDate = latestPrice.EndDate,
-                PendingPlannedEndDate = startDateChange.PlannedEndDate
-            };
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error getting pending start date change for apprenticeship {learningKey}", learningKey);
-        }
-
-        return pendingStartDateChange;
     }
 
     public async Task<PaymentStatus?> GetPaymentStatus(Guid learningKey)
@@ -290,7 +175,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 .FirstOrDefaultAsync(x => x.Key == learningKey);
 
             var episodes = apprenticeship?.Episodes.ToList();
-            var latestEpisode = episodes?.MaxBy(x => x.Prices.Where(x => !x.IsDeleted).Select(x => x.StartDate));
+            var latestEpisode = episodes?.MaxBy(x => x.Prices.Select(x => x.StartDate));
             if (latestEpisode == null)
             {
                 return null;
@@ -329,7 +214,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
 
             var apprenticeships = await DbContext.Apprenticeships
                 .Include(x => x.Episodes)
-                .ThenInclude(x => x.Prices.Where(y => !y.IsDeleted))
+                .ThenInclude(x => x.Prices)
                 .Include(x => x.WithdrawalRequests)
                 .Where(x => x.WithdrawalRequests == null || !x.WithdrawalRequests.Any(y => y.Reason == withdrawFromStartReason || y.Reason == withdrawFromPrivateBeta))
                 .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))

@@ -43,7 +43,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             // Arrange
             await SetUpApprenticeshipRepository();
             var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey, false);
+            await _dbContext.AddApprenticeship(apprenticeshipKey);
             var apprenticeship = await _dbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .SingleAsync(x => x.Key == apprenticeshipKey);
@@ -65,7 +65,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             // Arrange
             await SetUpApprenticeshipRepository();
             var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey, false);
+            await _dbContext.AddApprenticeship(apprenticeshipKey);
             var apprenticeship = await _dbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .SingleAsync(x => x.Key == apprenticeshipKey);
@@ -86,7 +86,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             // Arrange
             await SetUpApprenticeshipRepository();
             var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey, false);
+            await _dbContext.AddApprenticeship(apprenticeshipKey);
             var apprenticeship = await _dbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .ThenInclude(y => y.Prices)

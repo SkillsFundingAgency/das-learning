@@ -60,8 +60,6 @@
     <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="PriceHistory.sql" />
-    <Build Include="StartDateChange.sql" />
     <Build Include="FreezeRequest.sql" />
     <Build Include="Episode.sql" />
     <Build Include="EpisodePrice.sql" />

@@ -231,7 +231,6 @@ public class WhenGettingApprenticeshipsWithEpisodes
             .With(x => x.EpisodeKey, episodeKey)
             .With(x => x.StartDate, start)
             .With(x => x.EndDate, end)
-            .With(x => x.IsDeleted, false)
             .Create();
     }
 

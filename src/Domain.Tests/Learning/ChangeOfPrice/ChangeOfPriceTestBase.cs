@@ -45,8 +45,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice
                     TrainingPrice = cost.TrainingPrice,
                     EndPointAssessmentPrice = cost.EpaoPrice,
                     TotalPrice = cost.TotalPrice,
-                    FundingBandMaximum = fundingBandMaximum,
-                    IsDeleted = false
+                    FundingBandMaximum = fundingBandMaximum
                 });
             }
 

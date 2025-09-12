@@ -23,7 +23,7 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
         public void GetEpisode_ShouldReturnLatestActiveEpisode_WhenActiveEpisodeExists()
         {
             // Arrange
-            var activeEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-1), isDeleted: false);
+            var activeEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-1));
             var apprenticeship = CreateApprenticeshipWithEpisodes(activeEpisode);
 
             // Act
@@ -37,7 +37,7 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
         public void GetEpisode_ShouldReturnLatestEpisode_WhenNoActiveEpisodeExists()
         {
             // Arrange
-            var latestEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-2), isDeleted: true);
+            var latestEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-2));
             var apprenticeship = CreateApprenticeshipWithEpisodes(latestEpisode);
 
             // Act
@@ -51,8 +51,8 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
         public void GetEpisode_ShouldReturnActiveEpisodeAmongMultiple_WhenOneIsActive()
         {
             // Arrange
-            var deletedEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-2), isDeleted: true);
-            var activeEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-1), isDeleted: false);
+            var deletedEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-2));
+            var activeEpisode = CreateEpisode(startDate: DateTime.Today.AddMonths(-1));
             var apprenticeship = CreateApprenticeshipWithEpisodes(deletedEpisode, activeEpisode);
 
             // Act
@@ -84,7 +84,7 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
             var apprenticeship = _fixture.Build<Entities.Learning.Learning>()
                 .With(a => a.DateOfBirth, DateTime.Parse(dob))
                 .Create();
-            apprenticeship.Episodes.Add(CreateEpisode(startDate: DateTime.Parse(startDate), isDeleted: false));
+            apprenticeship.Episodes.Add(CreateEpisode(startDate: DateTime.Parse(startDate)));
 
             // Act
             var result = apprenticeship.GetAgeAtStartOfApprenticeship();
@@ -97,8 +97,8 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
         public void GetStartDate_ShouldReturnEarliestStartDate_WithNonDeletedPrices()
         {
             // Arrange
-            var episode1 = CreateEpisode(startDate: new DateTime(2021, 1, 1), isDeleted: false);
-            var episode2 = CreateEpisode(startDate: new DateTime(2020, 1, 1), isDeleted: false);
+            var episode1 = CreateEpisode(startDate: new DateTime(2021, 1, 1));
+            var episode2 = CreateEpisode(startDate: new DateTime(2020, 1, 1));
             var apprenticeship = CreateApprenticeshipWithEpisodes(episode1, episode2);
 
             // Act
@@ -112,8 +112,8 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
         public void GetStartDate_ShouldIgnoreDeletedPrices()
         {
             // Arrange
-            var episodeWithDeletedPrice = CreateEpisode(startDate: new DateTime(2021, 1, 1), isDeleted: true);
-            var episodeWithActivePrice = CreateEpisode(startDate: new DateTime(2020, 1, 1), isDeleted: false);
+            var episodeWithDeletedPrice = CreateEpisode(startDate: new DateTime(2021, 1, 1));
+            var episodeWithActivePrice = CreateEpisode(startDate: new DateTime(2020, 1, 1));
             var apprenticeship = CreateApprenticeshipWithEpisodes(episodeWithDeletedPrice, episodeWithActivePrice);
 
             // Act
@@ -127,8 +127,8 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
         public void GetPlannedEndDate_ShouldReturnLatestEndDate()
         {
             // Arrange
-            var episode1 = CreateEpisode(endDate: new DateTime(2022, 12, 1), isDeleted: false);
-            var episode2 = CreateEpisode(endDate: new DateTime(2023, 5, 1), isDeleted: false);
+            var episode1 = CreateEpisode(endDate: new DateTime(2022, 12, 1));
+            var episode2 = CreateEpisode(endDate: new DateTime(2023, 5, 1));
             var apprenticeship = CreateApprenticeshipWithEpisodes(episode1, episode2);
 
             // Act
@@ -136,21 +136,6 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
 
             // Assert
             result.Should().Be(new DateTime(2023, 5, 1));
-        }
-
-        [Test]
-        public void GetPlannedEndDate_ShouldIgnoreDeletedPrices()
-        {
-            // Arrange
-            var episodeWithDeletedPrice = CreateEpisode(endDate: new DateTime(2023, 5, 1), isDeleted: true);
-            var episodeWithActivePrice = CreateEpisode(endDate: new DateTime(2022, 12, 1), isDeleted: false);
-            var apprenticeship = CreateApprenticeshipWithEpisodes(episodeWithDeletedPrice, episodeWithActivePrice);
-
-            // Act
-            var result = apprenticeship.GetPlannedEndDate();
-
-            // Assert
-            result.Should().Be(new DateTime(2022, 12, 1));
         }
 
         private Entities.Learning.Learning CreateApprenticeshipWithEpisodes(params Episode[] episodes)
@@ -161,7 +146,7 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
             return apprenticeship;
         }
 
-        private Episode CreateEpisode(DateTime? startDate = null, DateTime? endDate = null, bool isDeleted = false)
+        private Episode CreateEpisode(DateTime? startDate = null, DateTime? endDate = null)
         {
             return _fixture.Build<Episode>()
                 .With(e => e.Prices, new List<EpisodePrice>
@@ -169,8 +154,7 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
                     new EpisodePrice
                     {
                         StartDate = startDate ?? DateTime.Today,
-                        EndDate = endDate ?? DateTime.Today.AddYears(1),
-                        IsDeleted = isDeleted
+                        EndDate = endDate ?? DateTime.Today.AddYears(1)
                     }
                 })
                 .Create();

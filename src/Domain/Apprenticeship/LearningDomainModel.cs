@@ -10,7 +10,6 @@ public class LearningDomainModel : AggregateRoot
 {
     private readonly Learning.DataAccess.Entities.Learning.Learning _entity;
     private readonly List<EpisodeDomainModel> _episodes;
-    private readonly List<StartDateChangeDomainModel> _startDateChanges;
     private readonly List<FreezeRequestDomainModel> _freezeRequests;
     private readonly List<MathsAndEnglishDomainModel> _mathsAndEnglishCourses;
 
@@ -22,7 +21,6 @@ public class LearningDomainModel : AggregateRoot
     public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
-    public IReadOnlyCollection<StartDateChangeDomainModel> StartDateChanges => new ReadOnlyCollection<StartDateChangeDomainModel>(_startDateChanges);
     public IReadOnlyCollection<FreezeRequestDomainModel> FreezeRequests => new ReadOnlyCollection<FreezeRequestDomainModel>(_freezeRequests);
     public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_mathsAndEnglishCourses);
     public DateTime StartDate
@@ -41,7 +39,7 @@ public class LearningDomainModel : AggregateRoot
 
     public DateTime? EndDate => AllPrices.MaxBy(x => x.StartDate)?.EndDate;
     public IEnumerable<EpisodePriceDomainModel> AllPrices => 
-        _episodes.SelectMany(x => x.EpisodePrices).Where(x => !x.IsDeleted);
+        _episodes.SelectMany(x => x.EpisodePrices);
     public EpisodePriceDomainModel LatestPrice
     {
         get
@@ -59,7 +57,7 @@ public class LearningDomainModel : AggregateRoot
     {
         get
         {
-            var latestEpisode = _episodes.MaxBy(x => x.EpisodePrices.Where(y => !y.IsDeleted).Max(y => y.StartDate));
+            var latestEpisode = _episodes.MaxBy(x => x.EpisodePrices.Max(y => y.StartDate));
             if (latestEpisode == null)
             {
                 throw new InvalidOperationException($"Unexpected error. {nameof(LatestEpisode)} could not be found in the {nameof(LearningDomainModel)}.");
@@ -68,8 +66,6 @@ public class LearningDomainModel : AggregateRoot
             return latestEpisode;
         }
     }
-
-    public StartDateChangeDomainModel? PendingStartDateChange => _startDateChanges.SingleOrDefault(x => x.RequestStatus == ChangeRequestStatus.Created);
 
     public int AgeAtStartOfApprenticeship => DateOfBirth.CalculateAgeAtDate(StartDate);
 
@@ -102,7 +98,6 @@ public class LearningDomainModel : AggregateRoot
     {
         _entity = entity;
         _episodes = entity.Episodes.Select(EpisodeDomainModel.Get).ToList();
-        _startDateChanges = entity.StartDateChanges.Select(StartDateChangeDomainModel.Get).ToList();
         _freezeRequests = entity.FreezeRequests.Select(FreezeRequestDomainModel.Get).ToList();
         _mathsAndEnglishCourses = entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList();
     }

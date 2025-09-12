@@ -32,10 +32,6 @@ public static class ApprenticeshipDomainModelTestHelper
             .SetValue(apprenticeship, new List<EpisodeDomainModel>());
 
         typeof(LearningDomainModel)
-            .GetField("_startDateChanges", BindingFlags.NonPublic | BindingFlags.Instance)
-            .SetValue(apprenticeship, new List<StartDateChangeDomainModel>());
-
-        typeof(LearningDomainModel)
             .GetField("_freezeRequests", BindingFlags.NonPublic | BindingFlags.Instance)
             .SetValue(apprenticeship, new List<FreezeRequestDomainModel>());
 

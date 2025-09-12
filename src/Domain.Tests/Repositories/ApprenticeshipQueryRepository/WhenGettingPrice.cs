@@ -56,17 +56,14 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             var episodePrice1 = _fixture.Build<EpisodePrice>()
                 .With(x => x.EpisodeKey, episodeKey)
                 .With(x => x.StartDate, new DateTime(2021, 3, 1))
-                .With(x => x.IsDeleted, false)
                 .Create();
             var episodePrice2 = _fixture.Build<EpisodePrice>()
                 .With(x => x.EpisodeKey, episodeKey)
                 .With(x => x.StartDate, new DateTime(2021, 8, 18))
-                .With(x => x.IsDeleted, false)
                 .Create();
             var episodePrice3 = _fixture.Build<EpisodePrice>()
                 .With(x => x.EpisodeKey, episodeKey)
                 .With(x => x.StartDate, new DateTime(2022, 8, 18))
-                .With(x => x.IsDeleted, true)
                 .Create();
 
             var episode = _fixture.Build<Episode>()

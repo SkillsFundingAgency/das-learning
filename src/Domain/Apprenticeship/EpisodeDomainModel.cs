@@ -1,14 +1,16 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
 using System.Collections.ObjectModel;
+using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
 public class EpisodeDomainModel
 {
-    private readonly Episode _entity;
+    private readonly DataAccess.Entities.Learning.Episode _entity;
     private readonly List<EpisodePriceDomainModel> _episodePrices;
     public Guid Key => _entity.Key;
     public long Ukprn => _entity.Ukprn;
@@ -25,12 +27,12 @@ public class EpisodeDomainModel
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
-    public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.Where(x => !x.IsDeleted).ToList();
+    public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
     public EpisodePriceDomainModel LatestPrice
     {
         get
         {
-            var latestPrice = _episodePrices.Where(y => !y.IsDeleted).MaxBy(x => x.StartDate);
+            var latestPrice = _episodePrices.MaxBy(x => x.StartDate);
             if (latestPrice == null)
             {
                 throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
@@ -44,7 +46,7 @@ public class EpisodeDomainModel
     {
         get
         {
-            var firstPrice = _episodePrices.Where(y => !y.IsDeleted).MinBy(x => x.StartDate);
+            var firstPrice = _episodePrices.MinBy(x => x.StartDate);
             if (firstPrice == null)
             {
                 throw new InvalidOperationException($"Unexpected error. {nameof(FirstPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
@@ -87,8 +89,7 @@ public class EpisodeDomainModel
         decimal totalPrice,
         decimal? trainingPrice,
         decimal? endpointAssessmentPrice,
-        int fundingBandMaximum,
-        bool shouldSupersedePreviousPrice = false)
+        int fundingBandMaximum)
     {
         var newEpisodePrice = EpisodePriceDomainModel.New(
             startDate,
@@ -97,11 +98,6 @@ public class EpisodeDomainModel
             trainingPrice,
             endpointAssessmentPrice,
             fundingBandMaximum);
-
-        if (shouldSupersedePreviousPrice)
-        {
-            LatestPrice.UpdateEndDate(newEpisodePrice.StartDate.AddDays(-1));
-        }
 
         _episodePrices.Add(newEpisodePrice);
         _entity.Prices.Add(newEpisodePrice.GetEntity());
@@ -112,7 +108,6 @@ public class EpisodeDomainModel
         var hasChanged = false;
 
         var existingPrices = _entity.Prices
-            .Where(x => !x.IsDeleted)
             .OrderBy(x => x.StartDate)
             .ToList();
 
@@ -174,21 +169,18 @@ public class EpisodeDomainModel
                 cost.TotalPrice,
                 cost.TrainingPrice,
                 cost.EpaoPrice,
-                currentFundingBandMaximum,
-                false);
+                currentFundingBandMaximum);
 
             matchedStartDates.Add(cost.FromDate);
             hasChanged = true;
         }
 
-        // Soft-delete unmatched existing prices
-        foreach (var price in _entity.Prices.Where(x => !x.IsDeleted))
+        // Delete unmatched existing prices
+        if (_entity.Prices.Any(x => !matchedStartDates.Contains(x.StartDate)))
         {
-            if (!matchedStartDates.Contains(price.StartDate))
-            {
-                price.IsDeleted = true;
-                hasChanged = true;
-            }
+            _entity.Prices.RemoveAll(x => !matchedStartDates.Contains(x.StartDate));
+            _episodePrices.RemoveAll(x => !matchedStartDates.Contains(x.StartDate));
+            hasChanged = true;
         }
 
         return hasChanged;
@@ -241,23 +233,6 @@ public class EpisodeDomainModel
     {
         return new EpisodeDomainModel(entity);
     }
-
-    private void DeletePricesStartingAfterDate(DateTime date)
-    {
-        foreach (var price in _entity.Prices.Where(x => x.StartDate > date && !x.IsDeleted))
-        {
-            price.IsDeleted = true;
-        }
-    }
-
-    private void DeletePricesEndingBeforeDate(DateTime date)
-    {
-        foreach (var price in _entity.Prices.Where(x => x.EndDate < date && !x.IsDeleted))
-        {
-            price.IsDeleted = true;
-        }
-    }
-
     internal void Withdraw(string userId, DateTime lastDateOfLearning)
     {
         _entity.LearningStatus = LearnerStatus.Withdrawn.ToString();

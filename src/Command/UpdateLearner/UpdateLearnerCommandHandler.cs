@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Enums;
-
 namespace SFA.DAS.Learning.Command.UpdateLearner;
 
 public class UpdateLearnerCommandHandler(ILogger<UpdateLearnerCommandHandler> logger, ILearningRepository learningRepository)
@@ -34,7 +32,7 @@ public class UpdateLearnerCommandHandler(ILogger<UpdateLearnerCommandHandler> lo
         {
             Changes = changes.ToList(),
 
-            Prices = learning.LatestEpisode.EpisodePrices.Where(x => !x.IsDeleted)
+            Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                 .ToList()
         };

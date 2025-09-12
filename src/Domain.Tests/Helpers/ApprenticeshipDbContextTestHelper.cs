@@ -27,7 +27,6 @@ public static class ApprenticeshipDbContextTestHelper
     public static async Task<DataAccess.Entities.Learning.Learning> AddApprenticeship(
         this LearningDataContext dbContext, 
         Guid apprenticeshipKey, 
-        bool addPendingPriceHistoryRequest,
         long? ukprn = null,
         string? initiator = null,
         long? approvalsApprenticeshipId = null,
@@ -42,7 +41,6 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.EpisodeKey, episodeKey)
             .With(x => x.StartDate, startDate ?? _fixture.Create<DateTime>())
             .With(x => x.EndDate, endDate ?? _fixture.Create<DateTime>())
-            .With(x => x.IsDeleted, false)
             .Create();
 
         var episode = _fixture.Build<Episode>()
@@ -59,32 +57,6 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.ApprovalsApprenticeshipId, approvalsApprenticeshipId ?? _fixture.Create<long>())
             .With(x => x.Episodes, new List<Episode>() { episode })
             .Create();
-
-        if (addPendingPriceHistoryRequest)
-        {
-            var providerApprovedDate = initiator == "Provider" ? _fixture.Create<DateTime>() : (DateTime?)null;
-            var employerApprovedDate = initiator == "Employer" ? _fixture.Create<DateTime>() : (DateTime?)null;
-
-            apprenticeship.PriceHistories = new List<PriceHistory>()
-            {
-                new()
-                {
-                    Key = _fixture.Create<Guid>(),
-                    LearningKey = apprenticeshipKey,
-                    PriceChangeRequestStatus = ChangeRequestStatus.Created,
-                    TrainingPrice = 10000,
-                    AssessmentPrice = 3000,
-                    TotalPrice = 13000,
-                    EffectiveFromDate = _fixture.Create<DateTime>(),
-                    ChangeReason = "testReason",
-                    ProviderApprovedDate = providerApprovedDate,
-                    EmployerApprovedDate = employerApprovedDate,
-                    ProviderApprovedBy = initiator == "Provider" ? "Mr Provider" : null,
-                    EmployerApprovedBy = initiator == "Employer" ? "Mr Employer" : null,
-                    Initiator = initiator == "Employer" ? ChangeInitiator.Employer : ChangeInitiator.Provider
-                }
-            };
-        }
 
         if (addWithdrawalRequest)
         {

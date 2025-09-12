@@ -119,7 +119,6 @@ public class WhenUpdatingLearningSupport
 
         episode.Prices.Clear();
         episode.Prices.Add(_fixture.Build<EpisodePrice>()
-            .With(x => x.IsDeleted, false)
             .Create());
 
         entity.Episodes = new List<DataAccess.Entities.Learning.Episode> { episode };

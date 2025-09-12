@@ -32,7 +32,7 @@ public static class LearnerUpdateModelHelper
             }).ToList(),
             OnProgrammeDetails = new OnProgrammeDetails
             {
-                Costs = learning.GetEpisode().Prices.Where(x => !x.IsDeleted).Select(x => new Cost
+                Costs = learning.GetEpisode().Prices.Select(x => new Cost
                 {
                     FromDate = x.StartDate,
                     TrainingPrice = Convert.ToInt32(x.TrainingPrice.Value),

@@ -44,7 +44,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice
 
             //Assert
             var prices = _learning.LatestEpisode.EpisodePrices
-                .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.StartDate)
                 .ToList();
 

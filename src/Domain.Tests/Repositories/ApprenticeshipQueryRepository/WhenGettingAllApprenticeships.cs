@@ -38,10 +38,10 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             // Arrange
             var ukprn = _fixture.Create<long>();
             SetUpApprenticeshipQueryRepository();
-            var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.DAS);
-            var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false);
-            var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.SLD);
-            var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.DAS);
+            var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+            var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
+            var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
+            var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
 
             // Act
             var result = await _sut.GetAll(ukprn, null);
@@ -61,10 +61,10 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             // Arrange
             var ukprn = _fixture.Create<long>();
             SetUpApprenticeshipQueryRepository();
-            var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.DAS);
-            var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false);
-            var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.SLD);
-            var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.DAS);
+            var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+            var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
+            var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
+            var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
 
             // Act
             var result = await _sut.GetAll(ukprn, FundingPlatform.SLD);
@@ -83,10 +83,10 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             // Arrange
             var ukprn = _fixture.Create<long>();
             SetUpApprenticeshipQueryRepository();
-            var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.DAS);
-            var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false);
-            var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.SLD);
-            var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, ukprn, fundingPlatform: FundingPlatform.DAS);
+            var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+            var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
+            var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
+            var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
 
             // Act
             var result = await _sut.GetAll(ukprn, FundingPlatform.DAS);

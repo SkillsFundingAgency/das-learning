@@ -6,8 +6,6 @@ public class Learning
 {
 	public Learning()
 	{
-		PriceHistories = new List<PriceHistory>();
-		StartDateChanges = new List<StartDateChange>();
 		FreezeRequests = new List<FreezeRequest>();
         Episodes = new List<Episode>();
         WithdrawalRequests = new List<WithdrawalRequest>();
@@ -22,8 +20,6 @@ public class Learning
 	public string LastName { get; set; } = null!;
 	public DateTime DateOfBirth { get; set; }
 	public string ApprenticeshipHashedId { get; set; } = null!;
-    public List<PriceHistory> PriceHistories { get; set; }
-    public List<StartDateChange> StartDateChanges { get; set; }
     public List<FreezeRequest> FreezeRequests { get; set; }
     public List<Episode> Episodes { get; set; }
     public List<WithdrawalRequest> WithdrawalRequests { get; set; }

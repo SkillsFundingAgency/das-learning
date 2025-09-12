@@ -52,7 +52,7 @@ public class WhenGettingLearnerStatus
         SetUpApprenticeshipQueryRepository();
         var apprenticeshipKey = _fixture.Create<Guid>();
 
-        var apprenticeship = await _dbContext.AddApprenticeship(apprenticeshipKey, false, learnerStatus: LearnerStatus.Active);
+        var apprenticeship = await _dbContext.AddApprenticeship(apprenticeshipKey, learnerStatus: LearnerStatus.Active);
 
         // Act
         var result = await _sut.GetLearnerStatus(apprenticeshipKey);
@@ -69,7 +69,7 @@ public class WhenGettingLearnerStatus
         SetUpApprenticeshipQueryRepository();
         var apprenticeshipKey = _fixture.Create<Guid>();
 
-        var apprenticeship = await _dbContext.AddApprenticeship(apprenticeshipKey, false, learnerStatus: LearnerStatus.Withdrawn, addWithdrawalRequest: true);
+        var apprenticeship = await _dbContext.AddApprenticeship(apprenticeshipKey, learnerStatus: LearnerStatus.Withdrawn, addWithdrawalRequest: true);
 
         // Act
         var result = await _sut.GetLearnerStatus(apprenticeshipKey);

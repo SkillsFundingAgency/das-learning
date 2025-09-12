@@ -46,7 +46,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice
             _result.Should().Contain(LearningUpdateChanges.Prices);
 
             var prices = _learning.LatestEpisode.EpisodePrices
-                .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.StartDate)
                 .ToList();
 
@@ -69,7 +68,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice
             _result.Should().Contain(LearningUpdateChanges.Prices);
 
             var price = _learning.LatestEpisode.EpisodePrices
-                .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.StartDate)
                 .Single();
 
@@ -91,7 +89,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice
             _result.Should().Contain(LearningUpdateChanges.Prices);
 
             var price = _learning.LatestEpisode.EpisodePrices
-                .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.StartDate)
                 .Single();
 
@@ -113,7 +110,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice
             _result.Should().Contain(LearningUpdateChanges.Prices);
 
             var price = _learning.LatestEpisode.EpisodePrices
-                .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.StartDate)
                 .Single();
 

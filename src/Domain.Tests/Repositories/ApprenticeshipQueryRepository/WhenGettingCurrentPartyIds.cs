@@ -51,7 +51,7 @@ public class WhenGettingCurrentPartyIds
         SetUpApprenticeshipQueryRepository();
         var apprenticeshipKey = _fixture.Create<Guid>();
 
-        var apprenticeship = await _dbContext.AddApprenticeship(apprenticeshipKey, false);
+        var apprenticeship = await _dbContext.AddApprenticeship(apprenticeshipKey);
         var episode = apprenticeship.Episodes.Single();
 
         // Act

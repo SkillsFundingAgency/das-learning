@@ -52,12 +52,12 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             var apprenticeshipKey = _fixture.Create<Guid>();
             SetUpApprenticeshipQueryRepository();
 
-            await _dbContext.AddApprenticeship(apprenticeshipKey, false);
+            await _dbContext.AddApprenticeship(apprenticeshipKey);
             var apprenticeship = _dbContext.Apprenticeships.Single(x => x.Key == apprenticeshipKey);
             var episode = _dbContext.Episodes.Single(x => x.LearningKey == apprenticeshipKey);
             var episodePrice = _dbContext.EpisodePrices.Single(x => x.EpisodeKey == episode.Key);
-            await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false);
-            await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false);
+            await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
+            await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
 
             // Act
             var result = await _sut.GetStartDate(apprenticeshipKey);
