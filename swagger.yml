@@ -62,11 +62,6 @@ paths:
           description: The UK Provider Reference Number for the provider entering this learner
           schema:
             type: string
-        - name: startMonth
-          in: query
-          required: false
-          schema:
-            type: integer
         - name: state
           in: query
           required: true
@@ -76,6 +71,11 @@ paths:
             - new
             - approved
             - hasPendingChanges
+        - name: startMonth
+          in: query
+          required: false
+          schema:
+            type: integer
         - name: startYear
           in: query
           required: false
@@ -416,6 +416,12 @@ components:
           type: string
           format: uri 
           example: /providers/{ukprn}/learning/{guid}/status/approved
+        start:
+          type: string
+          enum:
+          - new
+          - approved
+          - unapproved
         trainingType:
           type: string
         uln:
