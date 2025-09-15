@@ -6,6 +6,7 @@ namespace SFA.DAS.Learning.Command.UpdateLearner
     public class UpdateLearnerResult
     {
         public List<LearningUpdateChanges> Changes { get; set; } = [];
+        public Guid LearningEpisodeKey { get; set; }
         public List<EpisodePrice> Prices { get; set; } = [];
 
         public class EpisodePrice
