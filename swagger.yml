@@ -404,24 +404,10 @@ components:
     learning:
       type: object
       properties:
-        base-uri:
+        uri:
           type: string
           format: uri 
           example: /providers/{ukprn}/learning/{guid}/status/new
-        approved-uri:
-          type: string
-          format: uri 
-          example: /providers/{ukprn}/learning/{guid}/status/approved
-        unapproved-uri:
-          type: string
-          format: uri 
-          example: /providers/{ukprn}/learning/{guid}/status/approved
-        start:
-          type: string
-          enum:
-          - new
-          - approved
-          - unapproved
         trainingType:
           type: string
         uln:
@@ -485,6 +471,7 @@ components:
         - receivedDate
         - plannedOTJTrainingHours
         - isFlexiJob
+
 
     apprenticeshipLearning:
       description: This is the exact copy of a normal apprenticeship
