@@ -15,10 +15,8 @@ paths:
       description: The system is fully ready to accept requests and all the dependencies are healthy
       responses:
         '200':
-          description: All health checks have passed
           $ref: '#/components/responses/healthCheckResponse'
         '503':
-          description: A health check has failed
           $ref: '#/components/responses/healthCheckResponse'
           
   /providers/{ukprn}/academicyears/{academicyear}/learning:
@@ -53,10 +51,10 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/pagedApprenticeshipsResponse'  
-
-  /providers/{ukprn}/learners:
+    
+  /providers/{ukprn}/learning:
     get:
-      summary: Returns a paged list of learners for this provider
+      summary: Returns a paged list of learning. The state is a required query parameter so only one state of a particular record will be return per call
       parameters:
         - name: ukprn
           in: path
@@ -69,6 +67,15 @@ paths:
           required: false
           schema:
             type: integer
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+            - new
+            - approved
+            - hasPendingChanges
         - name: startYear
           in: query
           required: false
@@ -109,9 +116,9 @@ paths:
         '200':
           $ref: '#/components/responses/pagedLearningResponse' 
   
-  /providers/{ukprn}/learning/{learningKey}/approved:
+  /providers/{ukprn}/learning/{learningKey}/status/new:
     get:
-      summary: Returns the approved version of the record for this learning Id.
+      summary: Returns the new learning record that has not been through the approval process
       parameters:
         - name: learningKey
           in: path
@@ -131,11 +138,11 @@ paths:
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
-          description: The resource was not found
-    
-  /providers/{ukprn}/learning/{learningKey}/unapproved:
+          description: The resource was not found 
+        
+  /providers/{ukprn}/learning/{learningKey}/status/approved:
     get:
-      summary: Returns the approved version of the record for this learning Id.
+      summary: Returns the approved record of learning
       parameters:
         - name: learningKey
           in: path
@@ -155,11 +162,11 @@ paths:
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
-          description: The resource was not found  
-    
-  /providers/{ukprn}/learning/{learningKey}:
+          description: The resource was not found 
+      
+  /providers/{ukprn}/learning/{learningKey}/status/unapproved:
     get:
-      summary: Returns a record that has currently not been through approval.
+      summary: Returns the unapproved record of learning
       parameters:
         - name: learningKey
           in: path
@@ -179,7 +186,7 @@ paths:
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
-          description: The resource was not found  
+          description: The resource was not found 
           
 components:  
   headers:
@@ -397,6 +404,18 @@ components:
     learning:
       type: object
       properties:
+        base-uri:
+          type: string
+          format: uri 
+          example: /providers/{ukprn}/learning/{guid}/status/new
+        approved-uri:
+          type: string
+          format: uri 
+          example: /providers/{ukprn}/learning/{guid}/status/approved
+        unapproved-uri:
+          type: string
+          format: uri 
+          example: /providers/{ukprn}/learning/{guid}/status/approved
         trainingType:
           type: string
         uln:
