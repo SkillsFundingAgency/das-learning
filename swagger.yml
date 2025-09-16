@@ -55,7 +55,7 @@ paths:
     
   /providers/{ukprn}/learning:
     get:
-      summary: Returns a paged list of learning. The state and view are required query parameters so only one state of a particular record will be return per call and the view details whether the simple view or detailed payload is returned. This call is independant of laerningType and should return multiple learnings of every type
+      summary: Returns a paged list of learning. The state and view are required query parameters so only one state of a particular record will be return per call and the view details whether the simple view or detailed payload is returned. This call is independant of learningType and should return multiple learnings of every type
       parameters:
         - name: ukprn
           in: path
