@@ -73,7 +73,7 @@ public static class ApprenticeshipDomainModelTestHelper
             e.Episode.EmployerAccountId == episode.EmployerAccountId &&
             e.Episode.LegalEntityName == episode.LegalEntityName &&
             e.Episode.Ukprn == episode.Ukprn &&
-            e.Episode.AgeAtStartOfLearning == learning.AgeAtStartOfApprenticeship &&
+            e.Episode.AgeAtStartOfLearning == learning.AgeAtStartOfLearning &&
             e.Episode.Prices.Count == expectedNumberOfPrices &&
             e.Episode.Prices.MaxBy(x => x.StartDate).TotalPrice == episodePrice.TotalPrice &&
             e.Episode.FundingType == episode.FundingType &&

@@ -31,6 +31,7 @@ public class UpdateLearnerCommandHandler(ILogger<UpdateLearnerCommandHandler> lo
         return new UpdateLearnerResult
         {
             Changes = changes.ToList(),
+            AgeAtStartOfLearning = learning.AgeAtStartOfLearning,
             LearningEpisodeKey = learning.LatestEpisode.Key,
             Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)

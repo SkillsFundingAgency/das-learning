@@ -27,7 +27,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
             var startDate = new DateTime(2020, month, 01);
             var apprenticeship = CreateApprenticeshipDomainModel(dateOfBirth, startDate);
 
-            apprenticeship.AgeAtStartOfApprenticeship.Should().Be(expectedAge);
+            apprenticeship.AgeAtStartOfLearning.Should().Be(expectedAge);
         }
 
         private LearningDomainModel CreateApprenticeshipDomainModel(DateTime dateOfBirth, DateTime startDate)

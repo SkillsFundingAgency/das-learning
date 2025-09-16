@@ -67,7 +67,7 @@ public class LearningDomainModel : AggregateRoot
         }
     }
 
-    public int AgeAtStartOfApprenticeship => DateOfBirth.CalculateAgeAtDate(StartDate);
+    public int AgeAtStartOfLearning => DateOfBirth.CalculateAgeAtDate(StartDate);
 
     internal static LearningDomainModel New(
         long approvalsApprenticeshipId,

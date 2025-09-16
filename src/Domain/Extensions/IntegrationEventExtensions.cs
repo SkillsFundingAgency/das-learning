@@ -31,7 +31,7 @@ public static class IntegrationEventExtensions
             FundingEmployerAccountId = latestEpisode.FundingEmployerAccountId,
             LegalEntityName = latestEpisode.LegalEntityName,
             AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
-            AgeAtStartOfLearning = learning.AgeAtStartOfApprenticeship,
+            AgeAtStartOfLearning = learning.AgeAtStartOfLearning,
             TrainingCode = latestEpisode.TrainingCode,
             TrainingCourseVersion = latestEpisode.TrainingCourseVersion,
             PaymentsFrozen = latestEpisode.PaymentsFrozen,
