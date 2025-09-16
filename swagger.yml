@@ -407,7 +407,7 @@ components:
         uri:
           type: string
           format: uri 
-          example: /providers/{ukprn}/learning/{guid}/status/new if the record is the new record
+          example: /providers/{ukprn}/learning/{guid}/status/new if the record is the new record /status/approved if approved and /status/unapproved
         uln:
           type: integer
         firstName:
