@@ -407,9 +407,7 @@ components:
         uri:
           type: string
           format: uri 
-          example: /providers/{ukprn}/learning/{guid}/status/new
-        trainingType:
-          type: string
+          example: /providers/{ukprn}/learning/{guid}/status/new if the record is the new record
         uln:
           type: integer
         firstName:
@@ -472,14 +470,13 @@ components:
         - plannedOTJTrainingHours
         - isFlexiJob
 
-
     apprenticeshipLearning:
       description: This is the exact copy of a normal apprenticeship
       allOf:
       - $ref: "#/components/schemas/learning"
       - type: object
         properties:
-          trainingType:
+          learningType:
             type: string
             enum:
             - apprenticeship
@@ -490,7 +487,7 @@ components:
       - $ref: "#/components/schemas/learning"
       - type: object
         properties:
-          trainingType:
+          learningType:
             type: string
             enum:
             - foundationApprenticeship
@@ -501,7 +498,7 @@ components:
       - $ref: "#/components/schemas/learning"
       - type: object
         properties:
-          trainingType:
+          learningType:
             type: string
             enum:
             - shortApprenticeship
