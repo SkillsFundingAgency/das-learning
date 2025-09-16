@@ -10,6 +10,7 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/infoResponse'  
+          
   /health:
     get:
       description: The system is fully ready to accept requests and all the dependencies are healthy
@@ -50,11 +51,11 @@ paths:
             type: integer
       responses:
         '200':
-          $ref: '#/components/responses/pagedApprenticeshipsResponse'  
+          $ref: '#/components/responses/apimLearnerRecordIdsResponse'  
     
   /providers/{ukprn}/learning:
     get:
-      summary: Returns a paged list of learning. The state is a required query parameter so only one state of a particular record will be return per call. This call is independant of laerningType and should return multiple learnings of every type
+      summary: Returns a paged list of learning. The state and view are required query parameters so only one state of a particular record will be return per call and the view details whether the simple view or detailed payload is returned. This call is independant of laerningType and should return multiple learnings of every type
       parameters:
         - name: ukprn
           in: path
@@ -71,6 +72,14 @@ paths:
             - new
             - approved
             - hasPendingChanges
+        - name: view
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+            - simple
+            - detailed
         - name: startMonth
           in: query
           required: false
@@ -116,7 +125,7 @@ paths:
         '200':
           $ref: '#/components/responses/pagedLearningResponse' 
   
-  /providers/{ukprn}/learning/{learningKey}/status/new:
+  /providers/{ukprn}/learning/{learningKey}:
     get:
       summary: Returns the new learning record that has not been through the approval process
       parameters:
@@ -132,54 +141,14 @@ paths:
           description: The ukprn to filter down by provider
           schema:
             type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/learningResponse'  
-        '400':
-          $ref: '#/components/responses/badRequest'  
-        '404':
-          description: The resource was not found 
-        
-  /providers/{ukprn}/learning/{learningKey}/status/approved:
-    get:
-      summary: Returns the approved record of learning
-      parameters:
-        - name: learningKey
-          in: path
+        - name: view
+          in: query
           required: true
-          description: The id of the record in learning
           schema:
             type: string
-        - name: ukprn
-          in: path
-          required: true
-          description: The ukprn to filter down by provider
-          schema:
-            type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/learningResponse'  
-        '400':
-          $ref: '#/components/responses/badRequest'  
-        '404':
-          description: The resource was not found 
-      
-  /providers/{ukprn}/learning/{learningKey}/status/unapproved:
-    get:
-      summary: Returns the unapproved record of learning
-      parameters:
-        - name: learningKey
-          in: path
-          required: true
-          description: The id of the record in learning
-          schema:
-            type: string
-        - name: ukprn
-          in: path
-          required: true
-          description: The ukprn to filter down by provider
-          schema:
-            type: string
+            enum:
+            - simple
+            - detailed
       responses:
         '200':
           $ref: '#/components/responses/learningResponse'  
@@ -198,7 +167,7 @@ components:
   
   responses:
     pagedLearningResponse:
-      description: A paged learning response, containing learners from ILR and the 
+      description: A paged learning response, containing a  array of learner data from ILR and the 
       headers:
         Link:
           description: Pagination links (next, prev)
@@ -209,7 +178,9 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/pagedLearning'
+            oneOf: 
+            - $ref: '#/components/schemas/simplePagedLearning'
+            - $ref: '#/components/schemas/detailedPagedLearning'
 
     learningResponse:
       description: A single record of learning
@@ -222,24 +193,11 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/learningRecord'
+            oneOf:
+            - $ref: '#/components/schemas/simpleLearningRecord'
+            - $ref: '#/components/schemas/detailedLearningRecord'
 
-    changeResponse:
-      description: A list of changes applied from the ILR to a learning record
-      headers:
-        Location:
-          description: Location of the resource
-          schema:
-            type: string
-            format: url
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/changesRecord'
-
-    pagedApprenticeshipsResponse:
+    apimLearnerRecordIdsResponse:
       description: A paged apprenticeship response
       headers:
         Link:
@@ -251,7 +209,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/pagedApprenticeships'
+            $ref: '#/components/schemas/pagedApprovedLearnerRecordIds'
 
     okResponse:
       description: OK
@@ -283,102 +241,7 @@ components:
             type: string
             example: Leaner data APIM for the apprenticeship service - Version 3.0.2
 
-    createUpdateResponse:
-      description: The update
-      headers:
-        Location:
-          $ref: '#/components/headers/location'
-  
   schemas:
-    error:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-      required:
-        - code
-        - message
-    
-    changesRecord:
-      type: object
-      properties:
-        changes:
-          type: array
-          items:
-            $ref: "#/components/schemas/change"
-    
-    change:
-      type: object
-      properties:
-        name:
-          type: string
-          enum: 
-          - PriceChangeIncrease
-          - PriceChangeDecrease
-          - StartDateChange
-        value:
-          type: string
-          
-    learningRecord:
-      oneOf:
-      - $ref: '#/components/schemas/apprenticeshipLearning'
-      - $ref: '#/components/schemas/foundationApprenticeshipLearning'
-      - $ref: '#/components/schemas/shortApprenticeshipLearning'
-      
-    pagedLearning:
-      oneOf:
-        - $ref: '#/components/schemas/apprenticeshipLearning'
-        - $ref: '#/components/schemas/foundationApprenticeshipLearning'
-        - $ref: '#/components/schemas/shortApprenticeshipLearning'
-      type: object
-      properties:
-        total:
-          type: integer
-          minimum: 0
-        page: 
-          type: integer
-          minimum: 1
-        pageSize: 
-          type: integer
-          minimum: 1
-          maximum: 20
-        totalPages: 
-          type: integer
-          minimum: 1
-      required:
-        - page
-        - total
-        - pageSize  
-        - totalPages  
-    
-    pagedApprenticeships:
-      type: object
-      properties:
-        learners:
-          type: array
-          items:
-              $ref: '#/components/schemas/apprenticeship'
-        total:
-          type: integer
-          minimum: 0
-        page: 
-          type: integer
-          minimum: 1
-        pageSize: 
-          type: integer
-          minimum: 1
-          maximum: 20
-        totalPages: 
-          type: integer
-          minimum: 1
-      required:
-        - page
-        - total
-        - pageSize  
-        - totalPages  
-    
     healthcheckResults:
       type: array
       items:
@@ -391,8 +254,97 @@ components:
           type: string
         result: 
           type: string    
+      
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
     
-    apprenticeship:
+    simplePagedLearning:
+      type: object
+      properties:
+        learners:
+          type: array
+          items:
+            $ref: '#/components/schemas/simpleLearningRecord'
+        total:
+          type: integer
+          minimum: 0
+        page: 
+          type: integer
+          minimum: 1
+        pageSize: 
+          type: integer
+          minimum: 1
+          maximum: 20
+        totalPages: 
+          type: integer
+          minimum: 1
+      required:
+        - page
+        - total
+        - pageSize  
+        - totalPages  
+    
+    detailedPagedLearning:
+      type: object
+      properties:
+        learners:
+          type: array
+          items:
+            $ref: '#/components/schemas/detailedLearningRecord'
+        total:
+          type: integer
+          minimum: 0
+        page: 
+          type: integer
+          minimum: 1
+        pageSize: 
+          type: integer
+          minimum: 1
+          maximum: 20
+        totalPages: 
+          type: integer
+          minimum: 1
+      required:
+        - page
+        - total
+        - pageSize  
+        - totalPages  
+    
+    pagedApprovedLearnerRecordIds:
+      type: object
+      properties:
+        learners:
+          type: array
+          items:
+              $ref: '#/components/schemas/approvedRecordId'
+        total:
+          type: integer
+          minimum: 0
+        page: 
+          type: integer
+          minimum: 1
+        pageSize: 
+          type: integer
+          minimum: 1
+          maximum: 20
+        totalPages: 
+          type: integer
+          minimum: 1
+      required:
+        - page
+        - total
+        - pageSize  
+        - totalPages  
+    
+    approvedRecordId:
       type: object
       properties:
         uln:
@@ -401,13 +353,16 @@ components:
           type: string
           format: uuid
 
-    learning:
+    simpleLearningRecord:
       type: object
       properties:
+        learningKey:
+          type: string
+          format: uuid
         uri:
           type: string
           format: uri 
-          example: /providers/{ukprn}/learning/{guid}/status/new if the record is the new record /status/approved if approved and /status/unapproved
+          example: /providers/{ukprn}/learning/{guid}?status=new&view=summary
         uln:
           type: integer
         firstName:
@@ -470,35 +425,119 @@ components:
         - plannedOTJTrainingHours
         - isFlexiJob
 
-    apprenticeshipLearning:
-      description: This is the exact copy of a normal apprenticeship
-      allOf:
-      - $ref: "#/components/schemas/learning"
-      - type: object
-        properties:
-          learningType:
-            type: string
-            enum:
-            - apprenticeship
-      
-    foundationApprenticeshipLearning:
-      description: This is the exact copy of a normal apprenticeship
-      allOf:
-      - $ref: "#/components/schemas/learning"
-      - type: object
-        properties:
-          learningType:
-            type: string
-            enum:
-            - foundationApprenticeship
-
-    shortApprenticeshipLearning:
-      description: This is the exact copy of a normal apprenticeship
-      allOf:
-      - $ref: "#/components/schemas/learning"
-      - type: object
-        properties:
-          learningType:
-            type: string
-            enum:
-            - shortApprenticeship
+    detailedLearningRecord:
+      type: object
+      properties:
+        learningKey:
+          type: string
+          format: uuid
+        uri:
+          type: string
+          format: uri 
+          example: /providers/{ukprn}/learning/{guid}?status=new&view=detailed
+        learner:
+          type: object
+          properties:
+            uln:
+              type: string
+            learnerRef:
+              type: string
+            firstname:
+              type: string
+            lastname:
+              type: string
+            dob:
+              type: string
+              format: date
+            email:
+              type: string
+            hasEhcp:
+              type: boolean
+        delivery:
+          type: object
+          properties:
+            onProgramme:
+              type: object
+              properties:
+                care:
+                  type: object
+                  properties:
+                    careleaver:
+                      type: boolean
+                    employerConsent:
+                      type: boolean
+                standardCode:
+                  type: integer
+                agreementId:
+                  type: string
+                startDate:
+                  type: string
+                  format: date
+                expectedEndDate:
+                  type: string
+                  format: date
+                OffTheJobHours:
+                  type: integer
+                percentageOfTrainingLeft:
+                  type: integer
+                costs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      trainingPrice:
+                        type: number
+                      epaoPrice:
+                        type: number
+                      fromDate:
+                        type: string
+                        format: date
+                completionDate:
+                  type: string
+                  format: date
+                withdrawalDate:
+                  type: string
+                  format: date
+                learningSupport:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startDate:
+                        type: string
+                        format: date
+                      endDate:
+                        type: string
+                        format: date
+                isFlexiJob:
+                  type: boolean
+            englishAndMaths:
+              type: array
+              items:
+                type: object
+                properties:
+                  startDate:
+                    type: string
+                    format: date
+                  endDate:
+                    type: string
+                    format: date
+                  courseCode:
+                    type: integer
+                  completionDate:
+                    type: string
+                    format: date
+                  withdrawalDate:
+                    type: string
+                    format: date
+                  learningSupport:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        startDate:
+                          type: string
+                          format: date
+                        endDate:
+                          type: string
+                          format: date
