@@ -207,76 +207,54 @@ public class LearningDomainModel : AggregateRoot
     {
         bool hasChanges = false;
 
-        foreach (var course in updateModel.MathsAndEnglishCourses)
-        {
-            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x => x.Course.Trim() == course.Course.Trim());
+        var coursesToAdd = new List<MathsAndEnglish>();
+        var courseKeysToKeep = new List<Guid>();
 
-            if (existingCourse == null)
+        foreach (var incomingCourse in updateModel.MathsAndEnglishCourses)
+        {
+            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x => 
+                x.Course.Trim() == incomingCourse.Course.Trim()
+                && x.StartDate == incomingCourse.StartDate
+                && x.PlannedEndDate == incomingCourse.PlannedEndDate
+                && x.CompletionDate == incomingCourse.CompletionDate
+                && x.WithdrawalDate == incomingCourse.WithdrawalDate
+                && x.PriorLearningPercentage == incomingCourse.PriorLearningPercentage
+                && x.Amount == incomingCourse.Amount);
+
+            if (existingCourse != null)
             {
-                _entity.MathsAndEnglishCourses.Add(new MathsAndEnglish
-                {
-                    Course = course.Course,
-                    StartDate = course.StartDate,
-                    PlannedEndDate = course.PlannedEndDate,
-                    CompletionDate = course.CompletionDate,
-                    WithdrawalDate = course.WithdrawalDate,
-                    PriorLearningPercentage = course.PriorLearningPercentage,
-                    Amount = course.Amount
-                });
-                hasChanges = true;
+                courseKeysToKeep.Add(existingCourse.Key);
             }
             else
             {
-                if (course.StartDate.Date != existingCourse.StartDate.Date)
+                coursesToAdd.Add(new MathsAndEnglish
                 {
-                    existingCourse.StartDate = course.StartDate;
-                    hasChanges = true;
-                }
-
-                if (course.PlannedEndDate.Date != existingCourse.PlannedEndDate.Date)
-                {
-                    existingCourse.PlannedEndDate = course.PlannedEndDate;
-                    hasChanges = true;
-                }
-
-                if (course.CompletionDate?.Date != existingCourse.CompletionDate?.Date)
-                {
-                    existingCourse.CompletionDate = course.CompletionDate?.Date;
-                    hasChanges = true;
-                }
-
-                if (course.WithdrawalDate?.Date != existingCourse.WithdrawalDate?.Date)
-                {
-                    existingCourse.WithdrawalDate = course.WithdrawalDate?.Date;
-                    hasChanges = true;
-                }
-
-                if (course.PriorLearningPercentage != existingCourse.PriorLearningPercentage)
-                {
-                    existingCourse.PriorLearningPercentage = course.PriorLearningPercentage;
-                    hasChanges = true;
-                }
-
-                if (course.Amount != existingCourse.Amount)
-                {
-                    existingCourse.Amount = course.Amount;
-                    hasChanges = true;
-                }
+                    Course = incomingCourse.Course,
+                    StartDate = incomingCourse.StartDate,
+                    PlannedEndDate = incomingCourse.PlannedEndDate,
+                    CompletionDate = incomingCourse.CompletionDate,
+                    WithdrawalDate = incomingCourse.WithdrawalDate,
+                    PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
+                    Amount = incomingCourse.Amount
+                });
+                hasChanges = true;
             }
+           
         }
-        
-        var incomingCourses = updateModel.MathsAndEnglishCourses
-            .Select(c => c.Course);
 
         var coursesToRemove = _entity.MathsAndEnglishCourses
-            .Where(existing => !incomingCourses.Any(incoming => incoming.Trim() == existing.Course.Trim()))
+            .Where(existing => !courseKeysToKeep.Any(courseKeyToKeep => courseKeyToKeep == existing.Key))
             .ToList();
 
         foreach (var removed in coursesToRemove)
         {
             _entity.MathsAndEnglishCourses.Remove(removed);
+            _mathsAndEnglishCourses.RemoveAll(x => x.Key == removed.Key);
             hasChanges = true;
         }
+
+        _entity.MathsAndEnglishCourses.AddRange(coursesToAdd);
+        _mathsAndEnglishCourses.AddRange(coursesToAdd.Select(MathsAndEnglishDomainModel.Get));
 
         if (hasChanges) changes.Add(LearningUpdateChanges.MathsAndEnglish);
     }
