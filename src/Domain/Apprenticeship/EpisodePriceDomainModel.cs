@@ -6,7 +6,6 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
     {
         private readonly EpisodePrice _entity;
         public Guid Key => _entity.Key;
-        public bool IsDeleted => _entity.IsDeleted; 
         public DateTime StartDate => _entity.StartDate; 
         public DateTime EndDate => _entity.EndDate; 
         public decimal TotalPrice => _entity.TotalPrice;
@@ -24,7 +23,6 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
         {
             return new EpisodePriceDomainModel(new EpisodePrice
             {
-                IsDeleted = false,
                 StartDate = startDate,
                 EndDate = endDate,
                 TotalPrice = totalPrice,
@@ -49,30 +47,6 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
             _entity.TotalPrice = totalPrice;
             _entity.TrainingPrice = trainingPrice;
             _entity.EndPointAssessmentPrice = assessmentPrice;
-        }
-
-        public void UpdateEndDate(DateTime endDate)
-        {
-            if (endDate <= _entity.StartDate)
-            {
-                throw new InvalidOperationException($"An {nameof(_entity.EndDate)} of ({endDate:u}) was attempted to be assigned " +
-                                                    $"to the EpisodePrice for Key: {_entity.Key} (Episode: {_entity.EpisodeKey}). " +
-                                                    $"The {nameof(_entity.EndDate)} on a {nameof(EpisodePriceDomainModel)} must be greater " +
-                                                    $"than the existing {nameof(_entity.StartDate)} ({_entity.StartDate:u}).");
-            }
-            _entity.EndDate = endDate;
-        }
-
-        public void UpdateStartDate(DateTime startDate)
-        {
-            if (startDate >= _entity.EndDate)
-            {
-                throw new InvalidOperationException($"An {nameof(_entity.StartDate)} of ({startDate:u}) was attempted to be assigned " +
-                                                    $"to the EpisodePrice for Key: {_entity.Key} (Episode: {_entity.EpisodeKey}). " +
-                                                    $"The {nameof(_entity.StartDate)} on a {nameof(EpisodePriceDomainModel)} must be less " +
-                                                    $"than the existing {nameof(_entity.EndDate)} ({_entity.EndDate:u}).");
-            }
-            _entity.StartDate = startDate;
         }
 
         private EpisodePriceDomainModel(EpisodePrice entity)

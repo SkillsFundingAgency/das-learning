@@ -1,14 +1,16 @@
-﻿using System.Collections.ObjectModel;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
+﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
+using System.Collections.ObjectModel;
+using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
 public class EpisodeDomainModel
 {
-    private readonly Episode _entity;
+    private readonly DataAccess.Entities.Learning.Episode _entity;
     private readonly List<EpisodePriceDomainModel> _episodePrices;
     public Guid Key => _entity.Key;
     public long Ukprn => _entity.Ukprn;
@@ -25,12 +27,12 @@ public class EpisodeDomainModel
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
-    public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.Where(x => !x.IsDeleted).ToList();
+    public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
     public EpisodePriceDomainModel LatestPrice
     {
         get
         {
-            var latestPrice = _episodePrices.Where(y => !y.IsDeleted).MaxBy(x => x.StartDate);
+            var latestPrice = _episodePrices.MaxBy(x => x.StartDate);
             if (latestPrice == null)
             {
                 throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
@@ -44,7 +46,7 @@ public class EpisodeDomainModel
     {
         get
         {
-            var firstPrice = _episodePrices.Where(y => !y.IsDeleted).MinBy(x => x.StartDate);
+            var firstPrice = _episodePrices.MinBy(x => x.StartDate);
             if (firstPrice == null)
             {
                 throw new InvalidOperationException($"Unexpected error. {nameof(FirstPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
@@ -87,8 +89,7 @@ public class EpisodeDomainModel
         decimal totalPrice,
         decimal? trainingPrice,
         decimal? endpointAssessmentPrice,
-        int fundingBandMaximum,
-        bool shouldSupersedePreviousPrice = false)
+        int fundingBandMaximum)
     {
         var newEpisodePrice = EpisodePriceDomainModel.New(
             startDate,
@@ -98,63 +99,91 @@ public class EpisodeDomainModel
             endpointAssessmentPrice,
             fundingBandMaximum);
 
-        if (shouldSupersedePreviousPrice)
-        {
-            LatestPrice.UpdateEndDate(newEpisodePrice.StartDate.AddDays(-1));
-        }
-
         _episodePrices.Add(newEpisodePrice);
         _entity.Prices.Add(newEpisodePrice.GetEntity());
     }
 
-    internal void UpdatePricesForApprovedPriceChange(PriceHistoryDomainModel priceChangeRequest)
+    internal bool UpdatePricesIfChanged(List<Cost> costs)
     {
-        var endDate = LatestPrice.EndDate;
-        var fundingBandMaximum = LatestPrice.FundingBandMaximum;
-        DeletePricesStartingAfterDate(priceChangeRequest.EffectiveFromDate);
+        var hasChanged = false;
 
-        var remainingPrices = _entity.Prices.Where(x => !x.IsDeleted).ToList();
-        var latestActivePrice = remainingPrices.MaxBy(x => x.StartDate);
+        var existingPrices = _entity.Prices
+            .OrderBy(x => x.StartDate)
+            .ToList();
 
-        var shouldSupersedePreviousPrice = latestActivePrice != null && latestActivePrice.StartDate < priceChangeRequest.EffectiveFromDate;
+        var currentPlannedEndDate = existingPrices.LastOrDefault()?.EndDate ?? DateTime.MaxValue;
+        var currentFundingBandMaximum = existingPrices.FirstOrDefault()?.FundingBandMaximum ?? default;
 
-        AddEpisodePrice(priceChangeRequest.EffectiveFromDate,
-            endDate,
-            priceChangeRequest.TotalPrice,
-            priceChangeRequest.TrainingPrice,
-            priceChangeRequest.AssessmentPrice,
-            fundingBandMaximum,
-            shouldSupersedePreviousPrice);
-    }
+        var orderedCosts = costs.OrderBy(x => x.FromDate).ToList();
+        var matchedStartDates = new HashSet<DateTime>();
 
-    internal void UpdatePricesForApprovedStartDateChange(StartDateChangeDomainModel startDateChangeRequest)
-    {
-        var latestPrice = LatestPrice;
-        DeletePricesEndingBeforeDate(startDateChangeRequest.ActualStartDate);
-        DeletePricesStartingAfterDate(startDateChangeRequest.PlannedEndDate);
-
-        if (ActiveEpisodePrices.Count == 0)
+        for (var i = 0; i < orderedCosts.Count; i++)
         {
+            var cost = orderedCosts[i];
+            var isLast = i == orderedCosts.Count - 1;
+            var endDate = isLast ? currentPlannedEndDate : orderedCosts[i + 1].FromDate.AddDays(-1);
+
+            var existing = existingPrices.FirstOrDefault(p =>
+                p.StartDate == cost.FromDate);
+
+            if (existing != null)
+            {
+                matchedStartDates.Add(existing.StartDate);
+
+                if (cost.TrainingPrice != existing.TrainingPrice)
+                {
+                    existing.TrainingPrice = cost.TrainingPrice;
+                    existing.TotalPrice = (existing.TrainingPrice ?? 0) + (existing.EndPointAssessmentPrice ?? 0);
+                    hasChanged = true;
+                }
+
+                if (cost.EpaoPrice != existing.EndPointAssessmentPrice)
+                {
+                    existing.EndPointAssessmentPrice = cost.EpaoPrice;
+                    existing.TotalPrice = (existing.TrainingPrice ?? 0) + (existing.EndPointAssessmentPrice ?? 0);
+                    hasChanged = true;
+                }
+
+                if (existing.EndDate != endDate)
+                {
+                    //sync end date - this does not count as a change
+                    //since it must just have been truncated by a subsequent change
+                    existing.EndDate = endDate;
+                }
+
+                if (existing.FundingBandMaximum != currentFundingBandMaximum)
+                {
+                    //sync funding band maximum - this does not count as a change
+                    //since it might just be due to the first price moving into another band
+                    //There is duplication/redundancy in storing FundingBandMaximum on this level since
+                    //it applies to the entire episode, not just a price.
+                    existing.FundingBandMaximum = currentFundingBandMaximum;
+                }
+
+                continue;
+            }
+
             AddEpisodePrice(
-                startDateChangeRequest.ActualStartDate,
-                startDateChangeRequest.PlannedEndDate,
-                latestPrice.TotalPrice,
-                latestPrice.TrainingPrice,
-                latestPrice.EndPointAssessmentPrice,
-                latestPrice.FundingBandMaximum);
-        }
-        else
-        {
-            if (FirstPrice.StartDate != startDateChangeRequest.ActualStartDate)
-            {
-                FirstPrice.UpdateStartDate(startDateChangeRequest.ActualStartDate);
-            }
+                cost.FromDate,
+                endDate,
+                cost.TotalPrice,
+                cost.TrainingPrice,
+                cost.EpaoPrice,
+                currentFundingBandMaximum);
 
-            if (LatestPrice.EndDate != startDateChangeRequest.PlannedEndDate)
-            {
-                LatestPrice.UpdateEndDate(startDateChangeRequest.PlannedEndDate);
-            }
+            matchedStartDates.Add(cost.FromDate);
+            hasChanged = true;
         }
+
+        // Delete unmatched existing prices
+        if (_entity.Prices.Any(x => !matchedStartDates.Contains(x.StartDate)))
+        {
+            _entity.Prices.RemoveAll(x => !matchedStartDates.Contains(x.StartDate));
+            _episodePrices.RemoveAll(x => !matchedStartDates.Contains(x.StartDate));
+            hasChanged = true;
+        }
+
+        return hasChanged;
     }
 
     internal void UpdatePaymentStatus(bool isFrozen)
@@ -204,23 +233,6 @@ public class EpisodeDomainModel
     {
         return new EpisodeDomainModel(entity);
     }
-
-    private void DeletePricesStartingAfterDate(DateTime date)
-    {
-        foreach (var price in _entity.Prices.Where(x => x.StartDate > date && !x.IsDeleted))
-        {
-            price.IsDeleted = true;
-        }
-    }
-
-    private void DeletePricesEndingBeforeDate(DateTime date)
-    {
-        foreach (var price in _entity.Prices.Where(x => x.EndDate < date && !x.IsDeleted))
-        {
-            price.IsDeleted = true;
-        }
-    }
-
     internal void Withdraw(string userId, DateTime lastDateOfLearning)
     {
         _entity.LearningStatus = LearnerStatus.Withdrawn.ToString();

@@ -6,11 +6,8 @@ using NUnit.Framework;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Enums;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SFA.DAS.Learning.Command.UnitTests.UpdateLearner;
@@ -46,7 +43,7 @@ public class WhenUpdatingLearner
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.Should().NotBeEmpty();
+        result.Changes.Should().NotBeEmpty();
         _learningRepository.Verify(x => x.Update(domainModel), Times.Once);
 
         // Note this test works because the random generated domainModel will not match the random generated command.UpdateModel and at least
@@ -58,7 +55,17 @@ public class WhenUpdatingLearner
     {
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.LearningSupport.Clear();
+
         var domainModel = _fixture.Create<LearningDomainModel>();
+
+        // Create a single episode
+        var singleEpisode = _fixture.Create<EpisodeDomainModel>();
+
+        // Use reflection to set the private _episodes field so that there is only one
+        typeof(LearningDomainModel)
+            .GetField("_episodes", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?.SetValue(domainModel, new List<EpisodeDomainModel> { singleEpisode });
 
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
                            .ReturnsAsync(domainModel);
@@ -69,7 +76,7 @@ public class WhenUpdatingLearner
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.Should().BeEmpty();
+        result.Changes.Should().BeEmpty();
 
         // the first call is to make sure the data in the domain model is up to date before the update, that way there should be no changes detected
     }

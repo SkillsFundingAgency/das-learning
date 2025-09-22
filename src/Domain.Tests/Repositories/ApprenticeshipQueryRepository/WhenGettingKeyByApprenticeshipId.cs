@@ -52,8 +52,8 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             //Act
             var approvalsApprenticeshipId = _fixture.Create<long>();
             var expectedApprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(expectedApprenticeshipKey, false, approvalsApprenticeshipId: approvalsApprenticeshipId);
-            await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), false, approvalsApprenticeshipId: _fixture.Create<long>());
+            await _dbContext.AddApprenticeship(expectedApprenticeshipKey, approvalsApprenticeshipId: approvalsApprenticeshipId);
+            await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), approvalsApprenticeshipId: _fixture.Create<long>());
 
             // Act
             var result = await _sut.GetKeyByLearningId(approvalsApprenticeshipId);

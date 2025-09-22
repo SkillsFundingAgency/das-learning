@@ -10,9 +10,7 @@ public interface ILearningQueryRepository
     Task<Guid?> GetKeyByLearningId(long learningId);
     Task<ApprenticeshipPrice?> GetPrice(Guid learningKey);
     Task<ApprenticeshipStartDate?> GetStartDate(Guid learningKey);
-    Task<PendingPriceChange?> GetPendingPriceChange(Guid learningKey);
     Task<Guid?> GetKey(string apprenticeshipHashedId);
-    Task<PendingStartDateChange?> GetPendingStartDateChange(Guid learningKey);
     Task<PaymentStatus?> GetPaymentStatus(Guid learningKey);
 
     /// <summary>

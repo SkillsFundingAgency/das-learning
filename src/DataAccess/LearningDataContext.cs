@@ -12,8 +12,6 @@ namespace SFA.DAS.Learning.DataAccess
         public virtual DbSet<Entities.Learning.Learning> ApprenticeshipsDbSet { get; set; }
         public virtual DbSet<Episode> Episodes { get; set; }
         public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
-        public virtual DbSet<PriceHistory> PriceHistories { get; set; }
-        public virtual DbSet<StartDateChange> StartDateChanges { get; set; }
         public virtual DbSet<FreezeRequest> FreezeRequests { get; set; }
         public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
         public virtual DbSet<MathsAndEnglish> MathsAndEnglish { get; set; }
@@ -46,34 +44,6 @@ namespace SFA.DAS.Learning.DataAccess
             // EpisodePrice
             modelBuilder.Entity<EpisodePrice>()
                 .HasKey(x => x.Key);
-
-            // PriceHistory
-            modelBuilder.Entity<PriceHistory>()
-                .HasKey(x => x.Key);
-            modelBuilder.Entity<PriceHistory>()
-                .Property(x => x.PriceChangeRequestStatus)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (ChangeRequestStatus)Enum.Parse(typeof(ChangeRequestStatus), v));
-            modelBuilder.Entity<PriceHistory>()
-                .Property(x => x.Initiator)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (ChangeInitiator)Enum.Parse(typeof(ChangeInitiator), v));
-            
-            // StartDateChange
-            modelBuilder.Entity<StartDateChange>()
-                .HasKey(x => x.Key);
-            modelBuilder.Entity<StartDateChange>()
-                .Property(x => x.RequestStatus)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (ChangeRequestStatus)Enum.Parse(typeof(ChangeRequestStatus), v));
-            modelBuilder.Entity<StartDateChange>()
-                .Property(x => x.Initiator)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (ChangeInitiator)Enum.Parse(typeof(ChangeInitiator), v));
 
             // FreezeRequest
             modelBuilder.Entity<FreezeRequest>()

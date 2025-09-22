@@ -25,6 +25,43 @@ public class UpdateLearnerRequest
     /// Learning support details
     /// </summary>
     public List<LearningSupportUpdatedDetails> LearningSupport { get; set; }
+
+    /// <summary>
+    /// OnProgramme details
+    /// </summary>
+    public OnProgrammeDetails OnProgramme { get; set; }
+}
+
+/// <summary>
+/// OnProgramme details
+/// </summary>
+public class OnProgrammeDetails
+{
+    /// <summary>
+    /// Costs / Prices for the OnProgramme delivery
+    /// </summary>
+    public List<Cost> Costs { get; set; }
+}
+
+/// <summary>
+/// Cost details
+/// </summary>
+public class Cost
+{
+    /// <summary>
+    /// The cost of the training, aka TNP1
+    /// </summary>
+    public int TrainingPrice { get; set; }
+
+    /// <summary>
+    /// The cost of the end-point assessment, aka TNP2
+    /// </summary>
+    public int? EpaoPrice { get; set; }
+    
+    /// <summary>
+    /// The date from which this price applies
+    /// </summary>
+    public DateTime FromDate { get; set; }
 }
 
 /// <summary>
@@ -104,24 +141,40 @@ public static class UpdateLearnerRequestExtensions
     /// <param name="request">The request containing learner details</param>
     /// <param name="learnerKey">The unique identifier of the learner</param>
     /// <returns>A command to update the learner</returns>
-    public static UpdateLearnerCommand ToCommand(this UpdateLearnerRequest request, Guid learnerKey)
+    public static LearnerUpdateModel ToUpdateModel(this UpdateLearnerRequest request)
     {
-        var learningDetails = new Domain.Models.LearningUpdateDetails(request.Learner.CompletionDate);
-
-        var mathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x => 
-            new MathsAndEnglishUpdateDetails(
-                x.Course, 
-                x.StartDate, 
-                x.PlannedEndDate, 
-                x.CompletionDate, 
-                x.WithdrawalDate, 
-                x.PriorLearningPercentage,
-                x.Amount));
-        
-        var learningSupportDetails = request.LearningSupport.SelectOrEmptyList(x =>
-            new LearningSupportDetails(x.StartDate, x.EndDate));
-
-        var learnerUpdateModel = new LearnerUpdateModel(learningDetails, mathsAndEnglishCourses, learningSupportDetails);
-        return new UpdateLearnerCommand(learnerKey, learnerUpdateModel);
+        return new LearnerUpdateModel
+        {
+            Learning = new LearningUpdateDetails
+            {
+                CompletionDate = request.Learner.CompletionDate
+            },
+            MathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x =>
+                new MathsAndEnglishUpdateDetails
+                {
+                    Course = x.Course,
+                    StartDate = x.StartDate,
+                    PlannedEndDate = x.PlannedEndDate,
+                    CompletionDate = x.CompletionDate,
+                    WithdrawalDate = x.WithdrawalDate,
+                    PriorLearningPercentage = x.PriorLearningPercentage,
+                    Amount = x.Amount
+                }),
+            LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
+                new LearningSupportDetails
+                {
+                    StartDate = x.StartDate, EndDate = x.EndDate
+                }),
+            OnProgrammeDetails = new Domain.Models.OnProgrammeDetails
+            {
+                Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Domain.Models.Cost
+                {
+                    TrainingPrice = x.TrainingPrice,
+                    EpaoPrice = x.EpaoPrice,
+                    FromDate = x.FromDate
+                })
+            }
+        };
     }
+
 }

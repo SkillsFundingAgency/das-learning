@@ -16,6 +16,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Decorators\**" />
+    <EmbeddedResource Remove="Decorators\**" />
+    <None Remove="Decorators\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.17.0" />
     <PackageReference Include="Azure.Identity" Version="1.12.1" />
     <PackageReference Include="coverlet.msbuild" Version="6.0.4">
@@ -38,10 +44,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Command\SFA.DAS.Learning.Command.csproj" />
     <ProjectReference Include="..\TestHelpers\SFA.DAS.Learning.TestHelpers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Decorators\" />
   </ItemGroup>
 
 </Project>

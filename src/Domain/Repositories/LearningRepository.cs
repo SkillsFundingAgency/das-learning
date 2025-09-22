@@ -34,8 +34,6 @@ public class LearningRepository : ILearningRepository
     public async Task<LearningDomainModel> Get(Guid key)
     {
         var apprenticeship = await DbContext.ApprenticeshipsDbSet
-            .Include(x => x.PriceHistories)
-            .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
@@ -48,8 +46,6 @@ public class LearningRepository : ILearningRepository
     public async Task<LearningDomainModel?> Get(string uln, long approvalsApprenticeshipId)
     {
         var apprenticeship = await DbContext.Apprenticeships
-            .Include(x => x.PriceHistories)
-            .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
@@ -61,8 +57,6 @@ public class LearningRepository : ILearningRepository
     public async Task<LearningDomainModel?> GetByUln(string uln)
     {
         var apprenticeship = await DbContext.Apprenticeships
-            .Include(x => x.PriceHistories)
-            .Include(x => x.StartDateChanges)
             .Include(x => x.FreezeRequests)
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)

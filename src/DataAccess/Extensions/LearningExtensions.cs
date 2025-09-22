@@ -21,7 +21,7 @@ public static class LearningExtensions
 
     public static int GetAgeAtStartOfApprenticeship(this Entities.Learning.Learning learning)
     {
-        var startDate = learning.Episodes.SelectMany(e => e.Prices).Where(y => !y.IsDeleted).Min(p => p.StartDate);
+        var startDate = learning.Episodes.SelectMany(e => e.Prices).Min(p => p.StartDate);
         var age = startDate.Year - learning.DateOfBirth.Year;
 
         if (startDate < learning.DateOfBirth.AddYears(age)) age--;
@@ -31,12 +31,12 @@ public static class LearningExtensions
 
     public static DateTime GetStartDate(this Entities.Learning.Learning learning)
     {
-        return learning.Episodes.SelectMany(e => e.Prices).Where(y => !y.IsDeleted).Min(p => p.StartDate);
+        return learning.Episodes.SelectMany(e => e.Prices).Min(p => p.StartDate);
     }
 
     public static DateTime GetPlannedEndDate(this Entities.Learning.Learning learning)
     {
-        return learning.Episodes.SelectMany(e => e.Prices).Where(y => !y.IsDeleted).Max(p => p.EndDate);
+        return learning.Episodes.SelectMany(e => e.Prices).Max(p => p.EndDate);
     }
 
     /// <summary>
@@ -61,7 +61,6 @@ public static class LearningExtensions
     {
         var episode = learning.Episodes
             .MaxBy(x => x.Prices
-                .Where(y => !y.IsDeleted)
                 .Select(y => (DateTime?)y.StartDate).DefaultIfEmpty(null) //Ensures that we return null if there are no active prices
                 .Max());
         return episode;

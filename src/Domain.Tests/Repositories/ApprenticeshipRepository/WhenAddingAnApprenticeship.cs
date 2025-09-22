@@ -62,7 +62,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             // Arrange
             var apprenticeship = _fixture.Create<LearningDomainModel>();
             SetUpApprenticeshipRepository();
-            var episodePrice = _fixture.Build<EpisodePrice>().With(x => x.IsDeleted, false).Create();
+            var episodePrice = _fixture.Build<EpisodePrice>().Create();
             var episode = EpisodeDomainModel.Get(_fixture.Build<Episode>()
                 .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
                 .With(x => x.PaymentsFrozen, false)
