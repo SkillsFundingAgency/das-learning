@@ -155,6 +155,30 @@ paths:
         '400':
           $ref: '#/components/responses/badRequest'  
         '404':
+          description: The resource was not found
+    
+  /providers/{ukprn}/learnings/{learningKey}/changes:
+    get:
+      summary: Returns the stored changes on an unapproved learning record compared to the currently approved record
+      parameters:
+        - name: learningKey
+          in: path
+          required: true
+          description: The id of the record in learning
+          schema:
+            type: string
+        - name: ukprn
+          in: path
+          required: true
+          description: The ukprn to filter down by provider
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/changesResponse'  
+        '400':
+          $ref: '#/components/responses/badRequest'  
+        '404':
           description: The resource was not found 
           
 components:  
@@ -182,6 +206,19 @@ components:
             - $ref: '#/components/schemas/simplePagedLearning'
             - $ref: '#/components/schemas/detailedPagedLearning'
 
+    changesResponse:
+      description: A record of the current changes being requested
+      headers:
+        Location:
+          description: Location of the resource
+          schema:
+            type: string
+            format: url
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/changesRecord'
+          
     learningResponse:
       description: A single record of learning
       headers:
@@ -266,6 +303,19 @@ components:
         - code
         - message
     
+    changesRecord:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/changeRecord'
+        
+    changeRecord:
+      type: object
+      properties:
+        approvedValue:
+          type: string
+        unApprovedValue:
+          type: string
+
     simplePagedLearning:
       type: object
       properties:
