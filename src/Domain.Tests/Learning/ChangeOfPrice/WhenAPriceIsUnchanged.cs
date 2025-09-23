@@ -40,8 +40,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice
         [Test]
         public void ThenPricesAreNotMarkedAsUpdated()
         {
-
-
             //Assert
             var prices = _learning.LatestEpisode.EpisodePrices
                 .OrderBy(x => x.StartDate)
