@@ -186,6 +186,23 @@ public class EpisodeDomainModel
         return hasChanged;
     }
 
+    internal bool UpdateExpectedEndDateIfChanged(DateTime expectedEndDate)
+    {
+        var existingPrices = _entity.Prices
+            .OrderBy(x => x.StartDate)
+            .ToList();
+
+        var lastPrice = existingPrices.Last();
+
+        if (lastPrice.EndDate == expectedEndDate)
+        {
+            return false;
+        }
+
+        lastPrice.EndDate = expectedEndDate;
+        return true;
+    }
+
     internal void UpdatePaymentStatus(bool isFrozen)
     {
         _entity.PaymentsFrozen = isFrozen;

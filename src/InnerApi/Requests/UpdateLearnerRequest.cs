@@ -41,6 +41,11 @@ public class OnProgrammeDetails
     /// Costs / Prices for the OnProgramme delivery
     /// </summary>
     public List<Cost> Costs { get; set; }
+
+    /// <summary>
+    /// Planned end date for the OnProgramme delivery
+    /// </summary>
+    public DateTime ExpectedEndDate { get; set; }
 }
 
 /// <summary>
@@ -167,6 +172,7 @@ public static class UpdateLearnerRequestExtensions
                 }),
             OnProgrammeDetails = new Domain.Models.OnProgrammeDetails
             {
+                ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
                 Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Domain.Models.Cost
                 {
                     TrainingPrice = x.TrainingPrice,
