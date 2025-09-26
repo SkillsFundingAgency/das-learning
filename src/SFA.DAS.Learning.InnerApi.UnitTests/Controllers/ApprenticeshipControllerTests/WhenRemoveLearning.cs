@@ -4,15 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.Learning.Command;
-using SFA.DAS.Learning.Command.UpdateLearner;
+using SFA.DAS.Learning.Command.RemoveLearnerCommand;
 using SFA.DAS.Learning.InnerApi.Controllers;
-using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 
 namespace SFA.DAS.Learning.InnerApi.UnitTests.Controllers.ApprenticeshipControllerTests;
 
-public class WhenUpdateLearner
+public class WhenRemoveLearning
 {
     private readonly Fixture _fixture;
     private readonly Mock<IQueryDispatcher> _mockQueryDispatcher;
@@ -21,7 +20,7 @@ public class WhenUpdateLearner
     private readonly Mock<IPagedLinkHeaderService> _mockPagedLinkHeaderService;
     private LearningController _sut;
 
-    public WhenUpdateLearner()
+    public WhenRemoveLearning()
     {
         _fixture = new Fixture();
         _mockQueryDispatcher = new Mock<IQueryDispatcher>();
@@ -37,23 +36,19 @@ public class WhenUpdateLearner
     }
 
     [Test]
-    public async Task ThenReturnsListOfChanges()
+    public async Task ThenReturns204()
     {
         // Arrange
+        var ukprn = _fixture.Create<long>();
         var learnerKey = _fixture.Create<Guid>();
-        var expectedResponse = _fixture.Create<UpdateLearnerResult>();
-        var request = _fixture.Create<UpdateLearnerRequest>();
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(It.IsAny<UpdateLearnerCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+            .Setup(x => x.Send(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>()));
 
         // Act
-        var result = await _sut.UpdateLearning(learnerKey, request);
+        var result = await _sut.RemoveLearning(ukprn, learnerKey);
 
         // Assert
-        result.Should().BeOfType<OkObjectResult>();
-        var okResult = (OkObjectResult)result;
-        okResult.Value.Should().Be(expectedResponse);
+        result.Should().BeOfType<NoContentResult>();
     }
 }
