@@ -13,7 +13,6 @@ namespace SFA.DAS.Learning.DataAccess
         public virtual DbSet<Episode> Episodes { get; set; }
         public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
         public virtual DbSet<FreezeRequest> FreezeRequests { get; set; }
-        public virtual DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
         public virtual DbSet<MathsAndEnglish> MathsAndEnglish { get; set; }
         public virtual DbSet<LearningSupport> LearningSupport { get; set; }
 
@@ -47,10 +46,6 @@ namespace SFA.DAS.Learning.DataAccess
 
             // FreezeRequest
             modelBuilder.Entity<FreezeRequest>()
-                .HasKey(x => x.Key);
-
-            // WithdrawalRequest
-            modelBuilder.Entity<WithdrawalRequest>()
                 .HasKey(x => x.Key);
 
             // MathsAndEnglish

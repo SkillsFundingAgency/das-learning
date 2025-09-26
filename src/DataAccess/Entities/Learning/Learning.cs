@@ -8,7 +8,6 @@ public class Learning
 	{
 		FreezeRequests = new List<FreezeRequest>();
         Episodes = new List<Episode>();
-        WithdrawalRequests = new List<WithdrawalRequest>();
         MathsAndEnglishCourses = new List<MathsAndEnglish>();
     }
         
@@ -22,7 +21,6 @@ public class Learning
 	public string ApprenticeshipHashedId { get; set; } = null!;
     public List<FreezeRequest> FreezeRequests { get; set; }
     public List<Episode> Episodes { get; set; }
-    public List<WithdrawalRequest> WithdrawalRequests { get; set; }
     public DateTime? CompletionDate { get; set; }
     public List<MathsAndEnglish> MathsAndEnglishCourses { get; set; }
 }
