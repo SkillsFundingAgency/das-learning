@@ -16,11 +16,13 @@ public class TestFunctionPerScenarioHook
     public async Task CreateConfig()
     {
         _testContext.TestFunction = new TestFunction(_testContext, $"TEST{_featureContext.FeatureInfo.Title.Replace(" ", "")}");
+        _testContext.TestInnerApi = new TestInnerApi(_testContext);
     }
 
     [AfterScenario]
     public async Task CleanupAfterTestHarness()
     {
         await _testContext.TestFunction?.DisposeAsync()!;
+        await _testContext.TestInnerApi.DisposeAsync();
     }
 }

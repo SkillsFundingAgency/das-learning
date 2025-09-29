@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Functions\SFA.DAS.Learning.Functions.csproj" />
     <ProjectReference Include="..\Infrastructure\SFA.DAS.Learning.Infrastructure.csproj" />
+    <ProjectReference Include="..\InnerApi\SFA.DAS.Learning.InnerApi.csproj" />
     <ProjectReference Include="..\TestHelpers\SFA.DAS.Learning.TestHelpers.csproj" />
   </ItemGroup>
 

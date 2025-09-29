@@ -1,16 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using SFA.DAS.Encoding;
 using SFA.DAS.Learning.Command.Decorators;
-using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Infrastructure;
 using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
 using SFA.DAS.Learning.Infrastructure.Services;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.Learning.Command;
 
