@@ -203,15 +203,15 @@ public class LearningController : ControllerBase
     /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
     /// <param name="learningKey">The unique identifier for the learner record to remove.</param> -->
     [HttpDelete("{ukprn}/{learningKey}")]
-    [ProducesResponseType(204)]
+    [ProducesResponseType(200)]
     public async Task<IActionResult> RemoveLearning(long ukprn, Guid learningKey)
     {
         _logger.LogInformation("Deleting learning with key {LearningKey}", learningKey);
 
         var command = new RemoveLearnerCommand(learningKey);
 
-        await _commandDispatcher.Send(command);
+        var result = await _commandDispatcher.Send<RemoveLearnerCommand, RemoveLearnerResult>(command);
 
-        return NoContent();
+        return new OkObjectResult(result);
     }
 }
