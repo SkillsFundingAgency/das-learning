@@ -250,6 +250,7 @@ public class EpisodeDomainModel
     {
         return new EpisodeDomainModel(entity);
     }
+
     internal void Withdraw(DateTime lastDateOfLearning)
     {
         _entity.LearningStatus = LearnerStatus.Withdrawn.ToString();

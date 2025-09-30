@@ -184,6 +184,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdateExpectedEndDate(updateModel, changes);
 
+        UpdateWithdrawalDate(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -297,4 +299,21 @@ public class LearningDomainModel : AggregateRoot
         }
     }
 
+    private void UpdateWithdrawalDate(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var latestEpisode = LatestEpisode;
+
+        if (updateModel.Delivery.WithdrawalDate.HasValue)
+        {
+            if(updateModel.Delivery.WithdrawalDate != latestEpisode.LastDayOfLearning)
+            {
+                latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
+                changes.Add(LearningUpdateChanges.Withdrawal);
+            }
+        }
+        else
+        {
+            // To be complete as part of Reverse Withdrawal work
+        }
+    }
 }
