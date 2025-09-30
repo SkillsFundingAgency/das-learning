@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
@@ -191,6 +192,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdatePrices(updateModel, changes);
 
+        UpdateExpectedEndDate(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -275,6 +278,25 @@ public class LearningDomainModel : AggregateRoot
         if (hasChanged)
         {
             changes.Add(LearningUpdateChanges.Prices);
+        }
+    }
+
+    private void UpdateExpectedEndDate(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var hasChanged = LatestEpisode.UpdateExpectedEndDateIfChanged(updateModel.OnProgrammeDetails.ExpectedEndDate);
+
+        if (hasChanged)
+        {
+            changes.Add(LearningUpdateChanges.ExpectedEndDate);
+
+            var @event = new EndDateChangedEvent
+            {
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                LearningKey = Key,
+                PlannedEndDate = EndDate.Value
+            };
+
+            AddEvent(@event);
         }
     }
 }

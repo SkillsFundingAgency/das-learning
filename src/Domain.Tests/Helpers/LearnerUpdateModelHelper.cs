@@ -32,6 +32,7 @@ public static class LearnerUpdateModelHelper
             }).ToList(),
             OnProgrammeDetails = new OnProgrammeDetails
             {
+                ExpectedEndDate = learning.GetEpisode().Prices.MaxBy(p => p.StartDate).EndDate,
                 Costs = learning.GetEpisode().Prices.Select(x => new Cost
                 {
                     FromDate = x.StartDate,
