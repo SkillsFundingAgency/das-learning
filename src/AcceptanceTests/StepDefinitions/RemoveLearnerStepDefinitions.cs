@@ -1,6 +1,5 @@
 ﻿using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
-using SFA.DAS.CommitmentsV2.Messages.Events;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Types;
 
@@ -11,7 +10,6 @@ public class RemoveLearnerStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
     private readonly TestContext _testContext;
-    private ApprenticeshipCreatedEvent ApprovalCreatedEvent => (ApprenticeshipCreatedEvent)_scenarioContext["ApprovalCreatedEvent"];
 
     public RemoveLearnerStepDefinitions(ScenarioContext scenarioContext, TestContext testContext)
     {
@@ -20,6 +18,7 @@ public class RemoveLearnerStepDefinitions
     }
 
     [When(@"SLD inform us that a learner is to be removed")]
+    [Given(@"SLD have previously informed us that the learner is to be removed")]
     public async Task WhenSLDInformUsThatALearnerIsToBeRemoved()
     {
         var learning = await GetCurrentLearning();
@@ -44,7 +43,7 @@ public class RemoveLearnerStepDefinitions
     }
 
     [Then(@"a LearningWithdrawnEvent is sent")]
-    public async Task ThenTheEarningsForTheLearningAreRecalculated()
+    public async Task ThenALearningWithdrawnEventIsSent()
     {
         var learning = await GetCurrentLearning();
         await WaitHelper.WaitForIt(() => 
@@ -54,18 +53,20 @@ public class RemoveLearnerStepDefinitions
 
     }
 
+    [Then(@"a LearningWithdrawnEvent is not sent")]
+    public async Task ThenALearningWithdrawnEventIsNotSent()
+    {
+        var learning = await GetCurrentLearning();
+        await WaitHelper.WaitForUnexpected(() =>
+            _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(
+                x => x.LearningKey == learning.Key
+            ), $"{nameof(LearningWithdrawnEvent)} event should not be published");
+
+    }
+
     private async Task<DataAccess.Entities.Learning.Learning> GetCurrentLearning() 
     {
-        await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
-        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.Learning>().Single(x => x.Uln == ApprovalCreatedEvent.Uln);
-        learning.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.Episode>().Where(x => x.LearningKey == learning.Key).ToList();
-
-        foreach (var episode in learning.Episodes)
-        {
-            episode.Prices = dbConnection.GetAll<DataAccess.Entities.Learning.EpisodePrice>().Where(x => x.EpisodeKey == episode.Key).ToList();
-            episode.LearningSupport = dbConnection.GetAll<DataAccess.Entities.Learning.LearningSupport>().Where(x => x.EpisodeKey == episode.Key).ToList();
-        }
-
-        return learning;
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        return dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
     }
 }
