@@ -210,6 +210,17 @@ public class LearningDomainModel : AggregateRoot
             _entity.EmailAddress = updateModel.Learning.EmailAddress;
 
             changes.Add(LearningUpdateChanges.PersonalDetails);
+
+            var @event = new PersonalDetailsChangedEvent
+            {
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                LearningKey = Key,
+                FirstName = FirstName,
+                LastName = LastName,
+                EmailAddress = EmailAddress ?? ""
+            };
+
+            AddEvent(@event);
         }
     }
 

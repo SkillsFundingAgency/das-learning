@@ -7,53 +7,57 @@ using System;
 using System.Linq;
 using SFA.DAS.Learning.Domain.Events;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfExpectedEndDate
+namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfExpectedEndDate;
+
+[TestFixture]
+public class WhenExpectedEndDateIsUpdated
 {
-    [TestFixture]
-    public class WhenExpectedEndDateIsUpdated : ChangeOfExpectedEndDateTestBase
+    private LearningDomainModel _learning;
+    private LearningUpdateChanges[] _result;
+
+    [SetUp]
+    public void SetUp()
     {
-        private LearningDomainModel _learning;
-        private LearningUpdateChanges[] _result;
 
-        [SetUp]
-        public void SetUp()
+        _learning = new LearningDomainModelBuilder()
+            .WithGeneratedCosts(1)
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithFundingBandMaximum(15000)
+            .Build();
+
+        //Act
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2026, 07, 31);
+
+        _result = _learning.UpdateLearnerDetails(updateModel);
+    }
+
+    [Test]
+    public void ThenExpectedEndDateIsMarkedAsUpdated()
+    {
+        _result.Should().Contain(LearningUpdateChanges.ExpectedEndDate);
+        _result.Should().NotContain(LearningUpdateChanges.Prices);
+
+        var prices = _learning.LatestEpisode.EpisodePrices
+            .OrderBy(x => x.StartDate)
+            .ToList();
+
+        prices.Count().Should().Be(1);
+        prices.Last().EndDate.Should().Be(new DateTime(2026, 07, 31));
+    }
+
+    [Test]
+    public void ThenAnEndDateChangedEventIsEmitted()
+    {
+        var events = _learning.FlushEvents();
+
+        var expectedEvent = new EndDateChangedEvent
         {
-            _learning = CreateLearner(1, new DateTime(2025, 07, 31), 15000);
+            ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
+            LearningKey = _learning.Key,
+            PlannedEndDate = new DateTime(2026, 07, 31) //todo: can we make this non-nullable?
+        };
 
-            //Act
-            var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
-            updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2026, 07, 31);
-
-            _result = _learning.UpdateLearnerDetails(updateModel);
-        }
-
-        [Test]
-        public void ThenExpectedEndDateIsMarkedAsUpdated()
-        {
-            _result.Should().Contain(LearningUpdateChanges.ExpectedEndDate);
-            _result.Should().NotContain(LearningUpdateChanges.Prices);
-
-            var prices = _learning.LatestEpisode.EpisodePrices
-                .OrderBy(x => x.StartDate)
-                .ToList();
-
-            prices.Count().Should().Be(1);
-            prices.Last().EndDate.Should().Be(new DateTime(2026, 07, 31));
-        }
-
-        [Test]
-        public void ThenAnEndDateChangedEventIsEmitted()
-        {
-            var events = _learning.FlushEvents();
-
-            var expectedEvent = new EndDateChangedEvent
-            {
-                ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
-                LearningKey = _learning.Key,
-                PlannedEndDate = new DateTime(2026, 07, 31) //todo: can we make this non-nullable?
-            };
-
-            events.Should().ContainEquivalentOf(expectedEvent);
-        }
+        events.Should().ContainEquivalentOf(expectedEvent);
     }
 }
