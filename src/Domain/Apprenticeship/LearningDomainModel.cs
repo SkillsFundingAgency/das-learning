@@ -19,6 +19,7 @@ public class LearningDomainModel : AggregateRoot
     public string Uln => _entity.Uln;
     public string FirstName => _entity.FirstName;
     public string LastName => _entity.LastName;
+    public string EmailAddress => _entity.EmailAddress;
     public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
