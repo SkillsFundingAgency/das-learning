@@ -18,7 +18,7 @@ public class Learning
 	public string Uln { get; set; } = null!;
 	public string FirstName { get; set; } = null!;
 	public string LastName { get; set; } = null!;
-    public string EmailAddress { get; set; }
+    public string? EmailAddress { get; set; }
 	public DateTime DateOfBirth { get; set; }
 	public string ApprenticeshipHashedId { get; set; } = null!;
     public List<FreezeRequest> FreezeRequests { get; set; }

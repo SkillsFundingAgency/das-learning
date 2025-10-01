@@ -75,6 +75,21 @@ public class Cost
 public class  LearnerUpdateDetails
 {
     /// <summary>
+    /// The first or given names of the learner
+    /// </summary>
+    public string FirstName { get; set; }
+
+    /// <summary>
+    /// The last name of the learner
+    /// </summary>
+    public string LastName { get; set; }
+
+    /// <summary>
+    /// The email address of the learner
+    /// </summary>
+    public string EmailAddress { get; set; }
+    
+    /// <summary>
     /// Date the learning completes, this will be null until completion is confirmed
     /// </summary>
     public DateTime? CompletionDate { get; set; }
@@ -152,6 +167,9 @@ public static class UpdateLearnerRequestExtensions
         {
             Learning = new LearningUpdateDetails
             {
+                FirstName = request.Learner.FirstName,
+                LastName = request.Learner.LastName,
+                EmailAddress = request.Learner.EmailAddress,
                 CompletionDate = request.Learner.CompletionDate
             },
             MathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x =>

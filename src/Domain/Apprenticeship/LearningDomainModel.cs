@@ -19,7 +19,7 @@ public class LearningDomainModel : AggregateRoot
     public string Uln => _entity.Uln;
     public string FirstName => _entity.FirstName;
     public string LastName => _entity.LastName;
-    public string EmailAddress => _entity.EmailAddress;
+    public string? EmailAddress => _entity.EmailAddress;
     public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
@@ -185,6 +185,8 @@ public class LearningDomainModel : AggregateRoot
     {
         var changes = new List<LearningUpdateChanges>();
 
+        UpdateLearnerDetails(updateModel, changes);
+
         UpdateLearningDetails(updateModel, changes);
 
         UpdateMathsAndEnglishDetails(updateModel, changes);
@@ -196,6 +198,19 @@ public class LearningDomainModel : AggregateRoot
         UpdateExpectedEndDate(updateModel, changes);
 
         return changes.ToArray();
+    }
+
+    private void UpdateLearnerDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        if (updateModel.Learning.FirstName != FirstName || updateModel.Learning.LastName != LastName ||
+            updateModel.Learning.EmailAddress != EmailAddress)
+        {
+            _entity.FirstName = updateModel.Learning.FirstName;
+            _entity.LastName = updateModel.Learning.LastName;
+            _entity.EmailAddress = updateModel.Learning.EmailAddress;
+
+            changes.Add(LearningUpdateChanges.PersonalDetails);
+        }
     }
 
     private void UpdateLearningDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
