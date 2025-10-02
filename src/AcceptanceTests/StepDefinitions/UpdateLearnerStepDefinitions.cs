@@ -43,6 +43,10 @@ public class UpdateLearnerStepDefinitions
                 case "MathsAndEnglish":
                     updateRequest.MathsAndEnglishCourses = GetMathsAndEnglishFromString(valueString);
                     break;
+                case "LearningSupport":
+                    updateRequest.LearningSupport = GetLearningSupportFromString(valueString);
+                    break;
+
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -109,6 +113,8 @@ public class UpdateLearnerStepDefinitions
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
 
+        learning.MathsAndEnglishCourses.Should().HaveCount(table.Rows.Count, "the number of stored maths and english records should match the expected count");
+
         foreach (var row in table.Rows)
         {
             var expectedMathsAndEnglish = new DataAccess.Entities.Learning.MathsAndEnglish
@@ -131,18 +137,63 @@ public class UpdateLearnerStepDefinitions
         }
     }
 
+    [Then(@"the following LearningSupport details are stored")]
+    public async Task ThenTheFollowingLearningSupportDetailsAreStored(Table table)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        var episode = learning.Episodes.Single();
+        episode.LearningSupport.Should().HaveCount(table.Rows.Count, "the number of stored learning support records should match the expected count");
+
+        foreach (var row in table.Rows)
+        {
+            var expectedLearningSupport = new DataAccess.Entities.Learning.LearningSupport
+            {
+                StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
+                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value
+            };
+
+            episode.LearningSupport.Should().ContainEquivalentOf(expectedLearningSupport, options => options
+                    .Excluding(c => c.LearningKey)
+                    .Excluding(c => c.EpisodeKey)
+                    .Excluding(c => c.Key));
+        }
+    }
+
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
         var courses = new List<MathsAndEnglish>();
-        courses.Add(new MathsAndEnglish
+
+        if (parsedValues.Any())
         {
-            Course = parsedValues.GetValueOrDefault("course", "Maths"),
-            StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
-            PlannedEndDate = TokenisableDateTime.FromString(parsedValues["PlannedEndDate"]).DateTime!.Value,
-            Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000"))
-        });
+            courses.Add(new MathsAndEnglish
+            {
+                Course = parsedValues.GetValueOrDefault("course", "Maths"),
+                StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
+                PlannedEndDate = TokenisableDateTime.FromString(parsedValues["PlannedEndDate"]).DateTime!.Value,
+                Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000"))
+            });
+        }
+
         return courses;
+    }
+
+    private List<LearningSupportUpdatedDetails> GetLearningSupportFromString(string valueString)
+    {
+        var parsedValues = KeyValueParser.Parse(valueString);
+        var learningSupport = new List<LearningSupportUpdatedDetails>();
+
+        if (parsedValues.Any())
+        {
+            learningSupport.Add(new LearningSupportUpdatedDetails
+            {
+                StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
+                EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value
+            });
+        }
+
+        return learningSupport;
     }
 
     private static class KeyValueParser
