@@ -38,8 +38,8 @@ public class ApprovalCreatedStepDefinitions
                 new CommitmentsV2.Messages.Events.PriceEpisode
                 {
                     Cost = 6500,
-                    FromDate = TokenisableDateTime.FromString("currentAY-09-25").Value,
-                    ToDate = TokenisableDateTime.FromString("nextAY-07-31").Value,
+                    FromDate = TokenisableDateTime.FromString("currentAY-09-25").DateTime!.Value,
+                    ToDate = TokenisableDateTime.FromString("nextAY-07-31").DateTime,
                     EndPointAssessmentPrice = 500,
                     TrainingPrice = 6000
                 }
@@ -55,8 +55,8 @@ public class ApprovalCreatedStepDefinitions
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney(Table table)
     {
         var row = table.Rows[0];
-        var startDate = TokenisableDateTime.FromString(row["StartDate"]).Value;
-        var endDate = TokenisableDateTime.FromString(row["EndDate"]).Value;
+        var startDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value;
+        var endDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value;
         var trainingPrice = decimal.Parse(row["TrainingPrice"]);
         var epaPrice = decimal.Parse(row["EpaPrice"]);
 

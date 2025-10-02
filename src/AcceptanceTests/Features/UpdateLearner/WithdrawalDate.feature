@@ -10,7 +10,7 @@ Scenario: Apprenticeship withdrawal during learning recorded in ILR
 		| Property       | Value           |
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
-	Then the Completion Status for the Learning is set to “Withdrawn”
+	Then the Learning Status for the Learning is set to “Withdrawn”
 	And the “last day of learning” for the Learning is set to currentAY-11-25
 	And a LearningWithdrawnEvent is sent
 	And the following changes are returned
@@ -39,7 +39,7 @@ Scenario: Apprentice Withdrawn via the ILR - following previous removal
 		| Property       | Value           |
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
-	Then the Completion Status for the Learning is set to “Withdrawn”
+	Then the Learning Status for the Learning is set to “Withdrawn”
 	And the “last day of learning” for the Learning is set to currentAY-11-25
 	And a LearningWithdrawnEvent is sent
 	And the following changes are returned

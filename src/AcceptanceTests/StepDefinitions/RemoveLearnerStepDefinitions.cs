@@ -28,7 +28,7 @@ public class RemoveLearnerStepDefinitions
 
     }
 
-    [Then(@"the Completion Status for the Learning is set to “Withdrawn”")]
+    [Then(@"the Learning Status for the Learning is set to “Withdrawn”")]
     public async Task ThenTheCompletionStatusForTheLearningIsSetToWithdrawn()
     {
         var learning = await GetCurrentLearning();

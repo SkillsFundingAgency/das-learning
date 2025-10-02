@@ -9,6 +9,7 @@ internal static class SqlConnectionExtensions
     {
         var learning = dbConnection.GetAll<DataAccess.Entities.Learning.Learning>().Single(x => x.Uln == uln);
         learning.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.Episode>().Where(x => x.LearningKey == learning.Key).ToList();
+        learning.MathsAndEnglishCourses = dbConnection.GetAll<DataAccess.Entities.Learning.MathsAndEnglish>().Where(x => x.LearningKey == learning.Key).ToList();
 
         foreach (var episode in learning.Episodes)
         {

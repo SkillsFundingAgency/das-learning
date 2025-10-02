@@ -5,35 +5,40 @@ namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
 [TypeConverter(typeof(TokenisableDateTimeConverter))]
 public class TokenisableDateTime
 {
-    public TokenisableDateTime(DateTime value)
+    public TokenisableDateTime(DateTime? value)
     {
-        Value = value;
+        DateTime = value;
     }
 
-    public DateTime Value { get; }
+    public DateTime? DateTime { get; }
 
     public static TokenisableDateTime FromString(string value)
     {
-        if (DateTime.TryParse(value, out var parseResult))
+        if (System.DateTime.TryParse(value, out var parseResult))
         {
             return new TokenisableDateTime(parseResult);
         }
 
+        if (value.ToLower() == TokenisableYearConstants.Null.ToLower())
+        {
+            return new TokenisableDateTime(null);
+        }
+
         if (value.ToLower() == TokenisableYearConstants.CurrentDate.ToLower())
         {
-            return new TokenisableDateTime(DateTime.Now);
+            return new TokenisableDateTime(System.DateTime.Now);
         }
 
         if (value.ToLower() == TokenisableYearConstants.NextMonthFirstDay.ToLower())
         {
-            var nextMonth = DateTime.Now.AddMonths(1);
+            var nextMonth = System.DateTime.Now.AddMonths(1);
             var firstDayOfNextMonth = new DateTime(nextMonth.Year, nextMonth.Month, 1);
             return new TokenisableDateTime(firstDayOfNextMonth);
         }
 
         if (value.ToLower() == TokenisableYearConstants.LastDayOfCurrentMonth.ToLower())
         {
-            var firstDayOfNextMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1);
+            var firstDayOfNextMonth = new DateTime(System.DateTime.Now.Year, System.DateTime.Now.Month, 1).AddMonths(1);
             var lastDayOfCurrentMonth = firstDayOfNextMonth.AddDays(-1);
             return new TokenisableDateTime(lastDayOfCurrentMonth);
         }
@@ -73,7 +78,7 @@ public class TokenisableDateTime
         if (!int.TryParse(dateComponents[1], out var month)) throw new ArgumentException("Invalid date string format for TokenisableDateTime: Invalid month.");
         if (!int.TryParse(dateComponents[2], out var day)) throw new ArgumentException("Invalid date string format for TokenisableDateTime: Invalid day.");
 
-        int startYearOfCurrentAcademicYear = DateTime.Now.Month > 7 ? DateTime.Now.Year : DateTime.Now.Year - 1;
+        int startYearOfCurrentAcademicYear = System.DateTime.Now.Month > 7 ? System.DateTime.Now.Year : System.DateTime.Now.Year - 1;
         int yearToUse = month > 7 ? startYearOfCurrentAcademicYear : startYearOfCurrentAcademicYear + 1;
         return new DateTime(yearToUse, month, day);
     }
@@ -100,6 +105,7 @@ public class TokenisableDateTimeConverter : TypeConverter
 
 public static class TokenisableYearConstants
 {
+    public const string Null = "null";
     public const string CurrentAyToken = "currentAY";
     public const string PreviousAyToken = "previousAY";
     public const string TwoYearsAgoAYToken = "TwoYearsAgoAY";
