@@ -80,7 +80,7 @@ public class Startup
 
         services.AddEntityFrameworkForApprenticeships(ApplicationSettings, NotLocal(Configuration));
 
-        services.AddCommandServices(Configuration).AddEventServices().AddValidators();
+        services.AddCommandServices(Configuration).AddEventServices();
 
         if (NotAcceptanceTests(Configuration))
             services.AddApprenticeshipsOuterApiClient(ApplicationSettings.ApprenticeshipsOuterApiConfiguration.BaseUrl, ApplicationSettings.ApprenticeshipsOuterApiConfiguration.Key);

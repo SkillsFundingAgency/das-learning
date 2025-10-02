@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoFixture;
+﻿using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.TestHelpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
 using EpisodePrice = SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodePrice;
 
@@ -77,7 +76,6 @@ public class WhenGettingApprenticeshipsWithEpisodes
                 .With(x => x.Episodes, new List<Episode>() { episode1, episode2 })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
                 .With(x => x.Uln, _fixture.Create<long>().ToString())
-                .With(x => x.WithdrawalRequests, new List<WithdrawalRequest>())
                 .Create();
 
         await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
@@ -104,47 +102,6 @@ public class WhenGettingApprenticeshipsWithEpisodes
     }
 
     [Test]
-    public async Task ThenWithdrawnDataReturnedWhenWithdrawRequestExists()
-    {
-        //Arrange
-        SetUpApprenticeshipQueryRepository();
-
-        var apprenticeshipKey = _fixture.Create<Guid>();
-        var episodeKey = _fixture.Create<Guid>();
-
-        var ukprn = _fixture.Create<long>();
-        var startDate = _fixture.Create<DateTime>();
-        var endDate = startDate.AddYears(2);
-        var trainingCode = _fixture.Create<string>();
-
-        var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
-        var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
-        var withdrawRecord = _fixture.Build<WithdrawalRequest>()
-            .With(x => x.LearningKey, apprenticeshipKey)
-            .With(x => x.LastDayOfLearning, startDate.AddYears(1))
-            .Create();
-
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
-                .With(x => x.Key, apprenticeshipKey)
-                .With(x => x.Episodes, new List<Episode>() { episode })
-                .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
-                .With(x => x.Uln, _fixture.Create<long>().ToString())
-                .With(x => x.WithdrawalRequests, new List<WithdrawalRequest>() { withdrawRecord })
-                .Create();
-
-        await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
-        await _dbContext.SaveChangesAsync();
-
-        // Act
-        var result = await _sut.GetLearningsWithEpisodes(ukprn);
-
-        // Assert
-        result.Should().NotBeNull();
-        var apprenticeship = result.SingleOrDefault();
-        apprenticeship.WithdrawnDate.Should().Be(withdrawRecord.LastDayOfLearning);
-    }
-
-    [Test]
     public async Task ThenCompletionDataReturnedWhenCompletionExists()
     {
         //Arrange
@@ -167,7 +124,6 @@ public class WhenGettingApprenticeshipsWithEpisodes
                 .With(x => x.Episodes, new List<Episode>() { episode })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
                 .With(x => x.Uln, _fixture.Create<long>().ToString())
-                .With(x => x.WithdrawalRequests, new List<WithdrawalRequest>())
                 .With(x => x.CompletionDate, completionDate)
                 .Create();
 

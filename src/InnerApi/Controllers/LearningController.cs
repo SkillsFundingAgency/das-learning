@@ -7,13 +7,13 @@ using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 using SFA.DAS.Learning.Queries.GetApprenticeshipStartDate;
 using SFA.DAS.Learning.Queries.GetCurrentPartyIds;
-using SFA.DAS.Learning.Queries.GetLearnerStatus;
 using SFA.DAS.Learning.Queries.GetLearningKey;
 using SFA.DAS.Learning.Queries.GetLearningKeyByLearningId;
 using SFA.DAS.Learning.Queries.GetLearningPrice;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Command.UpdateLearner;
+using SFA.DAS.Learning.Command.RemoveLearnerCommand;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -146,27 +146,12 @@ public class LearningController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the Learner Status of the learning
-    /// </summary>
-    /// <param name="learningKey">Guid</param>
-    /// <returns>GetLearnerStatusResponse containing LearnerStatus</returns>
-    [HttpGet("{learningKey}/LearnerStatus")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> GetLearnerStatus(Guid learningKey)
-    {
-        var request = new GetLearnerStatusRequest { ApprenticeshipKey = learningKey };
-        var response = await _queryDispatcher.Send<GetLearnerStatusRequest, GetLearnerStatusResponse?>(request);
-        if (response == null) return NotFound();
-        return Ok(response);
-    }
-
-    /// <summary>
-    /// Gets all learnings for a given provider with episode & price data
+    /// Gets all fm36 learnings data for a given provider with episode and price data
     /// </summary>
     /// <param name="ukprn">Ukprn</param>
     /// <param name="collectionYear">Collection Year</param>
     /// <param name="collectionPeriod">Collection Period</param>
-    /// <returns>GetLearningsWithEpisodesResponse containing learning, episode, & price data</returns>
+    /// <returns>GetLearningsWithEpisodesResponse containing learning, episode, and price data</returns>
     [HttpGet("{ukprn}/{collectionYear}/{collectionPeriod}")]
     [ProducesResponseType(200)]
     public async Task<IActionResult> GetLearningsForFm36(long ukprn, short collectionYear, byte collectionPeriod)
@@ -208,6 +193,24 @@ public class LearningController : ControllerBase
         var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<UpdateLearnerCommand, UpdateLearnerResult>(command);
+
+        return new OkObjectResult(result);
+    }
+
+    /// <summary>
+    /// Removes a learner associated with a specific learning key.
+    /// </summary>
+    /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
+    /// <param name="learningKey">The unique identifier for the learner record to remove.</param> -->
+    [HttpDelete("{ukprn}/{learningKey}")]
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> RemoveLearning(long ukprn, Guid learningKey)
+    {
+        _logger.LogInformation("Deleting learning with key {LearningKey}", learningKey);
+
+        var command = new RemoveLearnerCommand(learningKey);
+
+        var result = await _commandDispatcher.Send<RemoveLearnerCommand, RemoveLearnerResult>(command);
 
         return new OkObjectResult(result);
     }

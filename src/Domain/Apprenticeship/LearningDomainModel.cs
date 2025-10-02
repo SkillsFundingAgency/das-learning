@@ -170,16 +170,6 @@ public class LearningDomainModel : AggregateRoot
         }
     }
 
-    public void WithdrawApprenticeship(string userId, DateTime lastDateOfLearning, string reason, DateTime changeDateTime)
-    {
-        var currentEpisode = LatestEpisode;
-
-        var withdrawRequest = WithdrawalRequestDomainModel.New(_entity.Key, currentEpisode.Key, reason, lastDateOfLearning, changeDateTime, userId);
-        _entity.WithdrawalRequests.Add(withdrawRequest.GetEntity());
-
-        currentEpisode.Withdraw(userId, lastDateOfLearning);
-    }
-
     public LearningUpdateChanges[] UpdateLearnerDetails(LearnerUpdateModel updateModel)
     {
         var changes = new List<LearningUpdateChanges>();
@@ -195,6 +185,13 @@ public class LearningDomainModel : AggregateRoot
         UpdateExpectedEndDate(updateModel, changes);
 
         return changes.ToArray();
+    }
+
+    public void RemoveLearner()
+    {
+        var latestEpisode = LatestEpisode;
+        var lastDayOfLearning = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
+        latestEpisode.Withdraw(lastDayOfLearning);
     }
 
     private void UpdateLearningDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
@@ -299,4 +296,5 @@ public class LearningDomainModel : AggregateRoot
             AddEvent(@event);
         }
     }
+
 }
