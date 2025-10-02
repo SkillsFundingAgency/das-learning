@@ -217,7 +217,7 @@ public class LearningDomainModel : AggregateRoot
                 LearningKey = Key,
                 FirstName = FirstName,
                 LastName = LastName,
-                EmailAddress = EmailAddress ?? ""
+                EmailAddress = EmailAddress
             };
 
             AddEvent(@event);

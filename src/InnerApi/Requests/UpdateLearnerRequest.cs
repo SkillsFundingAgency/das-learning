@@ -1,5 +1,4 @@
-﻿using SFA.DAS.Learning.Command.UpdateLearner;
-using SFA.DAS.Learning.Domain.Extensions;
+﻿using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 
 namespace SFA.DAS.Learning.InnerApi.Requests;
@@ -87,7 +86,7 @@ public class  LearnerUpdateDetails
     /// <summary>
     /// The email address of the learner
     /// </summary>
-    public string EmailAddress { get; set; }
+    public string? EmailAddress { get; set; }
     
     /// <summary>
     /// Date the learning completes, this will be null until completion is confirmed
