@@ -49,6 +49,9 @@ public class UpdateLearnerStepDefinitions
                 case "Prices":
                     updateRequest.OnProgramme.Costs = GetCostsFromString(valueString);
                     break;
+                case "ExpectedEndDate":
+                    updateRequest.OnProgramme.ExpectedEndDate = TokenisableDateTime.FromString(valueString).DateTime!.Value;
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
