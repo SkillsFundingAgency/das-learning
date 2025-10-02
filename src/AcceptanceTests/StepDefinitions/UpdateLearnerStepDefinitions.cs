@@ -46,7 +46,9 @@ public class UpdateLearnerStepDefinitions
                 case "LearningSupport":
                     updateRequest.LearningSupport = GetLearningSupportFromString(valueString);
                     break;
-
+                case "Prices":
+                    updateRequest.OnProgramme.Costs = GetCostsFromString(valueString);
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -97,6 +99,31 @@ public class UpdateLearnerStepDefinitions
 
         changes.Should().BeEquivalentTo(expectedChanges,
             "the returned changes should exactly match the expected changes");
+    }
+
+    [Then(@"the EpisodePrices are returned")]
+    public void ThenTheEpisodePricesAreReturned(Table table)
+    {
+        var episodePrices = _scenarioContext.GetUpdateLearnerResult().Prices;
+
+        var expectedPrices = table.Rows
+            .Select(row => new SFA.DAS.Learning.Command.UpdateLearner.UpdateLearnerResult.EpisodePrice
+            {
+                StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
+                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value,
+                TrainingPrice = int.Parse(row["TrainingPrice"]),
+                EndPointAssessmentPrice = int.Parse(row["EpaPrice"])
+            })
+            .ToList();
+
+        foreach (var expectedPrice in expectedPrices)
+        {
+            episodePrices.Should().ContainEquivalentOf(expectedPrice, options => options
+                .Excluding(c => c.Key)
+                .Excluding(c => c.TotalPrice)
+                .Excluding(c => c.FundingBandMaximum));
+        }
+
     }
 
     [Then(@"the Completion Date for the Learning is set to (.*)")]
@@ -160,6 +187,32 @@ public class UpdateLearnerStepDefinitions
         }
     }
 
+    [Then(@"the following Price details are stored")]
+    public async Task ThenTheFollowingPriceDetailsAreStored(Table table)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        var episodePrices = learning.Episodes.Single().Prices;
+        episodePrices.Should().HaveCount(table.Rows.Count, "the number of stored episodePrice records should match the expected count");
+
+        foreach (var row in table.Rows)
+        {
+            var price = new DataAccess.Entities.Learning.EpisodePrice
+            {
+                StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
+                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value,
+                EndPointAssessmentPrice = int.Parse(row["EpaPrice"]),
+                TrainingPrice = int.Parse(row["TrainingPrice"])
+            };
+
+            episodePrices.Should().ContainEquivalentOf(price, options => options
+                    .Excluding(c => c.EpisodeKey)
+                    .Excluding(c => c.Key)
+                    .Excluding(c => c.TotalPrice)
+                    .Excluding(c => c.FundingBandMaximum));
+        }
+    }
+
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
@@ -194,6 +247,24 @@ public class UpdateLearnerStepDefinitions
         }
 
         return learningSupport;
+    }
+
+    private List<Cost> GetCostsFromString(string valueString)
+    {
+        var parsedValues = KeyValueParser.Parse(valueString);
+        var costs = new List<Cost>();
+
+        if (parsedValues.Any())
+        {
+            costs.Add(new Cost
+            {
+                FromDate = TokenisableDateTime.FromString(parsedValues["fromDate"]).DateTime!.Value,
+                TrainingPrice = int.Parse(parsedValues["trainingPrice"]),
+                EpaoPrice = int.Parse(parsedValues["epaoPrice"])
+            });
+        }
+
+        return costs;
     }
 
     private static class KeyValueParser
