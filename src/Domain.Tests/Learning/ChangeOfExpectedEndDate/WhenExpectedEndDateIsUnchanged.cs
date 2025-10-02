@@ -7,44 +7,50 @@ using System;
 using System.Linq;
 using SFA.DAS.Learning.Domain.Events;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfExpectedEndDate
+namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfExpectedEndDate;
+
+[TestFixture]
+public class WhenExpectedEndDateIsUnchanged
 {
-    [TestFixture]
-    public class WhenExpectedEndDateIsUnchanged : ChangeOfExpectedEndDateTestBase
+    private LearningDomainModel _learning;
+    private LearningUpdateChanges[] _result;
+
+    [SetUp]
+    public void SetUp()
     {
-        private LearningDomainModel _learning;
-        private LearningUpdateChanges[] _result;
+        //_learning = CreateLearner(1, new DateTime(2025, 07, 31), 15000);
 
-        [SetUp]
-        public void SetUp()
-        {
-            _learning = CreateLearner(1, new DateTime(2025, 07, 31), 15000);
+        _learning = new LearningDomainModelBuilder()
+            .WithGeneratedCosts(1)
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithFundingBandMaximum(15000)
+            .Build();
 
-            //Act
-            var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
-            updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2025, 07, 31);
 
-            _result = _learning.UpdateLearnerDetails(updateModel);
-        }
+        //Act
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2025, 07, 31);
 
-        [Test]
-        public void ThenExpectedEndDateIsNotMarkedAsUpdated()
-        {
-            _result.Should().NotContain(LearningUpdateChanges.ExpectedEndDate);
+        _result = _learning.UpdateLearnerDetails(updateModel);
+    }
 
-            var prices = _learning.LatestEpisode.EpisodePrices
-                .OrderBy(x => x.StartDate)
-                .ToList();
+    [Test]
+    public void ThenExpectedEndDateIsNotMarkedAsUpdated()
+    {
+        _result.Should().NotContain(LearningUpdateChanges.ExpectedEndDate);
 
-            prices.Count().Should().Be(1);
-            prices.Last().EndDate.Should().Be(new DateTime(2025, 07, 31));
-        }
+        var prices = _learning.LatestEpisode.EpisodePrices
+            .OrderBy(x => x.StartDate)
+            .ToList();
 
-        [Test]
-        public void ThenAnEndDateChangedEventIsNotEmitted()
-        {
-            var events = _learning.FlushEvents();
-            events.Should().NotContain(x => x.GetType() == typeof(EndDateChangedEvent));
-        }
+        prices.Count().Should().Be(1);
+        prices.Last().EndDate.Should().Be(new DateTime(2025, 07, 31));
+    }
+
+    [Test]
+    public void ThenAnEndDateChangedEventIsNotEmitted()
+    {
+        var events = _learning.FlushEvents();
+        events.Should().NotContain(x => x.GetType() == typeof(EndDateChangedEvent));
     }
 }

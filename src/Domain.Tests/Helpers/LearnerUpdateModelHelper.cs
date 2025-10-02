@@ -13,6 +13,9 @@ public static class LearnerUpdateModelHelper
         {
             Learning = new LearningUpdateDetails
             {
+                FirstName = learning.FirstName,
+                LastName = learning.LastName,
+                EmailAddress = learning.EmailAddress ?? "",
                 CompletionDate = learning.CompletionDate
             },
             MathsAndEnglishCourses = learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails
