@@ -11,6 +11,11 @@ namespace SFA.DAS.Learning.InnerApi.Requests;
 /// </summary>
 public class UpdateLearnerRequest
 {
+    ///<summary>
+    /// Delivery details
+    /// </summary>
+    public Delivery Delivery { get; set; }
+
     /// <summary>
     /// Learner details to be updated
     /// </summary>
@@ -30,6 +35,17 @@ public class UpdateLearnerRequest
     /// OnProgramme details
     /// </summary>
     public OnProgrammeDetails OnProgramme { get; set; }
+}
+
+/// <summary>
+/// Delivery Details
+/// </summary>
+public class Delivery
+{
+    /// <summary>
+    /// Withdrawal during learning date
+    /// </summary>
+    public DateTime? WithdrawalDate { get; set; }
 }
 
 /// <summary>
@@ -150,6 +166,10 @@ public static class UpdateLearnerRequestExtensions
     {
         return new LearnerUpdateModel
         {
+            Delivery = new DeliveryDetails
+            {
+                WithdrawalDate = request.Delivery.WithdrawalDate
+            },
             Learning = new LearningUpdateDetails
             {
                 CompletionDate = request.Learner.CompletionDate

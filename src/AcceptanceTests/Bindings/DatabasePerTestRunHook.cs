@@ -1,14 +1,13 @@
 ﻿using SFA.DAS.Learning.TestHelpers;
 
-namespace SFA.DAS.Learning.AcceptanceTests.Bindings
+namespace SFA.DAS.Learning.AcceptanceTests.Bindings;
+
+[Binding]
+public static class DatabasePerTestRunHook
 {
-    [Binding]
-    public static class DatabasePerTestRunHook
+    [BeforeTestRun(Order = 1)]
+    public static void RefreshDatabaseModel()
     {
-        [BeforeTestRun(Order = 1)]
-        public static void RefreshDatabaseModel()
-        {
-            SqlDatabaseModel.Update("SFA.DAS.Learning.Database");
-        }
+        SqlDatabaseModel.Update("SFA.DAS.Learning.Database");
     }
 }

@@ -86,6 +86,14 @@ public class TestInnerApi : IDisposable
         var response = await _httpClient.PostAsync(route, content);
     }
 
+
+    internal async Task<T2> Put<T, T2>(string route, T body)
+    {
+        var content = new StringContent(JsonConvert.SerializeObject(body), System.Text.Encoding.UTF8, "application/json");
+        var response = await _httpClient.PutAsync(route, content);
+        return JsonConvert.DeserializeObject<T2>(await response.Content.ReadAsStringAsync())!;
+    }
+
     internal async Task Delete(string route)
     {
         var response = await _httpClient.DeleteAsync(route);
@@ -124,4 +132,5 @@ public class TestInnerApi : IDisposable
 
         _isDisposed = true;
     }
+
 }

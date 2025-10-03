@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
@@ -184,6 +185,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdateExpectedEndDate(updateModel, changes);
 
+        UpdateWithdrawalDate(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -297,4 +300,32 @@ public class LearningDomainModel : AggregateRoot
         }
     }
 
+    private void UpdateWithdrawalDate(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var latestEpisode = LatestEpisode;
+
+        if (updateModel.Delivery.WithdrawalDate.HasValue)
+        {
+            if(updateModel.Delivery.WithdrawalDate != latestEpisode.LastDayOfLearning)
+            {
+                latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
+                changes.Add(LearningUpdateChanges.Withdrawal);
+
+                var @event = new LearningWithdrawnEvent
+                {
+                    LearningKey = Key,
+                    ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                    Reason = WithdrawReason.WithdrawDuringLearning.ToString(),
+                    LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
+                    EmployerAccountId = LatestEpisode.EmployerAccountId
+                };
+
+                AddEvent(@event);
+            }
+        }
+        else
+        {
+            // To be complete as part of Reverse Withdrawal work
+        }
+    }
 }

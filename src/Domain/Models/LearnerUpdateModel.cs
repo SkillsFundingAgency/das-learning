@@ -2,10 +2,16 @@
 
 public class LearnerUpdateModel
 {
+    public DeliveryDetails Delivery { get; set; }
     public LearningUpdateDetails Learning { get; set; }
     public List<MathsAndEnglishUpdateDetails> MathsAndEnglishCourses { get; set; }
     public List<LearningSupportDetails> LearningSupport { get; set; }
     public OnProgrammeDetails OnProgrammeDetails { get; set; }
+}
+
+public class DeliveryDetails
+{
+    public DateTime? WithdrawalDate { get; set; }
 }
 
 public class LearningUpdateDetails

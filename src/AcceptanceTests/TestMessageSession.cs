@@ -4,6 +4,11 @@ public class TestMessageSession : IMessageSession
 {
     private readonly List<object> _publishedMessages = new List<object>();
 
+    public void ClearEventsOfType<T>()
+    {
+        _publishedMessages.RemoveAll(m => m is T);
+    }
+
     public List<T> ReceivedEvents<T>()
     {
         return _publishedMessages.OfType<T>().ToList();
