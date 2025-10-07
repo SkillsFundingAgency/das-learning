@@ -326,6 +326,16 @@ public class LearningDomainModel : AggregateRoot
         else
         {
             // To be complete as part of Reverse Withdrawal work
+            if (latestEpisode.LastDayOfLearning.HasValue) //todo: this assumes that LDoL = Withdrawal date, but is that right? Could it be a BiL or something else?
+            {
+                latestEpisode.ReverseWithdrawal();
+                changes.Add(LearningUpdateChanges.ReverseWithdrawal);
+
+                //todo: WithdrawalReverted event
+
+            }
+
+
         }
     }
 }

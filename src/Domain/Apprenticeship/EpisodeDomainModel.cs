@@ -257,6 +257,12 @@ public class EpisodeDomainModel
         _entity.LastDayOfLearning = lastDateOfLearning;
     }
 
+    internal void ReverseWithdrawal()
+    {
+        _entity.LearningStatus = LearnerStatus.Active.ToString();
+        _entity.LastDayOfLearning = null;
+    }
+
     private EpisodeDomainModel(Episode entity)
     {
         _entity = entity;
