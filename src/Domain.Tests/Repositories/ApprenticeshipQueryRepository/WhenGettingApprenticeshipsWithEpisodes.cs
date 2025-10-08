@@ -139,6 +139,66 @@ public class WhenGettingApprenticeshipsWithEpisodes
         apprenticeship.CompletionDate.Should().Be(completionDate);
     }
 
+    [Test]
+    public async Task ThenPaginationIsAppliedWhenSpecified()
+    {
+        // Arrange
+        SetUpApprenticeshipQueryRepository();
+
+        var ukprn = _fixture.Create<long>();
+        var apprenticeships = new List<DataAccess.Entities.Learning.Learning>();
+
+        // Create 5 apprenticeships
+        for (int i = 1; i <= 5; i++)
+        {
+            var apprenticeshipKey = _fixture.Create<Guid>();
+            var episodeKey = _fixture.Create<Guid>();
+            var startDate = _fixture.Create<DateTime>();
+            var endDate = startDate.AddYears(1);
+            var trainingCode = $"TC{i}";
+
+            var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
+            var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
+
+            var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+                .With(x => x.Key, apprenticeshipKey)
+                .With(x => x.Episodes, new List<Episode> { episode })
+                .With(x => x.DateOfBirth, startDate.AddYears(-20))
+                .With(x => x.Uln, i.ToString()) // Ensure Uln ordering
+                .Create();
+
+            apprenticeships.Add(apprenticeship);
+        }
+
+        await _dbContext.AddRangeAsync(apprenticeships);
+        await _dbContext.SaveChangesAsync();
+
+        // Getting page 2 with page size of 2
+        int pageSize = 2;
+        int pageOffset = 2;
+
+        // Act
+        var result = await _sut.GetLearningsWithEpisodes(
+            ukprn,
+            limit: pageSize,
+            offset: pageOffset);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Data.Count().Should().Be(pageSize);
+        result.TotalItems.Should().Be(apprenticeships.Count);
+        result.TotalPages.Should().Be((int)Math.Ceiling((double)apprenticeships.Count / pageSize));
+
+        var expectedUlnsForPage = apprenticeships
+            .OrderBy(a => a.Uln)
+            .Skip(pageOffset)
+            .Take(pageSize)
+            .Select(a => a.Uln)
+            .ToList();
+
+        result.Data.Select(a => a.Uln).Should().BeEquivalentTo(expectedUlnsForPage);
+    }
+
     private void AssertApprenticeship(
         DataAccess.Entities.Learning.Learning expected,
         DateTime startDate,

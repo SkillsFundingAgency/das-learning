@@ -202,10 +202,13 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
     }
 
     /// <summary>
-    /// Get apprenticeships with episodes for a provider
+    /// Get learnings with episodes for a provider
     /// </summary>
-    /// <param name="ukprn">The unique provider reference number. Only apprenticeships where the episode with this provider reference will be returned.</param>
-    /// <param name="activeOnDate">If populated, will return only apprenticeships that are active on this date</param>
+    /// <param name="ukprn">The unique provider reference number. Only learnings where the episode with this provider reference will be returned.</param>
+    /// <param name="activeOnDate">If populated, will return only learnings that are active on this date</param>
+    /// <param name="limit">pagination limit</param>
+    /// <param name="offset">pagination offset</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
     public async Task<PagedResult<LearningWithEpisodes>?> GetLearningsWithEpisodes(long ukprn, DateTime? activeOnDate = null, int? limit = null, int? offset = null, CancellationToken cancellationToken = default)
     {
         try

@@ -31,17 +31,16 @@ public class WhenGetApprenticeshipsWithEpisodes
         query.CollectionYear = 2021;
         query.CollectionPeriod = 1;
         var apprenticeships = _fixture.Create<List<LearningWithEpisodes>>();
-        var expectedResponse = new GetLearningsWithEpisodesResponse{ Items = apprenticeships };
 
         _apprenticeshipQueryRepository
-            .Setup(x => x.GetLearningsWithEpisodes(query.Ukprn, It.IsAny<DateTime>(), null, null, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetLearningsWithEpisodes(query.Ukprn, It.IsAny<DateTime>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<LearningWithEpisodes>{ Data = apprenticeships });
 
         // Act
         var actualResult = await _sut.Handle(query);
 
         // Assert
-        actualResult.Should().BeEquivalentTo(expectedResponse);
+        actualResult.Items.Should().BeEquivalentTo(apprenticeships);
     }
 
     [Test]
@@ -61,5 +60,35 @@ public class WhenGetApprenticeshipsWithEpisodes
 
         // Assert
         actualResult.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ThenPagedApprenticeshipsWithEpisodesAreReturnedWhenPaginationSpecified()
+    {
+        // Arrange
+        var query = _fixture.Create<GetLearningsWithEpisodesRequest>();
+        query.CollectionYear = 2021;
+        query.CollectionPeriod = 1;
+        query.Page = 1;
+        query.PageSize = 2;
+        var pagedResult = _fixture.Create<PagedResult<LearningWithEpisodes>>();
+        pagedResult.Data = new List<LearningWithEpisodes>
+        {
+            _fixture.Create<LearningWithEpisodes>(),
+            _fixture.Create<LearningWithEpisodes>()
+        };
+
+        _apprenticeshipQueryRepository
+            .Setup(x => x.GetLearningsWithEpisodes(query.Ukprn, It.IsAny<DateTime>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(pagedResult);
+
+        // Act
+        var actualResult = await _sut.Handle(query);
+
+        // Assert
+        actualResult.Items.Count().Should().Be(query.PageSize);
+        actualResult.PageSize.Should().Be(query.PageSize);
+        actualResult.Page.Should().Be(query.Page);
+        actualResult.TotalItems.Should().Be(pagedResult.TotalItems);
     }
 }

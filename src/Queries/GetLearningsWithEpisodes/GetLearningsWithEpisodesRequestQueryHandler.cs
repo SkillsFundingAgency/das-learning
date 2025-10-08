@@ -22,7 +22,7 @@ public class GetLearningsWithEpisodesRequestQueryHandler : IQueryHandler<GetLear
 
         var learnings = await _learningQueryRepository.GetLearningsWithEpisodes(query.Ukprn, query.CollectionYear.GetLastDay(query.CollectionPeriod), query.Limit, query.Offset);
 
-        if ((bool)learnings?.Data.IsNullOrEmpty())
+        if (learnings?.Data == null || !learnings.Data.Any())
         {
             _logger.LogInformation("No learnings found for {ukprn} (Pagination Limit: {limit} Pagination Offset: {offset})", query.Ukprn, query.Limit, query.Offset);
             return null;
