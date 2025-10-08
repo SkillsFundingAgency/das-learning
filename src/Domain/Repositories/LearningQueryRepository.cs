@@ -4,8 +4,8 @@ using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Extensions;
 using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Validators;
 using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
@@ -215,8 +215,6 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             var apprenticeships = await DbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .ThenInclude(x => x.Prices)
-                .Include(x => x.WithdrawalRequests)
-                .Where(x => x.WithdrawalRequests == null || !x.WithdrawalRequests.Any(y => y.Reason == withdrawFromStartReason || y.Reason == withdrawFromPrivateBeta))
                 .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))
                 .Where(x => !activeOnDate.HasValue || 
                     x.Episodes.Any(episode =>
@@ -236,7 +234,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                                 new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice, p.FundingBandMaximum)).ToList()))
                         .ToList(),
                     apprenticeship.GetAgeAtStartOfApprenticeship(),
-                    apprenticeship.GetWithdrawnDate(),
+                    apprenticeship.GetLastDayOfLearning(),
                     apprenticeship.CompletionDate)
             ).ToList();
         }
@@ -271,46 +269,5 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
         }
 
         return currentPartyIds;
-    }
-
-    public async Task<LearnerStatusDetails?> GetLearnerStatus(Guid apprenticeshipKey)
-    {
-        LearnerStatusDetails? learnerStatus = null;
-
-        try
-        {
-            var apprenticeship = await DbContext.Apprenticeships
-                .Where(a => a.Key == apprenticeshipKey)
-                .Include(a => a.Episodes)
-                .Include(a => a.WithdrawalRequests)
-                .SingleOrDefaultAsync();
-
-            if (apprenticeship == null)
-            {
-                logger.LogInformation("Learning not found for apprenticeship key {key} when attempting to get learner status", apprenticeshipKey);
-                return null;
-            }
-
-
-            var episode = apprenticeship.GetEpisode();
-
-            if (Enum.TryParse<LearnerStatus>(episode.LearningStatus, out var parsedStatus))
-            {
-                var withdrawalRequest = apprenticeship.WithdrawalRequests.SingleOrDefault(x => x.EpisodeKey == episode.Key);
-                learnerStatus = new LearnerStatusDetails
-                {
-                    LearnerStatus = parsedStatus,
-                    WithdrawalChangedDate = withdrawalRequest?.CreatedDate,
-                    WithdrawalReason = withdrawalRequest?.Reason,
-                    LastDayOfLearning = withdrawalRequest?.LastDayOfLearning
-                };
-            }
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error getting learner status for apprenticeship key {key}", apprenticeshipKey);
-        }
-
-        return learnerStatus;
     }
 }

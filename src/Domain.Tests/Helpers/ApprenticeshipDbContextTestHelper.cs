@@ -33,7 +33,6 @@ public static class ApprenticeshipDbContextTestHelper
         FundingPlatform? fundingPlatform = null,
         DateTime? startDate = null,
         LearnerStatus? learnerStatus = null,
-        bool addWithdrawalRequest = false,
         DateTime? endDate = null)
     {
         var episodeKey = _fixture.Create<Guid>();
@@ -57,23 +56,6 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.ApprovalsApprenticeshipId, approvalsApprenticeshipId ?? _fixture.Create<long>())
             .With(x => x.Episodes, new List<Episode>() { episode })
             .Create();
-
-        if (addWithdrawalRequest)
-        {
-            apprenticeship.WithdrawalRequests = new List<WithdrawalRequest>()
-            {
-                new()
-                {
-                    LearningKey = apprenticeshipKey,
-                    CreatedDate = DateTime.UtcNow,
-                    EpisodeKey = episodeKey,
-                    Key = Guid.NewGuid(),
-                    LastDayOfLearning = DateTime.UtcNow.AddDays(-1),
-                    ProviderApprovedBy = _fixture.Create<string>(),
-                    Reason = "WithdrawDuringLearning"
-                }
-            };
-        }
 
         await dbContext.AddAsync(apprenticeship);
         await dbContext.SaveChangesAsync();

@@ -39,22 +39,9 @@ public static class LearningExtensions
         return learning.Episodes.SelectMany(e => e.Prices).Max(p => p.EndDate);
     }
 
-    /// <summary>
-    /// NOTE **** This can be replaced in the future with LastDayOfLearning ****
-    /// 
-    /// This currently returns the Withdraw date which is the last day of learning when the learning was withdrawn
-    /// 
-    /// This is needed for some of the FM36 block details which are assembled in the earnings outer API
-    /// At some point an actual LastDayOfLearning field will be added to the learning entity which will either have 
-    /// actual last day of learning on the course or withdrawn date as its value. 
-    /// At that time LastDayOfLearning can replace this method
-    /// </summary>
-    public static DateTime? GetWithdrawnDate(this Entities.Learning.Learning learning)
+    public static DateTime? GetLastDayOfLearning(this Entities.Learning.Learning learning)
     {
-        if(!learning.WithdrawalRequests.Any())
-            return null;
-
-        return learning.WithdrawalRequests.Select(x=>x.LastDayOfLearning)?.Max();
+        return GetLatestActiveEpisode(learning)?.LastDayOfLearning;
     }
 
     private static Episode? GetLatestActiveEpisode(Entities.Learning.Learning learning)
