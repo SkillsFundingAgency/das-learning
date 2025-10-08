@@ -44,7 +44,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var result = await _sut.GetLearningsWithEpisodes(_fixture.Create<long>());
 
         //Assert
-        result.Should().BeEmpty();
+        result.Data.Should().BeEmpty();
     }
 
     [Test]
@@ -86,7 +86,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         // Assert
         result.Should().NotBeNull();
-        var apprenticeship = result.SingleOrDefault();
+        var apprenticeship = result.Data.SingleOrDefault();
         AssertApprenticeship(apprenticeshipRecord, startDate, endDate, ageAtStartOfApprenticeship, apprenticeship);
 
         var resultEpisode1 = apprenticeship.Episodes.SingleOrDefault(x => x.Key == episode1Key);
@@ -135,7 +135,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         // Assert
         result.Should().NotBeNull();
-        var apprenticeship = result.SingleOrDefault();
+        var apprenticeship = result.Data.SingleOrDefault();
         apprenticeship.CompletionDate.Should().Be(completionDate);
     }
 

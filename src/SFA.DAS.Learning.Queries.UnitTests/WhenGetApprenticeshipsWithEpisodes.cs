@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.Learning.DataTransferObjects;
+using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 
@@ -30,11 +31,11 @@ public class WhenGetApprenticeshipsWithEpisodes
         query.CollectionYear = 2021;
         query.CollectionPeriod = 1;
         var apprenticeships = _fixture.Create<List<LearningWithEpisodes>>();
-        var expectedResponse = new GetLearningsWithEpisodesResponse(query.Ukprn, apprenticeships);
+        var expectedResponse = new GetLearningsWithEpisodesResponse{ Items = apprenticeships };
 
         _apprenticeshipQueryRepository
-            .Setup(x => x.GetLearningsWithEpisodes(query.Ukprn, It.IsAny<DateTime>()))
-            .ReturnsAsync(apprenticeships);
+            .Setup(x => x.GetLearningsWithEpisodes(query.Ukprn, It.IsAny<DateTime>(), null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<LearningWithEpisodes>{ Data = apprenticeships });
 
         // Act
         var actualResult = await _sut.Handle(query);
@@ -52,8 +53,8 @@ public class WhenGetApprenticeshipsWithEpisodes
         query.CollectionPeriod = 1;
 
         _apprenticeshipQueryRepository
-            .Setup(x => x.GetLearningsWithEpisodes(query.Ukprn, It.IsAny<DateTime>()))
-            .ReturnsAsync((List<LearningWithEpisodes>?)null);
+            .Setup(x => x.GetLearningsWithEpisodes(query.Ukprn, It.IsAny<DateTime>(), null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<LearningWithEpisodes>());
 
         // Act
         var actualResult = await _sut.Handle(query);
