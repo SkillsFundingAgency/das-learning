@@ -315,7 +315,9 @@ public class LearningDomainModel : AggregateRoot
             {
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
-                Reason = WithdrawReason.WithdrawDuringLearning.ToString(),
+                Reason = latestEpisode.IsWithdrawnBackToStart
+                    ? WithdrawReason.WithdrawFromStart.ToString()
+                    : WithdrawReason.WithdrawDuringLearning.ToString(),
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
                 EmployerAccountId = LatestEpisode.EmployerAccountId
             };
