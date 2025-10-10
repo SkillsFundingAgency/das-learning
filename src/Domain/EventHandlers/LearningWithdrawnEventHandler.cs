@@ -7,7 +7,7 @@ namespace SFA.DAS.Learning.Domain.EventHandlers
     {
         public async Task Handle(LearningWithdrawnEvent @event, CancellationToken cancellationToken = default(CancellationToken))
         {
-            logger.LogInformation($"Sending LearningWithdrawnEvent for Learning {@event.LearningKey}, LastDayOfLearning {@event.LastDayOfLearning}");
+            logger.LogInformation($"Publishing LearningWithdrawnEvent for Learning {@event.LearningKey}, LastDayOfLearning {@event.LastDayOfLearning}");
 
             var message = new Types.LearningWithdrawnEvent
             {
