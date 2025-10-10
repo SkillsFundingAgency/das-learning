@@ -1,20 +1,28 @@
-﻿using SFA.DAS.Learning.TestHelpers;
+﻿using SFA.DAS.Learning.AcceptanceTests.Helpers;
+using SFA.DAS.Learning.TestHelpers;
 
-namespace SFA.DAS.Learning.AcceptanceTests.Bindings
+namespace SFA.DAS.Learning.AcceptanceTests.Bindings;
+
+[Binding]
+public class DatabasePerScenarioHook
 {
-    [Binding]
-    public class DatabasePerScenarioHook
-    {
-        [BeforeScenario(Order = 2)]
-        public void CreateDatabase(TestContext context)
-        {
-            context.SqlDatabase = new SqlDatabase();
-        }
+    private readonly ScenarioContext _scenarioContext;
 
-        [AfterScenario(Order = 100)]
-        public static void TearDownDatabase(TestContext context)
-        {
-            context.SqlDatabase?.Dispose();
-        }
+    public DatabasePerScenarioHook(ScenarioContext scenarioContext)
+    {
+        _scenarioContext = scenarioContext;
+    }
+
+    [BeforeScenario(Order = 2)]
+    public void CreateDatabase(TestContext context)
+    {
+        context.SqlDatabase = new SqlDatabase();
+        _scenarioContext.SetDbConnectionString(context.SqlDatabase.DatabaseInfo.ConnectionString);
+    }
+
+    [AfterScenario(Order = 100)]
+    public static void TearDownDatabase(TestContext context)
+    {
+        context.SqlDatabase?.Dispose();
     }
 }
