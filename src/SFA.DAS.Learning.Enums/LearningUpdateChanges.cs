@@ -7,5 +7,5 @@ public enum LearningUpdateChanges
     LearningSupport = 2,
     Prices = 3,
     ExpectedEndDate = 4,
-    PersonalDetails = 5
+    PersonalDetails = 7
 }
