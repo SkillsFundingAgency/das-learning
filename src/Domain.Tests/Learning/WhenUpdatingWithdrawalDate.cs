@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
 
@@ -54,6 +55,28 @@ public class WhenUpdatingWithdrawalDate
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
         domainModel.Episodes.First().LastDayOfLearning.Should().Be(withdrawalDate);
         domainModel.Episodes.First().LearningStatus.Should().Be(LearnerStatus.Withdrawn);
+    }
+
+    [Test]
+    public void AndWithdrawalRevered_ThenChangeMade()
+    {
+        //Arrange
+        var withdrawalDate = _fixture.Create<DateTime>();
+        var domainModel = GetLearningDomainModel(withdrawalDate);
+        var updateModel = GetLearnerUpdateModel(domainModel, null);
+
+        //Act
+        var result = domainModel.UpdateLearnerDetails(updateModel);
+
+        //Assert
+        result.Should().Contain(x => x == LearningUpdateChanges.ReverseWithdrawal);
+        domainModel.Episodes.First().LastDayOfLearning.Should().Be(null);
+        domainModel.Episodes.First().LearningStatus.Should().Be(LearnerStatus.Active);
+        domainModel.FlushEvents().Should().ContainEquivalentOf(new WithdrawalRevertedEvent
+        {
+            ApprovalsApprenticeshipId = domainModel.ApprovalsApprenticeshipId,
+            LearningKey = domainModel.Key
+        });
     }
 
     [Test]
