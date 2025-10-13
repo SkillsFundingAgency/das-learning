@@ -199,7 +199,10 @@ public class LearningDomainModel : AggregateRoot
             updateModel.Learning.EmailAddress != EmailAddress)
         {
             _entity.FirstName = updateModel.Learning.FirstName;
+            _entity.LastName = updateModel.Learning.LastName;
+            _entity.EmailAddress = updateModel.Learning.EmailAddress;
 
+            changes.Add(LearningUpdateChanges.PersonalDetails);
 
             var @event = new PersonalDetailsChangedEvent
             {
