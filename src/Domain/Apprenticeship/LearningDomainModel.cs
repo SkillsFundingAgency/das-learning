@@ -306,26 +306,38 @@ public class LearningDomainModel : AggregateRoot
 
         if (updateModel.Delivery.WithdrawalDate.HasValue)
         {
-            if(updateModel.Delivery.WithdrawalDate != latestEpisode.LastDayOfLearning)
+            if (updateModel.Delivery.WithdrawalDate == latestEpisode.LastDayOfLearning) return;
+
+            latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
+            changes.Add(LearningUpdateChanges.Withdrawal);
+
+            var @event = new LearningWithdrawnEvent
             {
-                latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
-                changes.Add(LearningUpdateChanges.Withdrawal);
+                LearningKey = Key,
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                Reason = latestEpisode.IsWithdrawnBackToStart
+                    ? WithdrawReason.WithdrawFromStart.ToString()
+                    : WithdrawReason.WithdrawDuringLearning.ToString(),
+                LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
+                EmployerAccountId = LatestEpisode.EmployerAccountId
+            };
 
-                var @event = new LearningWithdrawnEvent
-                {
-                    LearningKey = Key,
-                    ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
-                    Reason = WithdrawReason.WithdrawDuringLearning.ToString(),
-                    LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
-                    EmployerAccountId = LatestEpisode.EmployerAccountId
-                };
-
-                AddEvent(@event);
-            }
+            AddEvent(@event);
         }
         else
         {
-            // To be complete as part of Reverse Withdrawal work
+            if (!latestEpisode.LastDayOfLearning.HasValue) return;
+
+            latestEpisode.ReverseWithdrawal();
+            changes.Add(LearningUpdateChanges.ReverseWithdrawal);
+
+            var @event = new WithdrawalRevertedEvent
+            {
+                LearningKey = Key,
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId
+            };
+
+            AddEvent(@event);
         }
     }
 }

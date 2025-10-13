@@ -100,6 +100,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 .Excluding(y => y.FirstPrice)
                 .Excluding(y => y.ActiveEpisodePrices)
                 .Excluding(y => y.LearningStatus)
+                .Excluding(y => y.IsWithdrawnBackToStart)
                 .Excluding(y => y.LearningSupport));
         }
 
