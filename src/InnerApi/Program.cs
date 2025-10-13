@@ -58,7 +58,7 @@ public static class Program
         builder.Services.AddScoped<IPagedLinkHeaderService, PagedLinkHeaderService>();
         builder.Services.AddApprenticeshipsOuterApiClient(applicationSettings.ApprenticeshipsOuterApiConfiguration.BaseUrl, applicationSettings.ApprenticeshipsOuterApiConfiguration.Key);
         builder.Services.ConfigureNServiceBusForSend(applicationSettings.NServiceBusConnectionString.GetFullyQualifiedNamespace());
-        builder.Services.AddCommandServices(builder.Configuration).AddEventServices().AddValidators();
+        builder.Services.AddCommandServices(builder.Configuration).AddEventServices();
         builder.Services.AddDasHealthChecks(applicationSettings);
 
         //Add MI authentication

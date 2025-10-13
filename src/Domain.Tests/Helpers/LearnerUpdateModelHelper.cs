@@ -42,6 +42,10 @@ public static class LearnerUpdateModelHelper
                     TrainingPrice = Convert.ToInt32(x.TrainingPrice.Value),
                     EpaoPrice = Convert.ToInt32(x.EndPointAssessmentPrice.Value)
                 }).ToList()
+            },
+            Delivery = new DeliveryDetails
+            {
+                WithdrawalDate = learning.GetEpisode().LastDayOfLearning
             }
         };
     }

@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.UpdateLearner;
-using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Controllers;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.InnerApi.Services;

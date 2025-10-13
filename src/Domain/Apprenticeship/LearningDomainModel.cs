@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
@@ -171,16 +172,6 @@ public class LearningDomainModel : AggregateRoot
         }
     }
 
-    public void WithdrawApprenticeship(string userId, DateTime lastDateOfLearning, string reason, DateTime changeDateTime)
-    {
-        var currentEpisode = LatestEpisode;
-
-        var withdrawRequest = WithdrawalRequestDomainModel.New(_entity.Key, currentEpisode.Key, reason, lastDateOfLearning, changeDateTime, userId);
-        _entity.WithdrawalRequests.Add(withdrawRequest.GetEntity());
-
-        currentEpisode.Withdraw(userId, lastDateOfLearning);
-    }
-
     public LearningUpdateChanges[] UpdateLearnerDetails(LearnerUpdateModel updateModel)
     {
         var changes = new List<LearningUpdateChanges>();
@@ -197,6 +188,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdateExpectedEndDate(updateModel, changes);
 
+        UpdateWithdrawalDate(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -206,10 +199,7 @@ public class LearningDomainModel : AggregateRoot
             updateModel.Learning.EmailAddress != EmailAddress)
         {
             _entity.FirstName = updateModel.Learning.FirstName;
-            _entity.LastName = updateModel.Learning.LastName;
-            _entity.EmailAddress = updateModel.Learning.EmailAddress;
 
-            changes.Add(LearningUpdateChanges.PersonalDetails);
 
             var @event = new PersonalDetailsChangedEvent
             {
@@ -222,6 +212,13 @@ public class LearningDomainModel : AggregateRoot
 
             AddEvent(@event);
         }
+    }
+	
+	public void RemoveLearner()
+    {
+        var latestEpisode = LatestEpisode;
+        var lastDayOfLearning = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
+        latestEpisode.Withdraw(lastDayOfLearning);
     }
 
     private void UpdateLearningDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
@@ -321,6 +318,47 @@ public class LearningDomainModel : AggregateRoot
                 ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
                 LearningKey = Key,
                 PlannedEndDate = EndDate.Value
+            };
+
+            AddEvent(@event);
+        }
+    }
+
+    private void UpdateWithdrawalDate(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var latestEpisode = LatestEpisode;
+
+        if (updateModel.Delivery.WithdrawalDate.HasValue)
+        {
+            if (updateModel.Delivery.WithdrawalDate == latestEpisode.LastDayOfLearning) return;
+
+            latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
+            changes.Add(LearningUpdateChanges.Withdrawal);
+
+            var @event = new LearningWithdrawnEvent
+            {
+                LearningKey = Key,
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                Reason = latestEpisode.IsWithdrawnBackToStart
+                    ? WithdrawReason.WithdrawFromStart.ToString()
+                    : WithdrawReason.WithdrawDuringLearning.ToString(),
+                LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
+                EmployerAccountId = LatestEpisode.EmployerAccountId
+            };
+
+            AddEvent(@event);
+        }
+        else
+        {
+            if (!latestEpisode.LastDayOfLearning.HasValue) return;
+
+            latestEpisode.ReverseWithdrawal();
+            changes.Add(LearningUpdateChanges.ReverseWithdrawal);
+
+            var @event = new WithdrawalRevertedEvent
+            {
+                LearningKey = Key,
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId
             };
 
             AddEvent(@event);

@@ -3,8 +3,9 @@ using SFA.DAS.Learning.Domain.Repositories;
 
 namespace SFA.DAS.Learning.Command.UpdateLearner;
 
-public class UpdateLearnerCommandHandler(ILogger<UpdateLearnerCommandHandler> logger, ILearningRepository learningRepository)
-    : ICommandHandler<UpdateLearnerCommand, UpdateLearnerResult>
+public class UpdateLearnerCommandHandler(
+    ILogger<UpdateLearnerCommandHandler> logger, 
+    ILearningRepository learningRepository) : ICommandHandler<UpdateLearnerCommand, UpdateLearnerResult>
 {
     public async Task<UpdateLearnerResult> Handle(UpdateLearnerCommand command, CancellationToken cancellationToken = default)
     {

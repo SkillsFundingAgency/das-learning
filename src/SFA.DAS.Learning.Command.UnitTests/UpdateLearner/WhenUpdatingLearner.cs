@@ -7,7 +7,6 @@ using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SFA.DAS.Learning.Command.UnitTests.UpdateLearner;
@@ -62,10 +61,7 @@ public class WhenUpdatingLearner
         // Create a single episode
         var singleEpisode = _fixture.Create<EpisodeDomainModel>();
 
-        // Use reflection to set the private _episodes field so that there is only one
-        typeof(LearningDomainModel)
-            .GetField("_episodes", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?.SetValue(domainModel, new List<EpisodeDomainModel> { singleEpisode });
+        TestHelper.SetEpisode(domainModel, singleEpisode);
 
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
                            .ReturnsAsync(domainModel);
