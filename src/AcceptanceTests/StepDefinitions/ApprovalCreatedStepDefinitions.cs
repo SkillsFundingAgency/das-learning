@@ -28,16 +28,67 @@ public class ApprovalCreatedStepDefinitions
     [Given(@"that an apprentice record has been approved by an employer previously")]
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney()
     {
-        var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent> ()
+
+        var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
             .With(_ => _.TrainingCourseVersion, "1.0")
             .With(_ => _.IsOnFlexiPaymentPilot, true)
             .With(_ => _.Uln, _fixture.Create<long>().ToString)
             .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
+            .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
+                new CommitmentsV2.Messages.Events.PriceEpisode
+                {
+                    Cost = 6500,
+                    FromDate = TokenisableDateTime.FromString("currentAY-09-25").DateTime!.Value,
+                    ToDate = TokenisableDateTime.FromString("nextAY-07-31").DateTime,
+                    EndPointAssessmentPrice = 500,
+                    TrainingPrice = 6000
+                }
+            })
             .Create();
 
         await _testContext.TestFunction.PublishEvent(approvalCreatedEvent);
 
-        _scenarioContext["ApprovalCreatedEvent"] = approvalCreatedEvent;
+        _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
+    }
+
+    [Given(@"There is an apprenticeship with the following details")]
+    public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney(Table table)
+    {
+        var row = table.Rows[0];
+        var startDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value;
+        var endDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value;
+        var trainingPrice = decimal.Parse(row["TrainingPrice"]);
+        var epaPrice = decimal.Parse(row["EpaPrice"]);
+
+
+        var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
+            .With(_ => _.TrainingCourseVersion, "1.0")
+            .With(_ => _.IsOnFlexiPaymentPilot, true)
+            .With(_ => _.Uln, _fixture.Create<long>().ToString)
+            .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
+            .With(_ => _.DateOfBirth, startDate.AddYears(-19))
+            .With(_ => _.ActualStartDate, startDate)
+            .With(_ => _.StartDate, startDate)
+            .With(_ => _.EndDate, endDate)
+            .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
+                new CommitmentsV2.Messages.Events.PriceEpisode
+                {
+                    Cost = trainingPrice + epaPrice,
+                    FromDate = startDate,
+                    ToDate = endDate,
+                    EndPointAssessmentPrice = epaPrice,
+                    TrainingPrice = trainingPrice
+                }
+            })
+            .Create();
+
+        await _testContext.TestFunction.PublishEvent(approvalCreatedEvent);
+
+        _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learnerKey = dbConnection.GetLearningKey(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        _scenarioContext.SetLearningKey(learnerKey);
     }
 
     [Given("the funding band maximum for that apprenticeship is set")]
@@ -178,7 +229,7 @@ public class ApprovalCreatedStepDefinitions
         return learningCreatedEvent.Uln == ApprovalCreatedEvent.Uln;
     }
 
-    public CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent ApprovalCreatedEvent => (CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent)_scenarioContext["ApprovalCreatedEvent"];
+    public CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent ApprovalCreatedEvent => _scenarioContext.GetApprenticeshipCreatedEvent();
     public DataAccess.Entities.Learning.Learning Apprenticeship => (DataAccess.Entities.Learning.Learning)_scenarioContext["Learning"];
     public Episode LatestEpisode => (Episode)_scenarioContext["Episode"];
     public EpisodePrice LatestEpisodePrice => (EpisodePrice)_scenarioContext["EpisodePrice"];

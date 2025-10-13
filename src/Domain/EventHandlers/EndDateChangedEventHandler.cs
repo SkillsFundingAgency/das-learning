@@ -7,7 +7,7 @@ namespace SFA.DAS.Learning.Domain.EventHandlers
     {
         public async Task Handle(EndDateChangedEvent @event, CancellationToken cancellationToken = default(CancellationToken))
         {
-            logger.LogInformation($"Sending EndDateChangedEvent for Learning {@event.LearningKey}, ApprovalsApprenticeshipId {@event.ApprovalsApprenticeshipId}, PlannedEndDate: {@event.PlannedEndDate}");
+            logger.LogInformation($"Publishing EndDateChangedEvent for Learning {@event.LearningKey}, ApprovalsApprenticeshipId {@event.ApprovalsApprenticeshipId}, PlannedEndDate: {@event.PlannedEndDate}");
 
             var message = new Types.EndDateChangedEvent
             {
