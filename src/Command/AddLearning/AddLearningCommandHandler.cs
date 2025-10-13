@@ -38,17 +38,17 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         var existingLearning = await _learningRepository.Get(command.Uln, command.ApprovalsApprenticeshipId);
         if (existingLearning != null)
         {
-            _logger.LogInformation($"Learning not created as a record already exists with ULN: {command.Uln} and ApprovalsApprenticeshipId: {command.ApprovalsApprenticeshipId}.");
+            _logger.LogInformation("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
             return;
         }
 
-        _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {approvalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
+        _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
         if (command.ActualStartDate == null)
         {
             throw new Exception(
-                $"{nameof(command.ActualStartDate)} for Learning ({command.ApprenticeshipHashedId} (Approvals Learning Id: {command.ApprovalsApprenticeshipId}) is null. " +
-                $"Learnings funded by DAS should always have an actual start date. ");
+                $"{nameof(command.ActualStartDate)} for Learning ({command.ApprenticeshipHashedId}) with ApprovalsApprenticeshipId: {command.ApprovalsApprenticeshipId} is null. " +
+                "Learnings funded by DAS should always have an actual start date.");
         }
         var startDate = command.ActualStartDate.Value;
         var fundingBandMaximum = await _fundingBandMaximumService.GetFundingBandMaximum(int.Parse(command.TrainingCode), startDate);
@@ -89,7 +89,9 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {
             //2627: violation of unique constraint. 2601: violation of unique index
-            _logger.LogWarning($"Unique constraint violation, uln: {command.Uln}, approvals apprenticeship id: {command.ApprovalsApprenticeshipId}.");
+            _logger.LogWarning(
+                "Unique constraint violation for given Uln and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
+                command.ApprovalsApprenticeshipId);
             return;
         }
 
@@ -101,7 +103,9 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
     private async Task SendEvent(LearningDomainModel learning)
     {
-        _logger.LogInformation("Sending LearningCreatedEvent for ApprovalsApprenticeshipId: {approvalsApprenticeshipId}", learning.ApprovalsApprenticeshipId);
+        _logger.LogInformation(
+            "Sending LearningCreatedEvent for ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
+            learning.ApprovalsApprenticeshipId);
         var learningCreatedEvent = new LearningCreatedEvent
         {
             LearningKey = learning.Key,
