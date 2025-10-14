@@ -24,8 +24,6 @@ public class ApprovalCreatedStepDefinitions
         _fixture = new Fixture();
     }
 
-    //[Given(@"An apprenticeship with only a planned start date has been created as part of the approvals journey")]
-
     [Given(@"An apprenticeship has been created as part of the approvals journey")]
     [Given(@"that an apprentice record has been approved by an employer previously")]
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney()
