@@ -56,6 +56,9 @@ internal static class ScenarioContextExtensions
             },
             Learner = new LearnerUpdateDetails
             {
+                FirstName = apprenticeshipCreatedEvent.FirstName,
+                LastName = apprenticeshipCreatedEvent.LastName,
+                EmailAddress = null,
                 CompletionDate = null
             },
             LearningSupport = new List<LearningSupportUpdatedDetails>(),
