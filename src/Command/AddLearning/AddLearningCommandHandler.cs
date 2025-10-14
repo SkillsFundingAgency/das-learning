@@ -44,12 +44,12 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {approvalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
-        var startDate = GetDateFundingBandMaxIsApplicable(command.PlannedStartDate, command.ActualStartDate);
-        var fundingBandMaximum = await _fundingBandMaximumService.GetFundingBandMaximum(int.Parse(command.TrainingCode), startDate);
+        var fundingBandMaxDate = GetDateFundingBandMaxIsApplicable(command.PlannedStartDate, command.ActualStartDate);
+        var fundingBandMaximum = await _fundingBandMaximumService.GetFundingBandMaximum(int.Parse(command.TrainingCode), fundingBandMaxDate);
 
         if (fundingBandMaximum == null)
             throw new Exception(
-                $"No funding band maximum found for course {command.TrainingCode} for given date {startDate:u}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
+                $"No funding band maximum found for course {command.TrainingCode} for given date {fundingBandMaxDate:u}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
 
         var learning = _learningFactory.CreateNew(
             command.ApprovalsApprenticeshipId,
@@ -62,7 +62,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         learning.AddEpisode(
             command.UKPRN,
             command.EmployerAccountId,
-            startDate,
+            command.ActualStartDate ?? command.PlannedStartDate,
             command.PlannedEndDate,
             command.TotalPrice,
             command.TrainingPrice,

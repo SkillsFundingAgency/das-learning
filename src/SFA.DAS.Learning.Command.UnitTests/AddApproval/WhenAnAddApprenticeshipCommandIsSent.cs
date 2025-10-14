@@ -192,6 +192,33 @@ public class WhenAnAddApprenticeshipCommandIsSent
     }
 
     [Test]
+    public async Task AndNoActualStartDateSet_ThenEpisodeIsCreatedUsingPlannedStartDate()
+    {
+        var command = _fixture.Create<AddLearningCommand>();
+        var trainingCodeInt = _fixture.Create<int>();
+        command.TrainingCode = trainingCodeInt.ToString();
+        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        command.ActualStartDate = null;
+
+        _apprenticeshipFactory.Setup(x => x.CreateNew(
+                command.ApprovalsApprenticeshipId,
+                command.Uln,
+                command.DateOfBirth,
+                command.FirstName,
+                command.LastName,
+                command.ApprenticeshipHashedId))
+            .Returns(apprenticeship);
+
+        _fundingBandMaximumService
+            .Setup(x => x.GetFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime?>()))
+            .ReturnsAsync((int)Math.Ceiling(command.TotalPrice));
+
+        await _commandHandler.Handle(command);
+
+        _apprenticeshipRepository.Verify(x => x.Add(It.Is<LearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
+    }
+
+    [Test]
     public async Task ThenEventPublished()
     {
         // Arrange
