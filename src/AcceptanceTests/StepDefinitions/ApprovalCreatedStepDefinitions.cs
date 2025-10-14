@@ -24,6 +24,8 @@ public class ApprovalCreatedStepDefinitions
         _fixture = new Fixture();
     }
 
+    //[Given(@"An apprenticeship with only a planned start date has been created as part of the approvals journey")]
+
     [Given(@"An apprenticeship has been created as part of the approvals journey")]
     [Given(@"that an apprentice record has been approved by an employer previously")]
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney()
@@ -55,26 +57,35 @@ public class ApprovalCreatedStepDefinitions
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney(Table table)
     {
         var row = table.Rows[0];
-        var startDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value;
         var endDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value;
         var trainingPrice = decimal.Parse(row["TrainingPrice"]);
         var epaPrice = decimal.Parse(row["EpaPrice"]);
 
+        DateTime? actualStartDate = null;
+        if (row.ContainsKey("StartDate") && !string.IsNullOrWhiteSpace(row["StartDate"]))
+            actualStartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value;
+
+        DateTime? plannedStartDate = null;
+        if (row.ContainsKey("PlannedStartDate") && !string.IsNullOrWhiteSpace(row["PlannedStartDate"]))
+            plannedStartDate = TokenisableDateTime.FromString(row["PlannedStartDate"]).DateTime!.Value;
+
+        if(actualStartDate == null && plannedStartDate == null)
+            throw new ArgumentException("Either StartDate (ActualStartDate) or PlannedStartDate must be provided");
 
         var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
             .With(_ => _.TrainingCourseVersion, "1.0")
             .With(_ => _.IsOnFlexiPaymentPilot, true)
             .With(_ => _.Uln, _fixture.Create<long>().ToString)
             .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
-            .With(_ => _.DateOfBirth, startDate.AddYears(-19))
-            .With(_ => _.ActualStartDate, startDate)
-            .With(_ => _.StartDate, startDate)
+            .With(_ => _.DateOfBirth, actualStartDate?.AddYears(-19) ?? plannedStartDate.GetValueOrDefault().AddYears(-19))
+            .With(_ => _.ActualStartDate, actualStartDate)
+            .With(_ => _.StartDate, plannedStartDate ?? actualStartDate.Value)
             .With(_ => _.EndDate, endDate)
             .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
                 new CommitmentsV2.Messages.Events.PriceEpisode
                 {
                     Cost = trainingPrice + epaPrice,
-                    FromDate = startDate,
+                    FromDate = actualStartDate ?? plannedStartDate.Value,
                     ToDate = endDate,
                     EndPointAssessmentPrice = epaPrice,
                     TrainingPrice = trainingPrice
@@ -94,18 +105,34 @@ public class ApprovalCreatedStepDefinitions
     [Given("the funding band maximum for that apprenticeship is set")]
     public void GivenTheFundingBandMaximumForThatApprenticeshipIsSet()
     {
+        SetupFundingBandMaximum();
+    }
+
+    [Given("the funding band maximum for that apprenticeship is set for (.*)")]
+    public void GivenTheFundingBandMaximumForThatApprenticeshipIsSetForDate(TokenisableDateTime date)
+    {
+        SetupFundingBandMaximum(date.DateTime);
+    }
+
+    private void SetupFundingBandMaximum(DateTime? date = null)
+    {
         var fundingBandMaximum = _fixture.Create<int>();
         _scenarioContext["fundingBandMaximum"] = fundingBandMaximum;
 
         _testContext.TestFunction.mockApprenticeshipsOuterApiClient.Reset();
         _testContext.TestFunction.mockApprenticeshipsOuterApiClient
             .Setup(x => x.GetStandard(It.IsAny<int>()))
-            .ReturnsAsync(new GetStandardResponse { MaxFunding = fundingBandMaximum, ApprenticeshipFunding = 
-                new List<GetStandardFundingResponse>
-                {
-                    new() { EffectiveFrom = DateTime.MinValue, EffectiveTo = null, MaxEmployerLevyCap = fundingBandMaximum }
-                }});
+            .ReturnsAsync(new GetStandardResponse
+            {
+                MaxFunding = fundingBandMaximum,
+                ApprenticeshipFunding =
+                    new List<GetStandardFundingResponse>
+                    {
+                        new() { EffectiveFrom = date.GetValueOrDefault(DateTime.MinValue), EffectiveTo = date, MaxEmployerLevyCap = fundingBandMaximum }
+                    }
+            });
     }
+
 
     [Given("a funding band maximum for that apprenticeship and date range is not available")]
     public void GivenAFundingBandMaximumForThatApprenticeshipAndDateRangeIsNotAvailable()
@@ -149,7 +176,7 @@ public class ApprovalCreatedStepDefinitions
 
         var episodePrice = (await dbConnection.GetAllAsync<EpisodePrice>()).Last(x => x.EpisodeKey == episode.Key);
         episodePrice.Should().NotBeNull();
-        episodePrice.StartDate.Should().BeSameDateAs(ApprovalCreatedEvent.ActualStartDate!.Value);
+        episodePrice.StartDate.Should().BeSameDateAs(ApprovalCreatedEvent.ActualStartDate ?? ApprovalCreatedEvent.StartDate);
         episodePrice.EndDate.Should().BeSameDateAs(ApprovalCreatedEvent.EndDate);
         episodePrice.TotalPrice.Should().Be(ApprovalCreatedEvent.PriceEpisodes[0].Cost);
 
