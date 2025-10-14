@@ -44,13 +44,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {approvalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
-        if (command.ActualStartDate == null)
-        {
-            throw new Exception(
-                $"{nameof(command.ActualStartDate)} for Learning ({command.ApprenticeshipHashedId} (Approvals Learning Id: {command.ApprovalsApprenticeshipId}) is null. " +
-                $"Learnings funded by DAS should always have an actual start date. ");
-        }
-        var startDate = command.ActualStartDate.Value;
+        var startDate = GetDateFundingBandMaxIsApplicable(command.PlannedStartDate, command.ActualStartDate);
         var fundingBandMaximum = await _fundingBandMaximumService.GetFundingBandMaximum(int.Parse(command.TrainingCode), startDate);
 
         if (fundingBandMaximum == null)
@@ -97,6 +91,18 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         {
             await SendEvent(learning);
         }
+    }
+
+    private DateTime GetDateFundingBandMaxIsApplicable(DateTime plannedStartDate, DateTime? actualStartDate)
+    {
+        if(actualStartDate.HasValue)
+            return actualStartDate.Value;
+
+        return new DateTime(
+            plannedStartDate.Year,
+            plannedStartDate.Month,
+            DateTime.DaysInMonth(plannedStartDate.Year, plannedStartDate.Month)
+        );
     }
 
     private async Task SendEvent(LearningDomainModel learning)
