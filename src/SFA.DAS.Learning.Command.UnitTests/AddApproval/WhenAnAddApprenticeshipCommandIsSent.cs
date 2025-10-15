@@ -132,7 +132,24 @@ public class WhenAnAddApprenticeshipCommandIsSent
         await _commandHandler.Invoking(x => x.Handle(command, It.IsAny<CancellationToken>())).Should()
             .ThrowAsync<Exception>()
             .WithMessage(
-                $"No funding band maximum found for course {command.TrainingCode} for given date {command.ActualStartDate?.ToString("u")}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
+                $"No funding band maximum found for course {command.TrainingCode} for given ActualStartDate {command.ActualStartDate?.ToString("u")}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
+    }
+
+    [Test]
+    public async Task AndNoActualStartDateSet_ThenExceptionIsThrownWhenNoFundingBandMaximumForTheGivenDateAndCourseCodeIsPresent()
+    {
+        var command = _fixture.Create<AddLearningCommand>();
+        var trainingCodeInt = _fixture.Create<int>();
+        command.TrainingCode = trainingCodeInt.ToString();
+        command.ActualStartDate = null;
+
+        _fundingBandMaximumService.Setup(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime>()))
+            .ReturnsAsync((int?)null);
+
+        await _commandHandler.Invoking(x => x.Handle(command, It.IsAny<CancellationToken>())).Should()
+            .ThrowAsync<Exception>()
+            .WithMessage(
+                $"No funding band maximum found for course {command.TrainingCode} for given PlannedStartDate {command.PlannedStartDate:u}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
     }
 
     [Test]
@@ -162,7 +179,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
     }
 
     [Test]
-    public async Task AndNoActualStartDateSet_ThenFundingBandMaximumIsFetchedUsingLastDayOfMonthForPlannedStartDate()
+    public async Task AndNoActualStartDateSet_ThenFundingBandMaximumIsFetchedUsingNextApplicableRecordForPlannedStartDate()
     {
         var command = _fixture.Create<AddLearningCommand>();
         var trainingCodeInt = _fixture.Create<int>();
@@ -172,9 +189,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         command.ActualStartDate = null;
         command.PlannedStartDate = new DateTime(2023, 1, 15);
-        var expectedDate = new DateTime(2023, 1, 31);
 
-        _fundingBandMaximumService.Setup(x => x.GetFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime?>()))
+        _fundingBandMaximumService.Setup(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime>()))
             .ReturnsAsync(fundingBandMaximum);
 
         _apprenticeshipFactory.Setup(x => x.CreateNew(
@@ -188,7 +204,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         await _commandHandler.Handle(command);
 
-        _fundingBandMaximumService.Verify(x => x.GetFundingBandMaximum(trainingCodeInt, expectedDate));
+        _fundingBandMaximumService.Verify(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, command.PlannedStartDate));
     }
 
     [Test]
@@ -210,7 +226,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .Returns(apprenticeship);
 
         _fundingBandMaximumService
-            .Setup(x => x.GetFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime?>()))
+            .Setup(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime>()))
             .ReturnsAsync((int)Math.Ceiling(command.TotalPrice));
 
         await _commandHandler.Handle(command);
