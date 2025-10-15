@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Repositories;
+
 namespace SFA.DAS.Learning.Command.UpdateLearner;
 
 public class UpdateLearnerCommandHandler(
@@ -21,7 +22,15 @@ public class UpdateLearnerCommandHandler(
         if (changes.Length == 0)
         {
             logger.LogInformation("No changes detected for learner with key {LearnerKey}", command.LearnerKey);
-            return new UpdateLearnerResult();
+            return new UpdateLearnerResult
+            {
+                Changes = [],
+                AgeAtStartOfLearning = learning.AgeAtStartOfLearning,
+                LearningEpisodeKey = learning.LatestEpisode.Key,
+                Prices = learning.LatestEpisode.EpisodePrices
+                    .Select(x => (UpdateLearnerResult.EpisodePrice)x)
+                    .ToList()
+            };
         }
 
         logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearnerKey, changes);

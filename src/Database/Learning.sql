@@ -8,6 +8,7 @@
     [DateOfBirth] DATETIME NOT NULL,
     [ApprenticeshipHashedId] NVARCHAR(100) NULL, 
     [CompletionDate] DATETIME NULL,
+    [EmailAddress] NVARCHAR(320) NULL,
     CONSTRAINT UQ_Learning_ApprovalsApprenticeshipId_Uln UNIQUE (ApprovalsApprenticeshipId, Uln)
 )
 GO

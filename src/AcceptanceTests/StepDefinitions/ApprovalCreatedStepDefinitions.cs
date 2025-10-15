@@ -79,6 +79,8 @@ public class ApprovalCreatedStepDefinitions
             .With(_ => _.ActualStartDate, actualStartDate)
             .With(_ => _.StartDate, plannedStartDate ?? actualStartDate.Value)
             .With(_ => _.EndDate, endDate)
+            .With(_ => _.FirstName, _fixture.Create<string>())
+            .With(_ => _.LastName, _fixture.Create<string>())
             .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
                 new CommitmentsV2.Messages.Events.PriceEpisode
                 {
