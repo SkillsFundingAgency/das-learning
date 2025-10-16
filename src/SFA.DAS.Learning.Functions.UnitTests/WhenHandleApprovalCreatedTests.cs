@@ -53,7 +53,8 @@ namespace SFA.DAS.Learning.Functions.UnitTests
                         c.ApprenticeshipHashedId == @event.ApprenticeshipHashedId &&
                         c.FundingPlatform == (@event.IsOnFlexiPaymentPilot.HasValue ? (@event.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null) &&
                         c.AccountLegalEntityId == @event.AccountLegalEntityId &&
-                        c.TrainingCourseVersion == @event.TrainingCourseVersion
+                        c.TrainingCourseVersion == @event.TrainingCourseVersion &&
+                        c.PlannedStartDate == @event.StartDate
                     ),
                     It.IsAny<CancellationToken>()));
         }
@@ -94,19 +95,6 @@ namespace SFA.DAS.Learning.Functions.UnitTests
 
             commandDispatcher.Verify(x =>
                 x.Send(It.Is<AddLearningCommand>(c => c.FundingType == FundingType.Transfer),
-                    It.IsAny<CancellationToken>()));
-        }
-
-        [Test]
-        public async Task WhenNoActualStartDateThenPlannedStartDateUsed()
-        {
-            var @event = _fixture.Build<ApprenticeshipCreatedEvent>().Without(x => x.ActualStartDate).Create();
-            var commandDispatcher = new Mock<ICommandDispatcher>();
-            var handler = new ApprenticeshipCreatedEventHandler(commandDispatcher.Object, new Mock<ILogger<ApprenticeshipCreatedEventHandler>>().Object);
-            await handler.Handle(@event, new TestableMessageHandlerContext());
-
-            commandDispatcher.Verify(x =>
-                x.Send(It.Is<AddLearningCommand>(c => c.ActualStartDate == @event.StartDate),
                     It.IsAny<CancellationToken>()));
         }
     }

@@ -11,6 +11,7 @@ namespace SFA.DAS.Learning.Command.AddLearning
         public long EmployerAccountId { get; set; }
         public string LegalEntityName { get; set; }
         public DateTime? ActualStartDate { get; set; }
+        public DateTime PlannedStartDate { get; set; }
         public DateTime PlannedEndDate { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal? TrainingPrice { get; set; } 
