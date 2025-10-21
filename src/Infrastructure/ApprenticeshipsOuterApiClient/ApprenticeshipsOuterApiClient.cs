@@ -14,7 +14,6 @@ public class ApprenticeshipsOuterApiClient : IApprenticeshipsOuterApiClient
     private const string GetStandardUrl = "TrainingCourses/standards";
     private const string GetAcademicYearUrl = "CollectionCalendar/academicYear";
     private const string ApprenticeshipControllerUrl = "Apprenticeship";
-    private const string HandleWithdrawalNotificationsUrl = "handleWithdrawalNotifications";
 
     public ApprenticeshipsOuterApiClient(HttpClient httpClient)
     {
@@ -56,13 +55,4 @@ public class ApprenticeshipsOuterApiClient : IApprenticeshipsOuterApiClient
         throw new Exception($"Status code: {response.StatusCode} returned from apprenticeships outer api.");
     }
 
-    public async Task HandleWithdrawalNotifications(Guid apprenticeshipKey, HandleWithdrawalNotificationsRequest request)
-    {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{ApprenticeshipControllerUrl}/{apprenticeshipKey}/{HandleWithdrawalNotificationsUrl}");
-        requestMessage.Content = new StringContent(JsonConvert.SerializeObject(request), System.Text.Encoding.UTF8, "application/json");
-        
-        var response = await _httpClient.SendAsync(requestMessage).ConfigureAwait(false);
-
-        response.EnsureSuccessStatusCode();
-    }
 }
