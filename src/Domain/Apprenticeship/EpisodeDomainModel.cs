@@ -28,6 +28,7 @@ public class EpisodeDomainModel
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
+    public bool IsWithdrawnBackToStart => LearningStatus == LearnerStatus.Withdrawn && _entity.LastDayOfLearning == FirstPrice.StartDate;
     public EpisodePriceDomainModel LatestPrice
     {
         get
@@ -255,6 +256,12 @@ public class EpisodeDomainModel
     {
         _entity.LearningStatus = LearnerStatus.Withdrawn.ToString();
         _entity.LastDayOfLearning = lastDateOfLearning;
+    }
+
+    internal void ReverseWithdrawal()
+    {
+        _entity.LearningStatus = LearnerStatus.Active.ToString();
+        _entity.LastDayOfLearning = null;
     }
 
     private EpisodeDomainModel(Episode entity)

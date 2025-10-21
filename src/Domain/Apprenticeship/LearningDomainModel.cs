@@ -20,6 +20,7 @@ public class LearningDomainModel : AggregateRoot
     public string Uln => _entity.Uln;
     public string FirstName => _entity.FirstName;
     public string LastName => _entity.LastName;
+    public string? EmailAddress => _entity.EmailAddress;
     public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
@@ -175,6 +176,8 @@ public class LearningDomainModel : AggregateRoot
     {
         var changes = new List<LearningUpdateChanges>();
 
+        UpdateLearnerDetails(updateModel, changes);
+
         UpdateLearningDetails(updateModel, changes);
 
         UpdateMathsAndEnglishDetails(updateModel, changes);
@@ -190,7 +193,31 @@ public class LearningDomainModel : AggregateRoot
         return changes.ToArray();
     }
 
-    public void RemoveLearner()
+    private void UpdateLearnerDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        if (updateModel.Learning.FirstName != FirstName || updateModel.Learning.LastName != LastName ||
+            updateModel.Learning.EmailAddress != EmailAddress)
+        {
+            _entity.FirstName = updateModel.Learning.FirstName;
+            _entity.LastName = updateModel.Learning.LastName;
+            _entity.EmailAddress = updateModel.Learning.EmailAddress;
+
+            changes.Add(LearningUpdateChanges.PersonalDetails);
+
+            var @event = new PersonalDetailsChangedEvent
+            {
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                LearningKey = Key,
+                FirstName = FirstName,
+                LastName = LastName,
+                EmailAddress = EmailAddress
+            };
+
+            AddEvent(@event);
+        }
+    }
+	
+	public void RemoveLearner()
     {
         var latestEpisode = LatestEpisode;
         var lastDayOfLearning = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
@@ -306,26 +333,38 @@ public class LearningDomainModel : AggregateRoot
 
         if (updateModel.Delivery.WithdrawalDate.HasValue)
         {
-            if(updateModel.Delivery.WithdrawalDate != latestEpisode.LastDayOfLearning)
+            if (updateModel.Delivery.WithdrawalDate == latestEpisode.LastDayOfLearning) return;
+
+            latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
+            changes.Add(LearningUpdateChanges.Withdrawal);
+
+            var @event = new LearningWithdrawnEvent
             {
-                latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
-                changes.Add(LearningUpdateChanges.Withdrawal);
+                LearningKey = Key,
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                Reason = latestEpisode.IsWithdrawnBackToStart
+                    ? WithdrawReason.WithdrawFromStart.ToString()
+                    : WithdrawReason.WithdrawDuringLearning.ToString(),
+                LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
+                EmployerAccountId = LatestEpisode.EmployerAccountId
+            };
 
-                var @event = new LearningWithdrawnEvent
-                {
-                    LearningKey = Key,
-                    ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
-                    Reason = WithdrawReason.WithdrawDuringLearning.ToString(),
-                    LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
-                    EmployerAccountId = LatestEpisode.EmployerAccountId
-                };
-
-                AddEvent(@event);
-            }
+            AddEvent(@event);
         }
         else
         {
-            // To be complete as part of Reverse Withdrawal work
+            if (!latestEpisode.LastDayOfLearning.HasValue) return;
+
+            latestEpisode.ReverseWithdrawal();
+            changes.Add(LearningUpdateChanges.ReverseWithdrawal);
+
+            var @event = new WithdrawalRevertedEvent
+            {
+                LearningKey = Key,
+                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId
+            };
+
+            AddEvent(@event);
         }
     }
 }

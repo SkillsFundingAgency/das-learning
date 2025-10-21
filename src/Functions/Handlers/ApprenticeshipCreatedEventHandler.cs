@@ -18,7 +18,7 @@ namespace SFA.DAS.Learning.Functions.Handlers
             await commandDispatcher.Send(new AddLearningCommand
             {
                 TrainingCode = @event.TrainingCode,
-                ActualStartDate = @event.ActualStartDate ?? @event.StartDate,
+                ActualStartDate = @event.ActualStartDate,
                 TotalPrice = @event.PriceEpisodes[0].Cost,
                 TrainingPrice = @event.PriceEpisodes[0].TrainingPrice,
                 EndPointAssessmentPrice = @event.PriceEpisodes[0].EndPointAssessmentPrice,
@@ -36,7 +36,8 @@ namespace SFA.DAS.Learning.Functions.Handlers
                 ApprenticeshipHashedId = @event.ApprenticeshipHashedId,
                 FundingPlatform = @event.IsOnFlexiPaymentPilot.HasValue ? (@event.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null,
                 AccountLegalEntityId = @event.AccountLegalEntityId,
-                TrainingCourseVersion = @event.TrainingCourseVersion
+                TrainingCourseVersion = @event.TrainingCourseVersion,
+                PlannedStartDate = @event.StartDate
             });
         }
 

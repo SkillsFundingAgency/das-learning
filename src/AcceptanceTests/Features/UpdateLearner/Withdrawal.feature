@@ -2,7 +2,7 @@
 
 Tests for WithdrawalDate under UpdateLearner
 
-Scenario: Apprenticeship withdrawal during learning recorded in ILR
+Scenario: Apprenticeship withdrawal during learning
 	Given There is an apprenticeship with the following details
 		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
@@ -10,7 +10,7 @@ Scenario: Apprenticeship withdrawal during learning recorded in ILR
 		| Property       | Value           |
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
-	Then the Learning Status for the Learning is set to “Withdrawn”
+	Then the Learning Status for the Learning is set to Withdrawn
 	And the “last day of learning” for the Learning is set to currentAY-11-25
 	And a LearningWithdrawnEvent is sent
 	And the following changes are returned
@@ -30,7 +30,7 @@ Scenario: Identical Withdrawal requests do not result in Earnings recalculation
 	And the following changes are returned
 		| Change     |
 
-Scenario: Apprentice Withdrawn via the ILR - following previous removal
+Scenario: Apprentice Withdrawn following previous removal
 	Given There is an apprenticeship with the following details
 		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
@@ -39,9 +39,25 @@ Scenario: Apprentice Withdrawn via the ILR - following previous removal
 		| Property       | Value           |
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
-	Then the Learning Status for the Learning is set to “Withdrawn”
+	Then the Learning Status for the Learning is set to Withdrawn
 	And the “last day of learning” for the Learning is set to currentAY-11-25
 	And a LearningWithdrawnEvent is sent
 	And the following changes are returned
-		| Change     |
-		| Withdrawal |
+		| Change          |
+		| Withdrawal      |
+
+Scenario: Apprentice Reverse Withdrawal
+	Given There is an apprenticeship with the following details
+		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
+		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
+	And SLD have previously informed us that the learner is to be removed
+	And an update request has the following data
+		| Property       | Value |
+		| WithdrawalDate | null  |
+	When the update request is sent
+	Then the Learning Status for the Learning is set to Active
+	And the “last day of learning” for the Learning is set to null
+	#And a LearningWithdrawnEvent is sent --todo: withdrawal reversal event instead
+	And the following changes are returned
+		| Change            |
+		| ReverseWithdrawal |
