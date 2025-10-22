@@ -132,11 +132,28 @@ public class WhenAnAddApprenticeshipCommandIsSent
         await _commandHandler.Invoking(x => x.Handle(command, It.IsAny<CancellationToken>())).Should()
             .ThrowAsync<Exception>()
             .WithMessage(
-                $"No funding band maximum found for course {command.TrainingCode} for given date {command.ActualStartDate?.ToString("u")}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
+                $"No funding band maximum found for course {command.TrainingCode} for given ActualStartDate {command.ActualStartDate?.ToString("u")}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
     }
 
     [Test]
-    public async Task ThenFundingBandMaximumIsFetchedUsingStartDate()
+    public async Task AndNoActualStartDateSet_ThenExceptionIsThrownWhenNoFundingBandMaximumForTheGivenDateAndCourseCodeIsPresent()
+    {
+        var command = _fixture.Create<AddLearningCommand>();
+        var trainingCodeInt = _fixture.Create<int>();
+        command.TrainingCode = trainingCodeInt.ToString();
+        command.ActualStartDate = null;
+
+        _fundingBandMaximumService.Setup(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime>()))
+            .ReturnsAsync((int?)null);
+
+        await _commandHandler.Invoking(x => x.Handle(command, It.IsAny<CancellationToken>())).Should()
+            .ThrowAsync<Exception>()
+            .WithMessage(
+                $"No funding band maximum found for course {command.TrainingCode} for given PlannedStartDate {command.PlannedStartDate:u}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
+    }
+
+    [Test]
+    public async Task AndActualStartDateSet_ThenFundingBandMaximumIsFetchedUsingActualStartDate()
     {
         var command = _fixture.Create<AddLearningCommand>();
         var trainingCodeInt = _fixture.Create<int>();
@@ -159,6 +176,62 @@ public class WhenAnAddApprenticeshipCommandIsSent
         await _commandHandler.Handle(command);
 
         _fundingBandMaximumService.Verify(x => x.GetFundingBandMaximum(trainingCodeInt, command.ActualStartDate));
+    }
+
+    [Test]
+    public async Task AndNoActualStartDateSet_ThenFundingBandMaximumIsFetchedUsingNextApplicableRecordForPlannedStartDate()
+    {
+        var command = _fixture.Create<AddLearningCommand>();
+        var trainingCodeInt = _fixture.Create<int>();
+        command.TrainingCode = trainingCodeInt.ToString();
+        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var fundingBandMaximum = _fixture.Create<int>();
+
+        command.ActualStartDate = null;
+        command.PlannedStartDate = new DateTime(2023, 1, 15);
+
+        _fundingBandMaximumService.Setup(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime>()))
+            .ReturnsAsync(fundingBandMaximum);
+
+        _apprenticeshipFactory.Setup(x => x.CreateNew(
+                command.ApprovalsApprenticeshipId,
+                command.Uln,
+                command.DateOfBirth,
+                command.FirstName,
+                command.LastName,
+                command.ApprenticeshipHashedId))
+            .Returns(apprenticeship);
+
+        await _commandHandler.Handle(command);
+
+        _fundingBandMaximumService.Verify(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, command.PlannedStartDate));
+    }
+
+    [Test]
+    public async Task AndNoActualStartDateSet_ThenEpisodeIsCreatedUsingPlannedStartDate()
+    {
+        var command = _fixture.Create<AddLearningCommand>();
+        var trainingCodeInt = _fixture.Create<int>();
+        command.TrainingCode = trainingCodeInt.ToString();
+        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        command.ActualStartDate = null;
+
+        _apprenticeshipFactory.Setup(x => x.CreateNew(
+                command.ApprovalsApprenticeshipId,
+                command.Uln,
+                command.DateOfBirth,
+                command.FirstName,
+                command.LastName,
+                command.ApprenticeshipHashedId))
+            .Returns(apprenticeship);
+
+        _fundingBandMaximumService
+            .Setup(x => x.GetNextApplicableFundingBandMaximum(trainingCodeInt, It.IsAny<DateTime>()))
+            .ReturnsAsync((int)Math.Ceiling(command.TotalPrice));
+
+        await _commandHandler.Handle(command);
+
+        _apprenticeshipRepository.Verify(x => x.Add(It.Is<LearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
     }
 
     [Test]
