@@ -30,7 +30,6 @@ public class WhenAnEpisodeIsAdded
         var episode = EpisodeDomainModel.Get(_fixture.Build<Episode>()
             .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
             .With(x => x.PaymentsFrozen, false)
-            .With(x => x.LearningStatus, "Active")
             .With(x => x.LastDayOfLearning, (DateTime?)null)
             .Create());
 

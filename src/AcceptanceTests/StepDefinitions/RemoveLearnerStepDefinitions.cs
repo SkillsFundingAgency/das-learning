@@ -28,13 +28,6 @@ public class RemoveLearnerStepDefinitions
 
     }
 
-    [Then(@"the Learning Status for the Learning is set to (.*)")]
-    public async Task ThenTheCompletionStatusForTheLearningIsSetTo(string expectedStatus)
-    {
-        var learning = await GetCurrentLearning();
-        learning.Episodes.First().LearningStatus.Should().Be(expectedStatus);
-    }
-
     [Then(@"“last day of learning” for the Learning is set to its “Learning Start Date”")]
     public async Task ThenLastDayOfLearningForTheLearningIsSetToItsLearningStartDate()
     {

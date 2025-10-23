@@ -13,7 +13,6 @@
     [TrainingCode] NCHAR(10) NOT NULL,
     [TrainingCourseVersion] NVARCHAR(10) NULL,
     [PaymentsFrozen] BIT NOT NULL DEFAULT (0), 
-    [LearningStatus] NVARCHAR(50) NOT NULL DEFAULT 'Active', 
     [LastDayOfLearning] DATETIME NULL
 )
 GO
@@ -22,9 +21,8 @@ ADD CONSTRAINT FK_Episode_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.Lear
 GO
 CREATE INDEX IX_LearningKey ON [dbo].[Episode] (LearningKey);
 GO
-CREATE NONCLUSTERED INDEX [IX_Ukprn_LearningStatus] ON [dbo].[Episode]
+CREATE NONCLUSTERED INDEX [IX_Ukprn] ON [dbo].[Episode]
 (
-	[Ukprn] ASC,
-	[LearningStatus] ASC
+	[Ukprn] ASC
 )
 GO

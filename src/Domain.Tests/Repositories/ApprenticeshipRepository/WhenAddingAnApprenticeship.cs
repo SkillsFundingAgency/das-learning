@@ -66,7 +66,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             var episode = EpisodeDomainModel.Get(_fixture.Build<Episode>()
                 .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
                 .With(x => x.PaymentsFrozen, false)
-                .With(x => x.LearningStatus, "Active")
                 .With(x => x.LastDayOfLearning, (DateTime?)null)
                 .Create());
 
@@ -99,7 +98,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 .Excluding(y => y.EpisodePrices)
                 .Excluding(y => y.FirstPrice)
                 .Excluding(y => y.ActiveEpisodePrices)
-                .Excluding(y => y.LearningStatus)
                 .Excluding(y => y.IsWithdrawnBackToStart)
                 .Excluding(y => y.LearningSupport));
         }
