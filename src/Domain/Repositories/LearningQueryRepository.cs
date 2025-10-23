@@ -219,7 +219,8 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 .Where(x => !activeOnDate.HasValue || 
                     x.Episodes.Any(episode =>
                         episode.Prices.Any(price => price.EndDate >= activeOnDate.Value.StartOfCurrentAcademicYear()) && // end date is at least after the start of this academic year
-                         episode.Prices.Any(price => price.StartDate <= activeOnDate.Value)     // start date is at least before the requested period
+                        episode.Prices.Any(price => price.StartDate <= activeOnDate.Value) &&      // start date is at least before the requested date
+                        (!episode.LastDayOfLearning.HasValue || episode.LastDayOfLearning.Value >= activeOnDate.Value) // last day of learning is either null or on/after the requested date
                 ))
                 .ToListAsync();
 
