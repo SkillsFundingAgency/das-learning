@@ -8,8 +8,6 @@ using SFA.DAS.Learning.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
@@ -37,7 +35,6 @@ public class WhenUpdatingWithdrawalDate
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
         domainModel.Episodes.First().LastDayOfLearning.Should().BeNull();
-        domainModel.Episodes.First().LearningStatus.Should().Be(LearnerStatus.Active);
     }
 
     [Test]
@@ -54,7 +51,6 @@ public class WhenUpdatingWithdrawalDate
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
         domainModel.Episodes.First().LastDayOfLearning.Should().Be(withdrawalDate);
-        domainModel.Episodes.First().LearningStatus.Should().Be(LearnerStatus.Withdrawn);
     }
 
     [Test]
@@ -71,7 +67,6 @@ public class WhenUpdatingWithdrawalDate
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.ReverseWithdrawal);
         domainModel.Episodes.First().LastDayOfLearning.Should().Be(null);
-        domainModel.Episodes.First().LearningStatus.Should().Be(LearnerStatus.Active);
         domainModel.FlushEvents().Should().ContainEquivalentOf(new WithdrawalRevertedEvent
         {
             ApprovalsApprenticeshipId = domainModel.ApprovalsApprenticeshipId,
@@ -93,7 +88,6 @@ public class WhenUpdatingWithdrawalDate
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.Withdrawal);
         domainModel.Episodes.First().LastDayOfLearning.Should().Be(withdrawalDate);
-        domainModel.Episodes.First().LearningStatus.Should().Be(LearnerStatus.Withdrawn);
     }
 
     private LearningDomainModel GetLearningDomainModel(DateTime? withdrawalDate)
@@ -102,14 +96,6 @@ public class WhenUpdatingWithdrawalDate
         var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();
 
         episode.LastDayOfLearning = withdrawalDate;
-        if(withdrawalDate.HasValue)
-        {
-            episode.LearningStatus = LearnerStatus.Withdrawn.ToString();
-        }
-        else
-        {
-            episode.LearningStatus = LearnerStatus.Active.ToString();
-        }
 
         entity.Episodes = new List<DataAccess.Entities.Learning.Episode> { episode };
         return LearningDomainModel.Get(entity);

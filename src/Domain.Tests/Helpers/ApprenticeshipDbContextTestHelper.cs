@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers;
@@ -32,8 +31,8 @@ public static class ApprenticeshipDbContextTestHelper
         long? approvalsApprenticeshipId = null,
         FundingPlatform? fundingPlatform = null,
         DateTime? startDate = null,
-        LearnerStatus? learnerStatus = null,
-        DateTime? endDate = null)
+        DateTime? endDate = null,
+        DateTime? lastDayOfLearning = null)
     {
         var episodeKey = _fixture.Create<Guid>();
         var episodePrice = _fixture.Build<EpisodePrice>()
@@ -48,7 +47,7 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.Ukprn, ukprn ?? _fixture.Create<long>())
             .With(x => x.FundingPlatform, fundingPlatform ?? _fixture.Create<FundingPlatform>())
             .With(x => x.Prices, new List<EpisodePrice> { episodePrice })
-            .With(x => x.LearningStatus, learnerStatus != null ? learnerStatus.ToString() : _fixture.Create<LearnerStatus>().ToString())
+            .With(x => x.LastDayOfLearning, lastDayOfLearning)
             .Create();
 
         var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.Learning>()
