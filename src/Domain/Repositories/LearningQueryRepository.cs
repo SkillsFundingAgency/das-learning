@@ -7,6 +7,9 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Threading;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
@@ -199,31 +202,50 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
     }
 
     /// <summary>
-    /// Get apprenticeships with episodes for a provider
+    /// Get learnings with episodes for a provider
     /// </summary>
-    /// <param name="ukprn">The unique provider reference number. Only apprenticeships where the episode with this provider reference will be returned.</param>
-    /// <param name="activeOnDate">If populated, will return only apprenticeships that are active on this date</param>
-    public async Task<List<LearningWithEpisodes>?> GetLearningsWithEpisodes(long ukprn, DateTime? activeOnDate = null)
+    /// <param name="ukprn">The unique provider reference number. Only learnings where the episode with this provider reference will be returned.</param>
+    /// <param name="activeOnDate">If populated, will return only learnings that are active on this date</param>
+    /// <param name="limit">pagination limit</param>
+    /// <param name="offset">pagination offset</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    public async Task<PagedResult<LearningWithEpisodes>?> GetLearningsWithEpisodes(long ukprn, DateTime? activeOnDate = null, int? limit = null, int? offset = null, CancellationToken cancellationToken = default)
     {
-        List<LearningWithEpisodes>? apprenticeshipWithEpisodes = null;
-
         try
         {
             var withdrawFromStartReason = WithdrawReason.WithdrawFromStart.ToString();
             var withdrawFromPrivateBeta = WithdrawReason.WithdrawFromBeta.ToString();
 
-            var apprenticeships = await DbContext.Apprenticeships
+            var query = DbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .ThenInclude(x => x.Prices)
-                .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))
-                .Where(x => !activeOnDate.HasValue || 
+                .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn && e.FundingPlatform == FundingPlatform.DAS))
+                .Where(x => !activeOnDate.HasValue ||
                     x.Episodes.Any(episode =>
                         episode.Prices.Any(price => price.EndDate >= activeOnDate.Value.StartOfCurrentAcademicYear()) && // end date is at least after the start of this academic year
                          episode.Prices.Any(price => price.StartDate <= activeOnDate.Value)     // start date is at least before the requested period
                 ))
-                .ToListAsync();
+                .OrderBy(x => x.Uln)
+                .AsNoTracking();
 
-            apprenticeshipWithEpisodes = apprenticeships.Select(apprenticeship =>
+            List<DataAccess.Entities.Learning.Learning> apprenticeships;
+
+            var totalItems = await query.CountAsync(cancellationToken);
+            var totalPages = (int)Math.Ceiling((double)totalItems / limit.GetValueOrDefault());
+
+            if (limit.HasValue && offset.HasValue)
+            {
+                apprenticeships = await query
+                    .Skip(offset.Value)
+                    .Take(limit.Value)
+                    .ToListAsync(cancellationToken);
+            }
+            else
+            {
+                apprenticeships = await query.ToListAsync(cancellationToken);
+            }
+
+            var apprenticeshipWithEpisodes = apprenticeships.Select(apprenticeship =>
                 new LearningWithEpisodes(
                     apprenticeship.Key,
                     apprenticeship.Uln,
@@ -237,13 +259,19 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                     apprenticeship.GetLastDayOfLearning(),
                     apprenticeship.CompletionDate)
             ).ToList();
+
+            return new PagedResult<LearningWithEpisodes>
+            {
+                Data = apprenticeshipWithEpisodes,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error getting apprenticeships with episodes for provider UKPRN {Ukprn}", ukprn);
+            return null;
         }
-
-        return apprenticeshipWithEpisodes;
     }
 
     public async Task<CurrentPartyIds?> GetCurrentPartyIds(Guid apprenticeshipKey)
