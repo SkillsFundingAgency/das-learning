@@ -219,7 +219,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             var query = DbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .ThenInclude(x => x.Prices)
-                .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))
+                .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn && e.FundingPlatform == FundingPlatform.DAS))
                 .Where(x => !activeOnDate.HasValue ||
                     x.Episodes.Any(episode =>
                         episode.Prices.Any(price => price.EndDate >= activeOnDate.Value.StartOfCurrentAcademicYear()) && // end date is at least after the start of this academic year

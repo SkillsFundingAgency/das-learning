@@ -257,6 +257,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
             .With(x => x.Prices, prices.ToList())
             .With(x => x.Ukprn, ukprn)
             .With(x => x.TrainingCode, trainingCode)
+            .With(x=> x.FundingPlatform, DAS.Learning.Enums.FundingPlatform.DAS)
             .Create();
     }
 }
