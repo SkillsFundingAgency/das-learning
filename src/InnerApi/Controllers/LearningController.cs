@@ -151,15 +151,21 @@ public class LearningController : ControllerBase
     /// <param name="ukprn">Ukprn</param>
     /// <param name="collectionYear">Collection Year</param>
     /// <param name="collectionPeriod">Collection Period</param>
+    /// <param name="page">Page number</param>
+    /// <param name="pageSize">Number of items per page</param>
     /// <returns>GetLearningsWithEpisodesResponse containing learning, episode, and price data</returns>
     [HttpGet("{ukprn}/{collectionYear}/{collectionPeriod}")]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> GetLearningsForFm36(long ukprn, short collectionYear, byte collectionPeriod)
+    public async Task<IActionResult> GetLearningsForFm36(long ukprn, short collectionYear, byte collectionPeriod, [FromQuery] int? page = null, [FromQuery] int? pageSize = null)
     {
-        var request = new GetLearningsWithEpisodesRequest { Ukprn = ukprn, CollectionYear = collectionYear, CollectionPeriod = collectionPeriod };
+        var request = new GetLearningsWithEpisodesRequest { Ukprn = ukprn, CollectionYear = collectionYear, CollectionPeriod = collectionPeriod, Page = page ?? -1, PageSize = pageSize};
         var response = await _queryDispatcher.Send<GetLearningsWithEpisodesRequest, GetLearningsWithEpisodesResponse?>(request);
         if (response == null) return NotFound();
-        return Ok(response);
+
+        if (page != null && pageSize != null)
+            return Ok(response);
+        else
+            return Ok(response.Items);
     }
 
 
