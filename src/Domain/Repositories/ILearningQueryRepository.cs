@@ -18,6 +18,9 @@ public interface ILearningQueryRepository
     /// </summary>
     /// <param name="ukprn">The unique provider reference number. Only learnings where the episode with this provider reference will be returned.</param>
     /// <param name="activeOnDate">If populated, will return only learnings that are active on this date</param>
-    Task<List<LearningWithEpisodes>?> GetLearningsWithEpisodes(long ukprn, DateTime? activeOnDate = null);
+    /// <param name="limit">pagination limit</param>
+    /// <param name="offset">pagination offset</param>
+    /// <param name="cancellationToken">Cancellation Token</param>
+    Task<PagedResult<LearningWithEpisodes>?> GetLearningsWithEpisodes(long ukprn, DateTime? activeOnDate = null, int? limit = null, int? offset = null, CancellationToken cancellationToken = default);
     Task<CurrentPartyIds?> GetCurrentPartyIds(Guid apprenticeshipKey);
 }
