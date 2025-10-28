@@ -231,8 +231,12 @@ components:
         application/json:
           schema:
             oneOf:
-            - $ref: '#/components/schemas/simpleLearningRecord'
-            - $ref: '#/components/schemas/detailedLearningRecord'
+            - $ref: '#/components/schemas/simpleApprenticeshipRecord'
+            - $ref: '#/components/schemas/simpleShortApprenticeshipRecord'
+            - $ref: '#/components/schemas/simpleFoundationApprenticeshipRecord'
+            - $ref: '#/components/schemas/detailedApprenticeshipRecord'
+            - $ref: '#/components/schemas/detailedShortApprenticeshipRecord'
+            - $ref: '#/components/schemas/detailedFoundationApprenticeshipRecord'
 
     apimLearnerRecordIdsResponse:
       description: A paged apprenticeship response
@@ -322,7 +326,10 @@ components:
         learners:
           type: array
           items:
-            $ref: '#/components/schemas/simpleLearningRecord'
+            oneOf:  
+            - $ref: '#/components/schemas/simpleApprenticeshipRecord'
+            - $ref: '#/components/schemas/simpleShortApprenticeshipRecord'
+            - $ref: '#/components/schemas/simpleFoundationApprenticeshipRecord'
         total:
           type: integer
           minimum: 0
@@ -348,7 +355,10 @@ components:
         learners:
           type: array
           items:
-            $ref: '#/components/schemas/detailedLearningRecord'
+            oneOf:  
+            - $ref: '#/components/schemas/detailedApprenticeshipRecord'
+            - $ref: '#/components/schemas/detailedFoundationApprenticeshipRecord'
+            - $ref: '#/components/schemas/detailedShortApprenticeshipRecord'
         total:
           type: integer
           minimum: 0
@@ -403,16 +413,36 @@ components:
           type: string
           format: uuid
 
-    simpleLearningRecord:
+    commonRecord:
       type: object
       properties:
         learningKey:
           type: string
           format: uuid
+        learningType:
+          type: string
+          enum:
+          - apprenticeship
+          - shortApprenticeship
+          - foundationApprenticeship
         uri:
           type: string
           format: uri 
           example: /providers/{ukprn}/learning/{guid}?status=new&view=summary
+        
+    simpleShortApprenticeshipRecord:
+      allOf: 
+      - $ref: '#/components/schemas/simpleApprenticeshipRecord'
+
+    simpleFoundationApprenticeshipRecord:
+      allOf: 
+      - $ref: '#/components/schemas/simpleApprenticeshipRecord'
+    
+    simpleApprenticeshipRecord:
+      allOf:
+      - $ref: '#/components/schemas/commonRecord'
+      type: object
+      properties:
         uln:
           type: integer
         firstName:
@@ -475,16 +505,19 @@ components:
         - plannedOTJTrainingHours
         - isFlexiJob
 
-    detailedLearningRecord:
+    detailedShortApprenticeshipRecord:
+      allOf:
+      - $ref: '#/components/schemas/commonRecord'
+
+    detailedFoundationApprenticeshipRecord:
+      allOf:
+      - $ref: '#/components/schemas/commonRecord'
+
+    detailedApprenticeshipRecord:
+      allOf:
+      - $ref: '#/components/schemas/commonRecord'
       type: object
       properties:
-        learningKey:
-          type: string
-          format: uuid
-        uri:
-          type: string
-          format: uri 
-          example: /providers/{ukprn}/learning/{guid}?status=new&view=detailed
         learner:
           type: object
           properties:
