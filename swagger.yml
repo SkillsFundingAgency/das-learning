@@ -429,7 +429,13 @@ components:
           type: string
           format: uri 
           example: /providers/{ukprn}/learning/{guid}?status=new&view=summary
-        
+        state:
+          type: string
+          enum:
+          - new
+          - approved
+          - hasPendingChanges
+      
     simpleShortApprenticeshipRecord:
       allOf: 
       - $ref: '#/components/schemas/simpleApprenticeshipRecord'
