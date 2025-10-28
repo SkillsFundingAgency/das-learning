@@ -89,8 +89,11 @@ public static class Program
         
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseWhen(ctx => ctx.Request.Path.StartsWithSegments("/swagger"), subApp =>
+            {
+                subApp.UseSwagger();
+                subApp.UseSwaggerUI();
+            });
         }
 
         app.UseDasHealthChecks();
