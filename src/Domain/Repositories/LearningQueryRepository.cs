@@ -37,10 +37,17 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))
             .Where(x => x.Episodes.Any(e =>
                 e.Prices.Any(p =>
-                    (p.StartDate >= dates.Start && p.StartDate <= dates.End)
-                    | (p.EndDate >= dates.Start && p.EndDate <= dates.End)
-                    | (p.StartDate <= dates.End && p.EndDate >= dates.Start)
-                ) && (!e.LastDayOfLearning.HasValue || e.LastDayOfLearning >= dates.End )))
+                    (p.StartDate >= dates.Start && p.StartDate <= dates.End)    // Start date is within academic year
+                    | (p.EndDate >= dates.Start && p.EndDate <= dates.End)      // End date is within academic year     
+                    | (p.StartDate <= dates.End && p.EndDate >= dates.Start)    // Start date is before academic year and end date is after academic year
+                    &&
+                    ( !e.LastDayOfLearning.HasValue ||
+                    ( 
+                        e.LastDayOfLearning.Value >= dates.Start &&             // Last day of learning is after the start of academic year
+                        e.LastDayOfLearning != p.StartDate)                     // and last day of learning is not the same as start date
+                    )
+                ))
+            )
             .OrderBy(x => x.ApprovalsApprenticeshipId)
             .AsNoTracking();
 

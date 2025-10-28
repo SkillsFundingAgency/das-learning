@@ -16,12 +16,14 @@ public class ApprovalCreatedStepDefinitions
     private readonly ScenarioContext _scenarioContext;
     private readonly TestContext _testContext;
     private readonly Fixture _fixture;
+    private readonly LearningDataSeeder _learningDataSeeder;
 
     public ApprovalCreatedStepDefinitions(ScenarioContext scenarioContext, TestContext testContext)
     {
         _scenarioContext = scenarioContext;
         _testContext = testContext;
         _fixture = new Fixture();
+        _learningDataSeeder = new LearningDataSeeder(_scenarioContext, _testContext, _fixture);
     }
 
     [Given(@"An apprenticeship has been created as part of the approvals journey")]
@@ -67,33 +69,7 @@ public class ApprovalCreatedStepDefinitions
         if (row.ContainsKey("PlannedStartDate") && !string.IsNullOrWhiteSpace(row["PlannedStartDate"]))
             plannedStartDate = TokenisableDateTime.FromString(row["PlannedStartDate"]).DateTime!.Value;
 
-        if(actualStartDate == null && plannedStartDate == null)
-            throw new ArgumentException("Either StartDate (ActualStartDate) or PlannedStartDate must be provided");
-
-        var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
-            .With(_ => _.TrainingCourseVersion, "1.0")
-            .With(_ => _.IsOnFlexiPaymentPilot, true)
-            .With(_ => _.Uln, _fixture.Create<long>().ToString)
-            .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
-            .With(_ => _.DateOfBirth, actualStartDate?.AddYears(-19) ?? plannedStartDate.GetValueOrDefault().AddYears(-19))
-            .With(_ => _.ActualStartDate, actualStartDate)
-            .With(_ => _.StartDate, plannedStartDate ?? actualStartDate.Value)
-            .With(_ => _.EndDate, endDate)
-            .With(_ => _.FirstName, _fixture.Create<string>())
-            .With(_ => _.LastName, _fixture.Create<string>())
-            .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
-                new CommitmentsV2.Messages.Events.PriceEpisode
-                {
-                    Cost = trainingPrice + epaPrice,
-                    FromDate = actualStartDate ?? plannedStartDate.Value,
-                    ToDate = endDate,
-                    EndPointAssessmentPrice = epaPrice,
-                    TrainingPrice = trainingPrice
-                }
-            })
-            .Create();
-
-        await _testContext.TestFunction.PublishEvent(approvalCreatedEvent);
+        var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(actualStartDate,  endDate, trainingPrice, epaPrice, plannedStartDate);
 
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
 

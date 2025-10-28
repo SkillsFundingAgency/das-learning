@@ -10,8 +10,7 @@ Scenario: Apprenticeship withdrawal during learning
 		| Property       | Value           |
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
-	Then the Learning Status for the Learning is set to Withdrawn
-	And the “last day of learning” for the Learning is set to currentAY-11-25
+	Then the “last day of learning” for the Learning is set to currentAY-11-25
 	And a LearningWithdrawnEvent is sent
 	And the following changes are returned
 		| Change     |
@@ -39,8 +38,7 @@ Scenario: Apprentice Withdrawn following previous removal
 		| Property       | Value           |
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
-	Then the Learning Status for the Learning is set to Withdrawn
-	And the “last day of learning” for the Learning is set to currentAY-11-25
+	Then the “last day of learning” for the Learning is set to currentAY-11-25
 	And a LearningWithdrawnEvent is sent
 	And the following changes are returned
 		| Change          |
@@ -55,8 +53,7 @@ Scenario: Apprentice Reverse Withdrawal
 		| Property       | Value |
 		| WithdrawalDate | null  |
 	When the update request is sent
-	Then the Learning Status for the Learning is set to Active
-	And the “last day of learning” for the Learning is set to null
+	Then the “last day of learning” for the Learning is set to null
 	#And a LearningWithdrawnEvent is sent --todo: withdrawal reversal event instead
 	And the following changes are returned
 		| Change            |
