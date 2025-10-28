@@ -175,6 +175,41 @@ public class WhenGettingApprenticeshipsWithEpisodes
     }
 
     [Test]
+    public async Task ThenApprenticeshipIsNotReturnedWhenWithdrawnFromStart()
+    {
+        // Arrange
+        SetUpApprenticeshipQueryRepository();
+
+        var apprenticeshipKey = _fixture.Create<Guid>();
+        var episodeKey = _fixture.Create<Guid>();
+        var ukprn = _fixture.Create<long>();
+        var startDate = new DateTime(2025, 8, 1);
+        var endDate = new DateTime(2026, 7, 31);
+        var activeDate = new DateTime(2025, 12, 1); // within the range
+        var trainingCode = _fixture.Create<string>();
+
+        var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
+        var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
+        episode.LastDayOfLearning = startDate; //withdrawn back to start
+
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+            .With(x => x.Key, apprenticeshipKey)
+            .With(x => x.Episodes, new List<Episode> { episode })
+            .With(x => x.DateOfBirth, startDate.AddYears(-20))
+            .With(x => x.Uln, _fixture.Create<long>().ToString())
+            .Create();
+
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _sut.GetLearningsWithEpisodes(ukprn, activeDate);
+
+        // Assert
+        result.Data.Should().BeNullOrEmpty();
+    }
+
+    [Test]
     public async Task ThenApprenticeshipIsNotReturnedWhenNotActiveOnGivenDate()
     {
         // Arrange
@@ -268,45 +303,6 @@ public class WhenGettingApprenticeshipsWithEpisodes
         result.Data.Select(a => a.Uln).Should().BeEquivalentTo(expectedUlnsForPage);
     }
 
-    [Test]
-    public async Task ThenApprenticeshipIsNotReturnedWhenLastDayOfLearningIsBeforeActiveOnDate()
-    {
-        // Arrange
-        SetUpApprenticeshipQueryRepository();
-
-        var apprenticeshipKey = _fixture.Create<Guid>();
-        var episodeKey = _fixture.Create<Guid>();
-        var ukprn = _fixture.Create<long>();
-        var trainingCode = _fixture.Create<string>();
-
-        var startDate = new DateTime(2025, 8, 1);
-        var endDate = new DateTime(2026, 7, 31);
-        var activeOnDate = new DateTime(2025, 12, 1);
-
-        var lastDayOfLearning = new DateTime(2025, 11, 30);
-
-        var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
-
-        var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
-        episode.LastDayOfLearning = lastDayOfLearning;
-
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
-            .With(x => x.Key, apprenticeshipKey)
-            .With(x => x.Episodes, new List<Episode> { episode })
-            .With(x => x.DateOfBirth, startDate.AddYears(-22))
-            .With(x => x.Uln, _fixture.Create<long>().ToString())
-            .Create();
-
-        await _dbContext.AddAsync(apprenticeshipRecord);
-        await _dbContext.SaveChangesAsync();
-
-        // Act
-        var result = await _sut.GetLearningsWithEpisodes(ukprn, activeOnDate);
-
-        // Assert
-        result.Data.Should().BeEmpty("because LastDayOfLearning is before the active on date");
-    }
-
     private void AssertApprenticeship(
         DataAccess.Entities.Learning.Learning expected,
         DateTime startDate,
@@ -365,6 +361,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
             .With(x => x.Prices, prices.ToList())
             .With(x => x.Ukprn, ukprn)
             .With(x => x.TrainingCode, trainingCode)
+            .With(x => x.LastDayOfLearning, new DateTime?())
             .With(x=> x.FundingPlatform, DAS.Learning.Enums.FundingPlatform.DAS)
             .Create();
     }
