@@ -213,9 +213,6 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
     {
         try
         {
-            var withdrawFromStartReason = WithdrawReason.WithdrawFromStart.ToString();
-            var withdrawFromPrivateBeta = WithdrawReason.WithdrawFromBeta.ToString();
-
             var query = DbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .ThenInclude(x => x.Prices)
@@ -223,8 +220,9 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 .Where(x => !activeOnDate.HasValue ||
                     x.Episodes.Any(episode =>
                         episode.Prices.Any(price => price.EndDate >= activeOnDate.Value.StartOfCurrentAcademicYear()) && // end date is at least after the start of this academic year
-                         episode.Prices.Any(price => price.StartDate <= activeOnDate.Value)     // start date is at least before the requested period
-                ))
+                        episode.Prices.Any(price => price.StartDate <= activeOnDate.Value) &&      // start date is at least before the requested date
+                        !(episode.LastDayOfLearning.HasValue && episode.LastDayOfLearning.Value == episode.Prices.Min(p => p.StartDate)) //not withdrawn back to start
+                        ))
                 .OrderBy(x => x.Uln)
                 .AsNoTracking();
 
