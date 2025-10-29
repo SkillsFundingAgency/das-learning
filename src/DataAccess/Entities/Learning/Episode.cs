@@ -26,7 +26,6 @@ public class Episode
     public string? TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
     public List<EpisodePrice> Prices { get; set; }
-    public string LearningStatus { get; set; }
     public DateTime? LastDayOfLearning { get; set; }
     public List<LearningSupport> LearningSupport { get; set; }
 }

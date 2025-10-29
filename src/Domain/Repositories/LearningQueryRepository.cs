@@ -40,8 +40,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                     (p.StartDate >= dates.Start && p.StartDate <= dates.End)
                     | (p.EndDate >= dates.Start && p.EndDate <= dates.End)
                     | (p.StartDate <= dates.End && p.EndDate >= dates.Start)
-                )))
-            .Where(x => x.Episodes.Any(e => e.LearningStatus == nameof(LearnerStatus.Active)))
+                ) && (!e.LastDayOfLearning.HasValue || e.LastDayOfLearning >= dates.End )))
             .OrderBy(x => x.ApprovalsApprenticeshipId)
             .AsNoTracking();
 

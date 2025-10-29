@@ -23,12 +23,11 @@ public class EpisodeDomainModel
     public string TrainingCode => _entity.TrainingCode;
     public string TrainingCourseVersion => _entity.TrainingCourseVersion;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
-    public LearnerStatus LearningStatus => Enum.Parse<LearnerStatus>(_entity.LearningStatus);
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
-    public bool IsWithdrawnBackToStart => LearningStatus == LearnerStatus.Withdrawn && _entity.LastDayOfLearning == FirstPrice.StartDate;
+    public bool IsWithdrawnBackToStart => _entity.LastDayOfLearning == FirstPrice.StartDate;
     public EpisodePriceDomainModel LatestPrice
     {
         get
@@ -79,8 +78,7 @@ public class EpisodeDomainModel
             AccountLegalEntityId = accountLegalEntityId,
             TrainingCode = trainingCode,
             TrainingCourseVersion = trainingCourseVersion,
-            PaymentsFrozen = false,
-            LearningStatus = LearnerStatus.Active.ToString()
+            PaymentsFrozen = false
         });
     }
 
@@ -254,13 +252,11 @@ public class EpisodeDomainModel
 
     internal void Withdraw(DateTime lastDateOfLearning)
     {
-        _entity.LearningStatus = LearnerStatus.Withdrawn.ToString();
         _entity.LastDayOfLearning = lastDateOfLearning;
     }
 
     internal void ReverseWithdrawal()
     {
-        _entity.LearningStatus = LearnerStatus.Active.ToString();
         _entity.LastDayOfLearning = null;
     }
 
@@ -269,14 +265,4 @@ public class EpisodeDomainModel
         _entity = entity;
         _episodePrices = entity.Prices.Select(EpisodePriceDomainModel.Get).ToList();
     }
-}
-
-/// <summary>
-/// Note there are 2 learner status enums in this repo. (The other is in SFA.DAS.Apprenticeships.Types). The other enum is used for calculated
-/// status's and is not persisted. This enum is persisted in the database.
-/// </summary>
-public enum LearnerStatus
-{
-    Active,
-    Withdrawn
 }
