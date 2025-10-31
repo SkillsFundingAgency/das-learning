@@ -30,7 +30,7 @@ internal static class ScenarioContextExtensions
             throw new KeyNotFoundException("Cannot start populating UpdateLearnerRequest until a Learner is created",ex);
         }
 
-        var request = CreateUpdateLearnerRequestFromApprenticeshipCreatedEvent(apprenticeshipCreatedEvent);
+        var request = apprenticeshipCreatedEvent.BuildUpdateLearnerRequest();
 
         context.SetUpdateLearnerRequest(request);
         return request;
@@ -44,40 +44,19 @@ internal static class ScenarioContextExtensions
     internal static UpdateLearnerResult GetUpdateLearnerResult(this ScenarioContext context) => context.Get<UpdateLearnerResult>();
     internal static void SetUpdateLearnerResult(this ScenarioContext context, UpdateLearnerResult updateLearnerResult) => context.Set(updateLearnerResult);
 
-    private static UpdateLearnerRequest CreateUpdateLearnerRequestFromApprenticeshipCreatedEvent(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent apprenticeshipCreatedEvent)
+    /// <summary>
+    /// Ensures each call returns a unique Uln starting from 10001
+    /// </summary>
+    internal static long GetNextUln(this ScenarioContext context)
     {
-        var priceEpisode = apprenticeshipCreatedEvent.PriceEpisodes.Single();
+        if (context.ContainsKey("NextUln")) 
+        { 
+            var nextUln = context.Get<long>("NextUln");
+            context.Set(nextUln + 1, "NextUln");
+            return nextUln;
+        }
 
-        var request = new UpdateLearnerRequest
-        {
-            Delivery = new Delivery
-            {
-                WithdrawalDate = null
-            },
-            Learner = new LearnerUpdateDetails
-            {
-                FirstName = apprenticeshipCreatedEvent.FirstName,
-                LastName = apprenticeshipCreatedEvent.LastName,
-                EmailAddress = null,
-                CompletionDate = null
-            },
-            LearningSupport = new List<LearningSupportUpdatedDetails>(),
-            MathsAndEnglishCourses = new List<MathsAndEnglish>(),
-            OnProgramme = new OnProgrammeDetails
-            {
-                Costs = new List<Cost>
-                {
-                    new Cost
-                    {
-                        EpaoPrice = (int?)priceEpisode.EndPointAssessmentPrice,
-                        FromDate = apprenticeshipCreatedEvent.ActualStartDate!.Value,
-                        TrainingPrice = (int)priceEpisode.TrainingPrice!
-                    }
-                },
-                ExpectedEndDate = apprenticeshipCreatedEvent.EndDate
-            }
-        };
-
-        return request;
+        context.Set<long>(10001, "NextUln");
+        return 10001;
     }
 }

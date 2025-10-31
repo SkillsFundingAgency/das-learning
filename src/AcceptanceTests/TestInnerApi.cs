@@ -73,6 +73,11 @@ public class TestInnerApi : IDisposable
         });
     }
 
+    internal async Task<T> Get<T>(string route)
+    {
+        var response = await _httpClient.GetAsync(route);
+        return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync())!;
+    }
 
     public async Task Patch<T>(string route, T body)
     {
