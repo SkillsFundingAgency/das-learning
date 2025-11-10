@@ -1,9 +1,3 @@
-﻿IF EXISTS (
-    SELECT 1
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = 'EpisodePrice'
-      AND COLUMN_NAME = 'IsDeleted'
-)
-BEGIN
-    EXEC('DELETE FROM EpisodePrice WHERE IsDeleted = 1');
-END
+﻿/*
+Pre-deployment script
+*/
