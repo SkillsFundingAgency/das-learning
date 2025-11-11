@@ -52,6 +52,9 @@ public class UpdateLearnerStepDefinitions
                 case "ExpectedEndDate":
                     updateRequest.OnProgramme.ExpectedEndDate = TokenisableDateTime.FromString(valueString).DateTime!.Value;
                     break;
+                case "PauseDate":
+                    updateRequest.OnProgramme.PauseDate = TokenisableDateTime.FromString(valueString).DateTime;
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -134,7 +137,15 @@ public class UpdateLearnerStepDefinitions
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.CompletionDate = completionDate.DateTime;
+        learning.CompletionDate.Should().Be(completionDate.DateTime);
+    }
+
+    [Then(@"the Pause Date for the Learning is set to (.*)")]
+    public async Task ThenThePauseDateForTheLearningIsSetToCurrentAY(TokenisableDateTime pauseDate)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learning.Episodes.Single().PauseDate.Should().Be(pauseDate.DateTime);
     }
 
     [Then(@"the following maths and english details are stored")]
