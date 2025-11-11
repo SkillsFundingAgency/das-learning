@@ -41,7 +41,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         public async Task ThenApprenticeshipUpdatedInDataStore()
         {
             // Arrange
-            await SetUpApprenticeshipRepository();
+            SetUpApprenticeshipRepository();
             var apprenticeshipKey = _fixture.Create<Guid>();
             await _dbContext.AddApprenticeship(apprenticeshipKey);
             var apprenticeship = await _dbContext.Apprenticeships
@@ -63,7 +63,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         public async Task ThenEpisodeUpdatedInDataStore()
         {
             // Arrange
-            await SetUpApprenticeshipRepository();
+            SetUpApprenticeshipRepository();
             var apprenticeshipKey = _fixture.Create<Guid>();
             await _dbContext.AddApprenticeship(apprenticeshipKey);
             var apprenticeship = await _dbContext.Apprenticeships
@@ -84,7 +84,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         public async Task ThenEpisodePriceUpdatedInDataStore()
         {
             // Arrange
-            await SetUpApprenticeshipRepository();
+            SetUpApprenticeshipRepository();
             var apprenticeshipKey = _fixture.Create<Guid>();
             await _dbContext.AddApprenticeship(apprenticeshipKey);
             var apprenticeship = await _dbContext.Apprenticeships
@@ -102,7 +102,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             _dbContext.Episodes.Single().Prices.Single().FundingBandMaximum.Should().Be(12345);
         }
 
-        private async Task SetUpApprenticeshipRepository()
+        private void SetUpApprenticeshipRepository()
         {
             _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
             _apprenticeshipFactory = new Mock<ILearningFactory>();
