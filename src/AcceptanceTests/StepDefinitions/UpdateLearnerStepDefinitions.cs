@@ -228,7 +228,10 @@ public class UpdateLearnerStepDefinitions
                 Course = parsedValues.GetValueOrDefault("course", "Maths"),
                 StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
                 PlannedEndDate = TokenisableDateTime.FromString(parsedValues["PlannedEndDate"]).DateTime!.Value,
-                Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000"))
+                Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000")),
+                WithdrawalDate = parsedValues.TryGetValue("WithdrawalDate", out var parsedWithdrawalDate)
+                    ? TokenisableDateTime.FromString(parsedWithdrawalDate).DateTime!.Value
+                    : null
             });
         }
 
