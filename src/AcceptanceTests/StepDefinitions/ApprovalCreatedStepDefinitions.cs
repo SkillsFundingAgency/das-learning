@@ -48,7 +48,7 @@ public class ApprovalCreatedStepDefinitions
             })
             .Create();
 
-        await _testContext.TestFunction.PublishEvent(approvalCreatedEvent);
+        await _testContext.TestFunction!.PublishEvent(approvalCreatedEvent);
 
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
     }
@@ -95,7 +95,7 @@ public class ApprovalCreatedStepDefinitions
         var fundingBandMaximum = _fixture.Create<int>();
         _scenarioContext["fundingBandMaximum"] = fundingBandMaximum;
 
-        _testContext.TestFunction.mockApprenticeshipsOuterApiClient.Reset();
+        _testContext.TestFunction!.mockApprenticeshipsOuterApiClient.Reset();
         _testContext.TestFunction.mockApprenticeshipsOuterApiClient
             .Setup(x => x.GetStandard(It.IsAny<int>()))
             .ReturnsAsync(new GetStandardResponse
@@ -115,7 +115,7 @@ public class ApprovalCreatedStepDefinitions
     {
         var fundingBandMaximum = _fixture.Create<int>();
         _scenarioContext["fundingBandMaximum"] = fundingBandMaximum;
-        _testContext.TestFunction.mockApprenticeshipsOuterApiClient.Setup(x => x.GetStandard(It.IsAny<int>())).ReturnsAsync(new GetStandardResponse
+        _testContext.TestFunction!.mockApprenticeshipsOuterApiClient.Setup(x => x.GetStandard(It.IsAny<int>())).ReturnsAsync(new GetStandardResponse
         {
             MaxFunding = fundingBandMaximum,
             ApprenticeshipFunding = new List<GetStandardFundingResponse>
