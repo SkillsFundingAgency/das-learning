@@ -10,5 +10,5 @@ public enum LearningUpdateChanges
     Withdrawal = 5,
     ReverseWithdrawal = 6,
 	PersonalDetails = 7,
-    MathsAndEnglishWithdrawal = 8
+    MathsAndEnglishWithdrawal = 10
 }
