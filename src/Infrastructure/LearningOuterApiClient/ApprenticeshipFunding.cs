@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
+namespace SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 
 [ExcludeFromCodeCoverage]
 public class ApprenticeshipFunding

@@ -6,15 +6,15 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 using SFA.DAS.Learning.Infrastructure.Services;
 
 namespace SFA.DAS.Learning.Infrastructure.UnitTests
 {
     public class WhenGettingFundingBandMaximum
     {
-        private Mock<IApprenticeshipsOuterApiClient> _apprenticeshipsOuterApiClient;
+        private Mock<ILearningOuterApiClient> _learningOuterApiClient;
         private FundingBandMaximumService _service;
         private Fixture _fixture;
 
@@ -22,8 +22,8 @@ namespace SFA.DAS.Learning.Infrastructure.UnitTests
         public void Setup()
         {
             _fixture = new Fixture();
-            _apprenticeshipsOuterApiClient = new Mock<IApprenticeshipsOuterApiClient>();
-            _service = new FundingBandMaximumService(_apprenticeshipsOuterApiClient.Object, new Mock<ILogger<FundingBandMaximumService>>().Object);
+            _learningOuterApiClient = new Mock<ILearningOuterApiClient>();
+            _service = new FundingBandMaximumService(_learningOuterApiClient.Object, new Mock<ILogger<FundingBandMaximumService>>().Object);
         }
 
         [Test]
@@ -31,7 +31,7 @@ namespace SFA.DAS.Learning.Infrastructure.UnitTests
         {
             var courseCode = _fixture.Create<int>();
             var getStandardResponse = _fixture.Create<GetStandardResponse>();
-            _apprenticeshipsOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
+            _learningOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
             var result = await _service.GetFundingBandMaximum(courseCode, null);
             result.Should().BeNull();
         }
@@ -46,7 +46,7 @@ namespace SFA.DAS.Learning.Infrastructure.UnitTests
             getStandardResponse.ApprenticeshipFunding[0].EffectiveTo = new DateTime(2022, 05, 05);
             getStandardResponse.ApprenticeshipFunding[1].EffectiveFrom = new DateTime(2022, 05, 06);
             getStandardResponse.ApprenticeshipFunding[1].EffectiveTo = null;
-            _apprenticeshipsOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
+            _learningOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
             var result = await _service.GetFundingBandMaximum(courseCode, new DateTime(2022, 01, 01));
             result.Should().Be(getStandardResponse.ApprenticeshipFunding[0].MaxEmployerLevyCap);
         }
@@ -61,7 +61,7 @@ namespace SFA.DAS.Learning.Infrastructure.UnitTests
             getStandardResponse.ApprenticeshipFunding[0].EffectiveTo = new DateTime(2022, 05, 05);
             getStandardResponse.ApprenticeshipFunding[1].EffectiveFrom = new DateTime(2022, 05, 06);
             getStandardResponse.ApprenticeshipFunding[1].EffectiveTo = null;
-            _apprenticeshipsOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
+            _learningOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
             var result = await _service.GetFundingBandMaximum(courseCode, new DateTime(2022, 05, 07));
             result.Should().Be(getStandardResponse.ApprenticeshipFunding[1].MaxEmployerLevyCap);
         }
@@ -78,7 +78,7 @@ namespace SFA.DAS.Learning.Infrastructure.UnitTests
             getStandardResponse.ApprenticeshipFunding[0].EffectiveTo = new DateTime(2022, 05, 05);
             getStandardResponse.ApprenticeshipFunding[1].EffectiveFrom = new DateTime(2022, 05, 06);
             getStandardResponse.ApprenticeshipFunding[1].EffectiveTo = null;
-            _apprenticeshipsOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
+            _learningOuterApiClient.Setup(x => x.GetStandard(courseCode)).ReturnsAsync(getStandardResponse);
             var result = await _service.GetFundingBandMaximum(courseCode, actualStartDate);
             result.Should().BeNull();
         }
