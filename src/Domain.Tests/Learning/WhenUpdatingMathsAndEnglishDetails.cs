@@ -92,7 +92,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         //Assert
         learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
         entity.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglishWithdrawal);
     }
 
     [TestCase(true)]

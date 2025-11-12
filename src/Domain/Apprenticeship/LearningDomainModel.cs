@@ -236,24 +236,30 @@ public class LearningDomainModel : AggregateRoot
     private void UpdateMathsAndEnglishDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
         bool hasChanges = false;
+        bool hasWithdrawalChanges = false;
 
         var coursesToAdd = new List<MathsAndEnglish>();
         var courseKeysToKeep = new List<Guid>();
 
         foreach (var incomingCourse in updateModel.MathsAndEnglishCourses)
         {
-            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x => 
+            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x =>
                 x.Course.Trim() == incomingCourse.Course.Trim()
                 && x.StartDate == incomingCourse.StartDate
                 && x.PlannedEndDate == incomingCourse.PlannedEndDate
                 && x.CompletionDate == incomingCourse.CompletionDate
-                && x.WithdrawalDate == incomingCourse.WithdrawalDate
                 && x.PriorLearningPercentage == incomingCourse.PriorLearningPercentage
                 && x.Amount == incomingCourse.Amount);
 
             if (existingCourse != null)
             {
                 courseKeysToKeep.Add(existingCourse.Key);
+
+                if (existingCourse.WithdrawalDate != incomingCourse.WithdrawalDate)
+                {
+                    existingCourse.WithdrawalDate = incomingCourse.WithdrawalDate;
+                    hasWithdrawalChanges = true;
+                }
             }
             else
             {
@@ -269,11 +275,10 @@ public class LearningDomainModel : AggregateRoot
                 });
                 hasChanges = true;
             }
-           
         }
 
         var coursesToRemove = _entity.MathsAndEnglishCourses
-            .Where(existing => !courseKeysToKeep.Any(courseKeyToKeep => courseKeyToKeep == existing.Key))
+            .Where(existing => !courseKeysToKeep.Contains(existing.Key))
             .ToList();
 
         foreach (var removed in coursesToRemove)
@@ -286,9 +291,12 @@ public class LearningDomainModel : AggregateRoot
         _entity.MathsAndEnglishCourses.AddRange(coursesToAdd);
         _mathsAndEnglishCourses.AddRange(coursesToAdd.Select(MathsAndEnglishDomainModel.Get));
 
-        if (hasChanges) changes.Add(LearningUpdateChanges.MathsAndEnglish);
-    }
+        if (hasChanges)
+            changes.Add(LearningUpdateChanges.MathsAndEnglish);
 
+        if (hasWithdrawalChanges)
+            changes.Add(LearningUpdateChanges.MathsAndEnglishWithdrawal);
+    }
     private void UpdateLearningSupport(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
         var learningSupportHasChanged = LatestEpisode.UpdateLearningSupportIfChanged(updateModel.LearningSupport);
