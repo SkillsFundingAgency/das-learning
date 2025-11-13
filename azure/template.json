@@ -618,7 +618,7 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "[concat(variables('functionAppName'), 'apprenticeships-apim-product-subscription-', parameters('utcValue'))]",
+            "name": "[concat(variables('functionAppName'), '-apim-product-subscription-1', parameters('utcValue'))]",
             "resourceGroup": "[parameters('sharedApimResourceGroup')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -642,7 +642,7 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "[concat(variables('functionAppName'), 'learner-apim-product-subscription-', parameters('utcValue'))]",
+            "name": "[concat(variables('functionAppName'), '-apim-product-subscription-2', parameters('utcValue'))]",
             "resourceGroup": "[parameters('sharedApimResourceGroup')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
