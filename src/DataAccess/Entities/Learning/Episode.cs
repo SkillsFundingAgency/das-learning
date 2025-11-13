@@ -27,5 +27,6 @@ public class Episode
     public bool PaymentsFrozen { get; set; }
     public List<EpisodePrice> Prices { get; set; }
     public DateTime? LastDayOfLearning { get; set; }
+    public DateTime? PauseDate { get; set; }
     public List<LearningSupport> LearningSupport { get; set; }
 }

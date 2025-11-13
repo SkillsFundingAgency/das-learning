@@ -61,6 +61,11 @@ public class OnProgrammeDetails
     /// Planned end date for the OnProgramme delivery
     /// </summary>
     public DateTime ExpectedEndDate { get; set; }
+
+    /// <summary>
+    /// Pause date for the OnProgramme delivery
+    /// </summary>
+    public DateTime? PauseDate { get; set; }
 }
 
 /// <summary>
@@ -215,7 +220,8 @@ public static class UpdateLearnerRequestExtensions
                     TrainingPrice = x.TrainingPrice,
                     EpaoPrice = x.EpaoPrice,
                     FromDate = x.FromDate
-                })
+                }),
+                PauseDate = request.OnProgramme.PauseDate
             }
         };
     }

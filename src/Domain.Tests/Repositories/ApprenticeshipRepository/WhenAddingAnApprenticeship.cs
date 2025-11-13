@@ -67,6 +67,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
                 .With(x => x.PaymentsFrozen, false)
                 .With(x => x.LastDayOfLearning, (DateTime?)null)
+                .With(x => x.PauseDate, (DateTime?)null)
                 .Create());
 
             apprenticeship.AddEpisode(

@@ -190,6 +190,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdateWithdrawalDate(updateModel, changes);
 
+        UpdatePauseDate(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -365,6 +367,24 @@ public class LearningDomainModel : AggregateRoot
             };
 
             AddEvent(@event);
+        }
+    }
+
+    private void UpdatePauseDate(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var latestEpisode = LatestEpisode;
+
+        if (updateModel.OnProgrammeDetails.PauseDate == latestEpisode.PauseDate) return;
+
+        latestEpisode.SetPauseDate(updateModel.OnProgrammeDetails.PauseDate);
+
+        if (updateModel.OnProgrammeDetails.PauseDate.HasValue)
+        {
+            changes.Add(LearningUpdateChanges.BreakInLearningStarted);
+        }
+        else
+        {
+            changes.Add(LearningUpdateChanges.BreakInLearningRemoved);
         }
     }
 }
