@@ -1,23 +1,23 @@
 ﻿using Microsoft.Extensions.Logging;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 using SFA.DAS.Learning.Infrastructure.Extensions;
 
 namespace SFA.DAS.Learning.Infrastructure.Services;
 
 public class FundingBandMaximumService : IFundingBandMaximumService
 {
-    private readonly IApprenticeshipsOuterApiClient _apprenticeshipsOuterApiClient;
+    private readonly ILearningOuterApiClient _learningOuterApiClient;
     private readonly ILogger<FundingBandMaximumService> _logger;
 
-    public FundingBandMaximumService(IApprenticeshipsOuterApiClient apprenticeshipsOuterApiClient, ILogger<FundingBandMaximumService> logger)
+    public FundingBandMaximumService(ILearningOuterApiClient apprenticeshipsOuterApiClient, ILogger<FundingBandMaximumService> logger)
     {
-        _apprenticeshipsOuterApiClient = apprenticeshipsOuterApiClient;
+        _learningOuterApiClient = apprenticeshipsOuterApiClient;
         _logger = logger;
     }
 
     public async Task<int?> GetFundingBandMaximum(int courseCode, DateTime? startDate)
     {
-        var standard = await _apprenticeshipsOuterApiClient.GetStandard(courseCode);
+        var standard = await _learningOuterApiClient.GetStandard(courseCode);
 
         if (startDate == null)
             return null;
@@ -28,7 +28,7 @@ public class FundingBandMaximumService : IFundingBandMaximumService
 
     public async Task<int?> GetNextApplicableFundingBandMaximum(int courseCode, DateTime startDate)
     {
-        var standard = await _apprenticeshipsOuterApiClient.GetStandard(courseCode);
+        var standard = await _learningOuterApiClient.GetStandard(courseCode);
 
         // if a record exists for the start date simply return it
         var applicableRecord = standard.ApprenticeshipFunding

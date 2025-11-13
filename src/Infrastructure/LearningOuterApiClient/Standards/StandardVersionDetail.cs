@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+namespace SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 
 [ExcludeFromCodeCoverage]
 public class StandardVersionDetail
