@@ -214,8 +214,6 @@ public class ApprovalCreatedStepDefinitions
         await ThenAnApprenticeshipCreatedEventEventIsPublished();
         ((LearningCreatedEvent)_scenarioContext["publishedEvent"])
             .Episode
-            .Prices
-            .MaxBy(x => x.StartDate)?
             .FundingBandMaximum
             .Should().Be((int)_scenarioContext["fundingBandMaximum"]);
     }
