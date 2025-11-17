@@ -90,7 +90,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             result.TotalPrice = episodePrice2.TotalPrice;
             result.AssessmentPrice = episodePrice2.EndPointAssessmentPrice;
             result.TrainingPrice = episodePrice2.TrainingPrice;
-            result.FundingBandMaximum = episodePrice2.FundingBandMaximum;
             result.ApprenticeshipActualStartDate = episodePrice1.StartDate;
             result.ApprenticeshipPlannedEndDate = episodePrice2.EndDate;
             result.AccountLegalEntityId = episode.AccountLegalEntityId;

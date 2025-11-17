@@ -15,4 +15,5 @@ public class LearningEpisode
     public string? TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
     public List<LearningEpisodePrice> Prices { get; set; }
+    public int FundingBandMaximum { get; set; }
 }

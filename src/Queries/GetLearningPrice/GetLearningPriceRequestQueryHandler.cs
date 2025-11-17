@@ -23,7 +23,6 @@ public class GetLearningPriceRequestQueryHandler : IQueryHandler<GetLearningPric
             TrainingPrice = price.TrainingPrice,
             AssessmentPrice = price.AssessmentPrice,
             TotalPrice = price.TotalPrice,
-            FundingBandMaximum = price.FundingBandMaximum,
             ApprenticeshipActualStartDate = price.ApprenticeshipActualStartDate,
             ApprenticeshipPlannedEndDate = price.ApprenticeshipPlannedEndDate,
             AccountLegalEntityId = price.AccountLegalEntityId,

@@ -25,6 +25,7 @@ public class EpisodeDomainModel
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
     public DateTime? PauseDate => _entity.PauseDate;
+    public int FundingBandMaximum => _entity.FundingBandMaximum;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
@@ -66,7 +67,8 @@ public class EpisodeDomainModel
         string legalEntityName, 
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion)
+        string? trainingCourseVersion,
+        int fundingBandMaximum)
     {
         return new EpisodeDomainModel(new Episode
         {
@@ -79,7 +81,8 @@ public class EpisodeDomainModel
             AccountLegalEntityId = accountLegalEntityId,
             TrainingCode = trainingCode,
             TrainingCourseVersion = trainingCourseVersion,
-            PaymentsFrozen = false
+            PaymentsFrozen = false,
+            FundingBandMaximum = fundingBandMaximum
         });
     }
 
@@ -88,16 +91,14 @@ public class EpisodeDomainModel
         DateTime endDate,
         decimal totalPrice,
         decimal? trainingPrice,
-        decimal? endpointAssessmentPrice,
-        int fundingBandMaximum)
+        decimal? endpointAssessmentPrice)
     {
         var newEpisodePrice = EpisodePriceDomainModel.New(
             startDate,
             endDate,
             totalPrice,
             trainingPrice,
-            endpointAssessmentPrice,
-            fundingBandMaximum);
+            endpointAssessmentPrice);
 
         _episodePrices.Add(newEpisodePrice);
         _entity.Prices.Add(newEpisodePrice.GetEntity());
@@ -112,7 +113,6 @@ public class EpisodeDomainModel
             .ToList();
 
         var currentPlannedEndDate = existingPrices.LastOrDefault()?.EndDate ?? DateTime.MaxValue;
-        var currentFundingBandMaximum = existingPrices.FirstOrDefault()?.FundingBandMaximum ?? default;
 
         var orderedCosts = costs.OrderBy(x => x.FromDate).ToList();
         var matchedStartDates = new HashSet<DateTime>();
@@ -151,15 +151,6 @@ public class EpisodeDomainModel
                     existing.EndDate = endDate;
                 }
 
-                if (existing.FundingBandMaximum != currentFundingBandMaximum)
-                {
-                    //sync funding band maximum - this does not count as a change
-                    //since it might just be due to the first price moving into another band
-                    //There is duplication/redundancy in storing FundingBandMaximum on this level since
-                    //it applies to the entire episode, not just a price.
-                    existing.FundingBandMaximum = currentFundingBandMaximum;
-                }
-
                 continue;
             }
 
@@ -168,8 +159,7 @@ public class EpisodeDomainModel
                 endDate,
                 cost.TotalPrice,
                 cost.TrainingPrice,
-                cost.EpaoPrice,
-                currentFundingBandMaximum);
+                cost.EpaoPrice);
 
             matchedStartDates.Add(cost.FromDate);
             hasChanged = true;

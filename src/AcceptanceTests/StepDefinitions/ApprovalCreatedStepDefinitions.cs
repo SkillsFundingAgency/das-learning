@@ -165,7 +165,7 @@ public class ApprovalCreatedStepDefinitions
     public async Task ThenAnApprenticeshipRecordIsCreatedWithTheCorrectFundingBandMaximum()
     {
         await ThenAnApprenticeshipRecordIsCreated();
-        ((EpisodePrice)_scenarioContext["EpisodePrice"]).FundingBandMaximum.Should().Be((int)_scenarioContext["fundingBandMaximum"]);
+        ((Episode)_scenarioContext["Episode"]).FundingBandMaximum.Should().Be((int)_scenarioContext["fundingBandMaximum"]);
     }
 
     [Then("an Apprenticeship record is not created")]

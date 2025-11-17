@@ -131,15 +131,15 @@ public class LearningDomainModel : AggregateRoot
             legalEntityName,
             accountLegalEntityId,
             trainingCode,
-            trainingCourseVersion); 
+            trainingCourseVersion,
+            fundingBandMaximum); 
         
         episode.AddEpisodePrice(
             startDate,
             endDate,
             totalPrice,
             trainingPrice,
-            endpointAssessmentPrice,
-            fundingBandMaximum);
+            endpointAssessmentPrice);
 
         _episodes.Add(episode);
         _entity.Episodes.Add(episode.GetEntity());

@@ -80,7 +80,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 episodePrice.EndPointAssessmentPrice,
                 episode.FundingType,
                 episode.FundingPlatform,
-                episodePrice.FundingBandMaximum,
+                episode.FundingBandMaximum,
                 episode.FundingEmployerAccountId,
                 episode.LegalEntityName,
                 episode.AccountLegalEntityId,
