@@ -77,6 +77,7 @@ public class WhenUpdatingLearner
         // the first call is to make sure the data in the domain model is up to date before the update, that way there should be no changes detected
     }
 
+#pragma warning disable CS8620, CS8600
     [Test]
     public void ThenAnExceptionIsThrownIfTheLearnerIsNotFound()
     {
@@ -88,6 +89,7 @@ public class WhenUpdatingLearner
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
-        Assert.That(ex.Message, Is.EqualTo($"Learning with key {command.LearnerKey} not found."));
+        Assert.That(ex!.Message, Is.EqualTo($"Learning with key {command.LearnerKey} not found."));
     }
+#pragma warning restore CS8620, CS8600
 }

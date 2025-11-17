@@ -41,7 +41,8 @@ public static class LearnerUpdateModelHelper
                     FromDate = x.StartDate,
                     TrainingPrice = Convert.ToInt32(x.TrainingPrice.Value),
                     EpaoPrice = Convert.ToInt32(x.EndPointAssessmentPrice.Value)
-                }).ToList()
+                }).ToList(),
+                PauseDate = learning.GetEpisode().PauseDate
             },
             Delivery = new DeliveryDetails
             {

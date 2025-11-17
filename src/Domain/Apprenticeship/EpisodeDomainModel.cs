@@ -24,6 +24,7 @@ public class EpisodeDomainModel
     public string TrainingCourseVersion => _entity.TrainingCourseVersion;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
+    public DateTime? PauseDate => _entity.PauseDate;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
@@ -258,6 +259,11 @@ public class EpisodeDomainModel
     internal void ReverseWithdrawal()
     {
         _entity.LastDayOfLearning = null;
+    }
+
+    internal void SetPauseDate(DateTime? pauseDate)
+    {
+        _entity.PauseDate = pauseDate;
     }
 
     private EpisodeDomainModel(Episode entity)
