@@ -15,7 +15,7 @@
     [PaymentsFrozen] BIT NOT NULL DEFAULT (0), 
     [LastDayOfLearning] DATETIME NULL, 
     [PauseDate] DATETIME NULL,
-    [FundingBandMaximum] INT NOT NULL DEFAULT(0)
+    [FundingBandMaximum] INT NULL
 )
 GO
 ALTER TABLE dbo.Episode
