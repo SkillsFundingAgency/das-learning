@@ -25,6 +25,7 @@ public static class LearnerUpdateModelHelper
                 PlannedEndDate = x.PlannedEndDate,
                 CompletionDate = x.CompletionDate,
                 WithdrawalDate = x.WithdrawalDate,
+                PauseDate = x.PauseDate,
                 PriorLearningPercentage = x.PriorLearningPercentage,
                 Amount = x.Amount
             }).ToList(),

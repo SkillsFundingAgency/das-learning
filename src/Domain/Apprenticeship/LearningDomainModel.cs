@@ -239,6 +239,7 @@ public class LearningDomainModel : AggregateRoot
     {
         bool hasChanges = false;
         bool hasWithdrawalChanges = false;
+        bool hasPauseChanges = false;
 
         var coursesToAdd = new List<MathsAndEnglish>();
         var courseKeysToKeep = new List<Guid>();
@@ -262,6 +263,12 @@ public class LearningDomainModel : AggregateRoot
                     existingCourse.WithdrawalDate = incomingCourse.WithdrawalDate;
                     hasWithdrawalChanges = true;
                 }
+
+                if (existingCourse.PauseDate != incomingCourse.PauseDate)
+                {
+                    existingCourse.PauseDate = incomingCourse.PauseDate;
+                    hasPauseChanges = true;
+                }
             }
             else
             {
@@ -272,6 +279,7 @@ public class LearningDomainModel : AggregateRoot
                     PlannedEndDate = incomingCourse.PlannedEndDate,
                     CompletionDate = incomingCourse.CompletionDate,
                     WithdrawalDate = incomingCourse.WithdrawalDate,
+                    PauseDate = incomingCourse.PauseDate,
                     PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
                     Amount = incomingCourse.Amount
                 });
@@ -298,6 +306,9 @@ public class LearningDomainModel : AggregateRoot
 
         if (hasWithdrawalChanges)
             changes.Add(LearningUpdateChanges.MathsAndEnglishWithdrawal);
+
+        if (hasPauseChanges)
+            changes.Add(LearningUpdateChanges.MathsAndEnglishBreakInLearningStarted);
     }
     private void UpdateLearningSupport(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {

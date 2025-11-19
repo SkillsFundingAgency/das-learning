@@ -163,6 +163,9 @@ public class UpdateLearnerStepDefinitions
                 Course = row["Course"],
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
                 PlannedEndDate = TokenisableDateTime.FromString(row["PlannedEndDate"]).DateTime!.Value,
+                PauseDate = string.IsNullOrWhiteSpace(row["PauseDate"])
+                    ? null
+                    : TokenisableDateTime.FromString(row["PauseDate"]).DateTime,
                 Amount = decimal.Parse(row["Amount"])
             };
 
@@ -242,6 +245,9 @@ public class UpdateLearnerStepDefinitions
                 Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000")),
                 WithdrawalDate = parsedValues.TryGetValue("WithdrawalDate", out var parsedWithdrawalDate)
                     ? TokenisableDateTime.FromString(parsedWithdrawalDate).DateTime!.Value
+                    : null,
+                PauseDate = parsedValues.TryGetValue("PauseDate", out var parsedPauseDate)
+                    ? TokenisableDateTime.FromString(parsedPauseDate).DateTime!.Value
                     : null
             });
         }
