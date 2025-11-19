@@ -1,10 +1,9 @@
 using AutoFixture;
 using FluentAssertions;
 using Moq;
-using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 
 namespace SFA.DAS.Learning.Queries.UnitTests;
@@ -13,7 +12,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
 {
     private Fixture _fixture;
     private Mock<ILearningQueryRepository> _apprenticeshipQueryRepository;
-    private Mock<IApprenticeshipsOuterApiClient> _apiClient;
+    private Mock<ILearningOuterApiClient> _apiClient;
     private GetLearningsByAcademicYearQueryHandler _sut;
 
     [SetUp]
@@ -21,7 +20,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
     {
         _fixture = new Fixture();
         _apprenticeshipQueryRepository = new Mock<ILearningQueryRepository>();
-        _apiClient = new Mock<IApprenticeshipsOuterApiClient>();
+        _apiClient = new Mock<ILearningOuterApiClient>();
         _sut = new GetLearningsByAcademicYearQueryHandler(_apprenticeshipQueryRepository.Object);
     }
 

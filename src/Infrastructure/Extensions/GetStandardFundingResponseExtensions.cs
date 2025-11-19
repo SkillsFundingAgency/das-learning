@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+﻿using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 
 namespace SFA.DAS.Learning.Infrastructure.Extensions;
 

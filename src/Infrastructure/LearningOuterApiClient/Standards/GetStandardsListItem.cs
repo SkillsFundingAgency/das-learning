@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+namespace SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 
+#pragma warning disable CS8618
 [ExcludeFromCodeCoverage]
 public class GetStandardsListItem : StandardApiResponseBase
 {
@@ -18,3 +19,4 @@ public class GetStandardsListItem : StandardApiResponseBase
     public StandardVersionDetail VersionDetail { get; set; }
     public string StandardPageUrl { get; set; }
 }
+#pragma warning restore CS8618
