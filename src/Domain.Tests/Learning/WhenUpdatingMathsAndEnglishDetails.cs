@@ -210,4 +210,34 @@ public class WhenUpdatingMathsAndEnglishDetails
         entity.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).Amount.Should().Be(mathsAndEnglishUpdateModel.Amount);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
     }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void ThenNewCourseWithWithdrawalReturnsCorrectChangeTypes(bool changed)
+    {
+        //Arrange
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+        MathsAndEnglishUpdateDetails newCourse = null;
+
+        if (changed)
+        {
+            newCourse = _fixture.Create<MathsAndEnglishUpdateDetails>();
+            newCourse.WithdrawalDate = _fixture.Create<DateTime>();
+            updateModel.MathsAndEnglishCourses.Add(newCourse);
+        }
+
+        //Act
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        //Assert
+        entity.MathsAndEnglishCourses.Count.Should().Be(updateModel.MathsAndEnglishCourses.Count);
+        if (changed)
+        {
+            entity.MathsAndEnglishCourses.Should().Contain(x => x.Course == newCourse.Course);
+            result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+            result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglishWithdrawal);
+        }
+    }
 }

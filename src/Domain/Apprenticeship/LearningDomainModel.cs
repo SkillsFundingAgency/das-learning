@@ -284,6 +284,8 @@ public class LearningDomainModel : AggregateRoot
                     Amount = incomingCourse.Amount
                 });
                 hasChanges = true;
+
+                if(incomingCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
             }
         }
 
