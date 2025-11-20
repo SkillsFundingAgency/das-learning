@@ -6,8 +6,8 @@
     [EndDate] DATETIME NOT NULL, 
     [TrainingPrice] MONEY NULL, 
     [EndPointAssessmentPrice] MONEY NULL, 
-    [TotalPrice] MONEY NULL, 
-    [FundingBandMaximum] INT NOT NULL
+    [TotalPrice] MONEY NULL,
+    [FundingBandMaximum] INT NULL
 )
 GO
 ALTER TABLE dbo.EpisodePrice

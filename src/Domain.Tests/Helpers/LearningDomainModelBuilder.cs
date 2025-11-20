@@ -50,6 +50,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
 
             var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();
             episode.LearningKey = entity.Key;
+            episode.FundingBandMaximum = _fundingBandMaximum;
             episode.Prices.Clear();
             episode.LearningSupport.Clear();
 
@@ -66,8 +67,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
                     EndDate = endDate,
                     TrainingPrice = cost.TrainingPrice,
                     EndPointAssessmentPrice = cost.EpaoPrice,
-                    TotalPrice = cost.TotalPrice,
-                    FundingBandMaximum = _fundingBandMaximum
+                    TotalPrice = cost.TotalPrice
                 });
             }
 

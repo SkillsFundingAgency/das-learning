@@ -331,7 +331,6 @@ public class WhenGettingApprenticeshipsWithEpisodes
     {
         return actual.EndDate == expected.EndDate
             && actual.EndPointAssessmentPrice == expected.EndPointAssessmentPrice
-            && actual.FundingBandMaximum == expected.FundingBandMaximum
             && actual.StartDate == expected.StartDate
             && actual.TotalPrice == expected.TotalPrice
             && actual.TrainingPrice == expected.TrainingPrice;
