@@ -12,6 +12,7 @@ public class MathsAndEnglish
     public string Course { get; set; } = null!;
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? CompletionDate { get; set; }
+    public DateTime? PauseDate { get; set; }
     public int? PriorLearningPercentage { get; set; }
     public decimal Amount { get; set; }
 }
