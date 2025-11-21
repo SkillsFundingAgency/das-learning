@@ -70,8 +70,8 @@ Scenario: Maths and English pause date is set
 		| Course | StartDate       | PlannedEndDate | Amount | PauseDate       |
 		| maths  | currentAY-09-25 | nextAY-07-31   | 1000   | currentAY-12-25 |
 	And the following changes are returned
-		| Change                                |
-		| MathsAndEnglishBreakInLearningStarted |
+		| Change          |
+		| MathsAndEnglish |
 
 Scenario: Maths and English pause date is moved later
 	Given There is an apprenticeship with the following details
@@ -89,8 +89,8 @@ Scenario: Maths and English pause date is moved later
 		| Course | StartDate       | PlannedEndDate | Amount | PauseDate       |
 		| maths  | currentAY-09-25 | nextAY-07-31   | 1000   | currentAY-12-25 |
 	And the following changes are returned
-		| Change                                |
-		| MathsAndEnglishBreakInLearningStarted |
+		| Change          |
+		| MathsAndEnglish |
 
 Scenario: Maths and English pause date is removed
 	Given There is an apprenticeship with the following details
@@ -108,5 +108,5 @@ Scenario: Maths and English pause date is removed
 		| Course | StartDate       | PlannedEndDate | Amount | PauseDate |
 		| maths  | currentAY-09-25 | nextAY-07-31   | 1000   |           |
 	And the following changes are returned
-		| Change                                |
-		| MathsAndEnglishBreakInLearningStarted |
+		| Change          |
+		| MathsAndEnglish |

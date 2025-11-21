@@ -12,6 +12,5 @@ public enum LearningUpdateChanges
 	PersonalDetails = 7,
     BreakInLearningStarted = 8,
     BreakInLearningRemoved = 9,
-    MathsAndEnglishWithdrawal = 10,
-    MathsAndEnglishBreakInLearningStarted = 11
+    MathsAndEnglishWithdrawal = 10
 }
