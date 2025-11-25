@@ -2,7 +2,7 @@
 using Moq;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Functions;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 
 namespace SFA.DAS.Learning.AcceptanceTests;
 
@@ -11,19 +11,19 @@ internal class TestFunctionStartup
     private readonly Startup _startUp;
     private readonly IEnumerable<MessageHandler> _queueTriggeredFunctions;
     private readonly IMessageSession _messageSession;
-    private readonly Mock<IApprenticeshipsOuterApiClient> _mockApprenticeshipsOuterApiClient;
+    private readonly Mock<ILearningOuterApiClient> _mockLearningOuterApiClient;
 
     public TestFunctionStartup(
         TestContext testContext,
         IEnumerable<MessageHandler> queueTriggeredFunctions,
         IMessageSession messageSession,
-        Mock<IApprenticeshipsOuterApiClient> mockApprenticeshipsOuterApiClient)
+        Mock<ILearningOuterApiClient> mockApprenticeshipsOuterApiClient)
     {
         _startUp = new Startup();
         _startUp.Configuration = testContext.GenerateConfiguration();
         _queueTriggeredFunctions = queueTriggeredFunctions;
         _messageSession = messageSession;
-        _mockApprenticeshipsOuterApiClient = mockApprenticeshipsOuterApiClient;
+        _mockLearningOuterApiClient = mockApprenticeshipsOuterApiClient;
     }
 
     public void Configure()
@@ -42,6 +42,6 @@ internal class TestFunctionStartup
             collection.AddTransient(queueTriggeredFunction.HandlerType);
         }
 
-        collection.AddScoped<IApprenticeshipsOuterApiClient>(_ => _mockApprenticeshipsOuterApiClient.Object);
+        collection.AddScoped<ILearningOuterApiClient>(_ => _mockLearningOuterApiClient.Object);
     }
 }

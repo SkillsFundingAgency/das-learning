@@ -17,8 +17,7 @@ public static class IntegrationEventExtensions
                 EndDate = price.EndDate,
                 TrainingPrice = price.TrainingPrice,
                 EndPointAssessmentPrice = price.EndPointAssessmentPrice,
-                TotalPrice = price.TotalPrice,
-                FundingBandMaximum = price.FundingBandMaximum
+                TotalPrice = price.TotalPrice
             }).ToList();
 
         return new LearningEpisode()
@@ -35,7 +34,8 @@ public static class IntegrationEventExtensions
             TrainingCode = latestEpisode.TrainingCode,
             TrainingCourseVersion = latestEpisode.TrainingCourseVersion,
             PaymentsFrozen = latestEpisode.PaymentsFrozen,
-            Prices = prices
+            Prices = prices,
+            FundingBandMaximum = latestEpisode.FundingBandMaximum
         };
     }
 }

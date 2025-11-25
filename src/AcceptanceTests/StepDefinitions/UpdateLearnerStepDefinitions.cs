@@ -126,8 +126,7 @@ public class UpdateLearnerStepDefinitions
         {
             episodePrices.Should().ContainEquivalentOf(expectedPrice, options => options
                 .Excluding(c => c.Key)
-                .Excluding(c => c.TotalPrice)
-                .Excluding(c => c.FundingBandMaximum));
+                .Excluding(c => c.TotalPrice));
         }
 
     }
@@ -227,8 +226,7 @@ public class UpdateLearnerStepDefinitions
             episodePrices.Should().ContainEquivalentOf(price, options => options
                     .Excluding(c => c.EpisodeKey)
                     .Excluding(c => c.Key)
-                    .Excluding(c => c.TotalPrice)
-                    .Excluding(c => c.FundingBandMaximum));
+                    .Excluding(c => c.TotalPrice));
         }
     }
 

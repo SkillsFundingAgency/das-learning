@@ -56,7 +56,7 @@ public static class Program
         builder.Services.AddSingleton(x => applicationSettings);
         builder.Services.AddQueryServices();
         builder.Services.AddScoped<IPagedLinkHeaderService, PagedLinkHeaderService>();
-        builder.Services.AddApprenticeshipsOuterApiClient(applicationSettings.ApprenticeshipsOuterApiConfiguration.BaseUrl, applicationSettings.ApprenticeshipsOuterApiConfiguration.Key);
+        builder.Services.AddLearningOuterApiClient(applicationSettings.LearningOuterApiConfiguration.BaseUrl, applicationSettings.LearningOuterApiConfiguration.Key);
         builder.Services.ConfigureNServiceBusForSend(applicationSettings.NServiceBusConnectionString.GetFullyQualifiedNamespace());
         builder.Services.AddCommandServices(builder.Configuration).AddEventServices();
         builder.Services.AddDasHealthChecks(applicationSettings);

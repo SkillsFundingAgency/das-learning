@@ -14,7 +14,8 @@
     [TrainingCourseVersion] NVARCHAR(10) NULL,
     [PaymentsFrozen] BIT NOT NULL DEFAULT (0), 
     [LastDayOfLearning] DATETIME NULL, 
-    [PauseDate] DATETIME NULL
+    [PauseDate] DATETIME NULL,
+    [FundingBandMaximum] INT NULL
 )
 GO
 ALTER TABLE dbo.Episode

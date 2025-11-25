@@ -18,7 +18,6 @@ namespace SFA.DAS.Learning.Command.UpdateLearner
             public decimal? TrainingPrice { get; set; }
             public decimal? EndPointAssessmentPrice { get; set; }
             public decimal TotalPrice { get; set; }
-            public int FundingBandMaximum { get; set; }
 
             public static implicit operator EpisodePrice(EpisodePriceDomainModel x)
             {
@@ -29,8 +28,7 @@ namespace SFA.DAS.Learning.Command.UpdateLearner
                     EndDate = x.EndDate,
                     TrainingPrice = x.TrainingPrice,
                     EndPointAssessmentPrice = x.EndPointAssessmentPrice,
-                    TotalPrice = x.TotalPrice,
-                    FundingBandMaximum = x.FundingBandMaximum
+                    TotalPrice = x.TotalPrice
                 };
             }
         }
