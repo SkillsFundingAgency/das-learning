@@ -92,14 +92,12 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 .ThenInclude(y => y.Prices)
                 .SingleAsync(x => x.Key == apprenticeshipKey);
             var domainModel = LearningDomainModel.Get(apprenticeship);
-            domainModel.LatestEpisode.LatestPrice.GetEntity().FundingBandMaximum = 12345;
 
             // Act
             await _sut.Update(domainModel);
             
             // Assert
             _dbContext.Apprenticeships.Count().Should().Be(1);
-            _dbContext.Episodes.Single().Prices.Single().FundingBandMaximum.Should().Be(12345);
         }
 
         private void SetUpApprenticeshipRepository()
