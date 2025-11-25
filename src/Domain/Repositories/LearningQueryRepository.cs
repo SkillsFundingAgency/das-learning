@@ -112,7 +112,6 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             TotalPrice = latestPrice.TotalPrice,
             AssessmentPrice = latestPrice.EndPointAssessmentPrice,
             TrainingPrice = latestPrice.TrainingPrice,
-            FundingBandMaximum = latestPrice.FundingBandMaximum,
             ApprenticeshipActualStartDate = firstPrice.StartDate,
             ApprenticeshipPlannedEndDate = latestPrice.EndDate,
             AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
@@ -257,7 +256,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                     apprenticeship.GetPlannedEndDate(),
                     apprenticeship.Episodes.Select(ep =>
                             new Episode(ep.Key, ep.TrainingCode, ep.LastDayOfLearning, ep.Prices.Select(p =>
-                                new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice, p.FundingBandMaximum)).ToList()))
+                                new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
                         .ToList(),
                     apprenticeship.GetAgeAtStartOfApprenticeship(),
                     apprenticeship.GetLastDayOfLearning(),

@@ -91,7 +91,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
     }
 
     [Test]
-    public async Task ThenAnEpisodePriceIsCreatedWithTheCorrectFundingBandMaximum()
+    public async Task ThenAnEpisodeIsCreatedWithTheCorrectFundingBandMaximum()
     {
         var command = _fixture.Create<AddLearningCommand>();
         var trainingCodeInt = _fixture.Create<int>();
@@ -116,7 +116,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         _apprenticeshipRepository
             .Verify(x => x.Add(It.Is<LearningDomainModel>(y => 
-                y.GetEntity().Episodes.Last().Prices.Last().FundingBandMaximum == fundingBandMaximum)));
+                y.GetEntity().Episodes.Last().FundingBandMaximum == fundingBandMaximum)));
     }
 
     [Test]

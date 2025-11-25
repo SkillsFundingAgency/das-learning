@@ -11,15 +11,13 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
         public decimal TotalPrice => _entity.TotalPrice;
         public decimal? EndPointAssessmentPrice => _entity.EndPointAssessmentPrice;
         public decimal? TrainingPrice => _entity.TrainingPrice;
-        public int FundingBandMaximum => _entity.FundingBandMaximum;
 
         internal static EpisodePriceDomainModel New(
             DateTime startDate,
             DateTime endDate,
             decimal totalPrice,
             decimal? trainingPrice,
-            decimal? endpointAssessmentPrice,
-            int fundingBandMaximum)
+            decimal? endpointAssessmentPrice)
         {
             return new EpisodePriceDomainModel(new EpisodePrice
             {
@@ -28,7 +26,6 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
                 TotalPrice = totalPrice,
                 TrainingPrice = trainingPrice,
                 EndPointAssessmentPrice = endpointAssessmentPrice,
-                FundingBandMaximum = fundingBandMaximum
             });
         }
 
