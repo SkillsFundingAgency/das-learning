@@ -12,6 +12,7 @@ public class EpisodeDomainModel
 {
     private readonly DataAccess.Entities.Learning.Episode _entity;
     private readonly List<EpisodePriceDomainModel> _episodePrices;
+    private readonly List<EpisodeBreakInLearningDomainModel> _episodeBreaksInLearning;
     public Guid Key => _entity.Key;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
@@ -26,6 +27,7 @@ public class EpisodeDomainModel
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
     public DateTime? PauseDate => _entity.PauseDate;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
+    public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => new ReadOnlyCollection<EpisodeBreakInLearningDomainModel>(_episodeBreaksInLearning);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
     public bool IsWithdrawnBackToStart => _entity.LastDayOfLearning == FirstPrice.StartDate;
@@ -241,6 +243,39 @@ public class EpisodeDomainModel
         return newLearningSupportRecordsAdded || removedItems.Count > 0;
     }
 
+    /// <summary>
+    /// Updates the breaks in learning if there are differences and returns true; if no differences returns false.
+    /// </summary>
+    /// <param name="newBreaksInLearning">The new breaks in learning</param>
+    /// <returns>True if differences, otherwise false</returns>
+    internal bool UpdateBreaksInLearningIfChanged(List<BreakInLearning> newBreaksInLearning)
+    {
+        var newBreaksInLearningRecordAdded = false;
+
+        //  Remove breaks in learning that are no longer in the new list
+        _entity.BreaksInLearning.RemoveWhere(x =>
+                !newBreaksInLearning.Any(y => y.StartDate == x.StartDate && y.EndDate == x.EndDate),
+            out var removedItems);
+
+        //  Add breaks in learning that are in the new list but not in the existing list
+        foreach (var newBreakInLearning in newBreaksInLearning)
+        {
+            if (_entity.BreaksInLearning.All(x => x.StartDate != newBreakInLearning.StartDate || x.EndDate != newBreakInLearning.EndDate))
+            {
+                newBreaksInLearningRecordAdded = true;
+
+                _entity.BreaksInLearning.Add(new EpisodeBreakInLearning
+                {
+                    StartDate = newBreakInLearning.StartDate,
+                    EndDate = newBreakInLearning.EndDate,
+                    EpisodeKey = Key
+                });
+            }
+        }
+
+        return newBreaksInLearningRecordAdded || removedItems.Count > 0;
+    }
+
     public Episode GetEntity()
     {
         return _entity;
@@ -270,5 +305,6 @@ public class EpisodeDomainModel
     {
         _entity = entity;
         _episodePrices = entity.Prices.Select(EpisodePriceDomainModel.Get).ToList();
+        _episodeBreaksInLearning = entity.BreaksInLearning.Select(EpisodeBreakInLearningDomainModel.Get).ToList();
     }
 }
