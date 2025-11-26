@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+namespace SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
+
+#pragma warning disable CS8618
 
 [ExcludeFromCodeCoverage]
 public class GetStandardResponse
@@ -50,3 +52,4 @@ public class GetStandardResponse
         };
     }
 }
+#pragma warning restore CS8618

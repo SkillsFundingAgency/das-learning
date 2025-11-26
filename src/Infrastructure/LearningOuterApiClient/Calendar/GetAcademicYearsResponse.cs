@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Calendar;
+﻿namespace SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Calendar;
 
 public class GetAcademicYearsResponse
 {

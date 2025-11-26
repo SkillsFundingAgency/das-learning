@@ -6,15 +6,15 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 using SFA.DAS.Learning.Infrastructure.Services;
 
 namespace SFA.DAS.Learning.Infrastructure.UnitTests;
 
 public class WhenGettingNextApplicableFundingBandMaximum
 {
-    private Mock<IApprenticeshipsOuterApiClient> _apprenticeshipsOuterApiClient;
+    private Mock<ILearningOuterApiClient> _learningOuterApiClient;
     private FundingBandMaximumService _service;
     private Fixture _fixture;
 
@@ -22,9 +22,9 @@ public class WhenGettingNextApplicableFundingBandMaximum
     public void Setup()
     {
         _fixture = new Fixture();
-        _apprenticeshipsOuterApiClient = new Mock<IApprenticeshipsOuterApiClient>();
+        _learningOuterApiClient = new Mock<ILearningOuterApiClient>();
         _service = new FundingBandMaximumService(
-            _apprenticeshipsOuterApiClient.Object,
+            _learningOuterApiClient.Object,
             new Mock<ILogger<FundingBandMaximumService>>().Object);
     }
 
@@ -40,7 +40,7 @@ public class WhenGettingNextApplicableFundingBandMaximum
         standard.ApprenticeshipFunding[1].EffectiveFrom = new DateTime(2022, 06, 01);
         standard.ApprenticeshipFunding[1].EffectiveTo = null;
 
-        _apprenticeshipsOuterApiClient
+        _learningOuterApiClient
             .Setup(x => x.GetStandard(courseCode))
             .ReturnsAsync(standard);
 
@@ -61,7 +61,7 @@ public class WhenGettingNextApplicableFundingBandMaximum
         standard.ApprenticeshipFunding[1].EffectiveFrom = new DateTime(2022, 03, 20); // same month
         standard.ApprenticeshipFunding[1].EffectiveTo = null;
 
-        _apprenticeshipsOuterApiClient
+        _learningOuterApiClient
             .Setup(x => x.GetStandard(courseCode))
             .ReturnsAsync(standard);
 
@@ -82,7 +82,7 @@ public class WhenGettingNextApplicableFundingBandMaximum
         standard.ApprenticeshipFunding[1].EffectiveFrom = new DateTime(2022, 04, 01); // next month
         standard.ApprenticeshipFunding[1].EffectiveTo = null;
 
-        _apprenticeshipsOuterApiClient
+        _learningOuterApiClient
             .Setup(x => x.GetStandard(courseCode))
             .ReturnsAsync(standard);
 
@@ -103,7 +103,7 @@ public class WhenGettingNextApplicableFundingBandMaximum
         standard.ApprenticeshipFunding[1].EffectiveFrom = new DateTime(2022, 03, 01);
         standard.ApprenticeshipFunding[1].EffectiveTo = null;
 
-        _apprenticeshipsOuterApiClient
+        _learningOuterApiClient
             .Setup(x => x.GetStandard(courseCode))
             .ReturnsAsync(standard);
 

@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 using Moq;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -95,8 +95,8 @@ public class ApprovalCreatedStepDefinitions
         var fundingBandMaximum = _fixture.Create<int>();
         _scenarioContext["fundingBandMaximum"] = fundingBandMaximum;
 
-        _testContext.TestFunction!.mockApprenticeshipsOuterApiClient.Reset();
-        _testContext.TestFunction.mockApprenticeshipsOuterApiClient
+        _testContext.TestFunction!.mockLearningOuterApiClient.Reset();
+        _testContext.TestFunction.mockLearningOuterApiClient
             .Setup(x => x.GetStandard(It.IsAny<int>()))
             .ReturnsAsync(new GetStandardResponse
             {
@@ -115,7 +115,7 @@ public class ApprovalCreatedStepDefinitions
     {
         var fundingBandMaximum = _fixture.Create<int>();
         _scenarioContext["fundingBandMaximum"] = fundingBandMaximum;
-        _testContext.TestFunction!.mockApprenticeshipsOuterApiClient.Setup(x => x.GetStandard(It.IsAny<int>())).ReturnsAsync(new GetStandardResponse
+        _testContext.TestFunction!.mockLearningOuterApiClient.Setup(x => x.GetStandard(It.IsAny<int>())).ReturnsAsync(new GetStandardResponse
         {
             MaxFunding = fundingBandMaximum,
             ApprenticeshipFunding = new List<GetStandardFundingResponse>
@@ -165,7 +165,7 @@ public class ApprovalCreatedStepDefinitions
     public async Task ThenAnApprenticeshipRecordIsCreatedWithTheCorrectFundingBandMaximum()
     {
         await ThenAnApprenticeshipRecordIsCreated();
-        ((EpisodePrice)_scenarioContext["EpisodePrice"]).FundingBandMaximum.Should().Be((int)_scenarioContext["fundingBandMaximum"]);
+        ((Episode)_scenarioContext["Episode"]).FundingBandMaximum.Should().Be((int)_scenarioContext["fundingBandMaximum"]);
     }
 
     [Then("an Apprenticeship record is not created")]
@@ -214,8 +214,6 @@ public class ApprovalCreatedStepDefinitions
         await ThenAnApprenticeshipCreatedEventEventIsPublished();
         ((LearningCreatedEvent)_scenarioContext["publishedEvent"])
             .Episode
-            .Prices
-            .MaxBy(x => x.StartDate)?
             .FundingBandMaximum
             .Should().Be((int)_scenarioContext["fundingBandMaximum"]);
     }

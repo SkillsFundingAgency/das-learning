@@ -5,8 +5,8 @@ using Moq;
 using NServiceBus.Testing;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Functions;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient.Standards;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 
 namespace SFA.DAS.Learning.AcceptanceTests;
 
@@ -19,7 +19,7 @@ public class TestFunction : IDisposable
 
     public string HubName { get; }
 
-    public Mock<IApprenticeshipsOuterApiClient> mockApprenticeshipsOuterApiClient  { get; }
+    public Mock<ILearningOuterApiClient> mockLearningOuterApiClient  { get; }
 
     public TestFunction(TestContext testContext, string hubName)
     {
@@ -28,11 +28,11 @@ public class TestFunction : IDisposable
         _testContext = testContext;
         var _ = new Startup();// This forces the AzureFunction assembly to load
         _queueTriggeredFunctions = MessageHandlerHelper.GetMessageHandlers();
-        mockApprenticeshipsOuterApiClient = GetMockOuterApi();
+        mockLearningOuterApiClient = GetMockOuterApi();
 
         _testServer = new TestServer(new WebHostBuilder()
         .UseEnvironment(Environments.Development)
-            .UseStartup<TestFunctionStartup>((_) => new TestFunctionStartup(testContext, _queueTriggeredFunctions, _testContext.MessageSession, mockApprenticeshipsOuterApiClient)));
+            .UseStartup<TestFunctionStartup>((_) => new TestFunctionStartup(testContext, _queueTriggeredFunctions, _testContext.MessageSession, mockLearningOuterApiClient)));
 
     }
 
@@ -78,9 +78,9 @@ public class TestFunction : IDisposable
         _isDisposed = true;
     }
 
-    private static Mock<IApprenticeshipsOuterApiClient> GetMockOuterApi()
+    private static Mock<ILearningOuterApiClient> GetMockOuterApi()
     {
-        var mockApprenticeshipsOuterApiClient = new Mock<IApprenticeshipsOuterApiClient>();
+        var mockApprenticeshipsOuterApiClient = new Mock<ILearningOuterApiClient>();
 
         mockApprenticeshipsOuterApiClient.Setup(x => x.GetStandard(It.IsAny<int>())).ReturnsAsync(new GetStandardResponse
         {

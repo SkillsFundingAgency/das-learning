@@ -6,7 +6,7 @@ using SFA.DAS.Encoding;
 using SFA.DAS.Learning.Command.Decorators;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Infrastructure.ApprenticeshipsOuterApiClient;
+using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 using SFA.DAS.Learning.Infrastructure.Services;
 using System.Diagnostics.CodeAnalysis;
 
@@ -76,16 +76,16 @@ public static class ServiceCollectionExtensions
         return serviceCollection;
     }
 
-    public static IServiceCollection AddApprenticeshipsOuterApiClient(this IServiceCollection serviceCollection, string baseAddress, string key)
+    public static IServiceCollection AddLearningOuterApiClient(this IServiceCollection serviceCollection, string baseAddress, string key)
     {
         baseAddress = EnsureBaseAddressFormat(baseAddress);
-        serviceCollection.AddScoped<IApprenticeshipsOuterApiClient, ApprenticeshipsOuterApiClient>(x =>
+        serviceCollection.AddScoped<ILearningOuterApiClient, LearningOuterApiClient>(x =>
         {
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri(baseAddress);
             httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
             httpClient.DefaultRequestHeaders.Add("X-Version", "1");
-            return new ApprenticeshipsOuterApiClient(httpClient);
+            return new LearningOuterApiClient(httpClient);
         });
 
         return serviceCollection;

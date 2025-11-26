@@ -30,5 +30,6 @@ public class Episode
     public DateTime? LastDayOfLearning { get; set; }
     public DateTime? PauseDate { get; set; }
     public List<LearningSupport> LearningSupport { get; set; }
+    public int FundingBandMaximum { get; set; }
     public List<EpisodeBreakInLearning> BreaksInLearning { get; set; }
 }
