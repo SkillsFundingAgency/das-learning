@@ -41,6 +41,12 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.EndDate, endDate ?? _fixture.Create<DateTime>())
             .Create();
 
+        var episodeBreakInLearning = _fixture.Build<EpisodeBreakInLearning>()
+            .With(x => x.EpisodeKey, episodeKey)
+            .With(x => x.StartDate, _fixture.Create<DateTime>())
+            .With(x => x.EndDate, _fixture.Create<DateTime>())
+            .Create();
+
         var episode = _fixture.Build<Episode>()
             .With(x => x.LearningKey, apprenticeshipKey)
             .With(x => x.Key, episodeKey)
@@ -48,6 +54,7 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.FundingPlatform, fundingPlatform ?? _fixture.Create<FundingPlatform>())
             .With(x => x.Prices, new List<EpisodePrice> { episodePrice })
             .With(x => x.LastDayOfLearning, lastDayOfLearning)
+            .With(x => x.BreaksInLearning, new List<EpisodeBreakInLearning>{ episodeBreakInLearning })
             .Create();
 
         var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.Learning>()

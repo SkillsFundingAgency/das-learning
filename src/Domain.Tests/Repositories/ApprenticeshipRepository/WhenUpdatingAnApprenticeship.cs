@@ -102,6 +102,29 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             _dbContext.Episodes.Single().Prices.Single().FundingBandMaximum.Should().Be(12345);
         }
 
+        [Test]
+        public async Task ThenEpisodeBreakInLearningUpdatedInDataStore()
+        {
+            // Arrange
+            SetUpApprenticeshipRepository();
+            var apprenticeshipKey = _fixture.Create<Guid>();
+            await _dbContext.AddApprenticeship(apprenticeshipKey);
+            var apprenticeship = await _dbContext.Apprenticeships
+                .Include(x => x.Episodes)
+                .ThenInclude(y => y.BreaksInLearning)
+                .SingleAsync(x => x.Key == apprenticeshipKey);
+            var domainModel = LearningDomainModel.Get(apprenticeship);
+            var expectedBreakStart = _fixture.Create<DateTime>();
+            domainModel.LatestEpisode.EpisodeBreaksInLearning.Single().GetEntity().StartDate = expectedBreakStart;
+
+            // Act
+            await _sut.Update(domainModel);
+
+            // Assert
+            _dbContext.Apprenticeships.Count().Should().Be(1);
+            _dbContext.Episodes.Single().BreaksInLearning.Single().StartDate.Should().Be(expectedBreakStart);
+        }
+
         private void SetUpApprenticeshipRepository()
         {
             _domainEventDispatcher = new Mock<IDomainEventDispatcher>();

@@ -38,6 +38,7 @@ public class LearningRepository : ILearningRepository
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
+            .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
             .SingleAsync(x => x.Key == key);
 
         return _learningFactory.GetExisting(apprenticeship);

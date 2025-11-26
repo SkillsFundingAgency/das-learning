@@ -250,7 +250,7 @@ public static class UpdateLearnerRequestExtensions
                 }),
                 PauseDate = request.OnProgramme.PauseDate,
                 BreaksInLearning = request.OnProgramme.BreaksInLearning.SelectOrEmptyList(x => 
-                    new Domain.Models.BreakInLearning
+                    new Domain.Models.BreakInLearningUpdateDetails
                     {
                         StartDate = x.StartDate,
                         EndDate = x.EndDate

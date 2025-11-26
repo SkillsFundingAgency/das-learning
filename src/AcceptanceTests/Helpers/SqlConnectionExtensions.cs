@@ -15,6 +15,7 @@ internal static class SqlConnectionExtensions
         {
             episode.Prices = dbConnection.GetAll<DataAccess.Entities.Learning.EpisodePrice>().Where(x => x.EpisodeKey == episode.Key).ToList();
             episode.LearningSupport = dbConnection.GetAll<DataAccess.Entities.Learning.LearningSupport>().Where(x => x.EpisodeKey == episode.Key).ToList();
+            episode.BreaksInLearning = dbConnection.GetAll<DataAccess.Entities.Learning.EpisodeBreakInLearning>().Where(x => x.EpisodeKey == episode.Key).ToList();
         }
 
         return learning;

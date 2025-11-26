@@ -27,7 +27,7 @@ public class EpisodeDomainModel
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
     public DateTime? PauseDate => _entity.PauseDate;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
-    public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => new ReadOnlyCollection<EpisodeBreakInLearningDomainModel>(_episodeBreaksInLearning);
+    public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
     public bool IsWithdrawnBackToStart => _entity.LastDayOfLearning == FirstPrice.StartDate;
@@ -248,7 +248,7 @@ public class EpisodeDomainModel
     /// </summary>
     /// <param name="newBreaksInLearning">The new breaks in learning</param>
     /// <returns>True if differences, otherwise false</returns>
-    internal bool UpdateBreaksInLearningIfChanged(List<BreakInLearning> newBreaksInLearning)
+    internal bool UpdateBreaksInLearningIfChanged(List<BreakInLearningUpdateDetails> newBreaksInLearning)
     {
         var newBreaksInLearningRecordAdded = false;
 
