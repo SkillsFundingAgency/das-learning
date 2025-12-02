@@ -157,11 +157,16 @@ public class UpdateLearnerStepDefinitions
 
         foreach (var row in table.Rows)
         {
+            var pauseDate = row.ContainsKey("PauseDate") && !string.IsNullOrWhiteSpace(row["PauseDate"])
+                ? TokenisableDateTime.FromString(row["PauseDate"]).DateTime
+                : null;
+
             var expectedMathsAndEnglish = new DataAccess.Entities.Learning.MathsAndEnglish
             {
                 Course = row["Course"],
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
                 PlannedEndDate = TokenisableDateTime.FromString(row["PlannedEndDate"]).DateTime!.Value,
+                PauseDate = pauseDate,
                 Amount = decimal.Parse(row["Amount"])
             };
 
@@ -240,6 +245,9 @@ public class UpdateLearnerStepDefinitions
                 Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000")),
                 WithdrawalDate = parsedValues.TryGetValue("WithdrawalDate", out var parsedWithdrawalDate)
                     ? TokenisableDateTime.FromString(parsedWithdrawalDate).DateTime!.Value
+                    : null,
+                PauseDate = parsedValues.TryGetValue("PauseDate", out var parsedPauseDate)
+                    ? TokenisableDateTime.FromString(parsedPauseDate).DateTime!.Value
                     : null
             });
         }

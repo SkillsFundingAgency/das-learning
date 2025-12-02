@@ -8,7 +8,8 @@
     [WithdrawalDate] DATETIME NULL,
     [CompletionDate] DATETIME NULL, 
     [PriorLearningPercentage] INT NULL, 
-    [Amount] DECIMAL(15, 5) NOT NULL
+    [Amount] DECIMAL(15, 5) NOT NULL, 
+    [PauseDate] DATETIME NULL
 )
 GO
 

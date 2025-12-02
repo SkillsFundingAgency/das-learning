@@ -250,6 +250,7 @@ public class LearningDomainModel : AggregateRoot
                 && x.StartDate == incomingCourse.StartDate
                 && x.PlannedEndDate == incomingCourse.PlannedEndDate
                 && x.CompletionDate == incomingCourse.CompletionDate
+                && x.PauseDate == incomingCourse.PauseDate
                 && x.PriorLearningPercentage == incomingCourse.PriorLearningPercentage
                 && x.Amount == incomingCourse.Amount);
 
@@ -272,6 +273,7 @@ public class LearningDomainModel : AggregateRoot
                     PlannedEndDate = incomingCourse.PlannedEndDate,
                     CompletionDate = incomingCourse.CompletionDate,
                     WithdrawalDate = incomingCourse.WithdrawalDate,
+                    PauseDate = incomingCourse.PauseDate,
                     PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
                     Amount = incomingCourse.Amount
                 });

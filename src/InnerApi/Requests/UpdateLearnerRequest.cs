@@ -144,7 +144,12 @@ public class MathsAndEnglish
     /// Withdrawal date for the maths and english course, this will be null until a withdrawal is confirmed
     /// </summary>
     public DateTime? WithdrawalDate { get; set; }
-    
+
+    /// <summary>
+    /// Pause date for this maths and english course
+    /// </summary>
+    public DateTime? PauseDate { get; set; }
+
     /// <summary>
     /// Percentage of prior learning recognised for the course, if applicable
     /// </summary>
@@ -204,6 +209,7 @@ public static class UpdateLearnerRequestExtensions
                     PlannedEndDate = x.PlannedEndDate,
                     CompletionDate = x.CompletionDate,
                     WithdrawalDate = x.WithdrawalDate,
+                    PauseDate = x.PauseDate,
                     PriorLearningPercentage = x.PriorLearningPercentage,
                     Amount = x.Amount
                 }),
