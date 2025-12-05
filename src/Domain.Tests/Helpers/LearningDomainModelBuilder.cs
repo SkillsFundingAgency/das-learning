@@ -13,7 +13,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
         private List<Cost> _costs;
         private int _numberOfCosts = 1;
         private DateTime _plannedEndDate;
-        private int _fundingBandMaximum;
 
         public LearningDomainModelBuilder WithCosts(List<Cost> costs)
         {
@@ -33,12 +32,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
             return this;
         }
 
-        public LearningDomainModelBuilder WithFundingBandMaximum(int maximum)
-        {
-            _fundingBandMaximum = maximum;
-            return this;
-        }
-
         public LearningDomainModel Build()
         {
             var costs = _costs ?? _fixture.CreateMany<Cost>(_numberOfCosts).ToList();
@@ -50,7 +43,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
 
             var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();
             episode.LearningKey = entity.Key;
-            episode.FundingBandMaximum = _fundingBandMaximum;
             episode.Prices.Clear();
             episode.LearningSupport.Clear();
 

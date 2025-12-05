@@ -21,7 +21,6 @@ public static class ServiceCollectionExtensions
             .AddCommandHandlers(AddCommandHandlerDecorators)
             .AddScoped<ICommandDispatcher, CommandDispatcher>()
             .AddScoped<ILearningFactory, LearningFactory>()
-            .AddScoped<IFundingBandMaximumService, FundingBandMaximumService>()
             .AddSingleton<ISystemClockService, SystemClockService>()
             .AddEncodingServices(configuration)
             .AddPersistenceServices();

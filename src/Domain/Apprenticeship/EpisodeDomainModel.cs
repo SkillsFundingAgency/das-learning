@@ -26,7 +26,6 @@ public class EpisodeDomainModel
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
     public DateTime? PauseDate => _entity.PauseDate;
-    public int FundingBandMaximum => _entity.FundingBandMaximum;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
@@ -69,8 +68,7 @@ public class EpisodeDomainModel
         string legalEntityName, 
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion,
-        int fundingBandMaximum)
+        string? trainingCourseVersion)
     {
         return new EpisodeDomainModel(new Episode
         {
@@ -83,8 +81,7 @@ public class EpisodeDomainModel
             AccountLegalEntityId = accountLegalEntityId,
             TrainingCode = trainingCode,
             TrainingCourseVersion = trainingCourseVersion,
-            PaymentsFrozen = false,
-            FundingBandMaximum = fundingBandMaximum
+            PaymentsFrozen = false
         });
     }
 

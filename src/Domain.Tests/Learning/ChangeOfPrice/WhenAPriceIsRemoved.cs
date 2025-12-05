@@ -39,7 +39,6 @@ public class WhenAPriceIsRemoved
         _learning = new LearningDomainModelBuilder()
             .WithCosts(existingCosts)
             .WithPlannedEndDate(PlannedEndDate)
-            .WithFundingBandMaximum(15000)
             .Build();
 
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
