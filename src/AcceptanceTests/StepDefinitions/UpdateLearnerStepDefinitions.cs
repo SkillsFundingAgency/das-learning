@@ -251,7 +251,8 @@ public class UpdateLearnerStepDefinitions
             var expectedBreak = new DataAccess.Entities.Learning.EpisodeBreakInLearning
             {
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
-                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value
+                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value,
+                PriorPeriodExpectedEndDate = TokenisableDateTime.FromString(row["PriorPeriodExpectedEndDate"]).DateTime!.Value
             };
 
             episode.BreaksInLearning.Should().ContainEquivalentOf(expectedBreak, options => options
@@ -330,7 +331,8 @@ public class UpdateLearnerStepDefinitions
             breaks.Add(new BreakInLearning
             {
                 StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
-                EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value
+                EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value,
+                PriorPeriodExpectedEndDate = TokenisableDateTime.FromString(parsedValues["PriorPeriodExpectedEndDate"]).DateTime!.Value,
             });
         }
 
