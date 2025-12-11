@@ -2,9 +2,11 @@
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.UpdateLearner;
+using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Types;
+using Cost = SFA.DAS.Learning.InnerApi.Requests.Cost;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -54,6 +56,9 @@ public class UpdateLearnerStepDefinitions
                     break;
                 case "PauseDate":
                     updateRequest.OnProgramme.PauseDate = TokenisableDateTime.FromString(valueString).DateTime;
+                    break;
+                case "BreaksInLearning":
+                    updateRequest.OnProgramme.BreaksInLearning = GetBreaksInLearningFromString(valueString);
                     break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
@@ -230,6 +235,32 @@ public class UpdateLearnerStepDefinitions
         }
     }
 
+    [Then(@"the following BreaksInLearning details are stored")]
+    public async Task ThenTheFollowingBreaksInLearningDetailsAreStored(Table table)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        var episode = learning.Episodes.Single();
+
+        episode.BreaksInLearning.Should().HaveCount(
+            table.Rows.Count,
+            "the number of stored breaks in learning records should match the expected count");
+
+        foreach (var row in table.Rows)
+        {
+            var expectedBreak = new DataAccess.Entities.Learning.EpisodeBreakInLearning
+            {
+                StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
+                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value,
+                PriorPeriodExpectedEndDate = TokenisableDateTime.FromString(row["PriorPeriodExpectedEndDate"]).DateTime!.Value
+            };
+
+            episode.BreaksInLearning.Should().ContainEquivalentOf(expectedBreak, options => options
+                .Excluding(c => c.EpisodeKey)
+                .Excluding(c => c.Key));
+        }
+    }
+
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
@@ -289,6 +320,25 @@ public class UpdateLearnerStepDefinitions
 
         return costs;
     }
+
+    private List<BreakInLearning> GetBreaksInLearningFromString(string valueString)
+    {
+        var parsedValues = KeyValueParser.Parse(valueString);
+        var breaks = new List<BreakInLearning>();
+
+        if (parsedValues.Any())
+        {
+            breaks.Add(new BreakInLearning
+            {
+                StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
+                EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value,
+                PriorPeriodExpectedEndDate = TokenisableDateTime.FromString(parsedValues["PriorPeriodExpectedEndDate"]).DateTime!.Value,
+            });
+        }
+
+        return breaks;
+    }
+
 
     private static class KeyValueParser
     {

@@ -66,6 +66,11 @@ public class OnProgrammeDetails
     /// Pause date for the OnProgramme delivery
     /// </summary>
     public DateTime? PauseDate { get; set; }
+
+    /// <summary>
+    /// Breaks in learning for the OnProgramme delivery
+    /// </summary>
+    public List<BreakInLearning> BreaksInLearning { get; set; }
 }
 
 /// <summary>
@@ -176,6 +181,27 @@ public class LearningSupportUpdatedDetails
     /// </summary>
     public DateTime EndDate { get; set; }
 }
+
+/// <summary>
+/// Break in learning details
+/// </summary>
+public class BreakInLearning
+{
+    /// <summary>
+    /// Start date of the break in learning
+    /// </summary>
+    public DateTime StartDate { get; set; }
+
+    /// <summary>
+    /// End date of the break in learning
+    /// </summary>
+    public DateTime EndDate { get; set; }
+
+    /// <summary>
+    /// Expected end date of the period in learning which this break truncates
+    /// </summary>
+    public DateTime PriorPeriodExpectedEndDate { get; set; }
+}
 #pragma warning restore CS8618 // Required properties must be set in the constructor
 
 public static class UpdateLearnerRequestExtensions
@@ -227,7 +253,14 @@ public static class UpdateLearnerRequestExtensions
                     EpaoPrice = x.EpaoPrice,
                     FromDate = x.FromDate
                 }),
-                PauseDate = request.OnProgramme.PauseDate
+                PauseDate = request.OnProgramme.PauseDate,
+                BreaksInLearning = request.OnProgramme.BreaksInLearning.SelectOrEmptyList(x => 
+                    new Domain.Models.BreakInLearningUpdateDetails
+                    {
+                        StartDate = x.StartDate,
+                        EndDate = x.EndDate,
+                        PriorPeriodExpectedEndDate = x.PriorPeriodExpectedEndDate
+                    })
             }
         };
     }

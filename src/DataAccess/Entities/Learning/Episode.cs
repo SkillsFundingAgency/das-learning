@@ -10,6 +10,7 @@ public class Episode
     {
         Prices = new List<EpisodePrice>();
         LearningSupport = new List<LearningSupport>();
+        BreaksInLearning = new List<EpisodeBreakInLearning>();
     }
 
     [Key]
@@ -30,4 +31,5 @@ public class Episode
     public DateTime? PauseDate { get; set; }
     public List<LearningSupport> LearningSupport { get; set; }
     public int FundingBandMaximum { get; set; }
+    public List<EpisodeBreakInLearning> BreaksInLearning { get; set; }
 }

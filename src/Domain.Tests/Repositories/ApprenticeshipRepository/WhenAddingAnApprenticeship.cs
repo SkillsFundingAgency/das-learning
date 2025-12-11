@@ -100,7 +100,8 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 .Excluding(y => y.FirstPrice)
                 .Excluding(y => y.ActiveEpisodePrices)
                 .Excluding(y => y.IsWithdrawnBackToStart)
-                .Excluding(y => y.LearningSupport));
+                .Excluding(y => y.LearningSupport)
+                .Excluding(y => y.EpisodeBreaksInLearning));
         }
 
         private void SetUpApprenticeshipRepository()

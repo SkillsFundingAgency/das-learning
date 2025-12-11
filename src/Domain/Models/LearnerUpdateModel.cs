@@ -45,6 +45,7 @@ public class OnProgrammeDetails
     public DateTime ExpectedEndDate { get; set; }
     public List<Cost> Costs { get; set; }
     public DateTime? PauseDate { get; set; }
+    public List<BreakInLearningUpdateDetails> BreaksInLearning { get; set; }
 }
 
 public class Cost
@@ -56,4 +57,11 @@ public class Cost
     public DateTime FromDate { get; set; }
 
     public int TotalPrice => TrainingPrice + (EpaoPrice ?? 0);
+}
+
+public class BreakInLearningUpdateDetails
+{
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public DateTime PriorPeriodExpectedEndDate { get; set; }
 }

@@ -192,6 +192,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdatePauseDate(updateModel, changes);
 
+        UpdateBreaksInLearning(updateModel, changes);
+
         return changes.ToArray();
     }
 
@@ -397,6 +399,15 @@ public class LearningDomainModel : AggregateRoot
         else
         {
             changes.Add(LearningUpdateChanges.BreakInLearningRemoved);
+        }
+    }
+
+    private void UpdateBreaksInLearning(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        var breaksInLearningHaveChanged = LatestEpisode.UpdateBreaksInLearningIfChanged(updateModel.OnProgrammeDetails.BreaksInLearning);
+        if (breaksInLearningHaveChanged)
+        {
+            changes.Add(LearningUpdateChanges.BreaksInLearningUpdated);
         }
     }
 }

@@ -34,7 +34,8 @@ internal static class ApprenticeshipCreatedEventExtensions
                         TrainingPrice = (int)priceEpisode.TrainingPrice!
                     }
                 },
-                ExpectedEndDate = apprenticeshipCreatedEvent.EndDate
+                ExpectedEndDate = apprenticeshipCreatedEvent.EndDate,
+                BreaksInLearning = new List<BreakInLearning>()
             }
         };
 
