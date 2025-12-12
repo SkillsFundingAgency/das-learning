@@ -118,6 +118,11 @@ public class  LearnerUpdateDetails
     /// Date the learning completes, this will be null until completion is confirmed
     /// </summary>
     public DateTime? CompletionDate { get; set; }
+
+    /// <summary>
+    /// Date of birth of the learner
+    /// </summary>
+    public DateTime DateOfBirth { get; set; }
 }
 
 /// <summary>
@@ -225,7 +230,8 @@ public static class UpdateLearnerRequestExtensions
                 FirstName = request.Learner.FirstName,
                 LastName = request.Learner.LastName,
                 EmailAddress = request.Learner.EmailAddress,
-                CompletionDate = request.Learner.CompletionDate
+                CompletionDate = request.Learner.CompletionDate,
+                DateOfBirth = request.Learner.DateOfBirth
             },
             MathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x =>
                 new MathsAndEnglishUpdateDetails

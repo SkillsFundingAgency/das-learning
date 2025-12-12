@@ -38,4 +38,28 @@ public class WhenUpdatingLearnerDetails
         learning.CompletionDate.Should().Be(updateModel.Learning.CompletionDate?.Date);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.CompletionDate);
     }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void ThenDateOfBirthIsUpdated(bool changed)
+    {
+        // Arrange
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        entity.DateOfBirth = entity.DateOfBirth.Date; // normalize
+
+        var learning = LearningDomainModel.Get(entity);
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+
+        if (changed)
+            updateModel.Learning.DateOfBirth = _fixture.Create<DateTime>();
+
+        // Act
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        // Assert
+        learning.DateOfBirth.Should().Be(updateModel.Learning.DateOfBirth);
+
+        if (changed)
+            result.Should().Contain(x => x == LearningUpdateChanges.DateOfBirthChanged);
+    }
 }
