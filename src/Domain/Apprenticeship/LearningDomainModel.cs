@@ -5,6 +5,7 @@ using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
+using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglish;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -195,6 +196,8 @@ public class LearningDomainModel : AggregateRoot
         UpdatePauseDate(updateModel, changes);
 
         UpdateBreaksInLearning(updateModel, changes);
+
+        if (changes.Any()) AddEvent(this.ToLearnerUpdatedEvent());
 
         return changes.ToArray();
     }

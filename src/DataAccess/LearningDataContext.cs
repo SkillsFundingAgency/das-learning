@@ -17,6 +17,8 @@ namespace SFA.DAS.Learning.DataAccess
         public virtual DbSet<LearningSupport> LearningSupport { get; set; }
         public virtual DbSet<EpisodeBreakInLearning> EpisodeBreakInLearnings { get; set; }
 
+        public virtual DbSet<LearningHistory> LearningHistories { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Learning
@@ -59,6 +61,10 @@ namespace SFA.DAS.Learning.DataAccess
 
             // EpisodeBreakInLearning
             modelBuilder.Entity<EpisodeBreakInLearning>()
+                .HasKey(x => x.Key);
+
+            // LearningHistory
+            modelBuilder.Entity<LearningHistory>()
                 .HasKey(x => x.Key);
 
             base.OnModelCreating(modelBuilder);

@@ -1,14 +1,9 @@
 ﻿using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NServiceBus;
-using NUnit.Framework;
-using SFA.DAS.Learning.Domain.EventHandlers;
 using SFA.DAS.Learning.Domain.Events;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.EventHandlers
+namespace SFA.DAS.Learning.MessageHandlers.UnitTests
 {
     public class LearningWithdrawnEventHandlerTests
     {
