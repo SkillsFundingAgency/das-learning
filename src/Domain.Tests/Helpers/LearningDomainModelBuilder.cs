@@ -39,6 +39,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
 
             var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
             entity.CompletionDate = entity.CompletionDate?.Date;
+            entity.DateOfBirth = entity.DateOfBirth.Date;
             entity.MathsAndEnglishCourses.Clear();
 
             var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();

@@ -255,6 +255,7 @@ public class EpisodeDomainModel
                 {
                     StartDate = newBreakInLearning.StartDate,
                     EndDate = newBreakInLearning.EndDate,
+                    PriorPeriodExpectedEndDate = newBreakInLearning.PriorPeriodExpectedEndDate,
                     EpisodeKey = Key
                 });
             }

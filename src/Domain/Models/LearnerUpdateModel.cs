@@ -20,6 +20,7 @@ public class LearningUpdateDetails
     public string LastName { get; set; }
     public string? EmailAddress { get; set; }
     public DateTime? CompletionDate { get; set; }
+    public DateTime DateOfBirth { get; set; }
 }
 
 public class MathsAndEnglishUpdateDetails
@@ -63,4 +64,5 @@ public class BreakInLearningUpdateDetails
 {
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public DateTime PriorPeriodExpectedEndDate { get; set; }
 }

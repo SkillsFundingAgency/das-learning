@@ -60,6 +60,9 @@ public class UpdateLearnerStepDefinitions
                 case "BreaksInLearning":
                     updateRequest.OnProgramme.BreaksInLearning = GetBreaksInLearningFromString(valueString);
                     break;
+                case "DateOfBirth":
+                    updateRequest.Learner.DateOfBirth = TokenisableDateTime.FromString(valueString).DateTime!.Value;
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -251,7 +254,8 @@ public class UpdateLearnerStepDefinitions
             var expectedBreak = new DataAccess.Entities.Learning.EpisodeBreakInLearning
             {
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
-                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value
+                EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value,
+                PriorPeriodExpectedEndDate = TokenisableDateTime.FromString(row["PriorPeriodExpectedEndDate"]).DateTime!.Value
             };
 
             episode.BreaksInLearning.Should().ContainEquivalentOf(expectedBreak, options => options
@@ -259,6 +263,15 @@ public class UpdateLearnerStepDefinitions
                 .Excluding(c => c.Key));
         }
     }
+
+    [Then(@"the Date of Birth for the Learning is set to (.*)")]
+    public async Task ThenTheDateOfBirthForTheLearningIsSetTo(TokenisableDateTime dateOfBirth)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learning.DateOfBirth.Should().Be(dateOfBirth.DateTime);
+    }
+
 
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
     {
@@ -330,7 +343,8 @@ public class UpdateLearnerStepDefinitions
             breaks.Add(new BreakInLearning
             {
                 StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
-                EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value
+                EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value,
+                PriorPeriodExpectedEndDate = TokenisableDateTime.FromString(parsedValues["PriorPeriodExpectedEndDate"]).DateTime!.Value,
             });
         }
 

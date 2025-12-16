@@ -118,6 +118,11 @@ public class  LearnerUpdateDetails
     /// Date the learning completes, this will be null until completion is confirmed
     /// </summary>
     public DateTime? CompletionDate { get; set; }
+
+    /// <summary>
+    /// Date of birth of the learner
+    /// </summary>
+    public DateTime DateOfBirth { get; set; }
 }
 
 /// <summary>
@@ -196,6 +201,11 @@ public class BreakInLearning
     /// End date of the break in learning
     /// </summary>
     public DateTime EndDate { get; set; }
+
+    /// <summary>
+    /// Expected end date of the period in learning which this break truncates
+    /// </summary>
+    public DateTime PriorPeriodExpectedEndDate { get; set; }
 }
 #pragma warning restore CS8618 // Required properties must be set in the constructor
 
@@ -220,7 +230,8 @@ public static class UpdateLearnerRequestExtensions
                 FirstName = request.Learner.FirstName,
                 LastName = request.Learner.LastName,
                 EmailAddress = request.Learner.EmailAddress,
-                CompletionDate = request.Learner.CompletionDate
+                CompletionDate = request.Learner.CompletionDate,
+                DateOfBirth = request.Learner.DateOfBirth
             },
             MathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x =>
                 new MathsAndEnglishUpdateDetails
@@ -253,7 +264,8 @@ public static class UpdateLearnerRequestExtensions
                     new Domain.Models.BreakInLearningUpdateDetails
                     {
                         StartDate = x.StartDate,
-                        EndDate = x.EndDate
+                        EndDate = x.EndDate,
+                        PriorPeriodExpectedEndDate = x.PriorPeriodExpectedEndDate
                     })
             }
         };

@@ -176,6 +176,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdateLearnerDetails(updateModel, changes);
 
+        UpdateLearnerDateOfBirth(updateModel, changes);
+
         UpdateLearningDetails(updateModel, changes);
 
         UpdateMathsAndEnglishDetails(updateModel, changes);
@@ -218,8 +220,27 @@ public class LearningDomainModel : AggregateRoot
             AddEvent(@event);
         }
     }
-	
-	public void RemoveLearner()
+
+    private void UpdateLearnerDateOfBirth(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        if (updateModel.Learning.DateOfBirth != DateOfBirth)
+        {
+            _entity.DateOfBirth = updateModel.Learning.DateOfBirth;
+
+            changes.Add(LearningUpdateChanges.DateOfBirthChanged);
+
+            var @event = new DateOfBirthChangedEvent
+            {
+                LearningKey = Key,
+                DateOfBirth = DateOfBirth
+            };
+
+            AddEvent(@event);
+        }
+    }
+
+
+    public void RemoveLearner()
     {
         var latestEpisode = LatestEpisode;
         var lastDayOfLearning = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
