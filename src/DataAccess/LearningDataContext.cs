@@ -65,6 +65,7 @@ namespace SFA.DAS.Learning.DataAccess
 
             // LearningHistory
             modelBuilder.Entity<LearningHistory>()
+                .ToTable("LearningHistory", "History")
                 .HasKey(x => x.Key);
 
             base.OnModelCreating(modelBuilder);

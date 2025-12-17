@@ -1,7 +1,5 @@
 ﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
-[Table("History.LearningHistory")]
-[System.ComponentModel.DataAnnotations.Schema.Table("LearningHistory")]
 public class LearningHistory
 {
     [Key]
