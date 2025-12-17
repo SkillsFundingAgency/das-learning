@@ -3,45 +3,44 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.Learning.Domain.Events;
 
-namespace SFA.DAS.Learning.MessageHandlers.UnitTests
+namespace SFA.DAS.Learning.MessageHandlers.UnitTests;
+
+public class LearningWithdrawnEventHandlerTests
 {
-    public class LearningWithdrawnEventHandlerTests
+    private IFixture _fixture;
+    private Mock<IMessageSession> _messageSession;
+    private ILogger<LearningWithdrawnEventHandler> _logger;
+    private LearningWithdrawnEventHandler _handler;
+
+    [SetUp]
+    public void SetUp()
     {
-        private IFixture _fixture;
-        private Mock<IMessageSession> _messageSession;
-        private ILogger<LearningWithdrawnEventHandler> _logger;
-        private LearningWithdrawnEventHandler _handler;
+        _fixture = new Fixture();
 
-        [SetUp]
-        public void SetUp()
-        {
-            _fixture = new Fixture();
+        _messageSession = new Mock<IMessageSession>();
+        _logger = Mock.Of<ILogger<LearningWithdrawnEventHandler>>();
 
-            _messageSession = new Mock<IMessageSession>();
-            _logger = Mock.Of<ILogger<LearningWithdrawnEventHandler>>();
+        _handler = new LearningWithdrawnEventHandler(_messageSession.Object, _logger);
+    }
 
-            _handler = new LearningWithdrawnEventHandler(_messageSession.Object, _logger);
-        }
+    [Test]
+    public async Task Handle_PublishesLearningWithdrawnEventMessage()
+    {
+        // Arrange
+        var domainEvent = _fixture.Create<LearningWithdrawnEvent>();
 
-        [Test]
-        public async Task Handle_PublishesLearningWithdrawnEventMessage()
-        {
-            // Arrange
-            var domainEvent = _fixture.Create<LearningWithdrawnEvent>();
+        // Act
+        await _handler.Handle(domainEvent, default);
 
-            // Act
-            await _handler.Handle(domainEvent, default);
-
-            _messageSession.Verify(x => x.Publish(
-                    It.Is<Types.LearningWithdrawnEvent>(msg =>
-                        msg.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
-                        msg.LearningKey == domainEvent.LearningKey &&
-                        msg.LastDayOfLearning == domainEvent.LastDayOfLearning &&
-                        msg.EmployerAccountId == domainEvent.EmployerAccountId &&
-                        msg.Reason == domainEvent.Reason
-                        ),
-                    It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
-                Times.Once);
-        }
+        _messageSession.Verify(x => x.Publish(
+                It.Is<Types.LearningWithdrawnEvent>(msg =>
+                    msg.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
+                    msg.LearningKey == domainEvent.LearningKey &&
+                    msg.LastDayOfLearning == domainEvent.LastDayOfLearning &&
+                    msg.EmployerAccountId == domainEvent.EmployerAccountId &&
+                    msg.Reason == domainEvent.Reason
+                ),
+                It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

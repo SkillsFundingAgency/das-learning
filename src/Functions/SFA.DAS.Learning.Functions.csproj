@@ -28,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Command\SFA.DAS.Learning.Command.csproj" />
     <ProjectReference Include="..\Infrastructure\SFA.DAS.Learning.Infrastructure.csproj" />
+    <ProjectReference Include="..\SFA.DAS.Learning.MessageHandlers\SFA.DAS.Learning.MessageHandlers.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="local.settings.json">
