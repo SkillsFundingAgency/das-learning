@@ -21,6 +21,11 @@ internal static class SqlConnectionExtensions
         return learning;
     }
 
+    internal static List<DataAccess.Entities.Learning.LearningHistory> GetHistories(this SqlConnection dbConnection, Guid learningKey)
+    {
+        return dbConnection.GetAll<DataAccess.Entities.Learning.LearningHistory>().Where(x => x.LearningId == learningKey).ToList();
+    }
+
     internal static Guid GetLearningKey(this SqlConnection dbConnection, string uln)
     {
         var learning = dbConnection.GetAll<DataAccess.Entities.Learning.Learning>().Single(x => x.Uln == uln);

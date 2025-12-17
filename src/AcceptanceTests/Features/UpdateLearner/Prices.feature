@@ -19,3 +19,4 @@ Scenario: Prices are updated
 	And the EpisodePrices are returned
 		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
 		| currentAY-11-25 | nextAY-07-31 | 5500          | 400      |
+	And the learning history is maintained

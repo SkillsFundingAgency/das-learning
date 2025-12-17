@@ -1,5 +1,6 @@
 ﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
+[Dapper.Contrib.Extensions.Table("History.LearningHistory")]
 public class LearningHistory
 {
     [Key]

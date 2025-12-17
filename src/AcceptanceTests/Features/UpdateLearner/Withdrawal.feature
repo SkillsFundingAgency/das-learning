@@ -15,6 +15,7 @@ Scenario: Apprenticeship withdrawal during learning
 	And the following changes are returned
 		| Change     |
 		| Withdrawal |
+	And the learning history is maintained
 
 Scenario: Identical Withdrawal requests do not result in Earnings recalculation
 	Given There is an apprenticeship with the following details
@@ -28,6 +29,7 @@ Scenario: Identical Withdrawal requests do not result in Earnings recalculation
 	Then a LearningWithdrawnEvent is not sent
 	And the following changes are returned
 		| Change     |
+	And the learning history is maintained
 
 Scenario: Apprentice Withdrawn following previous removal
 	Given There is an apprenticeship with the following details
@@ -43,6 +45,7 @@ Scenario: Apprentice Withdrawn following previous removal
 	And the following changes are returned
 		| Change          |
 		| Withdrawal      |
+	And the learning history is maintained
 
 Scenario: Apprentice Reverse Withdrawal
 	Given There is an apprenticeship with the following details
@@ -58,3 +61,4 @@ Scenario: Apprentice Reverse Withdrawal
 	And the following changes are returned
 		| Change            |
 		| ReverseWithdrawal |
+	And the learning history is maintained

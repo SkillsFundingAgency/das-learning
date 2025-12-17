@@ -8,12 +8,12 @@ using SFA.DAS.Learning.Command.RemoveLearnerCommand;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Types;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
+using LearningWithdrawnEvent = SFA.DAS.Learning.Types.LearningWithdrawnEvent;
 
 namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
 
