@@ -32,7 +32,6 @@ public class Episode
     public bool PaymentsFrozen { get; set; }
     public DateTime? LastDayOfLearning { get; set; }
     public DateTime? PauseDate { get; set; }
-    public int FundingBandMaximum { get; set; }
     public List<LearningSupport> LearningSupport { get; set; }
     public List<EpisodeBreakInLearning> EpisodeBreaksInLearning { get; set; }
     public List<EpisodePrice> EpisodePrices { get; set; }

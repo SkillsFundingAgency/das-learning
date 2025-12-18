@@ -33,7 +33,6 @@ namespace SFA.DAS.Learning.Domain.Extensions
                     PaymentsFrozen = e.PaymentsFrozen,
                     LastDayOfLearning = e.LastDayOfLearning,
                     PauseDate = e.PauseDate,
-                    FundingBandMaximum = e.FundingBandMaximum,
 
                     LearningSupport = e.LearningSupport.Select(ls => new LearningSupport
                     {
