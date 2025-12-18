@@ -116,7 +116,6 @@ public class LearningDomainModel : AggregateRoot
         decimal? endpointAssessmentPrice,
         FundingType fundingType, 
         FundingPlatform? fundingPlatform,
-        int fundingBandMaximum,
         long? fundingEmployerAccountId, 
         string legalEntityName, 
         long? accountLegalEntityId,
@@ -132,8 +131,7 @@ public class LearningDomainModel : AggregateRoot
             legalEntityName,
             accountLegalEntityId,
             trainingCode,
-            trainingCourseVersion,
-            fundingBandMaximum); 
+            trainingCourseVersion); 
         
         episode.AddEpisodePrice(
             startDate,

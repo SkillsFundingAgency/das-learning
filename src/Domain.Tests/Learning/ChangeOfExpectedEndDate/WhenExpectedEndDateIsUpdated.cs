@@ -22,7 +22,6 @@ public class WhenExpectedEndDateIsUpdated
         _learning = new LearningDomainModelBuilder()
             .WithGeneratedCosts(1)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
-            .WithFundingBandMaximum(15000)
             .Build();
 
         //Act

@@ -44,7 +44,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning
                 _fixture.Create<decimal?>(), 
                 _fixture.Create<FundingType>(), 
                 _fixture.Create<FundingPlatform>(), 
-                _fixture.Create<int>(), 
                 _fixture.Create<long?>(), 
                 _fixture.Create<string>(), 
                 _fixture.Create<long?>(), 

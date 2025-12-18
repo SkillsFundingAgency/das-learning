@@ -34,8 +34,7 @@ public static class IntegrationEventExtensions
             TrainingCode = latestEpisode.TrainingCode,
             TrainingCourseVersion = latestEpisode.TrainingCourseVersion,
             PaymentsFrozen = latestEpisode.PaymentsFrozen,
-            Prices = prices,
-            FundingBandMaximum = latestEpisode.FundingBandMaximum
+            Prices = prices
         };
     }
 }

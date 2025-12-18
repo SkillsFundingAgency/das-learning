@@ -83,9 +83,6 @@ public class Startup
 
         services.AddCommandServices(Configuration).AddEventServices();
 
-        if (NotAcceptanceTests(Configuration))
-            services.AddLearningOuterApiClient(ApplicationSettings.LearningOuterApiConfiguration.BaseUrl, ApplicationSettings.LearningOuterApiConfiguration.Key);
-
         services.AddLogging((options) =>
         {
             options.AddApplicationInsights();

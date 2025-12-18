@@ -1,5 +1,6 @@
 ﻿namespace SFA.DAS.Learning.Types;
 
+#pragma warning disable CS8618
 public class LearningEpisode
 {
     public Guid Key { get; set; }
@@ -15,5 +16,5 @@ public class LearningEpisode
     public string? TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
     public List<LearningEpisodePrice> Prices { get; set; }
-    public int FundingBandMaximum { get; set; }
 }
+#pragma warning restore CS8618

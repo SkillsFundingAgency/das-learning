@@ -54,7 +54,6 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<decimal>(),
             _fixture.Create<FundingType>(),
             fundingPlatform,
-            _fixture.Create<int>(),
             _fixture.Create<long?>(),
             _fixture.Create<string>(),
             _fixture.Create<long>(),
