@@ -45,7 +45,6 @@ public class WhenAnEpisodeIsAdded
             episodePrice.EndPointAssessmentPrice,
             episode.FundingType,
             episode.FundingPlatform,
-            episode.FundingBandMaximum,
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
             episode.AccountLegalEntityId,

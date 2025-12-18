@@ -6,7 +6,6 @@ using NServiceBus.Testing;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Functions;
 using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
-using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 
 namespace SFA.DAS.Learning.AcceptanceTests;
 
@@ -81,16 +80,6 @@ public class TestFunction : IDisposable
     private static Mock<ILearningOuterApiClient> GetMockOuterApi()
     {
         var mockApprenticeshipsOuterApiClient = new Mock<ILearningOuterApiClient>();
-
-        mockApprenticeshipsOuterApiClient.Setup(x => x.GetStandard(It.IsAny<int>())).ReturnsAsync(new GetStandardResponse
-        {
-            MaxFunding = int.MaxValue,
-            ApprenticeshipFunding = new List<GetStandardFundingResponse>
-            {
-            new GetStandardFundingResponse{ EffectiveFrom = DateTime.MinValue, EffectiveTo = null, MaxEmployerLevyCap = int.MaxValue }
-            }
-        });
-
         return mockApprenticeshipsOuterApiClient;
     }
 }

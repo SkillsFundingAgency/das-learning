@@ -1,10 +1,8 @@
 using AutoFixture;
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
-using Moq;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient.Standards;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -78,53 +76,6 @@ public class ApprovalCreatedStepDefinitions
         _scenarioContext.SetLearningKey(learnerKey);
     }
 
-    [Given("the funding band maximum for that apprenticeship is set")]
-    public void GivenTheFundingBandMaximumForThatApprenticeshipIsSet()
-    {
-        SetupFundingBandMaximum();
-    }
-
-    [Given("the funding band maximum for that apprenticeship is set for (.*)")]
-    public void GivenTheFundingBandMaximumForThatApprenticeshipIsSetForDate(TokenisableDateTime date)
-    {
-        SetupFundingBandMaximum(date.DateTime);
-    }
-
-    private void SetupFundingBandMaximum(DateTime? date = null)
-    {
-        var fundingBandMaximum = _fixture.Create<int>();
-        _scenarioContext["fundingBandMaximum"] = fundingBandMaximum;
-
-        _testContext.TestFunction!.mockLearningOuterApiClient.Reset();
-        _testContext.TestFunction.mockLearningOuterApiClient
-            .Setup(x => x.GetStandard(It.IsAny<int>()))
-            .ReturnsAsync(new GetStandardResponse
-            {
-                MaxFunding = fundingBandMaximum,
-                ApprenticeshipFunding =
-                    new List<GetStandardFundingResponse>
-                    {
-                        new() { EffectiveFrom = date.GetValueOrDefault(DateTime.MinValue), EffectiveTo = date, MaxEmployerLevyCap = fundingBandMaximum }
-                    }
-            });
-    }
-
-
-    [Given("a funding band maximum for that apprenticeship and date range is not available")]
-    public void GivenAFundingBandMaximumForThatApprenticeshipAndDateRangeIsNotAvailable()
-    {
-        var fundingBandMaximum = _fixture.Create<int>();
-        _scenarioContext["fundingBandMaximum"] = fundingBandMaximum;
-        _testContext.TestFunction!.mockLearningOuterApiClient.Setup(x => x.GetStandard(It.IsAny<int>())).ReturnsAsync(new GetStandardResponse
-        {
-            MaxFunding = fundingBandMaximum,
-            ApprenticeshipFunding = new List<GetStandardFundingResponse>
-            {
-                new() { EffectiveFrom = DateTime.MinValue, EffectiveTo = DateTime.MinValue, MaxEmployerLevyCap = fundingBandMaximum }
-            }
-        });
-    }
-
     [Then(@"an Apprenticeship record is created")]
     public async Task ThenAnApprenticeshipRecordIsCreated()
     {
@@ -159,13 +110,6 @@ public class ApprovalCreatedStepDefinitions
         _scenarioContext["Learning"] = apprenticeship;
         _scenarioContext["Episode"] = episode;
         _scenarioContext["EpisodePrice"] = episodePrice;
-    }
-
-    [Then("an Apprenticeship record is created with the correct funding band maximum")]
-    public async Task ThenAnApprenticeshipRecordIsCreatedWithTheCorrectFundingBandMaximum()
-    {
-        await ThenAnApprenticeshipRecordIsCreated();
-        ((Episode)_scenarioContext["Episode"]).FundingBandMaximum.Should().Be((int)_scenarioContext["fundingBandMaximum"]);
     }
 
     [Then("an Apprenticeship record is not created")]
@@ -206,16 +150,6 @@ public class ApprovalCreatedStepDefinitions
         publishedEvent.Episode.FundingPlatform.ToString().Should().Be(LatestEpisode.FundingPlatform.ToString());
 
         _scenarioContext["publishedEvent"] = publishedEvent;
-    }
-
-    [Then("an ApprenticeshipCreatedEvent event is published with the correct funding band maximum")]
-    public async Task ThenAnApprenticeshipCreatedEventEventIsPublishedWithTheCorrectFundingBandMaximum()
-    {
-        await ThenAnApprenticeshipCreatedEventEventIsPublished();
-        ((LearningCreatedEvent)_scenarioContext["publishedEvent"])
-            .Episode
-            .FundingBandMaximum
-            .Should().Be((int)_scenarioContext["fundingBandMaximum"]);
     }
 
     [Then(@"an ApprenticeshipCreatedEvent event is not published")]

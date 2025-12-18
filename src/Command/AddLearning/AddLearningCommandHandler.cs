@@ -5,7 +5,6 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Infrastructure.Services;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -15,20 +14,17 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 {
     private readonly ILearningFactory _learningFactory;
     private readonly ILearningRepository _learningRepository;
-    private readonly IFundingBandMaximumService _fundingBandMaximumService;
     private readonly IMessageSession _messageSession;
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
     public AddLearningCommandHandler(
         ILearningFactory learningFactory,
         ILearningRepository learningRepository,
-        IFundingBandMaximumService fundingBandMaximumService,
         IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {
         _learningFactory = learningFactory;
         _learningRepository = learningRepository;
-        _fundingBandMaximumService = fundingBandMaximumService;
         _messageSession = messageSession;
         _logger = logger;
     }
@@ -43,19 +39,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         }
 
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
-
-        int? fundingBandMaximum;
-
-        if (command.ActualStartDate.HasValue)
-        {
-            fundingBandMaximum = await _fundingBandMaximumService.GetFundingBandMaximum(int.Parse(command.TrainingCode), command.ActualStartDate.Value);
-            if (fundingBandMaximum == null) throw new Exception($"No funding band maximum found for course {command.TrainingCode} for given ActualStartDate {command.ActualStartDate.Value:u}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
-        }
-        else
-        {
-            fundingBandMaximum = await _fundingBandMaximumService.GetNextApplicableFundingBandMaximum(int.Parse(command.TrainingCode), command.PlannedStartDate);
-            if (fundingBandMaximum == null) throw new Exception($"No funding band maximum found for course {command.TrainingCode} for given PlannedStartDate {command.PlannedStartDate:u}. Approvals Learning Id: {command.ApprovalsApprenticeshipId}");
-        }
 
         var learning = _learningFactory.CreateNew(
             command.ApprovalsApprenticeshipId,
@@ -75,7 +58,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.EndPointAssessmentPrice,
             command.FundingType,
             command.FundingPlatform,
-            fundingBandMaximum.Value,
             command.FundingEmployerAccountId,
             command.LegalEntityName,
             command.AccountLegalEntityId,

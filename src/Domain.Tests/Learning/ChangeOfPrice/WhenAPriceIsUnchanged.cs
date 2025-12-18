@@ -32,7 +32,6 @@ public class WhenAPriceIsUnchanged
         _learning = new LearningDomainModelBuilder()
             .WithCosts(existingCosts)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
-            .WithFundingBandMaximum(15000)
             .Build();
 
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
