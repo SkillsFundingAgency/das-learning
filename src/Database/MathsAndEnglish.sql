@@ -9,7 +9,8 @@
     [CompletionDate] DATETIME NULL, 
     [PriorLearningPercentage] INT NULL, 
     [Amount] DECIMAL(15, 5) NOT NULL, 
-    [PauseDate] DATETIME NULL
+    [PauseDate] DATETIME NULL, 
+    [LearnAimRef] VARCHAR(8) NOT NULL DEFAULT ''
 )
 GO
 

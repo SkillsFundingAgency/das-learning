@@ -131,9 +131,14 @@ public class  LearnerUpdateDetails
 public class MathsAndEnglish
 {
     /// <summary>
-    /// The maths and english course
+    /// The standard code of the linked OnProg
     /// </summary>
     public string Course { get; set; }
+
+    /// <summary>
+    /// The maths/english course the learner is undertaking
+    /// </summary>
+    public string LearnAimRef { get; set; }
 
     /// <summary>
     /// Start date of the maths and english course
@@ -237,6 +242,7 @@ public static class UpdateLearnerRequestExtensions
                 new MathsAndEnglishUpdateDetails
                 {
                     Course = x.Course,
+                    LearnAimRef = x.LearnAimRef,
                     StartDate = x.StartDate,
                     PlannedEndDate = x.PlannedEndDate,
                     CompletionDate = x.CompletionDate,
