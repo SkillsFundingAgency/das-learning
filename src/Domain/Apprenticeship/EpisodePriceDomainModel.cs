@@ -21,6 +21,7 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
         {
             return new EpisodePriceDomainModel(new EpisodePrice
             {
+                Key = Guid.NewGuid(),
                 StartDate = startDate,
                 EndDate = endDate,
                 TotalPrice = totalPrice,
