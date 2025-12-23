@@ -76,21 +76,6 @@ public class LearningRepository : ILearningRepository
 
     public async Task Update(LearningDomainModel learning)
     {
-        var tracked = DbContext.ChangeTracker.Entries().ToList();
-        //var trackedJson = JsonSerializer.Serialize(tracked, new JsonSerializerOptions
-        //{
-        //    WriteIndented = true
-        //});
-
-        var entries = DbContext.ChangeTracker.Entries()
-            .Select(e => new
-            {
-                Entity = e.Entity.GetType().Name,
-                State = e.State,
-                Key = e.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey())?.CurrentValue
-            })
-            .ToList();
-
         await DbContext.SaveChangesAsync();
   
         foreach (dynamic domainEvent in learning.FlushEvents())
