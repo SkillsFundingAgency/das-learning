@@ -144,6 +144,8 @@ public class LearningDomainModel : AggregateRoot
         _entity.Episodes.Add(episode.GetEntity());
     }
 
+    public void MarkAsCreated() => AddEvent(this.ToLearnerUpdatedEvent());
+
     public Learning.DataAccess.Entities.Learning.Learning GetEntity()
     {
         return _entity;
