@@ -72,6 +72,7 @@ public class EpisodeDomainModel
     {
         return new EpisodeDomainModel(new Episode
         {
+            Key = Guid.NewGuid(),
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
             FundingType = fundingType,

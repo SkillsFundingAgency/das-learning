@@ -82,6 +82,15 @@ public class LearningRepository : ILearningRepository
         //    WriteIndented = true
         //});
 
+        var entries = DbContext.ChangeTracker.Entries()
+            .Select(e => new
+            {
+                Entity = e.Entity.GetType().Name,
+                State = e.State,
+                Key = e.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey())?.CurrentValue
+            })
+            .ToList();
+
         await DbContext.SaveChangesAsync();
   
         foreach (dynamic domainEvent in learning.FlushEvents())

@@ -18,6 +18,7 @@ public class EpisodeBreakInLearningDomainModel
     {
         return new EpisodeBreakInLearningDomainModel(new EpisodeBreakInLearning
         {
+            Key = Guid.NewGuid(),
             EpisodeKey = episodeKey,
             StartDate = startDate,
             EndDate = endDate
