@@ -301,7 +301,9 @@ public class LearningDomainModel : AggregateRoot
                     WithdrawalDate = incomingCourse.WithdrawalDate,
                     PauseDate = incomingCourse.PauseDate,
                     PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
-                    Amount = incomingCourse.Amount
+                    Amount = incomingCourse.Amount,
+                    Key = Guid.NewGuid(),
+                    LearningKey = _entity.Key
                 });
                 hasChanges = true;
 

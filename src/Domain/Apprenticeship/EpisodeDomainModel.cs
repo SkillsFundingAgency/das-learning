@@ -224,7 +224,9 @@ public class EpisodeDomainModel
                 {
                     StartDate = newLearningSupport.StartDate,
                     EndDate = newLearningSupport.EndDate,
-                    LearningKey = _entity.LearningKey
+                    LearningKey = _entity.LearningKey,
+                    EpisodeKey = _entity.Key,
+                    Key = Guid.NewGuid()
                 });
             }
         }
