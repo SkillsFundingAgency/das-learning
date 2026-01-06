@@ -7,7 +7,7 @@ using SFA.DAS.Learning.Domain.Events;
 namespace SFA.DAS.Learning.MessageHandlers;
 
 public class LearnerUpdatedEventHandler(
-    ICommandHandler<ArchiveLearningHistoryCommand> archiveLearningHistoryCommandHandler,
+    IArchiveLearningHistoryCommandHandler archiveLearningHistoryCommandHandler,
     ILogger<LearnerUpdatedEventHandler> logger)
     : IDomainEventHandler<LearnerUpdatedEvent>
 {

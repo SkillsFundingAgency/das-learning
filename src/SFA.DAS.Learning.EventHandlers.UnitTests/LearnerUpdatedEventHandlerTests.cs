@@ -10,7 +10,7 @@ namespace SFA.DAS.Learning.MessageHandlers.UnitTests;
 public class LearnerUpdatedEventHandlerTests
 {
     private IFixture _fixture;
-    private Mock<ICommandHandler<ArchiveLearningHistoryCommand>> _archiveCommandHandler;
+    private Mock<IArchiveLearningHistoryCommandHandler> _archiveCommandHandler;
     private ILogger<LearnerUpdatedEventHandler> _logger;
     private LearnerUpdatedEventHandler _handler;
 
@@ -19,7 +19,7 @@ public class LearnerUpdatedEventHandlerTests
     {
         _fixture = new Fixture();
 
-        _archiveCommandHandler = new Mock<ICommandHandler<ArchiveLearningHistoryCommand>>();
+        _archiveCommandHandler = new Mock<IArchiveLearningHistoryCommandHandler>();
         _logger = Mock.Of<ILogger<LearnerUpdatedEventHandler>>();
 
         _handler = new LearnerUpdatedEventHandler(

@@ -9,6 +9,7 @@ using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 using SFA.DAS.Learning.Infrastructure.Services;
 using System.Diagnostics.CodeAnalysis;
+using SFA.DAS.Learning.Command.ArchiveLearningHistory;
 
 namespace SFA.DAS.Learning.Command;
 
@@ -43,6 +44,8 @@ public static class ServiceCollectionExtensions
                 .AsImplementedInterfaces()
                 .WithTransientLifetime();
         });
+
+        serviceCollection.AddScoped<IArchiveLearningHistoryCommandHandler, ArchiveLearningHistoryCommandHandler>();
 
         if (addDecorators != null)
         {

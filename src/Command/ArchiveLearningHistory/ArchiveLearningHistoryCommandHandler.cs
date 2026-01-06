@@ -5,10 +5,15 @@ using SFA.DAS.Learning.Domain.Repositories;
 
 namespace SFA.DAS.Learning.Command.ArchiveLearningHistory;
 
+public interface IArchiveLearningHistoryCommandHandler
+{
+    Task Handle(ArchiveLearningHistoryCommand command, CancellationToken cancellationToken = default);
+}
+
 public class ArchiveLearningHistoryCommandHandler(
     ILearningHistoryRepository repository,
     ILogger<ArchiveLearningHistoryCommandHandler> logger)
-    : ICommandHandler<ArchiveLearningHistoryCommand>
+    : IArchiveLearningHistoryCommandHandler
 {
     public async Task Handle(
         ArchiveLearningHistoryCommand command,
