@@ -1,5 +1,7 @@
 ﻿namespace SFA.DAS.Learning.Domain.Models;
 
+#pragma warning disable CS8618 // Required properties must be set in the constructor
+
 public class LearnerUpdateModel
 {
     public DeliveryDetails Delivery { get; set; }
@@ -21,6 +23,7 @@ public class LearningUpdateDetails
     public string? EmailAddress { get; set; }
     public DateTime? CompletionDate { get; set; }
     public DateTime DateOfBirth { get; set; }
+    public CareDetails Care { get; set; }
 }
 
 public class MathsAndEnglishUpdateDetails
@@ -66,3 +69,12 @@ public class BreakInLearningUpdateDetails
     public DateTime EndDate { get; set; }
     public DateTime PriorPeriodExpectedEndDate { get; set; }
 }
+
+public class CareDetails
+{
+    public bool HasEHCP { get; set; }
+    public bool IsCareLeaver { get; set; }
+    public bool CareLeaverEmployerConsentGiven { get; set; }
+}
+
+#pragma warning restore CS8618

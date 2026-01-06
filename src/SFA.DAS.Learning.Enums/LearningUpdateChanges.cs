@@ -14,5 +14,6 @@ public enum LearningUpdateChanges
     BreakInLearningRemoved = 9,
     MathsAndEnglishWithdrawal = 10,
     BreaksInLearningUpdated = 11,
-    DateOfBirthChanged = 12
+    DateOfBirthChanged = 12,
+    Care = 13
 }

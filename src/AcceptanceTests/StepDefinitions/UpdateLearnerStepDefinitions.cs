@@ -63,6 +63,9 @@ public class UpdateLearnerStepDefinitions
                 case "DateOfBirth":
                     updateRequest.Learner.DateOfBirth = TokenisableDateTime.FromString(valueString).DateTime!.Value;
                     break;
+                case "CareDetails":
+                    updateRequest.Learner.Care = GetCareDetailsFromString(valueString);
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -272,6 +275,16 @@ public class UpdateLearnerStepDefinitions
         learning.DateOfBirth.Should().Be(dateOfBirth.DateTime);
     }
 
+    [Given(@"the Care details for the Learning is")]
+    [Then(@"the Care details for the Learning is")]
+    public async Task ThenTheCareDetailsForTheLearningIs(Table table)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learning.HasEHCP.Should().Be(table.GetBoolean("HasEHCP"));
+        learning.IsCareLeaver.Should().Be(table.GetBoolean("IsCareLeaver"));
+        learning.CareLeaverEmployerConsentGiven.Should().Be(table.GetBoolean("CareLeaverEmployerConsentGiven"));
+    }
 
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
     {
@@ -351,6 +364,20 @@ public class UpdateLearnerStepDefinitions
         return breaks;
     }
 
+    private InnerApi.Requests.CareDetails GetCareDetailsFromString(string valueString)
+    {
+        var parsedValues = KeyValueParser.Parse(valueString);
+        var careDetails = new InnerApi.Requests.CareDetails();
+
+        if (parsedValues.Any())
+        {
+            careDetails.HasEHCP = bool.Parse(parsedValues.GetValueOrDefault("HasEHCP", "false"));
+            careDetails.IsCareLeaver = bool.Parse(parsedValues.GetValueOrDefault("IsCareLeaver", "false"));
+            careDetails.CareLeaverEmployerConsentGiven = bool.Parse(parsedValues.GetValueOrDefault("CareLeaverEmployerConsentGiven", "false"));
+        }
+
+        return careDetails;
+    }
 
     private static class KeyValueParser
     {

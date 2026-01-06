@@ -20,7 +20,8 @@ internal static class ApprenticeshipCreatedEventExtensions
                 LastName = apprenticeshipCreatedEvent.LastName,
                 EmailAddress = null,
                 CompletionDate = null,
-                DateOfBirth = apprenticeshipCreatedEvent.DateOfBirth
+                DateOfBirth = apprenticeshipCreatedEvent.DateOfBirth,
+                Care = new CareDetails()
             },
             LearningSupport = new List<LearningSupportUpdatedDetails>(),
             MathsAndEnglishCourses = new List<MathsAndEnglish>(),
