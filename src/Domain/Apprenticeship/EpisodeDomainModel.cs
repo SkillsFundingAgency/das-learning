@@ -98,7 +98,8 @@ public class EpisodeDomainModel
             endDate,
             totalPrice,
             trainingPrice,
-            endpointAssessmentPrice);
+            endpointAssessmentPrice,
+            _entity.Key);
 
         _episodePrices.Add(newEpisodePrice);
         _entity.Prices.Add(newEpisodePrice.GetEntity());

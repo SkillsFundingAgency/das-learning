@@ -17,7 +17,8 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
             DateTime endDate,
             decimal totalPrice,
             decimal? trainingPrice,
-            decimal? endpointAssessmentPrice)
+            decimal? endpointAssessmentPrice,
+            Guid episodeKey)
         {
             return new EpisodePriceDomainModel(new EpisodePrice
             {
@@ -27,6 +28,7 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship
                 TotalPrice = totalPrice,
                 TrainingPrice = trainingPrice,
                 EndPointAssessmentPrice = endpointAssessmentPrice,
+                EpisodeKey = episodeKey
             });
         }
 
