@@ -50,6 +50,7 @@ public class EpisodeBreakInLearning
     public Guid Key { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public DateTime PriorPeriodExpectedEndDate { get; set; }
 }
 
 public class EpisodePrice

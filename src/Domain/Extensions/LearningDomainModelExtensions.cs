@@ -46,7 +46,8 @@ namespace SFA.DAS.Learning.Domain.Extensions
                     {
                         Key = b.Key,
                         StartDate = b.StartDate,
-                        EndDate = b.EndDate
+                        EndDate = b.EndDate,
+                        PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
                     }).ToList(),
 
                     EpisodePrices = e.EpisodePrices.Select(p => new EpisodePrice

@@ -10,6 +10,7 @@ public class EpisodeBreakInLearningDomainModel
     public Guid EpisodeKey => _entity.EpisodeKey;
     public DateTime StartDate => _entity.StartDate;
     public DateTime EndDate => _entity.EndDate;
+    public DateTime PriorPeriodExpectedEndDate => _entity.PriorPeriodExpectedEndDate;
 
     internal static EpisodeBreakInLearningDomainModel New(
         Guid episodeKey,
