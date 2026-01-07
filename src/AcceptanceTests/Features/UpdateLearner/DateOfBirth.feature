@@ -14,3 +14,4 @@ Scenario: Learner date of birth is updated
     And the following changes are returned
         | Change             |
         | DateOfBirthChanged |
+    And the learning history is maintained

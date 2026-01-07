@@ -16,6 +16,7 @@ Scenario: BreaksInLearning details are added
     And the following changes are returned
         | Change                  |
         | BreaksInLearningUpdated |
+    And the learning history is maintained
 
 
 Scenario: BreaksInLearning details are added then removed
@@ -35,3 +36,4 @@ Scenario: BreaksInLearning details are added then removed
     And the following changes are returned
         | Change                 |
         | BreaksInLearningUpdated |
+    And the learning history is maintained

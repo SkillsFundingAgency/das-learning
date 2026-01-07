@@ -34,3 +34,4 @@ Scenario: LearningSupport details are added then removed
 	And the following changes are returned
 		| Change          |
 		| LearningSupport |
+	And the learning history is maintained

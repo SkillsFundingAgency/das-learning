@@ -16,6 +16,7 @@ Scenario: Maths and English details are added
 	And the following changes are returned
 		| Change          |
 		| MathsAndEnglish |
+	And the learning history is maintained
 
 Scenario: Maths and English details are added then removed
 	Given There is an apprenticeship with the following details
@@ -34,6 +35,7 @@ Scenario: Maths and English details are added then removed
 	And the following changes are returned
 		| Change          |
 		| MathsAndEnglish |
+	And the learning history is maintained
 
 Scenario: Maths and English details are added then withdrawn back to the start
 	Given There is an apprenticeship with the following details
@@ -53,6 +55,7 @@ Scenario: Maths and English details are added then withdrawn back to the start
 	And the following changes are returned
 		| Change                    |
 		| MathsAndEnglishWithdrawal |
+	And the learning history is maintained
 
 Scenario: Maths and English pause date is set
 	Given There is an apprenticeship with the following details
@@ -72,6 +75,7 @@ Scenario: Maths and English pause date is set
 	And the following changes are returned
 		| Change          |
 		| MathsAndEnglish |
+	And the learning history is maintained
 
 Scenario: Maths and English pause date is moved later
 	Given There is an apprenticeship with the following details
@@ -91,6 +95,7 @@ Scenario: Maths and English pause date is moved later
 	And the following changes are returned
 		| Change          |
 		| MathsAndEnglish |
+	And the learning history is maintained
 
 Scenario: Maths and English pause date is removed
 	Given There is an apprenticeship with the following details
@@ -110,3 +115,4 @@ Scenario: Maths and English pause date is removed
 	And the following changes are returned
 		| Change          |
 		| MathsAndEnglish |
+	And the learning history is maintained

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
@@ -74,9 +76,6 @@ public class LearningRepository : ILearningRepository
 
     public async Task Update(LearningDomainModel learning)
     {
-        var entity = learning.GetEntity();
-        DbContext.Update(entity);
-
         await DbContext.SaveChangesAsync();
   
         foreach (dynamic domainEvent in learning.FlushEvents())

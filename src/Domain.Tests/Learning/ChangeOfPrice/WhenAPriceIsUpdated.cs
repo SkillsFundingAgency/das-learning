@@ -54,7 +54,6 @@ public class WhenAPriceIsUpdated
 
         prices.Count().Should().Be(1);
         prices.Single().StartDate.Should().Be(new DateTime(2024, 06, 01));
-        prices.Single().Key.Should().Be(Guid.Empty);
     }
 
     [Test]

@@ -57,7 +57,6 @@ public class WhenANewPriceIsAdded
             .ToList();
 
         prices.Count().Should().Be(2);
-        prices.Last().Key.Should().Be(Guid.Empty);
     }
 
     [Test]

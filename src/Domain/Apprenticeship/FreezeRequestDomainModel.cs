@@ -19,6 +19,7 @@ public class FreezeRequestDomainModel
     {
         return new FreezeRequestDomainModel(new FreezeRequest
         {
+            Key = Guid.NewGuid(),
             LearningKey = apprenticeshipKey,
             FrozenBy = userId,
             FrozenDateTime = frozenDateTime,
