@@ -45,6 +45,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Learning.Queries.Un
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFA.DAS.Learning.InnerApi.UnitTests", "SFA.DAS.Learning.InnerApi.UnitTests\SFA.DAS.Learning.InnerApi.UnitTests.csproj", "{E33F079C-D877-48E1-A18A-F2BA546A033C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.Learning.MessageHandlers", "SFA.DAS.Learning.MessageHandlers\SFA.DAS.Learning.MessageHandlers.csproj", "{D2DEAE9D-B683-4DFD-9260-6ED1CD62C1F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.Learning.MessageHandlers.UnitTests", "SFA.DAS.Learning.EventHandlers.UnitTests\SFA.DAS.Learning.MessageHandlers.UnitTests.csproj", "{CFE7B5CF-EBC8-4361-9B70-D015DA4AAF82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,6 +137,14 @@ Global
 		{E33F079C-D877-48E1-A18A-F2BA546A033C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E33F079C-D877-48E1-A18A-F2BA546A033C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E33F079C-D877-48E1-A18A-F2BA546A033C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2DEAE9D-B683-4DFD-9260-6ED1CD62C1F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2DEAE9D-B683-4DFD-9260-6ED1CD62C1F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2DEAE9D-B683-4DFD-9260-6ED1CD62C1F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2DEAE9D-B683-4DFD-9260-6ED1CD62C1F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFE7B5CF-EBC8-4361-9B70-D015DA4AAF82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFE7B5CF-EBC8-4361-9B70-D015DA4AAF82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFE7B5CF-EBC8-4361-9B70-D015DA4AAF82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFE7B5CF-EBC8-4361-9B70-D015DA4AAF82}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -147,6 +159,7 @@ Global
 		{5336F80F-C1F0-4D16-83B7-B403B7EFAFBA} = {8B9357D2-75AF-4B77-98C0-B1C9F310BD88}
 		{DCF2492B-A244-4F7F-B54D-C7B50B732B7A} = {8B9357D2-75AF-4B77-98C0-B1C9F310BD88}
 		{E33F079C-D877-48E1-A18A-F2BA546A033C} = {8B9357D2-75AF-4B77-98C0-B1C9F310BD88}
+		{CFE7B5CF-EBC8-4361-9B70-D015DA4AAF82} = {8B9357D2-75AF-4B77-98C0-B1C9F310BD88}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A244BDC-EE6C-4218-8982-87E249BFFA07}

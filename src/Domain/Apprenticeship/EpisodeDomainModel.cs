@@ -72,6 +72,7 @@ public class EpisodeDomainModel
     {
         return new EpisodeDomainModel(new Episode
         {
+            Key = Guid.NewGuid(),
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
             FundingType = fundingType,
@@ -97,7 +98,8 @@ public class EpisodeDomainModel
             endDate,
             totalPrice,
             trainingPrice,
-            endpointAssessmentPrice);
+            endpointAssessmentPrice,
+            _entity.Key);
 
         _episodePrices.Add(newEpisodePrice);
         _entity.Prices.Add(newEpisodePrice.GetEntity());
@@ -222,7 +224,9 @@ public class EpisodeDomainModel
                 {
                     StartDate = newLearningSupport.StartDate,
                     EndDate = newLearningSupport.EndDate,
-                    LearningKey = _entity.LearningKey
+                    LearningKey = _entity.LearningKey,
+                    EpisodeKey = _entity.Key,
+                    Key = Guid.NewGuid()
                 });
             }
         }
@@ -256,7 +260,8 @@ public class EpisodeDomainModel
                     StartDate = newBreakInLearning.StartDate,
                     EndDate = newBreakInLearning.EndDate,
                     PriorPeriodExpectedEndDate = newBreakInLearning.PriorPeriodExpectedEndDate,
-                    EpisodeKey = Key
+                    EpisodeKey = Key,
+                    Key = Guid.NewGuid()
                 });
             }
         }

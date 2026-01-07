@@ -19,3 +19,4 @@ Scenario: ExpectedEndDate is moved earlier
 	And the EpisodePrices are returned
 		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
 		| currentAY-09-25 | nextAY-05-31 | 6000          | 500      |
+	And the learning history is maintained

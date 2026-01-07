@@ -64,6 +64,8 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TrainingCode,
             command.TrainingCourseVersion);
 
+        learning.MarkAsCreated();
+
         try
         {
             await _learningRepository.Add(learning);

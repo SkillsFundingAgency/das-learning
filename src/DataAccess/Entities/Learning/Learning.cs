@@ -12,7 +12,8 @@ public class Learning
     }
         
 	[Key]
-	public Guid Key { get; set; }
+    [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None)]
+    public Guid Key { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }
 	public string Uln { get; set; } = null!;
 	public string FirstName { get; set; } = null!;
