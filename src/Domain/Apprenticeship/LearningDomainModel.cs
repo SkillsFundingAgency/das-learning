@@ -5,6 +5,7 @@ using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
+using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglish;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -146,6 +147,8 @@ public class LearningDomainModel : AggregateRoot
         _entity.Episodes.Add(episode.GetEntity());
     }
 
+    public void MarkAsCreated() => AddEvent(this.ToLearnerUpdatedEvent());
+
     public Learning.DataAccess.Entities.Learning.Learning GetEntity()
     {
         return _entity;
@@ -198,6 +201,8 @@ public class LearningDomainModel : AggregateRoot
         UpdateBreaksInLearning(updateModel, changes);
 
         UpdateCareDetails(updateModel, changes);
+        
+        if (changes.Any()) AddEvent(this.ToLearnerUpdatedEvent());
 
         return changes.ToArray();
     }
@@ -301,7 +306,9 @@ public class LearningDomainModel : AggregateRoot
                     WithdrawalDate = incomingCourse.WithdrawalDate,
                     PauseDate = incomingCourse.PauseDate,
                     PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
-                    Amount = incomingCourse.Amount
+                    Amount = incomingCourse.Amount,
+                    Key = Guid.NewGuid(),
+                    LearningKey = _entity.Key
                 });
                 hasChanges = true;
 

@@ -14,6 +14,7 @@ using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Functions.AppStart;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Infrastructure.Extensions;
+using SFA.DAS.Learning.MessageHandlers.Extensions;
 
 namespace SFA.DAS.Learning.Functions;
 

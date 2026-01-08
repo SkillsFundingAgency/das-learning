@@ -14,6 +14,7 @@ Scenario: Apprenticeship pause date is set
 	And the following changes are returned
 		| Change                 |
 		| BreakInLearningStarted |
+	And the learning history is maintained
 
 Scenario: Apprenticeship pause date is un set
 	Given There is an apprenticeship with the following details
@@ -31,3 +32,4 @@ Scenario: Apprenticeship pause date is un set
 	And the following changes are returned
 		| Change                 |
 		| BreakInLearningRemoved |
+	And the learning history is maintained

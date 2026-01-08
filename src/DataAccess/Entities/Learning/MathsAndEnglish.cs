@@ -5,6 +5,7 @@
 public class MathsAndEnglish
 {
     [Key]
+    [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None)]
     public Guid Key { get; set; }
     public Guid LearningKey { get; set; }
     public DateTime StartDate { get; set; }

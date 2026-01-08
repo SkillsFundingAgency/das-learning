@@ -11,6 +11,7 @@ using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.InnerApi.Services;
+using SFA.DAS.Learning.MessageHandlers.Extensions;
 using SFA.DAS.Learning.Queries;
 
 namespace SFA.DAS.Learning.AcceptanceTests;

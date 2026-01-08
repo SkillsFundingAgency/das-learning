@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Command\SFA.DAS.Learning.Command.csproj" />
     <ProjectReference Include="..\DataAccess\SFA.DAS.Learning.DataAccess.csproj" />
     <ProjectReference Include="..\Queries\SFA.DAS.Learning.Queries.csproj" />
+    <ProjectReference Include="..\SFA.DAS.Learning.MessageHandlers\SFA.DAS.Learning.MessageHandlers.csproj" />
   </ItemGroup>
 
 </Project>
