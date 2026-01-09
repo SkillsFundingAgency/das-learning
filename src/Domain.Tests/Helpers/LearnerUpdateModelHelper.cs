@@ -17,7 +17,13 @@ public static class LearnerUpdateModelHelper
                 LastName = learning.LastName,
                 EmailAddress = learning.EmailAddress ?? "",
                 CompletionDate = learning.CompletionDate,
-                DateOfBirth = learning.DateOfBirth
+                DateOfBirth = learning.DateOfBirth,
+                Care = new CareDetails
+                {
+                    HasEHCP = learning.HasEHCP,
+                    IsCareLeaver = learning.IsCareLeaver,
+                    CareLeaverEmployerConsentGiven = learning.CareLeaverEmployerConsentGiven
+                }
             },
             MathsAndEnglishCourses = learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails
             {
