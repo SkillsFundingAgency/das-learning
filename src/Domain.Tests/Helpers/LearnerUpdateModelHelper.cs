@@ -28,6 +28,7 @@ public static class LearnerUpdateModelHelper
             MathsAndEnglishCourses = learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails
             {
                 Course = x.Course,
+                LearnAimRef = x.LearnAimRef,
                 StartDate = x.StartDate,
                 PlannedEndDate = x.PlannedEndDate,
                 CompletionDate = x.CompletionDate,

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
@@ -278,6 +279,7 @@ public class LearningDomainModel : AggregateRoot
         {
             var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x =>
                 x.Course.Trim() == incomingCourse.Course.Trim()
+                && x.LearnAimRef.Trim() == incomingCourse.LearnAimRef.Trim()
                 && x.StartDate == incomingCourse.StartDate
                 && x.PlannedEndDate == incomingCourse.PlannedEndDate
                 && x.CompletionDate == incomingCourse.CompletionDate
@@ -300,6 +302,7 @@ public class LearningDomainModel : AggregateRoot
                 coursesToAdd.Add(new MathsAndEnglish
                 {
                     Course = incomingCourse.Course,
+                    LearnAimRef = incomingCourse.LearnAimRef,
                     StartDate = incomingCourse.StartDate,
                     PlannedEndDate = incomingCourse.PlannedEndDate,
                     CompletionDate = incomingCourse.CompletionDate,

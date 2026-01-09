@@ -29,6 +29,7 @@ public class LearningUpdateDetails
 public class MathsAndEnglishUpdateDetails
 {
     public string Course { get; set; }
+    public string LearnAimRef { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime PlannedEndDate { get; set; }
     public DateTime? CompletionDate { get; set; }

@@ -11,6 +11,7 @@ public class MathsAndEnglish
     public DateTime StartDate { get; set; }
     public DateTime PlannedEndDate { get; set; }
     public string Course { get; set; } = null!;
+    public string LearnAimRef { get; set; } = null!;
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? CompletionDate { get; set; }
     public DateTime? PauseDate { get; set; }

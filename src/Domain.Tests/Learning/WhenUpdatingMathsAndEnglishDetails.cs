@@ -162,7 +162,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         //Arrange
         var course = _fixture.Create<MathsAndEnglishUpdateDetails>();
         var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
-        entity.MathsAndEnglishCourses = [new MathsAndEnglish { Course = course.Course }];
+        entity.MathsAndEnglishCourses = [new MathsAndEnglish { Course = course.Course, LearnAimRef = course.LearnAimRef }];
 
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
