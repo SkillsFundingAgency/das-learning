@@ -172,6 +172,7 @@ public class UpdateLearnerStepDefinitions
             var expectedMathsAndEnglish = new DataAccess.Entities.Learning.MathsAndEnglish
             {
                 Course = row["Course"],
+                LearnAimRef = row["LearnAimRef"],
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
                 PlannedEndDate = TokenisableDateTime.FromString(row["PlannedEndDate"]).DateTime!.Value,
                 PauseDate = pauseDate,
@@ -282,7 +283,8 @@ public class UpdateLearnerStepDefinitions
         {
             courses.Add(new MathsAndEnglish
             {
-                Course = parsedValues.GetValueOrDefault("course", "Maths"),
+                Course = parsedValues.GetValueOrDefault("course", "maths"),
+                LearnAimRef = parsedValues.GetValueOrDefault("learnAimRef", "maths"),
                 StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
                 PlannedEndDate = TokenisableDateTime.FromString(parsedValues["PlannedEndDate"]).DateTime!.Value,
                 Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000")),
