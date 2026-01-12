@@ -23,6 +23,9 @@ public class LearningDomainModel : AggregateRoot
     public string FirstName => _entity.FirstName;
     public string LastName => _entity.LastName;
     public string? EmailAddress => _entity.EmailAddress;
+    public bool HasEHCP => _entity.HasEHCP;
+    public bool IsCareLeaver => _entity.IsCareLeaver;
+    public bool CareLeaverEmployerConsentGiven => _entity.CareLeaverEmployerConsentGiven;
     public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
@@ -198,6 +201,8 @@ public class LearningDomainModel : AggregateRoot
 
         UpdateBreaksInLearning(updateModel, changes);
 
+        UpdateCareDetails(updateModel, changes);
+        
         if (changes.Any()) AddEvent(this.ToLearnerUpdatedEvent());
 
         return changes.ToArray();
@@ -437,6 +442,19 @@ public class LearningDomainModel : AggregateRoot
         if (breaksInLearningHaveChanged)
         {
             changes.Add(LearningUpdateChanges.BreaksInLearningUpdated);
+        }
+    }
+
+    private void UpdateCareDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
+    {
+        if (_entity.HasEHCP != updateModel.Learning.Care.HasEHCP ||
+            _entity.IsCareLeaver != updateModel.Learning.Care.IsCareLeaver ||
+            _entity.CareLeaverEmployerConsentGiven != updateModel.Learning.Care.CareLeaverEmployerConsentGiven)
+        {
+            _entity.HasEHCP = updateModel.Learning.Care.HasEHCP;
+            _entity.IsCareLeaver = updateModel.Learning.Care.IsCareLeaver;
+            _entity.CareLeaverEmployerConsentGiven = updateModel.Learning.Care.CareLeaverEmployerConsentGiven;
+            changes.Add(LearningUpdateChanges.Care);
         }
     }
 }

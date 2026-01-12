@@ -123,6 +123,11 @@ public class  LearnerUpdateDetails
     /// Date of birth of the learner
     /// </summary>
     public DateTime DateOfBirth { get; set; }
+
+    /// <summary>
+    /// Learner care details
+    /// </summary>
+    public CareDetails Care { get; set; }
 }
 
 /// <summary>
@@ -214,13 +219,28 @@ public class BreakInLearning
 }
 #pragma warning restore CS8618 // Required properties must be set in the constructor
 
+/// <summary>
+/// Learner care details
+/// </summary>
+public class CareDetails
+{
+    /// <summary> Indicates whether the learner has an Education, Health, and Care Plan (EHCP). /// </summary>
+    public bool HasEHCP { get; set; }
+    /// <summary> Indicates whether the learner is a care leaver </summary>
+    public bool IsCareLeaver { get; set; }
+    /// <summary> Indicates whether consent has been given to share information about the learner being a care leaver. </summary>
+    public bool CareLeaverEmployerConsentGiven { get; set; }
+}
+
+/// <summary>
+/// Extension methods for updating learner requests
+/// </summary>
 public static class UpdateLearnerRequestExtensions
 {
     /// <summary>
     /// Converts the request to a command for updating a learner
     /// </summary>
     /// <param name="request">The request containing learner details</param>
-    /// <param name="learnerKey">The unique identifier of the learner</param>
     /// <returns>A command to update the learner</returns>
     public static LearnerUpdateModel ToUpdateModel(this UpdateLearnerRequest request)
     {
@@ -236,7 +256,13 @@ public static class UpdateLearnerRequestExtensions
                 LastName = request.Learner.LastName,
                 EmailAddress = request.Learner.EmailAddress,
                 CompletionDate = request.Learner.CompletionDate,
-                DateOfBirth = request.Learner.DateOfBirth
+                DateOfBirth = request.Learner.DateOfBirth,
+                Care = new Domain.Models.CareDetails
+                {
+                    HasEHCP = request.Learner.Care.HasEHCP,
+                    IsCareLeaver = request.Learner.Care.IsCareLeaver,
+                    CareLeaverEmployerConsentGiven = request.Learner.Care.CareLeaverEmployerConsentGiven
+                }
             },
             MathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x =>
                 new MathsAndEnglishUpdateDetails

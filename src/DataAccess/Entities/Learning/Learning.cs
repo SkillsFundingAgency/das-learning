@@ -25,4 +25,7 @@ public class Learning
     public List<Episode> Episodes { get; set; }
     public DateTime? CompletionDate { get; set; }
     public List<MathsAndEnglish> MathsAndEnglishCourses { get; set; }
+    public bool HasEHCP { get; set; }
+    public bool IsCareLeaver { get; set; }
+    public bool CareLeaverEmployerConsentGiven { get; set; }
 }
