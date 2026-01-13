@@ -65,6 +65,36 @@ public class WhenRemovingLearner
     }
 
     [Test]
+    public async Task ThenEnglishAndMathsIsRemoved()
+    {
+        // Arrange
+        var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
+        var domainModel = _fixture.Create<LearningDomainModel>();
+
+        var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
+
+        TestHelper.SetEpisode(domainModel, latestEpisode);
+
+        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+            .ReturnsAsync(domainModel);
+
+        LearningDomainModel? updatedModel = null;
+
+        _learningRepository
+            .Setup(x => x.Update(It.IsAny<LearningDomainModel>()))
+            .Callback<LearningDomainModel>(m => updatedModel = m);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        _learningRepository.Verify(x => x.Update(It.IsAny<LearningDomainModel>()), Times.Once);
+
+        updatedModel.Should().NotBeNull();
+        updatedModel!.MathsAndEnglishCourses.Should().BeEmpty();
+    }
+
+    [Test]
     public void ThenAnExceptionIsThrownIfTheLearnerIsNotFound()
     {
         // Arrange
