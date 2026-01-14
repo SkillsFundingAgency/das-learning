@@ -256,6 +256,8 @@ public class LearningDomainModel : AggregateRoot
         var latestEpisode = LatestEpisode;
         var lastDayOfLearning = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
         latestEpisode.Withdraw(lastDayOfLearning);
+        latestEpisode.UpdateLearningSupportIfChanged([]);
+        latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.MathsAndEnglishCourses.Clear();
         _mathsAndEnglishCourses.Clear();
     }
