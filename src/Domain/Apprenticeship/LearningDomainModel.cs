@@ -13,7 +13,6 @@ public class LearningDomainModel : AggregateRoot
     private readonly Learning.DataAccess.Entities.Learning.Learning _entity;
     private readonly List<EpisodeDomainModel> _episodes;
     private readonly List<FreezeRequestDomainModel> _freezeRequests;
-    private readonly List<MathsAndEnglishDomainModel> _mathsAndEnglishCourses;
 
     public Guid Key => _entity.Key;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
@@ -28,7 +27,7 @@ public class LearningDomainModel : AggregateRoot
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<FreezeRequestDomainModel> FreezeRequests => new ReadOnlyCollection<FreezeRequestDomainModel>(_freezeRequests);
-    public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_mathsAndEnglishCourses);
+    public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList());
     public DateTime StartDate
     {
         get
@@ -105,7 +104,6 @@ public class LearningDomainModel : AggregateRoot
         _entity = entity;
         _episodes = entity.Episodes.Select(EpisodeDomainModel.Get).ToList();
         _freezeRequests = entity.FreezeRequests.Select(FreezeRequestDomainModel.Get).ToList();
-        _mathsAndEnglishCourses = entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList();
     }
 
     public void AddEpisode(
@@ -271,67 +269,27 @@ public class LearningDomainModel : AggregateRoot
         bool hasWithdrawalChanges = false;
         bool hasBreaksInLearningChanges = false;
 
-        var coursesToAdd = new List<MathsAndEnglish>();
+        var existingCourses = MathsAndEnglishCourses;
         var courseKeysToKeep = new List<Guid>();
 
         foreach (var incomingCourse in updateModel.MathsAndEnglishCourses)
         {
-            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x =>
-                x.Course.Trim() == incomingCourse.Course.Trim()
-                && x.LearnAimRef.Trim() == incomingCourse.LearnAimRef.Trim()
-                && x.StartDate == incomingCourse.StartDate
-                && x.PlannedEndDate == incomingCourse.PlannedEndDate
-                && x.CompletionDate == incomingCourse.CompletionDate
-                && x.PriorLearningPercentage == incomingCourse.PriorLearningPercentage
-                && x.Amount == incomingCourse.Amount);
+            var existingCourse = existingCourses.SingleOrDefault(x => x.LearnAimRef.Trim() == incomingCourse.LearnAimRef.Trim());
 
             if (existingCourse != null)
             {
                 courseKeysToKeep.Add(existingCourse.Key);
-                if (existingCourse.PauseDate != incomingCourse.PauseDate)
-                {
-                    existingCourse.PauseDate = incomingCourse.PauseDate;
-                    hasChanges = true;
-                }
-
-                hasBreaksInLearningChanges |= MathsAndEnglishDomainModel.Get(existingCourse).UpdateBreaksInLearningIfChanged(incomingCourse.BreaksInLearning);
-
-                if (existingCourse.WithdrawalDate != incomingCourse.WithdrawalDate)
-                {
-                    existingCourse.WithdrawalDate = incomingCourse.WithdrawalDate;
-                    hasWithdrawalChanges = true;
-                }
+                hasChanges |= existingCourse.Update(incomingCourse);
+                hasWithdrawalChanges |= existingCourse.UpdateWithdrawalDate(incomingCourse);
+                hasBreaksInLearningChanges |= existingCourse.UpdateBreaksInLearningIfChanged(incomingCourse.BreaksInLearning);
             }
             else
             {
-                var newCourse = new MathsAndEnglish
-                {
-                    Course = incomingCourse.Course,
-                    LearnAimRef = incomingCourse.LearnAimRef,
-                    StartDate = incomingCourse.StartDate,
-                    PlannedEndDate = incomingCourse.PlannedEndDate,
-                    CompletionDate = incomingCourse.CompletionDate,
-                    WithdrawalDate = incomingCourse.WithdrawalDate,
-                    PauseDate = incomingCourse.PauseDate,
-                    PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
-                    Amount = incomingCourse.Amount,
-                    Key = Guid.NewGuid(),
-                    LearningKey = _entity.Key
-                };
-
-                newCourse.BreaksInLearning = incomingCourse.BreaksInLearning.Select(b => new DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning
-                {
-                    Key = Guid.NewGuid(),
-                    MathsAndEnglishKey = newCourse.Key,
-                    StartDate = b.StartDate,
-                    EndDate = b.EndDate,
-                    PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
-                }).ToList();
-
-                coursesToAdd.Add(newCourse);
                 hasChanges = true;
-
-                if(incomingCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
+                var newCourse = new MathsAndEnglishDomainModel(incomingCourse, _entity.Key);
+                _entity.MathsAndEnglishCourses.Add(newCourse.GetEntity());
+                if(newCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
+                courseKeysToKeep.Add(newCourse.Key);
             }
         }
 
@@ -342,12 +300,8 @@ public class LearningDomainModel : AggregateRoot
         foreach (var removed in coursesToRemove)
         {
             _entity.MathsAndEnglishCourses.Remove(removed);
-            _mathsAndEnglishCourses.RemoveAll(x => x.Key == removed.Key);
             hasChanges = true;
         }
-
-        _entity.MathsAndEnglishCourses.AddRange(coursesToAdd);
-        _mathsAndEnglishCourses.AddRange(coursesToAdd.Select(MathsAndEnglishDomainModel.Get));
 
         if (hasChanges)
             changes.Add(LearningUpdateChanges.MathsAndEnglish);

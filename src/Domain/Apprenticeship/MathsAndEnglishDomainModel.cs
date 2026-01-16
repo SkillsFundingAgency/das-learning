@@ -1,6 +1,8 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -10,6 +12,7 @@ public class MathsAndEnglishDomainModel
 
     public Guid Key => _entity.Key;
     public Guid LearningKey => _entity.LearningKey;
+    public string LearnAimRef => _entity.LearnAimRef;
     public DateTime StartDate => _entity.StartDate;
     public DateTime PlannedEndDate => _entity.PlannedEndDate;
     public string Course => _entity.Course;
@@ -18,10 +21,39 @@ public class MathsAndEnglishDomainModel
     public DateTime? PauseDate => _entity.PauseDate;
     public int? PriorLearningPercentage => _entity.PriorLearningPercentage;
     public decimal Amount => _entity.Amount;
+    public IReadOnlyCollection<MathsAndEnglishBreakInLearningDomainModel> BreaksInLearning => new ReadOnlyCollection<MathsAndEnglishBreakInLearningDomainModel>(_entity.BreaksInLearning.Select(MathsAndEnglishBreakInLearningDomainModel.Get).ToList());
+
 
     internal MathsAndEnglishDomainModel(MathsAndEnglish entity)
     {
         _entity = entity;
+    }
+
+    public MathsAndEnglishDomainModel(MathsAndEnglishUpdateDetails incomingCourse, Guid learningKey)
+    {
+        _entity = new MathsAndEnglish
+        {
+            Key = Guid.NewGuid(),
+            LearningKey = learningKey,
+            LearnAimRef = incomingCourse.LearnAimRef,
+            Course = incomingCourse.Course,
+            StartDate = incomingCourse.StartDate,
+            PlannedEndDate = incomingCourse.PlannedEndDate,
+            CompletionDate = incomingCourse.CompletionDate,
+            PauseDate = incomingCourse.PauseDate,
+            Amount = incomingCourse.Amount,
+            PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
+            WithdrawalDate = incomingCourse.WithdrawalDate
+        };
+
+        _entity.BreaksInLearning = incomingCourse.BreaksInLearning.Select(b => new DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning
+        {
+            Key = Guid.NewGuid(),
+            MathsAndEnglishKey = _entity.Key,
+            StartDate = b.StartDate,
+            EndDate = b.EndDate,
+            PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+        }).ToList();
     }
 
     public static MathsAndEnglishDomainModel Get(MathsAndEnglish entity)
@@ -62,5 +94,52 @@ public class MathsAndEnglishDomainModel
         }
 
         return hasBreaksInLearningChanged || removedItems.Count > 0;
+    }
+
+    internal MathsAndEnglish GetEntity()
+    {
+        return _entity;
+    }
+
+    /// <summary>
+    /// Updates general details of the Maths and English course. Returns true if there were changes, otherwise false.
+    /// </summary>
+    /// <returns>True if the course was updated, otherwise false.</returns>
+    internal bool Update(MathsAndEnglishUpdateDetails incomingCourse)
+    {
+        var hasChanged =
+            _entity.Course.Trim() != incomingCourse.Course.Trim() ||
+            _entity.StartDate != incomingCourse.StartDate ||
+            _entity.PlannedEndDate != incomingCourse.PlannedEndDate ||
+            _entity.CompletionDate != incomingCourse.CompletionDate ||
+            _entity.PauseDate != incomingCourse.PauseDate ||
+            _entity.Amount != incomingCourse.Amount ||
+            _entity.PriorLearningPercentage != incomingCourse.PriorLearningPercentage;
+
+        if (!hasChanged)
+            return false;
+
+        _entity.Course = incomingCourse.Course;
+        _entity.StartDate = incomingCourse.StartDate;
+        _entity.PlannedEndDate = incomingCourse.PlannedEndDate;
+        _entity.CompletionDate = incomingCourse.CompletionDate;
+        _entity.PauseDate = incomingCourse.PauseDate;
+        _entity.Amount = incomingCourse.Amount;
+        _entity.PriorLearningPercentage = incomingCourse.PriorLearningPercentage;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Updates the withdrawal date if it has changed. Returns true if updated, otherwise false.
+    /// </summary>
+    /// <returns>True if the course was updated, otherwise false.</returns>
+    internal bool UpdateWithdrawalDate(MathsAndEnglishUpdateDetails incomingCourse)
+    {
+        if(_entity.WithdrawalDate == incomingCourse.WithdrawalDate)
+            return false;
+
+        _entity.WithdrawalDate = incomingCourse.WithdrawalDate;
+        return true;
     }
 }
