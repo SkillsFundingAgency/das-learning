@@ -1,6 +1,6 @@
 ﻿Feature: MathsAndEnglishBreaksInLearning
 
-A short summary of the feature
+Tests behaviour of Breaks In learning on Maths and English courses
 
 
 Scenario: When break in learning does not change, no change is recorded
