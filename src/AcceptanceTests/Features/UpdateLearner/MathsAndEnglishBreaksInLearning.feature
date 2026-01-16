@@ -104,30 +104,3 @@ Scenario: Training provider removes a previously recorded return from a break in
 		| Change                                 |
 		| EnglishAndMathsBreaksInLearningUpdated |
 	And the learning history is maintained
-
-
-#  Testing scenario for consideration:
-#
-#     No changes, learner returns after 3 months
-#     
-#     Learner has a price increase when returning from BiL
-#     
-#     Original end date pushed back
-#     
-#     Withdraw learner on same day as return from Break in Learning
-#     
-#     Withdraw learner during learning after return from Break in Learning
-#     
-#     Complete learning after return from Break in Learning
-#     
-#     Remove learner after return from Break in Learning
-#     
-#     No Changes, learner returns after 3 months and goes on Bil again after 5 months
-#     
-#     "Original" end pushed pack after return from second BiL
-#     
-#     Return from Break in Learning is corrected
-#     
-#     Return from Break in Learning is removed
-#     
-#     Return from Break in Learning is recorded – LearnAimRef changed
