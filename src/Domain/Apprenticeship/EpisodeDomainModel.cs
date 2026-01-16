@@ -245,13 +245,13 @@ public class EpisodeDomainModel
 
         //  Remove breaks in learning that are no longer in the new list
         _entity.BreaksInLearning.RemoveWhere(x =>
-                !newBreaksInLearning.Any(y => y.StartDate == x.StartDate && y.EndDate == x.EndDate),
+                !newBreaksInLearning.Any(y => y.StartDate == x.StartDate && y.EndDate == x.EndDate && y.PriorPeriodExpectedEndDate == x.PriorPeriodExpectedEndDate),
             out var removedItems);
 
         //  Add breaks in learning that are in the new list but not in the existing list
         foreach (var newBreakInLearning in newBreaksInLearning)
         {
-            if (_entity.BreaksInLearning.All(x => x.StartDate != newBreakInLearning.StartDate || x.EndDate != newBreakInLearning.EndDate))
+            if (_entity.BreaksInLearning.All(x => x.StartDate != newBreakInLearning.StartDate || x.EndDate != newBreakInLearning.EndDate || x.PriorPeriodExpectedEndDate != newBreakInLearning.PriorPeriodExpectedEndDate))
             {
                 newBreaksInLearningRecordAdded = true;
 

@@ -35,7 +35,13 @@ public static class LearnerUpdateModelHelper
                 WithdrawalDate = x.WithdrawalDate,
                 PauseDate = x.PauseDate,
                 PriorLearningPercentage = x.PriorLearningPercentage,
-                Amount = x.Amount
+                Amount = x.Amount,
+                BreaksInLearning = x.BreaksInLearning.Select(b => new BreakInLearningUpdateDetails
+                {
+                    StartDate = b.StartDate,
+                    EndDate = b.EndDate,
+                    PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+                }).ToList()
             }).ToList(),
             LearningSupport = learning.GetEpisode().LearningSupport.Select(x => new LearningSupportDetails
             {
@@ -55,7 +61,8 @@ public static class LearnerUpdateModelHelper
                 BreaksInLearning = learning.GetEpisode().BreaksInLearning.Select(b => new BreakInLearningUpdateDetails
                 {
                     StartDate = b.StartDate,
-                    EndDate = b.EndDate
+                    EndDate = b.EndDate,
+                    PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
                 }).ToList()
             },
             Delivery = new DeliveryDetails

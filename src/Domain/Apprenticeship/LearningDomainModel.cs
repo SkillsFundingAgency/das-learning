@@ -1,11 +1,9 @@
-﻿using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Domain.Enums;
+﻿using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
+using System.Collections.ObjectModel;
 using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglish;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -271,6 +269,7 @@ public class LearningDomainModel : AggregateRoot
     {
         bool hasChanges = false;
         bool hasWithdrawalChanges = false;
+        bool hasBreaksInLearningChanges = false;
 
         var coursesToAdd = new List<MathsAndEnglish>();
         var courseKeysToKeep = new List<Guid>();
@@ -283,13 +282,19 @@ public class LearningDomainModel : AggregateRoot
                 && x.StartDate == incomingCourse.StartDate
                 && x.PlannedEndDate == incomingCourse.PlannedEndDate
                 && x.CompletionDate == incomingCourse.CompletionDate
-                && x.PauseDate == incomingCourse.PauseDate
                 && x.PriorLearningPercentage == incomingCourse.PriorLearningPercentage
                 && x.Amount == incomingCourse.Amount);
 
             if (existingCourse != null)
             {
                 courseKeysToKeep.Add(existingCourse.Key);
+                if (existingCourse.PauseDate != incomingCourse.PauseDate)
+                {
+                    existingCourse.PauseDate = incomingCourse.PauseDate;
+                    hasChanges = true;
+                }
+
+                hasBreaksInLearningChanges |= MathsAndEnglishDomainModel.Get(existingCourse).UpdateBreaksInLearningIfChanged(incomingCourse.BreaksInLearning);
 
                 if (existingCourse.WithdrawalDate != incomingCourse.WithdrawalDate)
                 {
@@ -299,7 +304,7 @@ public class LearningDomainModel : AggregateRoot
             }
             else
             {
-                coursesToAdd.Add(new MathsAndEnglish
+                var newCourse = new MathsAndEnglish
                 {
                     Course = incomingCourse.Course,
                     LearnAimRef = incomingCourse.LearnAimRef,
@@ -312,7 +317,18 @@ public class LearningDomainModel : AggregateRoot
                     Amount = incomingCourse.Amount,
                     Key = Guid.NewGuid(),
                     LearningKey = _entity.Key
-                });
+                };
+
+                newCourse.BreaksInLearning = incomingCourse.BreaksInLearning.Select(b => new DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning
+                {
+                    Key = Guid.NewGuid(),
+                    MathsAndEnglishKey = newCourse.Key,
+                    StartDate = b.StartDate,
+                    EndDate = b.EndDate,
+                    PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+                }).ToList();
+
+                coursesToAdd.Add(newCourse);
                 hasChanges = true;
 
                 if(incomingCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
@@ -338,7 +354,11 @@ public class LearningDomainModel : AggregateRoot
 
         if (hasWithdrawalChanges)
             changes.Add(LearningUpdateChanges.MathsAndEnglishWithdrawal);
+
+        if (hasBreaksInLearningChanges)
+            changes.Add(LearningUpdateChanges.EnglishAndMathsBreaksInLearningUpdated);
     }
+
     private void UpdateLearningSupport(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
         var learningSupportHasChanged = LatestEpisode.UpdateLearningSupportIfChanged(updateModel.LearningSupport);
