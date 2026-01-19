@@ -55,7 +55,8 @@ public static class LearnerUpdateModelHelper
                 BreaksInLearning = learning.GetEpisode().BreaksInLearning.Select(b => new BreakInLearningUpdateDetails
                 {
                     StartDate = b.StartDate,
-                    EndDate = b.EndDate
+                    EndDate = b.EndDate,
+                    PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
                 }).ToList()
             },
             Delivery = new DeliveryDetails
