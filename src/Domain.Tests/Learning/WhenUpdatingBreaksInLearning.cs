@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
@@ -117,6 +118,34 @@ public class WhenUpdatingBreaksInLearning
             StartDate = DateTime.Now.Date,
             EndDate = DateTime.Now.AddDays(5).Date
         });
+
+        // Act
+        var result = learning.UpdateLearnerDetails(updateModel);
+
+        // Assert
+        result.Should().Contain(LearningUpdateChanges.BreaksInLearningUpdated);
+    }
+
+    [Test]
+    public void ThenBreaksAreUpdatedWhenPriorPeriodEndDateChanged()
+    {
+        // Arrange
+        var breaks = new List<EpisodeBreakInLearning>
+        {
+            new EpisodeBreakInLearning
+            {
+                Key = Guid.NewGuid(),
+                EpisodeKey = Guid.NewGuid(),
+                StartDate = DateTime.Now.AddDays(-20).Date,
+                EndDate = DateTime.Now.AddDays(-10).Date,
+                PriorPeriodExpectedEndDate = DateTime.Now.AddYears(2)
+            }
+        };
+
+        var learning = CreateLearner(breaks);
+
+        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        updateModel.OnProgrammeDetails.BreaksInLearning.First().PriorPeriodExpectedEndDate = DateTime.Now.AddYears(1);
 
         // Act
         var result = learning.UpdateLearnerDetails(updateModel);
