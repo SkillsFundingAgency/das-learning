@@ -4,7 +4,6 @@ using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
 using System.Collections.ObjectModel;
-using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglish;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -255,7 +254,6 @@ public class LearningDomainModel : AggregateRoot
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.MathsAndEnglishCourses.Clear();
-        _mathsAndEnglishCourses.Clear();
     }
 
     private void UpdateLearningDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
