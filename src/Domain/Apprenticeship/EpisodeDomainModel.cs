@@ -241,32 +241,50 @@ public class EpisodeDomainModel
     /// <returns>True if differences, otherwise false</returns>
     internal bool UpdateBreaksInLearningIfChanged(List<BreakInLearningUpdateDetails> newBreaksInLearning)
     {
-        var newBreaksInLearningRecordAdded = false;
+        var changed = false;
 
-        //  Remove breaks in learning that are no longer in the new list
-        _entity.BreaksInLearning.RemoveWhere(x =>
-                !newBreaksInLearning.Any(y => y.StartDate == x.StartDate && y.EndDate == x.EndDate),
+        // Remove breaks in learning that are no longer in the new list
+        _entity.BreaksInLearning.RemoveWhere(
+            existing => !newBreaksInLearning.Any(newItem =>
+                newItem.StartDate == existing.StartDate &&
+                newItem.EndDate == existing.EndDate &&
+                newItem.PriorPeriodExpectedEndDate == existing.PriorPeriodExpectedEndDate),
             out var removedItems);
 
-        //  Add breaks in learning that are in the new list but not in the existing list
-        foreach (var newBreakInLearning in newBreaksInLearning)
+        if (removedItems.Count > 0)
         {
-            if (_entity.BreaksInLearning.All(x => x.StartDate != newBreakInLearning.StartDate || x.EndDate != newBreakInLearning.EndDate))
-            {
-                newBreaksInLearningRecordAdded = true;
+            changed = true;
+        }
 
+        // Add or update breaks in learning
+        foreach (var newBreak in newBreaksInLearning)
+        {
+            var existing = _entity.BreaksInLearning
+                .SingleOrDefault(x => x.StartDate == newBreak.StartDate && x.EndDate == newBreak.EndDate);
+
+            if (existing is null)
+            {
+                // New record
                 _entity.BreaksInLearning.Add(new EpisodeBreakInLearning
                 {
-                    StartDate = newBreakInLearning.StartDate,
-                    EndDate = newBreakInLearning.EndDate,
-                    PriorPeriodExpectedEndDate = newBreakInLearning.PriorPeriodExpectedEndDate,
+                    StartDate = newBreak.StartDate,
+                    EndDate = newBreak.EndDate,
+                    PriorPeriodExpectedEndDate = newBreak.PriorPeriodExpectedEndDate,
                     EpisodeKey = Key,
                     Key = Guid.NewGuid()
                 });
+
+                changed = true;
+            }
+            else if (existing.PriorPeriodExpectedEndDate != newBreak.PriorPeriodExpectedEndDate)
+            {
+                // Existing record, but PPEndDate changed
+                existing.PriorPeriodExpectedEndDate = newBreak.PriorPeriodExpectedEndDate;
+                changed = true;
             }
         }
 
-        return newBreaksInLearningRecordAdded || removedItems.Count > 0;
+        return changed;
     }
 
     public Episode GetEntity()
