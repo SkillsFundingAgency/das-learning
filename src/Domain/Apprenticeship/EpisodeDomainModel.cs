@@ -234,7 +234,7 @@ public class EpisodeDomainModel
         return newLearningSupportRecordsAdded || removedItems.Count > 0;
     }
 
-    /// <summary>
+     /// <summary>
     /// Updates the breaks in learning if there are differences and returns true; if no differences returns false.
     /// </summary>
     /// <param name="newBreaksInLearning">The new breaks in learning</param>
