@@ -4,7 +4,7 @@ namespace SFA.DAS.Learning.DataAccess.Extensions;
 
 public static class LearningExtensions
 {
-    public static Episode GetEpisode(this Entities.Learning.Learning learning)
+    public static Episode GetEpisode(this Entities.Learning.ApprenticeshipLearning learning)
     {
         var episode = GetLatestActiveEpisode(learning);
 
@@ -19,7 +19,7 @@ public static class LearningExtensions
         return episode;
     }
 
-    public static int GetAgeAtStartOfApprenticeship(this Entities.Learning.Learning learning)
+    public static int GetAgeAtStartOfApprenticeship(this Entities.Learning.ApprenticeshipLearning learning)
     {
         var startDate = learning.Episodes.SelectMany(e => e.Prices).Min(p => p.StartDate);
         var age = startDate.Year - learning.DateOfBirth.Year;
@@ -29,22 +29,22 @@ public static class LearningExtensions
         return age;
     }
 
-    public static DateTime GetStartDate(this Entities.Learning.Learning learning)
+    public static DateTime GetStartDate(this Entities.Learning.ApprenticeshipLearning learning)
     {
         return learning.Episodes.SelectMany(e => e.Prices).Min(p => p.StartDate);
     }
 
-    public static DateTime GetPlannedEndDate(this Entities.Learning.Learning learning)
+    public static DateTime GetPlannedEndDate(this Entities.Learning.ApprenticeshipLearning learning)
     {
         return learning.Episodes.SelectMany(e => e.Prices).Max(p => p.EndDate);
     }
 
-    public static DateTime? GetLastDayOfLearning(this Entities.Learning.Learning learning)
+    public static DateTime? GetLastDayOfLearning(this Entities.Learning.ApprenticeshipLearning learning)
     {
         return GetLatestActiveEpisode(learning)?.LastDayOfLearning;
     }
 
-    private static Episode? GetLatestActiveEpisode(Entities.Learning.Learning learning)
+    private static Episode? GetLatestActiveEpisode(Entities.Learning.ApprenticeshipLearning learning)
     {
         var episode = learning.Episodes
             .MaxBy(x => x.Prices
@@ -53,7 +53,7 @@ public static class LearningExtensions
         return episode;
     }
 
-    private static Episode? GetLatestEpisode(Entities.Learning.Learning learning)
+    private static Episode? GetLatestEpisode(Entities.Learning.ApprenticeshipLearning learning)
     {
         var episode = learning.Episodes.MaxBy(x => x.Prices.Max(y => y.StartDate));
         return episode;

@@ -92,7 +92,7 @@ public class WhenUpdatingWithdrawalDate
 
     private LearningDomainModel GetLearningDomainModel(DateTime? withdrawalDate)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();
 
         episode.LastDayOfLearning = withdrawalDate;

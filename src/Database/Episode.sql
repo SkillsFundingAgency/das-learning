@@ -18,7 +18,7 @@
 )
 GO
 ALTER TABLE dbo.Episode
-ADD CONSTRAINT FK_Episode_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.Learning ([Key])
+ADD CONSTRAINT FK_Episode_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.ApprenticeshipLearning ([Key])
 GO
 CREATE INDEX IX_LearningKey ON [dbo].[Episode] (LearningKey);
 GO

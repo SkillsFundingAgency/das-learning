@@ -5,9 +5,9 @@ namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
 
 internal static class SqlConnectionExtensions
 {
-    internal static DataAccess.Entities.Learning.Learning GetLearning(this SqlConnection dbConnection, string uln)
+    internal static DataAccess.Entities.Learning.ApprenticeshipLearning GetLearning(this SqlConnection dbConnection, string uln)
     {
-        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.Learning>().Single(x => x.Uln == uln);
+        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.Uln == uln);
         learning.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.Episode>().Where(x => x.LearningKey == learning.Key).ToList();
         learning.MathsAndEnglishCourses = dbConnection.GetAll<DataAccess.Entities.Learning.MathsAndEnglish>().Where(x => x.LearningKey == learning.Key).ToList();
 
@@ -28,7 +28,7 @@ internal static class SqlConnectionExtensions
 
     internal static Guid GetLearningKey(this SqlConnection dbConnection, string uln)
     {
-        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.Learning>().Single(x => x.Uln == uln);
+        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.Uln == uln);
         return learning.Key;
     }
 }

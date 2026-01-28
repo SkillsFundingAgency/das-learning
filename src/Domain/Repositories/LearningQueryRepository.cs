@@ -231,7 +231,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 .OrderBy(x => x.Uln)
                 .AsNoTracking();
 
-            List<DataAccess.Entities.Learning.Learning> apprenticeships;
+            List<DataAccess.Entities.Learning.ApprenticeshipLearning> apprenticeships;
 
             var totalItems = await query.CountAsync(cancellationToken);
             var totalPages = (int)Math.Ceiling((double)totalItems / limit.GetValueOrDefault());

@@ -8,8 +8,8 @@ namespace SFA.DAS.Learning.DataAccess
     [ExcludeFromCodeCoverage]
     public class LearningDataContext(DbContextOptions<LearningDataContext> options) : DbContext(options)
     {
-        public IQueryable<Entities.Learning.Learning> Apprenticeships => ApprenticeshipsDbSet;
-        public virtual DbSet<Entities.Learning.Learning> ApprenticeshipsDbSet { get; set; }
+        public IQueryable<Entities.Learning.ApprenticeshipLearning> Apprenticeships => ApprenticeshipsDbSet;
+        public virtual DbSet<Entities.Learning.ApprenticeshipLearning> ApprenticeshipsDbSet { get; set; }
         public virtual DbSet<Episode> Episodes { get; set; }
         public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
         public virtual DbSet<FreezeRequest> FreezeRequests { get; set; }
@@ -22,11 +22,11 @@ namespace SFA.DAS.Learning.DataAccess
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Learning
-            modelBuilder.Entity<Entities.Learning.Learning>()
+            modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
                 .HasMany(x => x.Episodes)
                 .WithOne()
                 .HasForeignKey(fk => fk.LearningKey);
-            modelBuilder.Entity<Entities.Learning.Learning>()
+            modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
                 .HasKey(a => new { a.Key });
 
             // Episode

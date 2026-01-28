@@ -7,7 +7,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers;
 
 public static class LearnerUpdateModelHelper
 {
-    public static LearnerUpdateModel CreateFromLearningEntity(DataAccess.Entities.Learning.Learning learning)
+    public static LearnerUpdateModel CreateFromLearningEntity(DataAccess.Entities.Learning.ApprenticeshipLearning learning)
     {
         return new LearnerUpdateModel
         {

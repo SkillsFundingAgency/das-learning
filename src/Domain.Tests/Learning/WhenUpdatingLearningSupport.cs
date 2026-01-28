@@ -102,7 +102,7 @@ public class WhenUpdatingLearningSupport
 
     private LearningDomainModel CreateLearner(List<LearningSupportDetails> learningSupport)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();

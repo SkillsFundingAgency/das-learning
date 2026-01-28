@@ -63,9 +63,9 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             result.Should().Be(expectedApprenticeshipKey);
         }
 
-        private DataAccess.Entities.Learning.Learning CreateApprenticeshipWithApproval(Guid apprenticeshipKey, long apprenticeshipId)
+        private DataAccess.Entities.Learning.ApprenticeshipLearning CreateApprenticeshipWithApproval(Guid apprenticeshipKey, long apprenticeshipId)
         {
-            return _fixture.Build<DataAccess.Entities.Learning.Learning>()
+            return _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
                 .Create();
         }

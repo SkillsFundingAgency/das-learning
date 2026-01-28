@@ -12,7 +12,7 @@
 
 GO
 ALTER TABLE [dbo].[FreezeRequest]
-ADD CONSTRAINT FK_FreezeRequest_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.Learning ([Key])
+ADD CONSTRAINT FK_FreezeRequest_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.ApprenticeshipLearning ([Key])
 GO
 CREATE INDEX IX_LearningKey ON [dbo].[FreezeRequest] (LearningKey);
 GO

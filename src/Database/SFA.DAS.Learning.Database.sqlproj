@@ -63,7 +63,7 @@
     <Build Include="FreezeRequest.sql" />
     <Build Include="Episode.sql" />
     <Build Include="EpisodePrice.sql" />
-    <Build Include="Learning.sql" />
+    <Build Include="ApprenticeshipLearning.sql" />
     <Build Include="MathsAndEnglish.sql" />
     <Build Include="LearningSupport.sql" />
     <Build Include="EpisodeBreakInLearning.sql" />

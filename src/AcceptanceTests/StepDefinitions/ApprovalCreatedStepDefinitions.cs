@@ -83,7 +83,7 @@ public class ApprovalCreatedStepDefinitions
 
         await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
 
-        var apprenticeship = dbConnection.GetAll<DataAccess.Entities.Learning.Learning>().Single(x => x.Uln == ApprovalCreatedEvent.Uln);
+        var apprenticeship = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.Uln == ApprovalCreatedEvent.Uln);
         apprenticeship.Should().NotBeNull();
         apprenticeship.Uln.Should().Be(ApprovalCreatedEvent.Uln);
         apprenticeship.FirstName.Should().Be(ApprovalCreatedEvent.FirstName);
@@ -121,7 +121,8 @@ public class ApprovalCreatedStepDefinitions
     private async Task<bool> ApprenticeshipRecordMatchesExpectation()
     {
         await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
-        var apprenticeship = (await dbConnection.GetAllAsync<DataAccess.Entities.Learning.Learning>()).SingleOrDefault(x => x.Uln == ApprovalCreatedEvent.Uln);
+        var apprenticeships = (await dbConnection.GetAllAsync<DataAccess.Entities.Learning.ApprenticeshipLearning>()).Where(x => x.Uln == ApprovalCreatedEvent.Uln);
+        var apprenticeship = apprenticeships.SingleOrDefault();
 
         return apprenticeship != null;
     }
@@ -165,7 +166,7 @@ public class ApprovalCreatedStepDefinitions
     }
 
     public CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent ApprovalCreatedEvent => _scenarioContext.GetApprenticeshipCreatedEvent();
-    public DataAccess.Entities.Learning.Learning Apprenticeship => (DataAccess.Entities.Learning.Learning)_scenarioContext["Learning"];
+    public DataAccess.Entities.Learning.ApprenticeshipLearning Apprenticeship => (DataAccess.Entities.Learning.ApprenticeshipLearning)_scenarioContext["Learning"];
     public Episode LatestEpisode => (Episode)_scenarioContext["Episode"];
     public EpisodePrice LatestEpisodePrice => (EpisodePrice)_scenarioContext["EpisodePrice"];
 }

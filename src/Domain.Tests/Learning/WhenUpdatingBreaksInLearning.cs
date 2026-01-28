@@ -156,7 +156,7 @@ public class WhenUpdatingBreaksInLearning
 
     private LearningDomainModel CreateLearner(List<EpisodeBreakInLearning> breaks)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();

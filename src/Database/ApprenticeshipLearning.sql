@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[Learning]
+﻿CREATE TABLE [dbo].[ApprenticeshipLearning]
 (
 	[Key] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
     [ApprovalsApprenticeshipId] BIGINT NOT NULL,
@@ -12,8 +12,8 @@
     [HasEHCP] BIT NOT NULL DEFAULT 0, 
     [IsCareLeaver] BIT NOT NULL DEFAULT 0, 
     [CareLeaverEmployerConsentGiven] BIT NOT NULL DEFAULT 0,
-    CONSTRAINT UQ_Learning_ApprovalsApprenticeshipId_Uln UNIQUE (ApprovalsApprenticeshipId, Uln)
+    CONSTRAINT UQ_ApprenticeshipLearning_ApprovalsApprenticeshipId_Uln UNIQUE (ApprovalsApprenticeshipId, Uln)
 )
 GO
-CREATE INDEX IX_Learning_Uln ON Learning (Uln)
+CREATE INDEX IX_ApprenticeshipLearning_Uln ON ApprenticeshipLearning (Uln)
 GO

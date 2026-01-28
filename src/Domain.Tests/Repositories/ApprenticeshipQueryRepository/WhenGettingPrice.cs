@@ -73,7 +73,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
 
             var apprenticeships = new[]
             {
-                _fixture.Build<DataAccess.Entities.Learning.Learning>()
+                _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                     .With(x => x.Key, apprenticeshipKey)
                     .With(x => x.Episodes, new List<Episode>() { episode })
                     .Create(), 

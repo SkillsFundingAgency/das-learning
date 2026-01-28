@@ -1,10 +1,10 @@
 ﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
-[Table("dbo.Learning")]
-[System.ComponentModel.DataAnnotations.Schema.Table("Learning")]
-public class Learning
+[Table("dbo.ApprenticeshipLearning")]
+[System.ComponentModel.DataAnnotations.Schema.Table("ApprenticeshipLearning")]
+public class ApprenticeshipLearning
 {
-	public Learning()
+	public ApprenticeshipLearning()
 	{
 		FreezeRequests = new List<FreezeRequest>();
         Episodes = new List<Episode>();

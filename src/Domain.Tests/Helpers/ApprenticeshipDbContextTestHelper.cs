@@ -23,7 +23,7 @@ public static class ApprenticeshipDbContextTestHelper
         return new LearningQueryRepository(new Lazy<LearningDataContext>(dbContext), logger);
     }
 
-    public static async Task<DataAccess.Entities.Learning.Learning> AddApprenticeship(
+    public static async Task<DataAccess.Entities.Learning.ApprenticeshipLearning> AddApprenticeship(
         this LearningDataContext dbContext, 
         Guid apprenticeshipKey, 
         long? ukprn = null,
@@ -57,7 +57,7 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.BreaksInLearning, new List<EpisodeBreakInLearning>{ episodeBreakInLearning })
             .Create();
 
-        var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
             .With(x => x.ApprovalsApprenticeshipId, approvalsApprenticeshipId ?? _fixture.Create<long>())
             .With(x => x.Episodes, new List<Episode>() { episode })

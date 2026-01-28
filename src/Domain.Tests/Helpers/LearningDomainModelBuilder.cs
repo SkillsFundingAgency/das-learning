@@ -37,7 +37,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
             var costs = _costs ?? _fixture.CreateMany<Cost>(_numberOfCosts).ToList();
             var orderedCosts = costs.OrderBy(c => c.FromDate).ToList();
 
-            var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+            var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
             entity.CompletionDate = entity.CompletionDate?.Date;
             entity.DateOfBirth = entity.DateOfBirth.Date;
             entity.MathsAndEnglishCourses.Clear();

@@ -9,7 +9,7 @@
 GO
 
 ALTER TABLE [dbo].[LearningSupport]
-ADD CONSTRAINT FK_LearningSupport_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.Learning ([Key])
+ADD CONSTRAINT FK_LearningSupport_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.ApprenticeshipLearning ([Key])
 GO
 
 CREATE INDEX IX_LearningKey ON [dbo].[LearningSupport] (LearningKey);

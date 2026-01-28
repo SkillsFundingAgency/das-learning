@@ -27,7 +27,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     public void ThenNewCourseIsAdded(bool changed)
     {
         //Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
         MathsAndEnglishUpdateDetails newCourse = null;
@@ -55,7 +55,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     public void ThenCompletionDateIsUpdated(bool changed)
     {
         //Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.MathsAndEnglishCourses.ForEach(x => x.CompletionDate = x.CompletionDate?.Date);
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
@@ -77,7 +77,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     public void ThenWithdrawalDateIsUpdated(bool changed)
     {
         //Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.MathsAndEnglishCourses.ForEach(x => x.WithdrawalDate = x.WithdrawalDate?.Date);
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
@@ -99,7 +99,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     [TestCase(false)]
     public void ThenStartDateIsUpdated(bool changed)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.MathsAndEnglishCourses.ForEach(x => x.StartDate = x.StartDate.Date);
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
@@ -118,7 +118,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     [TestCase(false)]
     public void ThenPlannedEndDateIsUpdated(bool changed)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.MathsAndEnglishCourses.ForEach(x => x.PlannedEndDate = x.PlannedEndDate.Date);
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
@@ -137,7 +137,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     [TestCase(false)]
     public void ThenPriorLearningPercentageIsUpdated(bool changed)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
@@ -161,7 +161,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     {
         //Arrange
         var course = _fixture.Create<MathsAndEnglishUpdateDetails>();
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.MathsAndEnglishCourses = [new MathsAndEnglish { Course = course.Course, LearnAimRef = course.LearnAimRef }];
 
         var learning = LearningDomainModel.Get(entity);
@@ -193,7 +193,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     [TestCase(false)]
     public void ThenAmountIsUpdated(bool changed)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
@@ -216,7 +216,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     public void ThenNewCourseWithWithdrawalReturnsCorrectChangeTypes(bool changed)
     {
         //Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
         MathsAndEnglishUpdateDetails newCourse = null;

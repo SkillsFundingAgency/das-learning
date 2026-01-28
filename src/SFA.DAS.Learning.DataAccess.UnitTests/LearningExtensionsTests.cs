@@ -81,7 +81,7 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
         public void GetAgeAtStartOfApprenticeship_ShouldReturnCorrectAge(string dob, string startDate, int expectedAge)
         {
             // Arrange
-            var apprenticeship = _fixture.Build<Entities.Learning.Learning>()
+            var apprenticeship = _fixture.Build<Entities.Learning.ApprenticeshipLearning>()
                 .With(a => a.DateOfBirth, DateTime.Parse(dob))
                 .Create();
             apprenticeship.Episodes.Add(CreateEpisode(startDate: DateTime.Parse(startDate)));
@@ -138,9 +138,9 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
             result.Should().Be(new DateTime(2023, 5, 1));
         }
 
-        private Entities.Learning.Learning CreateApprenticeshipWithEpisodes(params Episode[] episodes)
+        private Entities.Learning.ApprenticeshipLearning CreateApprenticeshipWithEpisodes(params Episode[] episodes)
         {
-            var apprenticeship = _fixture.Create<Entities.Learning.Learning>();
+            var apprenticeship = _fixture.Create<Entities.Learning.ApprenticeshipLearning>();
             apprenticeship.Episodes = new List<Episode>();
             apprenticeship.Episodes.AddRange(episodes);
             return apprenticeship;

@@ -57,7 +57,7 @@ public class RemoveLearnerStepDefinitions
 
     }
 
-    private async Task<DataAccess.Entities.Learning.Learning> GetCurrentLearning() 
+    private async Task<DataAccess.Entities.Learning.ApprenticeshipLearning> GetCurrentLearning() 
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         return dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);

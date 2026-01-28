@@ -71,7 +71,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice4 = CreateEpisodePrice(episode2Key, startDate.AddYears(1), endDate);
         var episode2 = CreateEpisode(episode2Key, ukprn, trainingCode, episodePrice3, episodePrice4);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
                 .With(x => x.Episodes, new List<Episode>() { episode1, episode2 })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
@@ -119,7 +119,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
                 .With(x => x.Episodes, new List<Episode>() { episode })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
@@ -156,7 +156,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
             .With(x => x.Episodes, new List<Episode> { episode })
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
@@ -192,7 +192,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
         episode.LastDayOfLearning = startDate; //withdrawn back to start
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
             .With(x => x.Episodes, new List<Episode> { episode })
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
@@ -226,7 +226,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
             .With(x => x.Episodes, new List<Episode> { episode })
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
@@ -250,7 +250,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         SetUpApprenticeshipQueryRepository();
 
         var ukprn = _fixture.Create<long>();
-        var apprenticeships = new List<DataAccess.Entities.Learning.Learning>();
+        var apprenticeships = new List<DataAccess.Entities.Learning.ApprenticeshipLearning>();
 
         // Create 5 apprenticeships
         for (int i = 1; i <= 5; i++)
@@ -264,7 +264,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
             var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
             var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-            var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+            var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
                 .With(x => x.Episodes, new List<Episode> { episode })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20))
@@ -304,7 +304,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
     }
 
     private void AssertApprenticeship(
-        DataAccess.Entities.Learning.Learning expected,
+        DataAccess.Entities.Learning.ApprenticeshipLearning expected,
         DateTime startDate,
         DateTime endDate,
         int age,

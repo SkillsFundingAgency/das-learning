@@ -24,7 +24,7 @@ public class WhenUpdatingLearnerDetails
     public void ThenCompletionDateIsUpdated(bool changed)
     {
         //Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
         var learning = LearningDomainModel.Get(entity);
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
@@ -44,7 +44,7 @@ public class WhenUpdatingLearnerDetails
     public void ThenDateOfBirthIsUpdated(bool changed)
     {
         // Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.DateOfBirth = entity.DateOfBirth.Date; // normalize
 
         var learning = LearningDomainModel.Get(entity);
