@@ -66,7 +66,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
                 .With(x => x.StartDate, new DateTime(2022, 8, 18))
                 .Create();
 
-            var episode = _fixture.Build<Episode>()
+            var episode = _fixture.Build<ApprenticeshipEpisode>()
                 .With(x => x.Key, episodeKey)
                 .With(x => x.Prices, new List<EpisodePrice> { episodePrice1, episodePrice2, episodePrice3 })
                 .Create();
@@ -75,7 +75,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepo
             {
                 _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                     .With(x => x.Key, apprenticeshipKey)
-                    .With(x => x.Episodes, new List<Episode>() { episode })
+                    .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode })
                     .Create(), 
             };
 

@@ -91,7 +91,7 @@ public class ApprovalCreatedStepDefinitions
         apprenticeship.Key.Should().NotBe(Guid.Empty);
         apprenticeship.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
        
-        var episode = (await dbConnection.GetAllAsync<Episode>()).Last(x => x.LearningKey == apprenticeship.Key);
+        var episode = (await dbConnection.GetAllAsync<ApprenticeshipEpisode>()).Last(x => x.LearningKey == apprenticeship.Key);
         episode.Should().NotBeNull();
         episode.Key.Should().NotBe(Guid.Empty);
         episode.Ukprn.Should().Be(ApprovalCreatedEvent.ProviderId);
@@ -167,6 +167,6 @@ public class ApprovalCreatedStepDefinitions
 
     public CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent ApprovalCreatedEvent => _scenarioContext.GetApprenticeshipCreatedEvent();
     public DataAccess.Entities.Learning.ApprenticeshipLearning Apprenticeship => (DataAccess.Entities.Learning.ApprenticeshipLearning)_scenarioContext["Learning"];
-    public Episode LatestEpisode => (Episode)_scenarioContext["Episode"];
+    public ApprenticeshipEpisode LatestEpisode => (ApprenticeshipEpisode)_scenarioContext["Episode"];
     public EpisodePrice LatestEpisodePrice => (EpisodePrice)_scenarioContext["EpisodePrice"];
 }

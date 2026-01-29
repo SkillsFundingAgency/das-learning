@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using EpisodePrice = SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodePrice;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepository;
@@ -73,7 +73,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
-                .With(x => x.Episodes, new List<Episode>() { episode1, episode2 })
+                .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode1, episode2 })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
                 .With(x => x.Uln, _fixture.Create<long>().ToString())
                 .Create();
@@ -121,7 +121,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
-                .With(x => x.Episodes, new List<Episode>() { episode })
+                .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
                 .With(x => x.Uln, _fixture.Create<long>().ToString())
                 .With(x => x.CompletionDate, completionDate)
@@ -158,7 +158,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
-            .With(x => x.Episodes, new List<Episode> { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
             .With(x => x.Uln, _fixture.Create<long>().ToString())
             .Create();
@@ -194,7 +194,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
-            .With(x => x.Episodes, new List<Episode> { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
             .With(x => x.Uln, _fixture.Create<long>().ToString())
             .Create();
@@ -228,7 +228,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
-            .With(x => x.Episodes, new List<Episode> { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
             .With(x => x.Uln, _fixture.Create<long>().ToString())
             .Create();
@@ -266,7 +266,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
             var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
-                .With(x => x.Episodes, new List<Episode> { episode })
+                .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
                 .With(x => x.DateOfBirth, startDate.AddYears(-20))
                 .With(x => x.Uln, i.ToString()) // Ensure Uln ordering
                 .Create();
@@ -319,7 +319,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         actual.Episodes.Count.Should().Be(expected.Episodes.Count);
     }
 
-    private void AssertEpisode(Episode expected, DataTransferObjects.Episode actual)
+    private void AssertEpisode(ApprenticeshipEpisode expected, DataTransferObjects.Episode actual)
     {
         actual.Should().NotBeNull();
         actual.TrainingCode.Should().Be(expected.TrainingCode);
@@ -353,9 +353,9 @@ public class WhenGettingApprenticeshipsWithEpisodes
             .Create();
     }
 
-    private Episode CreateEpisode(Guid key, long ukprn, string trainingCode, params EpisodePrice[] prices)
+    private ApprenticeshipEpisode CreateEpisode(Guid key, long ukprn, string trainingCode, params EpisodePrice[] prices)
     {
-        return _fixture.Build<Episode>()
+        return _fixture.Build<ApprenticeshipEpisode>()
             .With(x => x.Key, key)
             .With(x => x.Prices, prices.ToList())
             .With(x => x.Ukprn, ukprn)

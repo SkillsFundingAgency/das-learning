@@ -138,17 +138,17 @@ namespace SFA.DAS.Learning.DataAccess.UnitTests
             result.Should().Be(new DateTime(2023, 5, 1));
         }
 
-        private Entities.Learning.ApprenticeshipLearning CreateApprenticeshipWithEpisodes(params Episode[] episodes)
+        private Entities.Learning.ApprenticeshipLearning CreateApprenticeshipWithEpisodes(params ApprenticeshipEpisode[] episodes)
         {
             var apprenticeship = _fixture.Create<Entities.Learning.ApprenticeshipLearning>();
-            apprenticeship.Episodes = new List<Episode>();
+            apprenticeship.Episodes = new List<ApprenticeshipEpisode>();
             apprenticeship.Episodes.AddRange(episodes);
             return apprenticeship;
         }
 
-        private Episode CreateEpisode(DateTime? startDate = null, DateTime? endDate = null)
+        private ApprenticeshipEpisode CreateEpisode(DateTime? startDate = null, DateTime? endDate = null)
         {
-            return _fixture.Build<Episode>()
+            return _fixture.Build<ApprenticeshipEpisode>()
                 .With(e => e.Prices, new List<EpisodePrice>
                 {
                     new EpisodePrice

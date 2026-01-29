@@ -4,13 +4,12 @@ using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
 using System.Collections.ObjectModel;
-using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
 public class EpisodeDomainModel
 {
-    private readonly DataAccess.Entities.Learning.Episode _entity;
+    private readonly DataAccess.Entities.Learning.ApprenticeshipEpisode _entity;
     private readonly List<EpisodePriceDomainModel> _episodePrices;
     private readonly List<EpisodeBreakInLearningDomainModel> _episodeBreaksInLearning;
     public Guid Key => _entity.Key;
@@ -70,7 +69,7 @@ public class EpisodeDomainModel
         string trainingCode,
         string? trainingCourseVersion)
     {
-        return new EpisodeDomainModel(new Episode
+        return new EpisodeDomainModel(new ApprenticeshipEpisode
         {
             Key = Guid.NewGuid(),
             Ukprn = ukprn,
@@ -287,12 +286,12 @@ public class EpisodeDomainModel
         return changed;
     }
 
-    public Episode GetEntity()
+    public ApprenticeshipEpisode GetEntity()
     {
         return _entity;
     }
 
-    public static EpisodeDomainModel Get(Episode entity)
+    public static EpisodeDomainModel Get(ApprenticeshipEpisode entity)
     {
         return new EpisodeDomainModel(entity);
     }
@@ -312,7 +311,7 @@ public class EpisodeDomainModel
         _entity.PauseDate = pauseDate;
     }
 
-    private EpisodeDomainModel(Episode entity)
+    private EpisodeDomainModel(ApprenticeshipEpisode entity)
     {
         _entity = entity;
         _episodePrices = entity.Prices.Select(EpisodePriceDomainModel.Get).ToList();

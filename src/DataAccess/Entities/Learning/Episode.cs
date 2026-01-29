@@ -2,11 +2,11 @@
 
 namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
-[Table("dbo.Episode")]
-[System.ComponentModel.DataAnnotations.Schema.Table("Episode")]
-public class Episode
+[Table("dbo.ApprenticeshipEpisode")]
+[System.ComponentModel.DataAnnotations.Schema.Table("ApprenticeshipEpisode")]
+public class ApprenticeshipEpisode
 {
-    public Episode()
+    public ApprenticeshipEpisode()
     {
         Prices = new List<EpisodePrice>();
         LearningSupport = new List<LearningSupport>();

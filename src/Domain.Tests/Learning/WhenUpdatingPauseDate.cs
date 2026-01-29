@@ -89,11 +89,11 @@ public class WhenUpdatingPauseDate
     private LearningDomainModel GetLearningDomainModel(DateTime? pauseDate)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();
+        var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
 
         episode.PauseDate = pauseDate;
 
-        entity.Episodes = new List<DataAccess.Entities.Learning.Episode> { episode };
+        entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
         return LearningDomainModel.Get(entity);
     }
 

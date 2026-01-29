@@ -10,7 +10,7 @@ namespace SFA.DAS.Learning.DataAccess
     {
         public IQueryable<Entities.Learning.ApprenticeshipLearning> Apprenticeships => ApprenticeshipsDbSet;
         public virtual DbSet<Entities.Learning.ApprenticeshipLearning> ApprenticeshipsDbSet { get; set; }
-        public virtual DbSet<Episode> Episodes { get; set; }
+        public virtual DbSet<ApprenticeshipEpisode> Episodes { get; set; }
         public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
         public virtual DbSet<FreezeRequest> FreezeRequests { get; set; }
         public virtual DbSet<MathsAndEnglish> MathsAndEnglish { get; set; }
@@ -30,14 +30,14 @@ namespace SFA.DAS.Learning.DataAccess
                 .HasKey(a => new { a.Key });
 
             // Episode
-            modelBuilder.Entity<Episode>()
+            modelBuilder.Entity<ApprenticeshipEpisode>()
                 .HasKey(a => new { a.Key });
-            modelBuilder.Entity<Episode>()
+            modelBuilder.Entity<ApprenticeshipEpisode>()
                 .Property(p => p.FundingType)
                 .HasConversion(
                     v => v.ToString(),
                     v => (FundingType)Enum.Parse(typeof(FundingType), v));
-            modelBuilder.Entity<Episode>()
+            modelBuilder.Entity<ApprenticeshipEpisode>()
                 .Property(p => p.FundingPlatform)
                 .HasConversion(
                     v => (int?)v,

@@ -27,7 +27,7 @@ public class WhenAnEpisodeIsAdded
         //Arrange
         var apprenticeship = _fixture.Create<LearningDomainModel>();
         var episodePrice = _fixture.Build<EpisodePrice>().Create();
-        var episode = EpisodeDomainModel.Get(_fixture.Build<Episode>()
+        var episode = EpisodeDomainModel.Get(_fixture.Build<ApprenticeshipEpisode>()
             .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
             .With(x => x.PaymentsFrozen, false)
             .With(x => x.LastDayOfLearning, (DateTime?)null)

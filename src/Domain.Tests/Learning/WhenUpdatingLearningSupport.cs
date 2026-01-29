@@ -105,7 +105,7 @@ public class WhenUpdatingLearningSupport
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
 
-        var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();
+        var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = entity.Key;
         episode.PauseDate = null;
 
@@ -122,7 +122,7 @@ public class WhenUpdatingLearningSupport
         episode.Prices.Add(_fixture.Build<EpisodePrice>()
             .Create());
 
-        entity.Episodes = new List<DataAccess.Entities.Learning.Episode> { episode };
+        entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
 
         return LearningDomainModel.Get(entity);
     }

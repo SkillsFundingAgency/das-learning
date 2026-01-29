@@ -4,7 +4,7 @@ namespace SFA.DAS.Learning.DataAccess.Extensions;
 
 public static class LearningExtensions
 {
-    public static Episode GetEpisode(this Entities.Learning.ApprenticeshipLearning learning)
+    public static ApprenticeshipEpisode GetEpisode(this Entities.Learning.ApprenticeshipLearning learning)
     {
         var episode = GetLatestActiveEpisode(learning);
 
@@ -44,7 +44,7 @@ public static class LearningExtensions
         return GetLatestActiveEpisode(learning)?.LastDayOfLearning;
     }
 
-    private static Episode? GetLatestActiveEpisode(Entities.Learning.ApprenticeshipLearning learning)
+    private static ApprenticeshipEpisode? GetLatestActiveEpisode(Entities.Learning.ApprenticeshipLearning learning)
     {
         var episode = learning.Episodes
             .MaxBy(x => x.Prices
@@ -53,7 +53,7 @@ public static class LearningExtensions
         return episode;
     }
 
-    private static Episode? GetLatestEpisode(Entities.Learning.ApprenticeshipLearning learning)
+    private static ApprenticeshipEpisode? GetLatestEpisode(Entities.Learning.ApprenticeshipLearning learning)
     {
         var episode = learning.Episodes.MaxBy(x => x.Prices.Max(y => y.StartDate));
         return episode;

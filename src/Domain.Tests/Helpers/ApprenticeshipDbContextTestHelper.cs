@@ -47,7 +47,7 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.EndDate, _fixture.Create<DateTime>())
             .Create();
 
-        var episode = _fixture.Build<Episode>()
+        var episode = _fixture.Build<ApprenticeshipEpisode>()
             .With(x => x.LearningKey, apprenticeshipKey)
             .With(x => x.Key, episodeKey)
             .With(x => x.Ukprn, ukprn ?? _fixture.Create<long>())
@@ -60,7 +60,7 @@ public static class ApprenticeshipDbContextTestHelper
         var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
             .With(x => x.ApprovalsApprenticeshipId, approvalsApprenticeshipId ?? _fixture.Create<long>())
-            .With(x => x.Episodes, new List<Episode>() { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode })
             .Create();
 
         await dbContext.AddAsync(apprenticeship);

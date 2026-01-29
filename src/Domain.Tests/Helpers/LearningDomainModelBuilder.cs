@@ -42,7 +42,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
             entity.DateOfBirth = entity.DateOfBirth.Date;
             entity.MathsAndEnglishCourses.Clear();
 
-            var episode = _fixture.Create<DataAccess.Entities.Learning.Episode>();
+            var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
             episode.LearningKey = entity.Key;
             episode.Prices.Clear();
             episode.LearningSupport.Clear();
