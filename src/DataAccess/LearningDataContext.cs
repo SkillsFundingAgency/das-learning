@@ -41,7 +41,11 @@ namespace SFA.DAS.Learning.DataAccess
                 .HasForeignKey(fk => fk.LearningKey);
             modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
                 .HasKey(a => new { a.Key });
-            ;
+
+            modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
+                .HasMany(x => x.Episodes)
+                .WithOne()
+                .HasForeignKey(fk => fk.LearningKey);
             modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
                 .HasKey(a => new { a.Key });
 
