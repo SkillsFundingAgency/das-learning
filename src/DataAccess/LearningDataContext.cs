@@ -72,6 +72,11 @@ namespace SFA.DAS.Learning.DataAccess
             modelBuilder.Entity<ShortCourseEpisode>()
                 .HasKey(a => new { a.Key });
 
+            modelBuilder.Entity<ShortCourseEpisode>()
+                .HasOne<ShortCourseLearning>()
+                .WithMany(l => l.Episodes)
+                .HasForeignKey(e => e.LearningKey);
+
             // EpisodePrice
             modelBuilder.Entity<EpisodePrice>()
                 .HasKey(x => x.Key);
@@ -138,9 +143,8 @@ namespace SFA.DAS.Learning.DataAccess
 
             modelBuilder.Entity<ShortCourseMilestone>()
                 .HasOne<ShortCourseEpisode>()
-                .WithMany()
-                .HasForeignKey(e => e.EpisodeKey)
-                .HasPrincipalKey(e => e.Key);
+                .WithMany(e => e.Milestones)
+                .HasForeignKey(m => m.EpisodeKey);
 
             base.OnModelCreating(modelBuilder);
         }
