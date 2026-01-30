@@ -17,7 +17,9 @@ namespace SFA.DAS.Learning.DataAccess
         public virtual DbSet<LearningSupport> LearningSupport { get; set; }
         public virtual DbSet<EpisodeBreakInLearning> EpisodeBreakInLearnings { get; set; }
         public virtual DbSet<LearningHistory> LearningHistories { get; set; }
-        public virtual DbSet<Entities.Learning.ShortCourseLearning> ApprenticeshipUnitLearnings { get; set; }
+        public virtual DbSet<Entities.Learning.ShortCourseLearning> ShortCourseLearnings { get; set; }
+        public virtual DbSet<Entities.Learning.ShortCourseEpisode> ShortCourseEpisodes { get; set; }
+        public virtual DbSet<Entities.Learning.ShortCourseMilestone> ShortCourseMilestones { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
