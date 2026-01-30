@@ -17,5 +17,5 @@ GO
 
 GO
 ALTER TABLE [dbo].[LearningSupport]
-ADD CONSTRAINT FK_LearningSupport_Episode FOREIGN KEY (EpisodeKey) REFERENCES dbo.Episode ([Key])
+ADD CONSTRAINT FK_LearningSupport_Episode FOREIGN KEY (EpisodeKey) REFERENCES dbo.ApprenticeshipEpisode ([Key])
 GO

@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[Episode]
+﻿CREATE TABLE [dbo].[ApprenticeshipEpisode]
 (
     [Key] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
 	[LearningKey] UNIQUEIDENTIFIER NOT NULL, 
@@ -17,12 +17,12 @@
     [PauseDate] DATETIME NULL
 )
 GO
-ALTER TABLE dbo.Episode
-ADD CONSTRAINT FK_Episode_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.ApprenticeshipLearning ([Key])
+ALTER TABLE dbo.ApprenticeshipEpisode
+ADD CONSTRAINT FK_ApprenticeshipEpisode_Learning FOREIGN KEY (LearningKey) REFERENCES dbo.ApprenticeshipLearning ([Key])
 GO
-CREATE INDEX IX_LearningKey ON [dbo].[Episode] (LearningKey);
+CREATE INDEX IX_LearningKey ON [dbo].[ApprenticeshipEpisode] (LearningKey);
 GO
-CREATE NONCLUSTERED INDEX [IX_Ukprn] ON [dbo].[Episode]
+CREATE NONCLUSTERED INDEX [IX_Ukprn] ON [dbo].[ApprenticeshipEpisode]
 (
 	[Ukprn] ASC
 )

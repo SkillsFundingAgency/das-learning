@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[ApprenticeshipUnitLearning]
+﻿CREATE TABLE [dbo].[ShortCourseLearning]
 (
     [Key] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
     [LearnerKey] UNIQUEIDENTIFIER NOT NULL,
