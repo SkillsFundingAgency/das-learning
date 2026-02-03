@@ -1,7 +1,8 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models;
+using SFA.DAS.Learning.Domain.Models.Apprenticeships;
+using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Enums;
 using System.Collections.ObjectModel;
 

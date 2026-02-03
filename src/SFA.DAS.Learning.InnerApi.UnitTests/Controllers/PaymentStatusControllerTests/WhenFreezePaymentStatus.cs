@@ -8,6 +8,7 @@ using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.SetPaymentsFrozen;
 using SFA.DAS.Learning.InnerApi.Controllers;
 using SFA.DAS.Learning.InnerApi.Requests;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.Queries;
 
 namespace SFA.DAS.Learning.InnerApi.UnitTests.Controllers.PaymentStatusControllerTests;

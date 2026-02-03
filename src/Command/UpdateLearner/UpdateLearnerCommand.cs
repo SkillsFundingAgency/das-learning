@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Domain.Models;
+﻿using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 
 namespace SFA.DAS.Learning.Command.UpdateLearner;
 

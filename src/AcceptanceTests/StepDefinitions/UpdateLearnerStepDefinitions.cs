@@ -2,11 +2,11 @@
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.UpdateLearner;
-using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.InnerApi.Requests;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.Types;
-using Cost = SFA.DAS.Learning.InnerApi.Requests.Cost;
+using Cost = SFA.DAS.Learning.InnerApi.Requests.Apprenticeships.Cost;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -313,14 +313,14 @@ public class UpdateLearnerStepDefinitions
         return courses;
     }
 
-    private List<LearningSupportUpdatedDetails> GetLearningSupportFromString(string valueString)
+    private List<LearningSupportDetails> GetLearningSupportFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
-        var learningSupport = new List<LearningSupportUpdatedDetails>();
+        var learningSupport = new List<LearningSupportDetails>();
 
         if (parsedValues.Any())
         {
-            learningSupport.Add(new LearningSupportUpdatedDetails
+            learningSupport.Add(new LearningSupportDetails
             {
                 StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
                 EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value
@@ -366,10 +366,10 @@ public class UpdateLearnerStepDefinitions
         return breaks;
     }
 
-    private InnerApi.Requests.CareDetails GetCareDetailsFromString(string valueString)
+    private CareDetails GetCareDetailsFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
-        var careDetails = new InnerApi.Requests.CareDetails();
+        var careDetails = new CareDetails();
 
         if (parsedValues.Any())
         {

@@ -1,12 +1,12 @@
 ﻿using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice;
 

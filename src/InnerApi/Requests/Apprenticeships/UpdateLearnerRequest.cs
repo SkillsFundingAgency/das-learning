@@ -1,7 +1,9 @@
 ﻿using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models;
+using SFA.DAS.Learning.Domain.Models.Apprenticeships;
+using SFA.DAS.Learning.InnerApi.Requests.Shared;
+using LearningSupportDetails = SFA.DAS.Learning.InnerApi.Requests.Shared.LearningSupportDetails;
 
-namespace SFA.DAS.Learning.InnerApi.Requests;
+namespace SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 #pragma warning disable CS8618 // Required properties must be set in the constructor
 
@@ -18,7 +20,7 @@ public class UpdateLearnerRequest
     /// <summary>
     /// Learner details to be updated
     /// </summary>
-    public LearnerUpdateDetails Learner { get; set; }
+    public ApprenticeshipLearnerUpdateDetails Learner { get; set; }
 
     /// <summary>
     /// Maths and English course details
@@ -28,7 +30,7 @@ public class UpdateLearnerRequest
     /// <summary>
     /// Learning support details
     /// </summary>
-    public List<LearningSupportUpdatedDetails> LearningSupport { get; set; }
+    public List<LearningSupportDetails> LearningSupport { get; set; }
 
     /// <summary>
     /// OnProgramme details
@@ -45,6 +47,22 @@ public class Delivery
     /// Withdrawal during learning date
     /// </summary>
     public DateTime? WithdrawalDate { get; set; }
+}
+
+/// <summary>
+/// Learner details to be updated for Apprenticeships
+/// </summary>
+public class ApprenticeshipLearnerUpdateDetails : LearnerUpdateDetails
+{
+    /// <summary>
+    /// Learner care details
+    /// </summary>
+    public CareDetails Care { get; set; }
+
+    /// <summary>
+    /// Date the learning completes, this will be null until completion is confirmed
+    /// </summary>
+    public DateTime? CompletionDate { get; set; }
 }
 
 /// <summary>
@@ -92,42 +110,6 @@ public class Cost
     /// The date from which this price applies
     /// </summary>
     public DateTime FromDate { get; set; }
-}
-
-/// <summary>
-/// Learner details to be updated
-/// </summary>
-public class  LearnerUpdateDetails
-{
-    /// <summary>
-    /// The first or given names of the learner
-    /// </summary>
-    public string FirstName { get; set; }
-
-    /// <summary>
-    /// The last name of the learner
-    /// </summary>
-    public string LastName { get; set; }
-
-    /// <summary>
-    /// The email address of the learner
-    /// </summary>
-    public string? EmailAddress { get; set; }
-    
-    /// <summary>
-    /// Date the learning completes, this will be null until completion is confirmed
-    /// </summary>
-    public DateTime? CompletionDate { get; set; }
-
-    /// <summary>
-    /// Date of birth of the learner
-    /// </summary>
-    public DateTime DateOfBirth { get; set; }
-
-    /// <summary>
-    /// Learner care details
-    /// </summary>
-    public CareDetails Care { get; set; }
 }
 
 /// <summary>
@@ -179,22 +161,6 @@ public class MathsAndEnglish
     /// Amount associated with the maths and english course
     /// </summary>
     public decimal Amount { get; set; }
-}
-
-/// <summary>
-/// Combined Learning Support details (e.g. both onProgrammer and Maths and English)
-///</summary>
-public class LearningSupportUpdatedDetails
-{
-    /// <summary>
-    /// Start date of the learning support
-    /// </summary>
-    public DateTime StartDate { get; set; }
-
-    /// <summary>
-    /// End date of the learning support
-    /// </summary>
-    public DateTime EndDate { get; set; }
 }
 
 /// <summary>
@@ -257,7 +223,7 @@ public static class UpdateLearnerRequestExtensions
                 EmailAddress = request.Learner.EmailAddress,
                 CompletionDate = request.Learner.CompletionDate,
                 DateOfBirth = request.Learner.DateOfBirth,
-                Care = new Domain.Models.CareDetails
+                Care = new Domain.Models.Apprenticeships.CareDetails
                 {
                     HasEHCP = request.Learner.Care.HasEHCP,
                     IsCareLeaver = request.Learner.Care.IsCareLeaver,
@@ -278,14 +244,14 @@ public static class UpdateLearnerRequestExtensions
                     Amount = x.Amount
                 }),
             LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
-                new LearningSupportDetails
+                new Domain.Models.Shared.LearningSupportDetails
                 {
                     StartDate = x.StartDate, EndDate = x.EndDate
                 }),
-            OnProgrammeDetails = new Domain.Models.OnProgrammeDetails
+            OnProgrammeDetails = new Domain.Models.Apprenticeships.OnProgrammeDetails
             {
                 ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
-                Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Domain.Models.Cost
+                Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Domain.Models.Apprenticeships.Cost
                 {
                     TrainingPrice = x.TrainingPrice,
                     EpaoPrice = x.EpaoPrice,
@@ -293,7 +259,7 @@ public static class UpdateLearnerRequestExtensions
                 }),
                 PauseDate = request.OnProgramme.PauseDate,
                 BreaksInLearning = request.OnProgramme.BreaksInLearning.SelectOrEmptyList(x => 
-                    new Domain.Models.BreakInLearningUpdateDetails
+                    new Domain.Models.Apprenticeships.BreakInLearningUpdateDetails
                     {
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,

@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.Learning.Domain.Models;
+﻿using SFA.DAS.Learning.Domain.Models.Shared;
+
+namespace SFA.DAS.Learning.Domain.Models.Apprenticeships;
 
 #pragma warning disable CS8618 // Required properties must be set in the constructor
 
@@ -16,13 +18,11 @@ public class DeliveryDetails
     public DateTime? WithdrawalDate { get; set; }
 }
 
-public class LearningUpdateDetails
+//todo on the ShortCourses tech design the Learner object is shared between Apprenticeships and ShortCourses without any inheritance, however these two fields are not on the design but are currently required for Apprenticeships.
+//Suspect these should be refactored to live on the Apprenticeship specific learning delivery, and we do away with the inheritance and just use the shared Learner object.
+public class LearningUpdateDetails : Learner
 {
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string? EmailAddress { get; set; }
     public DateTime? CompletionDate { get; set; }
-    public DateTime DateOfBirth { get; set; }
     public CareDetails Care { get; set; }
 }
 
@@ -37,12 +37,6 @@ public class MathsAndEnglishUpdateDetails
     public DateTime? PauseDate { get; set; }
     public int? PriorLearningPercentage { get; set; }
     public decimal Amount { get; set; }
-}
-
-public class LearningSupportDetails
-{
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
 }
 
 public class OnProgrammeDetails

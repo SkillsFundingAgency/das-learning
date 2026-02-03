@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 

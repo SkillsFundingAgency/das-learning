@@ -4,7 +4,7 @@ using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models;
+using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Enums;
 using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglish;
 
