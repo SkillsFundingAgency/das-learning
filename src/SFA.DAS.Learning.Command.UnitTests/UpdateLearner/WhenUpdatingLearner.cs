@@ -33,7 +33,7 @@ public class WhenUpdatingLearner
     {
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
                            .ReturnsAsync(domainModel);
@@ -56,10 +56,10 @@ public class WhenUpdatingLearner
         var command = _fixture.Create<UpdateLearnerCommand>();
         command.UpdateModel.LearningSupport.Clear();
 
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         // Create a single episode
-        var singleEpisode = _fixture.Create<EpisodeDomainModel>();
+        var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
 
         TestHelper.SetEpisode(domainModel, singleEpisode);
 
@@ -85,7 +85,7 @@ public class WhenUpdatingLearner
         var command = _fixture.Create<UpdateLearnerCommand>();
 
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
-                           .ReturnsAsync((LearningDomainModel)null);
+                           .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));

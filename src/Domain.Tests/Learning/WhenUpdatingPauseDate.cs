@@ -86,7 +86,7 @@ public class WhenUpdatingPauseDate
         domainModel.Episodes.First().PauseDate.Should().Be(pauseDate);
     }
 
-    private LearningDomainModel GetLearningDomainModel(DateTime? pauseDate)
+    private ApprenticeshipLearningDomainModel GetLearningDomainModel(DateTime? pauseDate)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
@@ -94,10 +94,10 @@ public class WhenUpdatingPauseDate
         episode.PauseDate = pauseDate;
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
-        return LearningDomainModel.Get(entity);
+        return ApprenticeshipLearningDomainModel.Get(entity);
     }
 
-    private LearnerUpdateModel GetLearnerUpdateModel(LearningDomainModel domainModel, DateTime? pauseDate)
+    private LearnerUpdateModel GetLearnerUpdateModel(ApprenticeshipLearningDomainModel domainModel, DateTime? pauseDate)
     {
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(domainModel.GetEntity());
         updateModel.OnProgrammeDetails.PauseDate = pauseDate;

@@ -48,13 +48,13 @@ public class WhenAnAddApprenticeshipCommandIsSent
 	public async Task WhenAnApprenticeshipAlreadyExistsThenItIsNotCreatedAgain()
     {
         var command = _fixture.Create<AddLearningCommand>();
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
 		_apprenticeshipRepository.Setup(x => x.Get(command.Uln, command.ApprovalsApprenticeshipId)).ReturnsAsync(apprenticeship);
 
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.IsAny<LearningDomainModel>()), Times.Never());
+        _apprenticeshipRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never());
     }
 	
     [Test]
@@ -63,7 +63,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var command = _fixture.Create<AddLearningCommand>();
         var trainingCodeInt = _fixture.Create<int>();
         command.TrainingCode = trainingCodeInt.ToString();
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         _apprenticeshipFactory.Setup(x => x.CreateNew(
                 command.ApprovalsApprenticeshipId,
@@ -76,8 +76,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
         
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<LearningDomainModel>(y => y.GetEntity().Episodes.Count == 1)));
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<LearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1)));
+        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Count == 1)));
+        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1)));
     }
 
     [Test]
@@ -86,7 +86,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var command = _fixture.Create<AddLearningCommand>();
         var trainingCodeInt = _fixture.Create<int>();
         command.TrainingCode = trainingCodeInt.ToString();
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         command.ActualStartDate = null;
 
         _apprenticeshipFactory.Setup(x => x.CreateNew(
@@ -100,7 +100,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<LearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
+        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
     }
 
     [Test]
@@ -111,7 +111,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         command.FundingPlatform = FundingPlatform.DAS;
         var trainingCodeInt = _fixture.Create<int>();
         command.TrainingCode = trainingCodeInt.ToString();
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         _apprenticeshipFactory.Setup(x => x.CreateNew(
                 command.ApprovalsApprenticeshipId,
@@ -140,7 +140,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         command.FundingPlatform = FundingPlatform.SLD;
         var trainingCodeInt = _fixture.Create<int>();
         command.TrainingCode = trainingCodeInt.ToString();
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         _apprenticeshipFactory.Setup(x => x.CreateNew(
                 command.ApprovalsApprenticeshipId,
@@ -158,7 +158,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _messageSession.Verify(x => x.Publish(It.IsAny<LearningCreatedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    private static bool DoApprenticeshipDetailsMatchDomainModel(LearningCreatedEvent e, LearningDomainModel learning)
+    private static bool DoApprenticeshipDetailsMatchDomainModel(LearningCreatedEvent e, ApprenticeshipLearningDomainModel learning)
     {
         return
             e.LearningKey == learning.Key &&

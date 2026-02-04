@@ -100,7 +100,7 @@ public class WhenUpdatingLearningSupport
     }
 
 
-    private LearningDomainModel CreateLearner(List<LearningSupportDetails> learningSupport)
+    private ApprenticeshipLearningDomainModel CreateLearner(List<LearningSupportDetails> learningSupport)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
@@ -124,7 +124,7 @@ public class WhenUpdatingLearningSupport
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
 
-        return LearningDomainModel.Get(entity);
+        return ApprenticeshipLearningDomainModel.Get(entity);
     }
 
 }

@@ -14,6 +14,7 @@ using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Command.RemoveLearnerCommand;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -54,7 +55,7 @@ public class LearningController : ControllerBase
         var response = await _queryDispatcher.Send<GetLearningsRequest, GetLearningsResponse>(request);
 
         return Ok(response.Learnings);
-    }
+    }   
 
     /// <summary>
     /// Get paginated learnings for a provider between specified dates.

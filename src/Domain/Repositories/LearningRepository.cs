@@ -21,7 +21,7 @@ public class LearningRepository : ILearningRepository
         _learningFactory = learningFactory;
     }
 
-    public async Task Add(LearningDomainModel learning)
+    public async Task Add(ApprenticeshipLearningDomainModel learning)
     {
         var entity = learning.GetEntity();
         await DbContext.AddAsync(entity);
@@ -33,7 +33,7 @@ public class LearningRepository : ILearningRepository
         }
     }
 
-    public async Task<LearningDomainModel> Get(Guid key)
+    public async Task<ApprenticeshipLearningDomainModel> Get(Guid key)
     {
         var apprenticeship = await DbContext.ApprenticeshipsDbSet
             .Include(x => x.FreezeRequests)
@@ -46,7 +46,7 @@ public class LearningRepository : ILearningRepository
         return _learningFactory.GetExisting(apprenticeship);
     }
 
-    public async Task<LearningDomainModel?> Get(string uln, long approvalsApprenticeshipId)
+    public async Task<ApprenticeshipLearningDomainModel?> Get(string uln, long approvalsApprenticeshipId)
     {
         var apprenticeship = await DbContext.Apprenticeships
             .Include(x => x.FreezeRequests)
@@ -57,7 +57,7 @@ public class LearningRepository : ILearningRepository
         return apprenticeship == null ? null : _learningFactory.GetExisting(apprenticeship);
     }
     
-    public async Task<LearningDomainModel?> GetByUln(string uln)
+    public async Task<ApprenticeshipLearningDomainModel?> GetByUln(string uln)
     {
         var apprenticeship = await DbContext.Apprenticeships
             .Include(x => x.FreezeRequests)
@@ -74,7 +74,7 @@ public class LearningRepository : ILearningRepository
         return _learningFactory.GetExisting(apprenticeship);
     }
 
-    public async Task Update(LearningDomainModel learning)
+    public async Task Update(ApprenticeshipLearningDomainModel learning)
     {
         await DbContext.SaveChangesAsync();
   

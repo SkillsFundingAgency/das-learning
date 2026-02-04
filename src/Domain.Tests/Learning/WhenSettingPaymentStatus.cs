@@ -24,7 +24,7 @@ public class WhenSettingPaymentStatus
     public void And_NewStatusIsSameAsOld_Then_Throws()
     {
         //Arrange
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         ApprenticeshipDomainModelTestHelper.AddEpisode(apprenticeship);
         var userId = _fixture.Create<string>();
 
@@ -39,7 +39,7 @@ public class WhenSettingPaymentStatus
     public void And_NewStatusIsFrozen_Then_PaymentsAreFrozen()
     {
         //Arrange
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         ApprenticeshipDomainModelTestHelper.AddEpisode(apprenticeship);
         var userId = _fixture.Create<string>();
         var timeChanged = DateTime.Now;
@@ -64,7 +64,7 @@ public class WhenSettingPaymentStatus
         var userIdUnfreeze = _fixture.Create<string>();
         var timefreeze = DateTime.Now.AddMinutes(-10);
         var timeUnfreeze = DateTime.Now;
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         ApprenticeshipDomainModelTestHelper.AddEpisode(apprenticeship);
         apprenticeship.SetPaymentsFrozen(true, userIdFreeze, timefreeze);
 

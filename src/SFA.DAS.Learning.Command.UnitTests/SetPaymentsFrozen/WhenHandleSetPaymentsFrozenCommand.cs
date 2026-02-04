@@ -41,7 +41,7 @@ public class WhenHandleSetPaymentsFrozenCommand
     public async Task Handle_ShouldGetAndUpdateApprenticeship(SetPayments setPayments)
     {
         // Arrange
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         ApprenticeshipDomainModelTestHelper.AddEpisode(apprenticeship);
         _mockApprenticeshipRepository.Setup(x => x.Get(It.IsAny<Guid>())).ReturnsAsync(apprenticeship);
 
@@ -57,7 +57,7 @@ public class WhenHandleSetPaymentsFrozenCommand
         // Assert
         _mockApprenticeshipRepository.Verify(x => x.Get(command.LearningKey), Times.Once);
         _mockApprenticeshipRepository.Verify(x => x.Update(
-            It.Is<LearningDomainModel>(y => y
+            It.Is<ApprenticeshipLearningDomainModel>(y => y
                 .LatestEpisode.PaymentsFrozen == command.NewPaymentsFrozenStatus)), Times.Once);
 
         switch(setPayments)
@@ -85,7 +85,7 @@ public class WhenHandleSetPaymentsFrozenCommand
     public async Task WhenFundingPlatformIsNotDASThenEventNotPublished(SetPayments setPayments)
     {
         // Arrange
-        var apprenticeship = _fixture.Create<LearningDomainModel>();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         ApprenticeshipDomainModelTestHelper.AddEpisode(apprenticeship, fundingPlatform: FundingPlatform.SLD);
         _mockApprenticeshipRepository.Setup(x => x.Get(It.IsAny<Guid>())).ReturnsAsync(apprenticeship);
 

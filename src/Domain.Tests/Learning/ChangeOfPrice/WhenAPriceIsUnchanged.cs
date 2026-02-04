@@ -13,7 +13,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice;
 [TestFixture]
 public class WhenAPriceIsUnchanged
 {
-    private LearningDomainModel _learning;
+    private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
     [SetUp]

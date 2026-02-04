@@ -41,7 +41,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         public async Task ThenApprenticeshipAddedToDataStore()
         {
             // Arrange
-            var apprenticeship = _fixture.Create<LearningDomainModel>();
+            var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
             SetUpApprenticeshipRepository();
 
             // Act
@@ -60,10 +60,10 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         public async Task ThenEpisodeAddedToDataStore()
         {
             // Arrange
-            var apprenticeship = _fixture.Create<LearningDomainModel>();
+            var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
             SetUpApprenticeshipRepository();
             var episodePrice = _fixture.Build<EpisodePrice>().Create();
-            var episode = EpisodeDomainModel.Get(_fixture.Build<ApprenticeshipEpisode>()
+            var episode = ApprenticeshipEpisodeDomainModel.Get(_fixture.Build<ApprenticeshipEpisode>()
                 .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
                 .With(x => x.PaymentsFrozen, false)
                 .With(x => x.LastDayOfLearning, (DateTime?)null)

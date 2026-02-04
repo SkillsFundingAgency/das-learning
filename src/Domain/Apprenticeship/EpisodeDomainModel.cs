@@ -8,7 +8,54 @@ using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class EpisodeDomainModel
+public abstract class EpisodeDomainModel
+{
+}
+
+public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
+{
+    private readonly DataAccess.Entities.Learning.ShortCourseEpisode _entity;
+    private readonly List<ShortCourseMilestoneDomainModel> _milestones;
+
+    public Guid Key => _entity.Key;
+    public Guid LearningKey => _entity.LearningKey;
+    public long Ukprn => _entity.Ukprn;
+    public long EmployerAccountId => _entity.EmployerAccountId;
+    public string TrainingCode => _entity.TrainingCode;
+
+    public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
+        new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
+
+    internal static ShortCourseEpisodeDomainModel New(
+        Guid learningKey,
+        long ukprn,
+        long employerAccountId,
+        string trainingCode)
+    {
+        return new ShortCourseEpisodeDomainModel(new ShortCourseEpisode
+        {
+            Key = Guid.NewGuid(),
+            LearningKey = learningKey,
+            Ukprn = ukprn,
+            EmployerAccountId = employerAccountId,
+            TrainingCode = trainingCode
+        });
+    }
+
+    public static ShortCourseEpisodeDomainModel Get(ShortCourseEpisode entity)
+        => new(entity);
+
+    public ShortCourseEpisode GetEntity() => _entity;
+
+    private ShortCourseEpisodeDomainModel(ShortCourseEpisode entity)
+    {
+        _milestones = entity.Milestones
+            .Select(ShortCourseMilestoneDomainModel.Get)
+            .ToList();
+    }
+}
+
+public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
 {
     private readonly DataAccess.Entities.Learning.ApprenticeshipEpisode _entity;
     private readonly List<EpisodePriceDomainModel> _episodePrices;
@@ -38,7 +85,7 @@ public class EpisodeDomainModel
             var latestPrice = _episodePrices.MaxBy(x => x.StartDate);
             if (latestPrice == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(ApprenticeshipEpisodeDomainModel)}.");
             }
 
             return latestPrice;
@@ -52,14 +99,14 @@ public class EpisodeDomainModel
             var firstPrice = _episodePrices.MinBy(x => x.StartDate);
             if (firstPrice == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(FirstPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(FirstPrice)} could not be found in the {nameof(ApprenticeshipEpisodeDomainModel)}.");
             }
 
             return firstPrice;
         }
     }
 
-    internal static EpisodeDomainModel New(
+    internal static ApprenticeshipEpisodeDomainModel New(
         long ukprn,
         long employerAccountId,
         FundingType fundingType, 
@@ -70,7 +117,7 @@ public class EpisodeDomainModel
         string trainingCode,
         string? trainingCourseVersion)
     {
-        return new EpisodeDomainModel(new ApprenticeshipEpisode
+        return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
         {
             Key = Guid.NewGuid(),
             Ukprn = ukprn,
@@ -292,9 +339,9 @@ public class EpisodeDomainModel
         return _entity;
     }
 
-    public static EpisodeDomainModel Get(ApprenticeshipEpisode entity)
+    public static ApprenticeshipEpisodeDomainModel Get(ApprenticeshipEpisode entity)
     {
-        return new EpisodeDomainModel(entity);
+        return new ApprenticeshipEpisodeDomainModel(entity);
     }
 
     internal void Withdraw(DateTime lastDateOfLearning)
@@ -312,7 +359,7 @@ public class EpisodeDomainModel
         _entity.PauseDate = pauseDate;
     }
 
-    private EpisodeDomainModel(ApprenticeshipEpisode entity)
+    private ApprenticeshipEpisodeDomainModel(ApprenticeshipEpisode entity)
     {
         _entity = entity;
         _episodePrices = entity.Prices.Select(EpisodePriceDomainModel.Get).ToList();

@@ -10,7 +10,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPersonalDetails;
 [TestFixture]
 public class WhenFirstNameIsUnchanged
 {
-    private LearningDomainModel _learning;
+    private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
     private string _firstName;

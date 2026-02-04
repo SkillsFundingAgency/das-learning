@@ -47,7 +47,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             var apprenticeship = await _dbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = LearningDomainModel.Get(apprenticeship);
+            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
             var newDateOfBirth = _fixture.Create<DateTime>();
             domainModel.GetEntity().DateOfBirth = newDateOfBirth;
 
@@ -69,7 +69,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
             var apprenticeship = await _dbContext.Apprenticeships
                 .Include(x => x.Episodes)
                 .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = LearningDomainModel.Get(apprenticeship);
+            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
             domainModel.LatestEpisode.GetEntity().LegalEntityName = "alternative_name";
 
             // Act
@@ -91,7 +91,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 .Include(x => x.Episodes)
                 .ThenInclude(y => y.Prices)
                 .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = LearningDomainModel.Get(apprenticeship);
+            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
 
             // Act
             await _sut.Update(domainModel);
@@ -111,7 +111,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
                 .Include(x => x.Episodes)
                 .ThenInclude(y => y.BreaksInLearning)
                 .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = LearningDomainModel.Get(apprenticeship);
+            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
             var expectedBreakStart = _fixture.Create<DateTime>();
             domainModel.LatestEpisode.EpisodeBreaksInLearning.Single().GetEntity().StartDate = expectedBreakStart;
 

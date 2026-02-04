@@ -15,11 +15,11 @@ public static class ApprenticeshipDomainModelTestHelper
     private static readonly Fixture _fixture = new();
 
     // If this method isn't a sign that we need to refactor this project then I don't know what is
-    public static LearningDomainModel CreateBasicTestModel()
+    public static ApprenticeshipLearningDomainModel CreateBasicTestModel()
     {
         // Create an instance with default constructor or Activator
-        var apprenticeship = (LearningDomainModel)Activator.CreateInstance(
-            typeof(LearningDomainModel),
+        var apprenticeship = (ApprenticeshipLearningDomainModel)Activator.CreateInstance(
+            typeof(ApprenticeshipLearningDomainModel),
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
             new object[] { new DataAccess.Entities.Learning.ApprenticeshipLearning() },
@@ -27,18 +27,18 @@ public static class ApprenticeshipDomainModelTestHelper
         );
 
         // Set private fields to empty lists using reflection
-        typeof(LearningDomainModel)
+        typeof(ApprenticeshipLearningDomainModel)
             .GetField("_episodes", BindingFlags.NonPublic | BindingFlags.Instance)
-            .SetValue(apprenticeship, new List<EpisodeDomainModel>());
+            .SetValue(apprenticeship, new List<ApprenticeshipEpisodeDomainModel>());
 
-        typeof(LearningDomainModel)
+        typeof(ApprenticeshipLearningDomainModel)
             .GetField("_freezeRequests", BindingFlags.NonPublic | BindingFlags.Instance)
             .SetValue(apprenticeship, new List<FreezeRequestDomainModel>());
 
         return apprenticeship;
     }
 
-    public static void AddEpisode(LearningDomainModel learning, DateTime? startDate = null, DateTime? endDate = null, long? ukprn = null, FundingPlatform? fundingPlatform = FundingPlatform.DAS)
+    public static void AddEpisode(ApprenticeshipLearningDomainModel learning, DateTime? startDate = null, DateTime? endDate = null, long? ukprn = null, FundingPlatform? fundingPlatform = FundingPlatform.DAS)
     {
         var start = startDate ?? _fixture.Create<DateTime>();
         var end = endDate ?? (start.AddDays(_fixture.Create<int>()));
@@ -61,7 +61,7 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<string?>());
     }
 
-    public static bool DoEpisodeDetailsMatchDomainModel(LearningEvent e, LearningDomainModel learning)
+    public static bool DoEpisodeDetailsMatchDomainModel(LearningEvent e, ApprenticeshipLearningDomainModel learning)
     {
         var episode = learning.LatestEpisode;
         var expectedNumberOfPrices = learning.AllPrices.Count();

@@ -13,7 +13,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice;
 [TestFixture]
 public class WhenAPriceIsRemoved
 {
-    private LearningDomainModel _learning;
+    private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
     private static readonly DateTime PlannedEndDate = new(2025, 07, 31);
 

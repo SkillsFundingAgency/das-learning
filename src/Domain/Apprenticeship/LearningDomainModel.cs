@@ -10,10 +10,57 @@ using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEn
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class LearningDomainModel : AggregateRoot
+public abstract class LearningDomainModel : AggregateRoot
+{
+}
+
+public class ShortCourseLearningDomainModel : LearningDomainModel
+{
+    private readonly Learning.DataAccess.Entities.Learning.ShortCourseLearning _entity;
+    private readonly List<ShortCourseEpisodeDomainModel> _episodes;
+
+    public Guid Key => _entity.Key;
+    public Guid LearnerKey => _entity.LearnerKey;
+    public DateTime? WithdrawalDate => _entity.WithdrawalDate;
+    public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
+    public bool IsApproved => _entity.IsApproved;
+    public DateTime? CompletionDate => _entity.CompletionDate;
+    public IReadOnlyCollection<ShortCourseEpisodeDomainModel> Episodes => new ReadOnlyCollection<ShortCourseEpisodeDomainModel>(_episodes);
+
+    internal static ShortCourseLearningDomainModel New(
+        Guid learnerKey,
+        DateTime expectedEndDate,
+        DateTime? completionDate)
+    {
+        return new ShortCourseLearningDomainModel(new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            LearnerKey = learnerKey,
+            ExpectedEndDate = expectedEndDate,
+            CompletionDate = completionDate,
+            IsApproved = false,
+            WithdrawalDate = null
+        });
+    }
+
+    public static ShortCourseLearningDomainModel Get(ShortCourseLearning entity)
+    {
+        return new ShortCourseLearningDomainModel(entity);
+    }
+
+    private ShortCourseLearningDomainModel(ShortCourseLearning entity)
+    {
+        _entity = entity;
+        _episodes = entity.Episodes
+            .Select(ShortCourseEpisodeDomainModel.Get)
+            .ToList();
+    }
+}
+
+public class ApprenticeshipLearningDomainModel : LearningDomainModel
 {
     private readonly Learning.DataAccess.Entities.Learning.ApprenticeshipLearning _entity;
-    private readonly List<EpisodeDomainModel> _episodes;
+    private readonly List<ApprenticeshipEpisodeDomainModel> _episodes;
     private readonly List<FreezeRequestDomainModel> _freezeRequests;
     private readonly List<MathsAndEnglishDomainModel> _mathsAndEnglishCourses;
 
@@ -28,7 +75,7 @@ public class LearningDomainModel : AggregateRoot
     public bool CareLeaverEmployerConsentGiven => _entity.CareLeaverEmployerConsentGiven;
     public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
-    public IReadOnlyCollection<EpisodeDomainModel> Episodes => new ReadOnlyCollection<EpisodeDomainModel>(_episodes);
+    public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<FreezeRequestDomainModel> FreezeRequests => new ReadOnlyCollection<FreezeRequestDomainModel>(_freezeRequests);
     public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_mathsAndEnglishCourses);
     public DateTime StartDate
@@ -38,7 +85,7 @@ public class LearningDomainModel : AggregateRoot
             var startDate = AllPrices.MinBy(x => x.StartDate)?.StartDate;
             if (startDate == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(StartDate)} could not be found in the {nameof(LearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(StartDate)} could not be found in the {nameof(ApprenticeshipLearningDomainModel)}.");
             }
 
             return startDate.Value;
@@ -55,20 +102,20 @@ public class LearningDomainModel : AggregateRoot
             var latestPrice = AllPrices.MaxBy(x => x.StartDate);
             if (latestPrice == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(LearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(ApprenticeshipLearningDomainModel)}.");
             }
 
             return latestPrice;
         }
     }
-    public EpisodeDomainModel LatestEpisode
+    public ApprenticeshipEpisodeDomainModel LatestEpisode
     {
         get
         {
             var latestEpisode = _episodes.MaxBy(x => x.EpisodePrices.Max(y => y.StartDate));
             if (latestEpisode == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestEpisode)} could not be found in the {nameof(LearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestEpisode)} could not be found in the {nameof(ApprenticeshipLearningDomainModel)}.");
             }
 
             return latestEpisode;
@@ -77,7 +124,7 @@ public class LearningDomainModel : AggregateRoot
 
     public int AgeAtStartOfLearning => DateOfBirth.CalculateAgeAtDate(StartDate);
 
-    internal static LearningDomainModel New(
+    internal static ApprenticeshipLearningDomainModel New(
         long approvalsApprenticeshipId,
         string uln,
         DateTime dateOfBirth,
@@ -85,7 +132,7 @@ public class LearningDomainModel : AggregateRoot
         string lastName,
         string apprenticeshipHashedId)
     {
-        return new LearningDomainModel(new Learning.DataAccess.Entities.Learning.ApprenticeshipLearning
+        return new ApprenticeshipLearningDomainModel(new Learning.DataAccess.Entities.Learning.ApprenticeshipLearning
         {
             Key = Guid.NewGuid(),
             ApprovalsApprenticeshipId = approvalsApprenticeshipId,
@@ -97,15 +144,15 @@ public class LearningDomainModel : AggregateRoot
         });
     }
 
-    public static LearningDomainModel Get(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)
+    public static ApprenticeshipLearningDomainModel Get(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)
     {
-        return new LearningDomainModel(entity);
+        return new ApprenticeshipLearningDomainModel(entity);
     }
 
-    private LearningDomainModel(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)
+    private ApprenticeshipLearningDomainModel(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)
     {
         _entity = entity;
-        _episodes = entity.Episodes.Select(EpisodeDomainModel.Get).ToList();
+        _episodes = entity.Episodes.Select(ApprenticeshipEpisodeDomainModel.Get).ToList();
         _freezeRequests = entity.FreezeRequests.Select(FreezeRequestDomainModel.Get).ToList();
         _mathsAndEnglishCourses = entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList();
     }
@@ -126,7 +173,7 @@ public class LearningDomainModel : AggregateRoot
         string trainingCode,
         string? trainingCourseVersion)
     {
-        var episode = EpisodeDomainModel.New(
+        var episode = ApprenticeshipEpisodeDomainModel.New(
             ukprn,
             employerAccountId,
             fundingType,

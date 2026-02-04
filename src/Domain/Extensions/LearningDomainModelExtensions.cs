@@ -5,7 +5,7 @@ namespace SFA.DAS.Learning.Domain.Extensions
 {
     public static class LearningDomainModelExtensions
     {
-        public static LearnerUpdatedEvent ToLearnerUpdatedEvent(this LearningDomainModel learner)
+        public static LearnerUpdatedEvent ToLearnerUpdatedEvent(this ApprenticeshipLearningDomainModel learner)
         {
             return new LearnerUpdatedEvent
             {

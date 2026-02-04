@@ -5,7 +5,7 @@ namespace SFA.DAS.Learning.Domain.Extensions;
 
 public static class IntegrationEventExtensions
 {
-    public static LearningEpisode BuildEpisodeForIntegrationEvent(this LearningDomainModel learning)
+    public static LearningEpisode BuildEpisodeForIntegrationEvent(this ApprenticeshipLearningDomainModel learning)
     {
         var latestEpisode = learning.LatestEpisode;
         var activePrices = latestEpisode.ActiveEpisodePrices;

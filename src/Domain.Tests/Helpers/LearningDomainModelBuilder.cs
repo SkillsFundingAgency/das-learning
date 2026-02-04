@@ -32,7 +32,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
             return this;
         }
 
-        public LearningDomainModel Build()
+        public ApprenticeshipLearningDomainModel Build()
         {
             var costs = _costs ?? _fixture.CreateMany<Cost>(_numberOfCosts).ToList();
             var orderedCosts = costs.OrderBy(c => c.FromDate).ToList();
@@ -65,7 +65,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
             }
 
             entity.Episodes = [episode];
-            return LearningDomainModel.Get(entity);
+            return ApprenticeshipLearningDomainModel.Get(entity);
         }
     }
 }

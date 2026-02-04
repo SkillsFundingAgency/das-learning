@@ -47,7 +47,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
 
@@ -69,7 +69,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
 
@@ -78,17 +78,17 @@ public class WhenRemovingLearner
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
             .ReturnsAsync(domainModel);
 
-        LearningDomainModel? updatedModel = null;
+        ApprenticeshipLearningDomainModel? updatedModel = null;
 
         _learningRepository
-            .Setup(x => x.Update(It.IsAny<LearningDomainModel>()))
-            .Callback<LearningDomainModel>(m => updatedModel = m);
+            .Setup(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(m => updatedModel = m);
 
         // Act
         await _commandHandler.Handle(command);
 
         // Assert
-        _learningRepository.Verify(x => x.Update(It.IsAny<LearningDomainModel>()), Times.Once);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
 
         updatedModel.Should().NotBeNull();
         updatedModel!.MathsAndEnglishCourses.Should().BeEmpty();
@@ -99,7 +99,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
 
@@ -108,17 +108,17 @@ public class WhenRemovingLearner
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
             .ReturnsAsync(domainModel);
 
-        LearningDomainModel? updatedModel = null;
+        ApprenticeshipLearningDomainModel? updatedModel = null;
 
         _learningRepository
-            .Setup(x => x.Update(It.IsAny<LearningDomainModel>()))
-            .Callback<LearningDomainModel>(m => updatedModel = m);
+            .Setup(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(m => updatedModel = m);
 
         // Act
         await _commandHandler.Handle(command);
 
         // Assert
-        _learningRepository.Verify(x => x.Update(It.IsAny<LearningDomainModel>()), Times.Once);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
 
         updatedModel.Should().NotBeNull();
         updatedModel!.LatestEpisode.LearningSupport.Should().BeEmpty();
@@ -129,7 +129,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
 
@@ -138,17 +138,17 @@ public class WhenRemovingLearner
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
             .ReturnsAsync(domainModel);
 
-        LearningDomainModel? updatedModel = null;
+        ApprenticeshipLearningDomainModel? updatedModel = null;
 
         _learningRepository
-            .Setup(x => x.Update(It.IsAny<LearningDomainModel>()))
-            .Callback<LearningDomainModel>(m => updatedModel = m);
+            .Setup(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(m => updatedModel = m);
 
         // Act
         await _commandHandler.Handle(command);
 
         // Assert
-        _learningRepository.Verify(x => x.Update(It.IsAny<LearningDomainModel>()), Times.Once);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
 
         updatedModel.Should().NotBeNull();
         updatedModel!.LatestEpisode.EpisodeBreaksInLearning.Should().BeEmpty();
@@ -160,7 +160,7 @@ public class WhenRemovingLearner
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
-                           .ReturnsAsync((LearningDomainModel)null);
+                           .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
@@ -172,7 +172,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x =>
         {
@@ -205,7 +205,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<LearningDomainModel>();
+        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
 

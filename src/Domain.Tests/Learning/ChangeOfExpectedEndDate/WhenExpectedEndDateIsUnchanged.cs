@@ -12,7 +12,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfExpectedEndDate;
 [TestFixture]
 public class WhenExpectedEndDateIsUnchanged
 {
-    private LearningDomainModel _learning;
+    private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
     [SetUp]
