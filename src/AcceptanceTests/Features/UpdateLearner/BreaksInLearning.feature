@@ -37,3 +37,23 @@ Scenario: BreaksInLearning details are added then removed
         | Change                 |
         | BreaksInLearningUpdated |
     And the learning history is maintained
+
+Scenario: BreaksInLearning PriorPeriodExpectedEndDate is updated and changes are detected
+    Given There is an apprenticeship with the following details
+        | StartDate       | EndDate      | TrainingPrice | EpaPrice |
+        | currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
+    And an update request has the following data
+        | Property         | Value                                                                                  |
+        | BreaksInLearning | startDate:currentAY-10-25 endDate:nextAY-11-25 PriorPeriodExpectedEndDate:nextAY-07-31 |
+    And the update request is sent
+    And an update request has the following data
+        | Property         | Value                                                                                  |
+        | BreaksInLearning | startDate:currentAY-10-25 endDate:nextAY-11-25 PriorPeriodExpectedEndDate:nextAY-07-15 |
+    When the update request is sent
+    Then the following BreaksInLearning details are stored
+        | StartDate       | EndDate      | PriorPeriodExpectedEndDate |
+        | currentAY-10-25 | nextAY-11-25 | nextAY-07-15               |
+    And the following changes are returned
+        | Change                  |
+        | BreaksInLearningUpdated |
+    And the learning history is maintained

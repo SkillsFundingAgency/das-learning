@@ -161,6 +161,11 @@ public class MathsAndEnglish
     /// Amount associated with the maths and english course
     /// </summary>
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Breaks in learning for the maths and english course
+    /// </summary>
+    public List<BreakInLearning> BreaksInLearning { get; set; }
 }
 
 /// <summary>
@@ -241,7 +246,14 @@ public static class UpdateLearnerRequestExtensions
                     WithdrawalDate = x.WithdrawalDate,
                     PauseDate = x.PauseDate,
                     PriorLearningPercentage = x.PriorLearningPercentage,
-                    Amount = x.Amount
+                    Amount = x.Amount,
+                    BreaksInLearning = x.BreaksInLearning.SelectOrEmptyList(b => 
+                        new BreakInLearningUpdateDetails
+                        {
+                            StartDate = b.StartDate,
+                            EndDate = b.EndDate,
+                            PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+                        })
                 }),
             LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
                 new Domain.Models.Shared.LearningSupportDetails

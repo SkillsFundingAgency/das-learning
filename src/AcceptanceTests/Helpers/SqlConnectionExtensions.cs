@@ -18,6 +18,11 @@ internal static class SqlConnectionExtensions
             episode.BreaksInLearning = dbConnection.GetAll<DataAccess.Entities.Learning.EpisodeBreakInLearning>().Where(x => x.EpisodeKey == episode.Key).ToList();
         }
 
+        foreach (var mathsAndEnglish in learning.MathsAndEnglishCourses)
+        {
+            mathsAndEnglish.BreaksInLearning = dbConnection.GetAll<DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning>().Where(x => x.MathsAndEnglishKey == mathsAndEnglish.Key).ToList();
+        }
+
         return learning;
     }
 

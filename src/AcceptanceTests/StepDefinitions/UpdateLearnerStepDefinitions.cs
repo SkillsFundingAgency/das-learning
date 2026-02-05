@@ -7,6 +7,7 @@ using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.Types;
 using Cost = SFA.DAS.Learning.InnerApi.Requests.Apprenticeships.Cost;
+using MathsAndEnglishBreakInLearning = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -172,6 +173,8 @@ public class UpdateLearnerStepDefinitions
                 ? TokenisableDateTime.FromString(row["PauseDate"]).DateTime
                 : null;
 
+            var breaksInLearning = GetBreakInLearningsFromTableRow(row);
+
             var expectedMathsAndEnglish = new DataAccess.Entities.Learning.MathsAndEnglish
             {
                 Course = row["Course"],
@@ -179,7 +182,8 @@ public class UpdateLearnerStepDefinitions
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
                 PlannedEndDate = TokenisableDateTime.FromString(row["PlannedEndDate"]).DateTime!.Value,
                 PauseDate = pauseDate,
-                Amount = decimal.Parse(row["Amount"])
+                Amount = decimal.Parse(row["Amount"]),
+                BreaksInLearning = breaksInLearning
             };
 
             learning.MathsAndEnglishCourses
@@ -189,6 +193,8 @@ public class UpdateLearnerStepDefinitions
                     .Excluding(c => c.PriorLearningPercentage)
                     .Excluding(c => c.LearningKey)
                     .Excluding(c => c.Key)
+                    .For(c=> c.BreaksInLearning).Exclude(x=>x.Key)
+                    .For(c => c.BreaksInLearning).Exclude(x => x.MathsAndEnglishKey)
                     .Using<string>(ctx => ctx.Subject?.Trim().Should().Be(ctx.Expectation?.Trim()))
                     .WhenTypeIs<string>());
         }
@@ -294,19 +300,41 @@ public class UpdateLearnerStepDefinitions
 
         if (parsedValues.Any())
         {
+            var breaksInLearning = new List<BreakInLearning>();
+            var plannedEndDate = TokenisableDateTime.FromString(parsedValues["PlannedEndDate"]).DateTime!.Value;
+
+            parsedValues.TryGetValue("breakInLearningStart", out var parsedBreakInLearningStart);
+            if (parsedBreakInLearningStart != null)
+            {
+                var priorPeriodExpectedEndDate = plannedEndDate;
+                parsedValues.TryGetValue("breakInLearningPriorPeriodExpectedEndDate", out var priorPeriodExpectedEndDateString);
+                if(priorPeriodExpectedEndDateString != null)
+                {
+                    priorPeriodExpectedEndDate = TokenisableDateTime.FromString(priorPeriodExpectedEndDateString).DateTime!.Value;
+                }
+
+                breaksInLearning.Add(new BreakInLearning
+                {
+                    StartDate = TokenisableDateTime.FromString(parsedBreakInLearningStart).DateTime!.Value,
+                    EndDate = TokenisableDateTime.FromString(parsedValues["breakInLearningEnd"]).DateTime!.Value,
+                    PriorPeriodExpectedEndDate = priorPeriodExpectedEndDate
+                });
+            }
+
             courses.Add(new MathsAndEnglish
             {
                 Course = parsedValues.GetValueOrDefault("course", "maths"),
                 LearnAimRef = parsedValues.GetValueOrDefault("learnAimRef", "maths"),
                 StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
-                PlannedEndDate = TokenisableDateTime.FromString(parsedValues["PlannedEndDate"]).DateTime!.Value,
+                PlannedEndDate = plannedEndDate,
                 Amount = decimal.Parse(parsedValues.GetValueOrDefault("Amount", "1000")),
                 WithdrawalDate = parsedValues.TryGetValue("WithdrawalDate", out var parsedWithdrawalDate)
                     ? TokenisableDateTime.FromString(parsedWithdrawalDate).DateTime!.Value
                     : null,
                 PauseDate = parsedValues.TryGetValue("PauseDate", out var parsedPauseDate)
                     ? TokenisableDateTime.FromString(parsedPauseDate).DateTime!.Value
-                    : null
+                    : null,
+                BreaksInLearning = breaksInLearning
             });
         }
 
@@ -379,6 +407,23 @@ public class UpdateLearnerStepDefinitions
         }
 
         return careDetails;
+    }
+
+    private List<MathsAndEnglishBreakInLearning> GetBreakInLearningsFromTableRow(TableRow row)
+    {
+        var breaks = new List<MathsAndEnglishBreakInLearning>();
+
+        if (row.ContainsKey("BreakInLearningStart"))
+        {
+            breaks.Add(new MathsAndEnglishBreakInLearning
+            {
+                StartDate = TokenisableDateTime.FromString(row["BreakInLearningStart"]).DateTime!.Value,
+                EndDate = TokenisableDateTime.FromString(row["BreakInLearningEnd"]).DateTime!.Value,
+                PriorPeriodExpectedEndDate = TokenisableDateTime.FromString(row["BreakInLearningPriorPeriodExpectedEndDate"]).DateTime!.Value,
+            });
+        }
+
+        return breaks;
     }
 
     private static class KeyValueParser

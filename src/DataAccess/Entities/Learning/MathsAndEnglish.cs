@@ -4,6 +4,11 @@
 [System.ComponentModel.DataAnnotations.Schema.Table("MathsAndEnglish")]
 public class MathsAndEnglish
 {
+    public MathsAndEnglish()
+    {
+        BreaksInLearning = new List<MathsAndEnglishBreakInLearning>();
+    }
+
     [Key]
     [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None)]
     public Guid Key { get; set; }
@@ -17,4 +22,5 @@ public class MathsAndEnglish
     public DateTime? PauseDate { get; set; }
     public int? PriorLearningPercentage { get; set; }
     public decimal Amount { get; set; }
+    public List<MathsAndEnglishBreakInLearning> BreaksInLearning { get; set; }
 }

@@ -55,6 +55,7 @@ public class WhenUpdatingLearner
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
         command.UpdateModel.LearningSupport.Clear();
+        command.UpdateModel.MathsAndEnglishCourses.Clear();
 
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 

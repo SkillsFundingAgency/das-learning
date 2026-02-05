@@ -35,7 +35,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     {
         var apprenticeship = await DbContext.ApprenticeshipsDbSet
             .Include(x => x.FreezeRequests)
-            .Include(x => x.MathsAndEnglishCourses)
+            .Include(x => x.MathsAndEnglishCourses).ThenInclude(y => y.BreaksInLearning)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)

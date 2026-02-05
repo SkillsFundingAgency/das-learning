@@ -68,6 +68,7 @@
     <Build Include="LearningSupport.sql" />
     <Build Include="EpisodeBreakInLearning.sql" />
     <Build Include="LearningHistory.sql" />
+    <Build Include="MathsAndEnglishBreakInLearning.sql" />
     <Build Include="ShortCourseLearning.sql" />
     <Build Include="ShortCourseEpisode.sql" />
     <Build Include="ShortCourseMilestone.sql" />
