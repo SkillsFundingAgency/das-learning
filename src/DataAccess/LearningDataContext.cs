@@ -110,21 +110,21 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<MathsAndEnglish>()
             .HasKey(x => x.Key);
 
-            modelBuilder.Entity<MathsAndEnglish>()
-                .HasOne<ApprenticeshipLearning>()
-                .WithMany(al => al.MathsAndEnglishCourses)
-                .HasForeignKey(e => e.LearningKey)
-                .HasPrincipalKey(al => al.Key);
+        modelBuilder.Entity<MathsAndEnglish>()
+            .HasOne<ApprenticeshipLearning>()
+            .WithMany(al => al.MathsAndEnglishCourses)
+            .HasForeignKey(e => e.LearningKey)
+            .HasPrincipalKey(al => al.Key);
 
         // LearningSupport
         modelBuilder.Entity<LearningSupport>()
             .HasKey(x => x.Key);
 
-            modelBuilder.Entity<LearningSupport>()
-                .HasOne<ApprenticeshipEpisode>()
-                .WithMany(e => e.LearningSupport)
-                .HasForeignKey(e => e.EpisodeKey)
-                .HasPrincipalKey(ae => ae.Key);
+        modelBuilder.Entity<LearningSupport>()
+            .HasOne<ApprenticeshipEpisode>()
+            .WithMany(e => e.LearningSupport)
+            .HasForeignKey(e => e.EpisodeKey)
+            .HasPrincipalKey(ae => ae.Key);
 
         // EpisodeBreakInLearning
         modelBuilder.Entity<EpisodeBreakInLearning>()
@@ -135,6 +135,14 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .WithMany(e => e.BreaksInLearning)
             .HasForeignKey(e => e.EpisodeKey)
             .HasPrincipalKey(ae => ae.Key)
+            .IsRequired();
+
+        // MathsAndEnglishBreakInLearning
+        modelBuilder.Entity<MathsAndEnglishBreakInLearning>()
+            .HasKey(x => x.Key);
+
+        modelBuilder.Entity<MathsAndEnglishBreakInLearning>()
+            .Property(x => x.MathsAndEnglishKey)
             .IsRequired();
 
         // LearningHistory

@@ -13,7 +13,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
     private readonly Learning.DataAccess.Entities.Learning.ApprenticeshipLearning _entity;
     private readonly List<ApprenticeshipEpisodeDomainModel> _episodes;
     private readonly List<FreezeRequestDomainModel> _freezeRequests;
-    private readonly List<MathsAndEnglishDomainModel> _mathsAndEnglishCourses;
 
     public Guid Key => _entity.Key;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
@@ -28,7 +27,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<FreezeRequestDomainModel> FreezeRequests => new ReadOnlyCollection<FreezeRequestDomainModel>(_freezeRequests);
-    public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_mathsAndEnglishCourses);
+    public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList());
     public DateTime StartDate
     {
         get
@@ -36,7 +35,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             var startDate = AllPrices.MinBy(x => x.StartDate)?.StartDate;
             if (startDate == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(StartDate)} could not be found in the {nameof(ApprenticeshipLearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(StartDate)} could not be found in the {nameof(LearningDomainModel)}.");
             }
 
             return startDate.Value;
@@ -44,7 +43,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
     }
 
     public DateTime? EndDate => AllPrices.MaxBy(x => x.StartDate)?.EndDate;
-    public IEnumerable<EpisodePriceDomainModel> AllPrices => 
+    public IEnumerable<EpisodePriceDomainModel> AllPrices =>
         _episodes.SelectMany(x => x.EpisodePrices);
     public EpisodePriceDomainModel LatestPrice
     {
@@ -53,7 +52,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             var latestPrice = AllPrices.MaxBy(x => x.StartDate);
             if (latestPrice == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(ApprenticeshipLearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(LearningDomainModel)}.");
             }
 
             return latestPrice;
@@ -66,7 +65,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             var latestEpisode = _episodes.MaxBy(x => x.EpisodePrices.Max(y => y.StartDate));
             if (latestEpisode == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestEpisode)} could not be found in the {nameof(ApprenticeshipLearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestEpisode)} could not be found in the {nameof(LearningDomainModel)}.");
             }
 
             return latestEpisode;
@@ -105,7 +104,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         _entity = entity;
         _episodes = entity.Episodes.Select(ApprenticeshipEpisodeDomainModel.Get).ToList();
         _freezeRequests = entity.FreezeRequests.Select(FreezeRequestDomainModel.Get).ToList();
-        _mathsAndEnglishCourses = entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList();
     }
 
     public void AddEpisode(
@@ -116,10 +114,10 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         decimal totalPrice,
         decimal? trainingPrice,
         decimal? endpointAssessmentPrice,
-        FundingType fundingType, 
+        FundingType fundingType,
         FundingPlatform? fundingPlatform,
-        long? fundingEmployerAccountId, 
-        string legalEntityName, 
+        long? fundingEmployerAccountId,
+        string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
         string? trainingCourseVersion)
@@ -133,8 +131,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             legalEntityName,
             accountLegalEntityId,
             trainingCode,
-            trainingCourseVersion); 
-        
+            trainingCourseVersion);
+
         episode.AddEpisodePrice(
             startDate,
             endDate,
@@ -160,7 +158,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             throw new InvalidOperationException($"Payments are already {(newPaymentsFrozenStatus ? "frozen" : "unfrozen")} for this apprenticeship: {Key}.");
         }
 
-        LatestEpisode.UpdatePaymentStatus(newPaymentsFrozenStatus); 
+        LatestEpisode.UpdatePaymentStatus(newPaymentsFrozenStatus);
 
         if (newPaymentsFrozenStatus)
         {
@@ -200,7 +198,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         UpdateBreaksInLearning(updateModel, changes);
 
         UpdateCareDetails(updateModel, changes);
-        
+
         if (changes.Any()) AddEvent(this.ToLearnerUpdatedEvent());
 
         return changes.ToArray();
@@ -257,12 +255,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.MathsAndEnglishCourses.Clear();
-        _mathsAndEnglishCourses.Clear();
     }
 
     private void UpdateLearningDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
-        if (updateModel.Learning.CompletionDate?.Date != _entity.CompletionDate?.Date) 
+        if (updateModel.Learning.CompletionDate?.Date != _entity.CompletionDate?.Date)
         {
             _entity.CompletionDate = updateModel.Learning.CompletionDate?.Date;
             changes.Add(LearningUpdateChanges.CompletionDate);
@@ -273,51 +270,29 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
     {
         bool hasChanges = false;
         bool hasWithdrawalChanges = false;
+        bool hasBreaksInLearningChanges = false;
 
-        var coursesToAdd = new List<MathsAndEnglish>();
+        var existingCourses = MathsAndEnglishCourses;
         var courseKeysToKeep = new List<Guid>();
 
         foreach (var incomingCourse in updateModel.MathsAndEnglishCourses)
         {
-            var existingCourse = _entity.MathsAndEnglishCourses.SingleOrDefault(x =>
-                x.Course.Trim() == incomingCourse.Course.Trim()
-                && x.LearnAimRef.Trim() == incomingCourse.LearnAimRef.Trim()
-                && x.StartDate == incomingCourse.StartDate
-                && x.PlannedEndDate == incomingCourse.PlannedEndDate
-                && x.CompletionDate == incomingCourse.CompletionDate
-                && x.PauseDate == incomingCourse.PauseDate
-                && x.PriorLearningPercentage == incomingCourse.PriorLearningPercentage
-                && x.Amount == incomingCourse.Amount);
+            var existingCourse = existingCourses.SingleOrDefault(x => x.LearnAimRef.Trim() == incomingCourse.LearnAimRef.Trim());
 
             if (existingCourse != null)
             {
                 courseKeysToKeep.Add(existingCourse.Key);
-
-                if (existingCourse.WithdrawalDate != incomingCourse.WithdrawalDate)
-                {
-                    existingCourse.WithdrawalDate = incomingCourse.WithdrawalDate;
-                    hasWithdrawalChanges = true;
-                }
+                hasChanges |= existingCourse.Update(incomingCourse);
+                hasWithdrawalChanges |= existingCourse.UpdateWithdrawalDate(incomingCourse);
+                hasBreaksInLearningChanges |= existingCourse.UpdateBreaksInLearningIfChanged(incomingCourse.BreaksInLearning);
             }
             else
             {
-                coursesToAdd.Add(new MathsAndEnglish
-                {
-                    Course = incomingCourse.Course,
-                    LearnAimRef = incomingCourse.LearnAimRef,
-                    StartDate = incomingCourse.StartDate,
-                    PlannedEndDate = incomingCourse.PlannedEndDate,
-                    CompletionDate = incomingCourse.CompletionDate,
-                    WithdrawalDate = incomingCourse.WithdrawalDate,
-                    PauseDate = incomingCourse.PauseDate,
-                    PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
-                    Amount = incomingCourse.Amount,
-                    Key = Guid.NewGuid(),
-                    LearningKey = _entity.Key
-                });
                 hasChanges = true;
-
-                if(incomingCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
+                var newCourse = new MathsAndEnglishDomainModel(incomingCourse, _entity.Key);
+                _entity.MathsAndEnglishCourses.Add(newCourse.GetEntity());
+                if (newCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
+                courseKeysToKeep.Add(newCourse.Key);
             }
         }
 
@@ -328,23 +303,23 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         foreach (var removed in coursesToRemove)
         {
             _entity.MathsAndEnglishCourses.Remove(removed);
-            _mathsAndEnglishCourses.RemoveAll(x => x.Key == removed.Key);
             hasChanges = true;
         }
-
-        _entity.MathsAndEnglishCourses.AddRange(coursesToAdd);
-        _mathsAndEnglishCourses.AddRange(coursesToAdd.Select(MathsAndEnglishDomainModel.Get));
 
         if (hasChanges)
             changes.Add(LearningUpdateChanges.MathsAndEnglish);
 
         if (hasWithdrawalChanges)
             changes.Add(LearningUpdateChanges.MathsAndEnglishWithdrawal);
+
+        if (hasBreaksInLearningChanges)
+            changes.Add(LearningUpdateChanges.EnglishAndMathsBreaksInLearningUpdated);
     }
+
     private void UpdateLearningSupport(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
         var learningSupportHasChanged = LatestEpisode.UpdateLearningSupportIfChanged(updateModel.LearningSupport);
-        if(learningSupportHasChanged)
+        if (learningSupportHasChanged)
         {
             changes.Add(LearningUpdateChanges.LearningSupport);
         }
