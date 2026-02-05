@@ -1,5 +1,4 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.Models.Shared;
@@ -10,49 +9,6 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
 public abstract class EpisodeDomainModel
 {
-}
-
-public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
-{
-    private readonly DataAccess.Entities.Learning.ShortCourseEpisode _entity;
-    private readonly List<ShortCourseMilestoneDomainModel> _milestones;
-
-    public Guid Key => _entity.Key;
-    public Guid LearningKey => _entity.LearningKey;
-    public long Ukprn => _entity.Ukprn;
-    public long EmployerAccountId => _entity.EmployerAccountId;
-    public string TrainingCode => _entity.TrainingCode;
-
-    public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
-        new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
-
-    internal static ShortCourseEpisodeDomainModel New(
-        Guid learningKey,
-        long ukprn,
-        long employerAccountId,
-        string trainingCode)
-    {
-        return new ShortCourseEpisodeDomainModel(new ShortCourseEpisode
-        {
-            Key = Guid.NewGuid(),
-            LearningKey = learningKey,
-            Ukprn = ukprn,
-            EmployerAccountId = employerAccountId,
-            TrainingCode = trainingCode
-        });
-    }
-
-    public static ShortCourseEpisodeDomainModel Get(ShortCourseEpisode entity)
-        => new(entity);
-
-    public ShortCourseEpisode GetEntity() => _entity;
-
-    private ShortCourseEpisodeDomainModel(ShortCourseEpisode entity)
-    {
-        _milestones = entity.Milestones
-            .Select(ShortCourseMilestoneDomainModel.Get)
-            .ToList();
-    }
 }
 
 public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel

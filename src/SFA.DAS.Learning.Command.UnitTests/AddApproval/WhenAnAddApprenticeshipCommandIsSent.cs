@@ -21,8 +21,8 @@ namespace SFA.DAS.Learning.Command.UnitTests.AddApproval;
 public class WhenAnAddApprenticeshipCommandIsSent
 {
     private AddLearningCommandHandler _commandHandler = null!;
-    private Mock<ILearningFactory> _apprenticeshipFactory = null!;
-    private Mock<ILearningRepository> _apprenticeshipRepository = null!;
+    private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory = null!;
+    private Mock<IApprenticeshipLearningRepository> _apprenticeshipRepository = null!;
     private Mock<IMessageSession> _messageSession = null!;
     private Mock<ILogger<AddLearningCommandHandler>> _logger = null!;
     private Fixture _fixture = null!;
@@ -30,8 +30,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
     [SetUp]
     public void SetUp()
     {
-        _apprenticeshipFactory = new Mock<ILearningFactory>();
-        _apprenticeshipRepository = new Mock<ILearningRepository>();
+        _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
+        _apprenticeshipRepository = new Mock<IApprenticeshipLearningRepository>();
         _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<AddLearningCommandHandler>>();
         _commandHandler = new AddLearningCommandHandler(

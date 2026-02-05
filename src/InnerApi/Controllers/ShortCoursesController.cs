@@ -7,7 +7,7 @@ using SFA.DAS.Learning.Queries;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
-[Route("")]
+[Route("shortCourses")]
 [ApiController]
 public class ShortCoursesController : ControllerBase
 {

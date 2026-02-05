@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.Learning.Domain.Factories
 {
-    public interface ILearningFactory
+    public interface IApprenticeshipLearningFactory
     {
         ApprenticeshipLearningDomainModel CreateNew(
             long approvalsApprenticeshipId,

@@ -12,13 +12,11 @@ public class ShortCourseMilestoneDomainModel
     public Milestone Milestone => _entity.Milestone;
 
     internal static ShortCourseMilestoneDomainModel New(
-        Guid episodeKey,
         Milestone milestone)
     {
         return new ShortCourseMilestoneDomainModel(new ShortCourseMilestone
         {
             Key = Guid.NewGuid(),
-            EpisodeKey = episodeKey,
             Milestone = milestone
         });
     }

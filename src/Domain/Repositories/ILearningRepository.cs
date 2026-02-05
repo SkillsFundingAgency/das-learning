@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
-public interface ILearningRepository
+public interface IApprenticeshipLearningRepository
 {
     Task Add(ApprenticeshipLearningDomainModel learning);
     Task<ApprenticeshipLearningDomainModel> Get(Guid key);

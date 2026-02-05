@@ -15,14 +15,14 @@ namespace SFA.DAS.Learning.Command.UnitTests.UpdateLearner;
 public class WhenUpdatingLearner
 {
     private UpdateLearnerCommandHandler _commandHandler;
-    private Mock<ILearningRepository> _learningRepository;
+    private Mock<IApprenticeshipLearningRepository> _learningRepository;
     private Mock<ILogger<UpdateLearnerCommandHandler>> _logger;
     private Fixture _fixture;
 
     [SetUp]
     public void SetUp()
     {
-        _learningRepository = new Mock<ILearningRepository>();
+        _learningRepository = new Mock<IApprenticeshipLearningRepository>();
         _logger = new Mock<ILogger<UpdateLearnerCommandHandler>>();
         _commandHandler = new UpdateLearnerCommandHandler(_logger.Object, _learningRepository.Object);
         _fixture = new Fixture();

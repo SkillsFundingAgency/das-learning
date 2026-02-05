@@ -12,14 +12,14 @@ namespace SFA.DAS.Learning.Command.AddLearning;
 
 public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 {
-    private readonly ILearningFactory _learningFactory;
-    private readonly ILearningRepository _learningRepository;
+    private readonly IApprenticeshipLearningFactory _learningFactory;
+    private readonly IApprenticeshipLearningRepository _learningRepository;
     private readonly IMessageSession _messageSession;
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
     public AddLearningCommandHandler(
-        ILearningFactory learningFactory,
-        ILearningRepository learningRepository,
+        IApprenticeshipLearningFactory learningFactory,
+        IApprenticeshipLearningRepository learningRepository,
         IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {

@@ -18,7 +18,7 @@ namespace SFA.DAS.Learning.Command.UnitTests.SetPaymentsFrozen;
 
 public class WhenHandleSetPaymentsFrozenCommand
 {
-    private Mock<ILearningRepository> _mockApprenticeshipRepository;
+    private Mock<IApprenticeshipLearningRepository> _mockApprenticeshipRepository;
     private Mock<IMessageSession> _messageSession;
     private Mock<ILogger<SetPaymentsFrozenCommandHandler>> _logger;
     private SetPaymentsFrozenCommandHandler _handler;
@@ -27,7 +27,7 @@ public class WhenHandleSetPaymentsFrozenCommand
     [SetUp]
     public void SetUp()
     {
-        _mockApprenticeshipRepository = new Mock<ILearningRepository>();
+        _mockApprenticeshipRepository = new Mock<IApprenticeshipLearningRepository>();
         _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<SetPaymentsFrozenCommandHandler>>();
         _handler = new SetPaymentsFrozenCommandHandler(

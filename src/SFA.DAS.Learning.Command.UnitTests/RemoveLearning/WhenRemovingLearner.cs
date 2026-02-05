@@ -22,7 +22,7 @@ namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
 public class WhenRemovingLearner
 {
     private RemoveLearnerCommandHandler _commandHandler;
-    private Mock<ILearningRepository> _learningRepository;
+    private Mock<IApprenticeshipLearningRepository> _learningRepository;
     private Mock<IMessageSession> _messageSession;
     private Mock<ILogger<RemoveLearnerCommandHandler>> _logger;
     private Fixture _fixture;
@@ -30,7 +30,7 @@ public class WhenRemovingLearner
     [SetUp]
     public void SetUp()
     {
-        _learningRepository = new Mock<ILearningRepository>();
+        _learningRepository = new Mock<IApprenticeshipLearningRepository>();
         _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<RemoveLearnerCommandHandler>>();
 

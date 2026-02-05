@@ -8,13 +8,13 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Factories
     [TestFixture]
     public class WhenAnExistingApprenticeshipIsCreated
     {
-        private LearningFactory _learningFactory;
+        private ApprenticeshipLearningFactory _learningFactory;
         private Fixture _fixture;
 
         [SetUp]
         public void SetUp()
         {
-            _learningFactory = new LearningFactory();
+            _learningFactory = new ApprenticeshipLearningFactory();
             _fixture = new Fixture();
         }
 

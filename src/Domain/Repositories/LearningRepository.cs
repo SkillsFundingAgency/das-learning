@@ -1,20 +1,18 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
-public class LearningRepository : ILearningRepository
+public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepository
 {
     private readonly Lazy<LearningDataContext> _lazyContext;
     private IDomainEventDispatcher _domainEventDispatcher;
-    private readonly ILearningFactory _learningFactory;
+    private readonly IApprenticeshipLearningFactory _learningFactory;
     private LearningDataContext DbContext => _lazyContext.Value;
 
-    public LearningRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, ILearningFactory learningFactory)
+    public ApprenticeshipLearningRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, IApprenticeshipLearningFactory learningFactory)
     {
         _lazyContext = dbContext;
         _domainEventDispatcher = domainEventDispatcher;

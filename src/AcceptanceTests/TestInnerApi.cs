@@ -86,10 +86,11 @@ public class TestInnerApi : IDisposable
         var response = await _httpClient.PatchAsync(route, content);
     }
 
-    public async Task Post<T>(string route, T body)
+    public async Task<T2> Post<T1, T2>(string route, T1 body)
     {
         var content = new StringContent(JsonConvert.SerializeObject(body), System.Text.Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(route, content);
+        return JsonConvert.DeserializeObject<T2>(await response.Content.ReadAsStringAsync())!;
     }
 
 

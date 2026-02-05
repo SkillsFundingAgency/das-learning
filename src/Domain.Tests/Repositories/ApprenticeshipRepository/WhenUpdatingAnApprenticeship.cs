@@ -18,11 +18,11 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
 {
     public class WhenUpdatingAnApprenticeship
     {
-        private LearningRepository _sut;
+        private ApprenticeshipLearningRepository _sut;
         private Fixture _fixture;
         private LearningDataContext _dbContext;
         private Mock<IDomainEventDispatcher> _domainEventDispatcher;
-        private Mock<ILearningFactory> _apprenticeshipFactory;
+        private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory;
 
         [SetUp]
         public void Arrange()
@@ -126,9 +126,9 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepositor
         private void SetUpApprenticeshipRepository()
         {
             _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
-            _apprenticeshipFactory = new Mock<ILearningFactory>();
+            _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
             _dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
-            _sut = new LearningRepository(new Lazy<LearningDataContext>(_dbContext),
+            _sut = new ApprenticeshipLearningRepository(new Lazy<LearningDataContext>(_dbContext),
                 _domainEventDispatcher.Object, _apprenticeshipFactory.Object);
         }
     }

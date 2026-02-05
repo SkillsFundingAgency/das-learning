@@ -7,12 +7,12 @@ namespace SFA.DAS.Learning.Command.SetPaymentsFrozen;
 
 public class SetPaymentsFrozenCommandHandler : ICommandHandler<SetPaymentsFrozenCommand>
 {
-    private readonly ILearningRepository _learningRepository;
+    private readonly IApprenticeshipLearningRepository _learningRepository;
     private readonly IMessageSession _messageSession;
     private readonly ILogger<SetPaymentsFrozenCommandHandler> _logger;
 
     public SetPaymentsFrozenCommandHandler(
-        ILearningRepository learningRepository,
+        IApprenticeshipLearningRepository learningRepository,
         IMessageSession messageSession,
         ILogger<SetPaymentsFrozenCommandHandler> logger)
     {

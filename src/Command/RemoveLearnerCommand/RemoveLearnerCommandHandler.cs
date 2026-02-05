@@ -9,12 +9,12 @@ namespace SFA.DAS.Learning.Command.RemoveLearnerCommand;
 
 public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand, RemoveLearnerResult>
 {
-    private readonly ILearningRepository _learningRepository;
+    private readonly IApprenticeshipLearningRepository _learningRepository;
     private readonly IMessageSession _messageSession;
     private readonly ILogger<RemoveLearnerCommandHandler> _logger;
 
     public RemoveLearnerCommandHandler(
-        ILearningRepository learningRepository,
+        IApprenticeshipLearningRepository learningRepository,
         IMessageSession messageSession,
         ILogger<RemoveLearnerCommandHandler> logger)
     {
