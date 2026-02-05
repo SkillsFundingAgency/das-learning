@@ -8,18 +8,15 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 {
     private readonly IShortCourseLearningRepository _learningRepository;
     private readonly IShortCourseLearningFactory _learningFactory;
-    private readonly IMessageSession _messageSession;
     private readonly ILogger<CreateDraftShortCourseCommandHandler> _logger;
 
     public CreateDraftShortCourseCommandHandler(
         IShortCourseLearningRepository learningRepository,
         IShortCourseLearningFactory learningFactory,
-        IMessageSession messageSession,
         ILogger<CreateDraftShortCourseCommandHandler> logger)
     {
         _learningRepository = learningRepository;
         _learningFactory = learningFactory;
-        _messageSession = messageSession;
         _logger = logger;
     }
 
@@ -43,6 +40,6 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         //todo we may want to send an event here in a future story but there isn't one on the tech design at present (event on tech design is LearningDataEvent which comes from outer)
 
-        return new CreateDraftShortCourseResult() { LearningKey = learning.Key }; //todo check the entity has a key on it by this point if not need to fix
+        return new CreateDraftShortCourseResult() { LearningKey = learning.Key };
     }
 }

@@ -1,14 +1,5 @@
-﻿using NUnit.Framework;
-using SFA.DAS.Learning.AcceptanceTests.Helpers;
-using SFA.DAS.Learning.Command.UpdateLearner;
-using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+﻿using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SFA.DAS.Learning.Enums;
 using Microsoft.Data.SqlClient;
 using Dapper.Contrib.Extensions;

@@ -3,13 +3,7 @@ using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
