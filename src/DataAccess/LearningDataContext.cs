@@ -44,18 +44,19 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasForeignKey(fk => fk.LearningKey);
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
                 .HasKey(a => new { a.Key });
-
-            modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
-                .HasMany(x => x.Episodes)
-                .WithOne()
-                .HasForeignKey(fk => fk.LearningKey);
-            modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
-            .HasKey(a => new { a.Key });
-
-        modelBuilder.Entity<Entities.Learning.Learning>()
+        modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
             .HasMany(x => x.MathsAndEnglishCourses)
             .WithOne()
             .HasForeignKey(fk => fk.LearningKey);
+
+        modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
+            .HasMany(x => x.Episodes)
+            .WithOne()
+            .HasForeignKey(fk => fk.LearningKey);
+        modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
+        .HasKey(a => new { a.Key });
+
+        
 
 
         // Episode
@@ -72,19 +73,19 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
                 v => (int?)v,
                 v => (FundingPlatform?)v);
 
-            modelBuilder.Entity<ApprenticeshipEpisode>()
-                .HasOne<ApprenticeshipLearning>()
-                .WithMany(a => a.Episodes)
-                .HasForeignKey(e => e.LearningKey)
-                .HasPrincipalKey(a => a.Key);
+        modelBuilder.Entity<ApprenticeshipEpisode>()
+            .HasOne<ApprenticeshipLearning>()
+            .WithMany(a => a.Episodes)
+            .HasForeignKey(e => e.LearningKey)
+            .HasPrincipalKey(a => a.Key);
 
-            modelBuilder.Entity<ShortCourseEpisode>()
-                .HasKey(a => new { a.Key });
+        modelBuilder.Entity<ShortCourseEpisode>()
+            .HasKey(a => new { a.Key });
 
-            modelBuilder.Entity<ShortCourseEpisode>()
-                .HasOne<ShortCourseLearning>()
-                .WithMany(l => l.Episodes)
-                .HasForeignKey(e => e.LearningKey);
+        modelBuilder.Entity<ShortCourseEpisode>()
+            .HasOne<ShortCourseLearning>()
+            .WithMany(l => l.Episodes)
+            .HasForeignKey(e => e.LearningKey);
 
         // EpisodePrice
         modelBuilder.Entity<EpisodePrice>()
@@ -133,8 +134,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasOne<ApprenticeshipEpisode>()
             .WithMany(e => e.BreaksInLearning)
             .HasForeignKey(e => e.EpisodeKey)
-            .HasPrincipalKey(ae => ae.Key);
-
+            .HasPrincipalKey(ae => ae.Key)
             .IsRequired();
 
         // LearningHistory
@@ -142,20 +142,20 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .ToTable("LearningHistory", "History")
             .HasKey(x => x.Key);
 
-            // ShortCourseMilestone
-            modelBuilder.Entity<ShortCourseMilestone>()
-                .HasKey(e => e.Key);
+        // ShortCourseMilestone
+        modelBuilder.Entity<ShortCourseMilestone>()
+            .HasKey(e => e.Key);
 
-            modelBuilder.Entity<ShortCourseMilestone>()
-                .Property(e => e.Milestone)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (Milestone)Enum.Parse(typeof(Milestone), v));
+        modelBuilder.Entity<ShortCourseMilestone>()
+            .Property(e => e.Milestone)
+            .HasConversion(
+                v => v.ToString(),
+                v => (Milestone)Enum.Parse(typeof(Milestone), v));
 
-            modelBuilder.Entity<ShortCourseMilestone>()
-                .HasOne<ShortCourseEpisode>()
-                .WithMany(e => e.Milestones)
-                .HasForeignKey(m => m.EpisodeKey);
+        modelBuilder.Entity<ShortCourseMilestone>()
+            .HasOne<ShortCourseEpisode>()
+            .WithMany(e => e.Milestones)
+            .HasForeignKey(m => m.EpisodeKey);
 
         base.OnModelCreating(modelBuilder);
     }
