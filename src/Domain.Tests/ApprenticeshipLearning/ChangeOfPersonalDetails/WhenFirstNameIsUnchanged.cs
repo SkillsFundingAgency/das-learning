@@ -5,15 +5,15 @@ using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPersonalDetails;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPersonalDetails;
 
 [TestFixture]
-public class WhenLastNameIsUnchanged
+public class WhenFirstNameIsUnchanged
 {
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
-    private string _lastName;
+    private string _firstName;
 
     [SetUp]
     public void SetUp()
@@ -22,7 +22,7 @@ public class WhenLastNameIsUnchanged
 
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
 
-        _lastName = updateModel.Learning.LastName;
+        _firstName = updateModel.Learning.FirstName;
 
         //Act
         _result = _learning.UpdateLearnerDetails(updateModel);
@@ -37,7 +37,7 @@ public class WhenLastNameIsUnchanged
     [Test]
     public void DomainModelIsUnchanged()
     {
-        _learning.LastName.Should().Be(_lastName);
+        _learning.FirstName.Should().Be(_firstName);
     }
 
     [Test]

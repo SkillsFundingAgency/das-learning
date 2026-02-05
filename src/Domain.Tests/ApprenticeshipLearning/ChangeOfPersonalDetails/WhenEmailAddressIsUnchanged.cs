@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.Domain.Events;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPersonalDetails;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPersonalDetails;
 
 [TestFixture]
 public class WhenEmailAddressIsUnchanged

@@ -1,14 +1,14 @@
-﻿using NUnit.Framework;
-using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.UnitTests.Helpers;
-using SFA.DAS.Learning.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using NUnit.Framework;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Models.Apprenticeships;
+using SFA.DAS.Learning.Domain.UnitTests.Helpers;
+using SFA.DAS.Learning.Enums;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPrice;
 
 [TestFixture]
 public class WhenAPriceIsUpdated

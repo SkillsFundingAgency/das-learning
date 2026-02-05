@@ -1,17 +1,17 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPrice;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPrice;
 
 [TestFixture]
-public class WhenAPriceIsUnchanged
+public class WhenANewPriceIsAdded
 {
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
@@ -36,21 +36,36 @@ public class WhenAPriceIsUnchanged
 
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
 
+        updateModel.OnProgrammeDetails.Costs.Add(new Cost
+        {
+            FromDate = new DateTime(2024, 12, 01),
+            TrainingPrice = 12000,
+            EpaoPrice = 1000
+        });
+
         //Act
         _result = _learning.UpdateLearnerDetails(updateModel);
     }
 
     [Test]
-    public void ThenPricesAreNotMarkedAsUpdated()
+    public void ThenPricesAreMarkedAsUpdated()
     {
-        //Assert
+        _result.Should().Contain(LearningUpdateChanges.Prices);
+
         var prices = _learning.LatestEpisode.EpisodePrices
             .OrderBy(x => x.StartDate)
             .ToList();
 
-        prices.Count.Should().Be(1);
-        prices.Single().Key.Should().NotBe(Guid.Empty);
-        _result.Should().BeEmpty();
+        prices.Count().Should().Be(2);
     }
 
+    [Test]
+    public void ThenPrecedingPriceEndDateIsSet()
+    {
+        var prices = _learning.LatestEpisode.EpisodePrices
+            .OrderBy(x => x.StartDate)
+            .ToList();
+
+        prices.First().EndDate.Should().Be(new DateTime(2024, 11, 30));
+    }
 }

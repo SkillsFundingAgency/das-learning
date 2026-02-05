@@ -1,4 +1,6 @@
-﻿using AutoFixture;
+﻿using System;
+using System.Linq;
+using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
@@ -6,10 +8,8 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
-using System;
-using System.Linq;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
 [TestFixture]
 public class WhenUpdatingMathsAndEnglishDetails

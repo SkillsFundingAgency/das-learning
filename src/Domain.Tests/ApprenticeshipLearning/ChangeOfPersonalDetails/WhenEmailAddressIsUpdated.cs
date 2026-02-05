@@ -6,15 +6,15 @@ using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPersonalDetails;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPersonalDetails;
 
 [TestFixture]
-public class WhenLastNameIsUpdated
+public class WhenEmailAddressIsUpdated
 {
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
-    private string _lastName;
+    private string _emailAddress;
 
     [SetUp]
     public void SetUp()
@@ -25,8 +25,8 @@ public class WhenLastNameIsUpdated
 
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
 
-        _lastName = fixture.Create<string>();
-        updateModel.Learning.LastName = _lastName;
+        _emailAddress = fixture.Create<string>();
+        updateModel.Learning.EmailAddress = _emailAddress;
 
         //Act
         _result = _learning.UpdateLearnerDetails(updateModel);
@@ -41,7 +41,7 @@ public class WhenLastNameIsUpdated
     [Test]
     public void DomainModelIsUpdated()
     {
-        _learning.LastName.Should().Be(_lastName);
+        _learning.EmailAddress.Should().Be(_emailAddress);
     }
 
     [Test]
@@ -54,8 +54,8 @@ public class WhenLastNameIsUpdated
             ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
             LearningKey = _learning.Key,
             FirstName = _learning.FirstName,
-            LastName = _lastName,
-            EmailAddress = _learning.EmailAddress ?? ""
+            LastName = _learning.LastName,
+            EmailAddress = _emailAddress
         };
 
         events.Should().ContainEquivalentOf(expectedEvent);

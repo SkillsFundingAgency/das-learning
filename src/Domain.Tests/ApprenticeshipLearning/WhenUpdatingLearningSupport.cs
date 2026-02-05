@@ -1,15 +1,15 @@
-﻿using AutoFixture;
+﻿using System;
+using System.Collections.Generic;
+using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
-using System;
-using System.Collections.Generic;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Domain.Models.Shared;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
 [TestFixture]
 public class WhenUpdatingLearningSupport

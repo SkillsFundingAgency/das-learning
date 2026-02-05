@@ -1,13 +1,13 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Linq;
+using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
-using System;
-using System.Linq;
-using SFA.DAS.Learning.Domain.Events;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfExpectedEndDate;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfExpectedEndDate;
 
 [TestFixture]
 public class WhenExpectedEndDateIsUnchanged

@@ -10,7 +10,7 @@ using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
 [TestFixture]
 public class WhenUpdatingBreaksInLearning

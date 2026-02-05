@@ -1,16 +1,16 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Linq;
+using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
-using System;
-using System.Linq;
-using SFA.DAS.Learning.Domain.Events;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfExpectedEndDate;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfExpectedEndDate;
 
 [TestFixture]
-public class WhenExpectedEndDateWithMultiplePricesIsUpdated
+public class WhenExpectedEndDateIsUpdated
 {
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
@@ -18,8 +18,9 @@ public class WhenExpectedEndDateWithMultiplePricesIsUpdated
     [SetUp]
     public void SetUp()
     {
+
         _learning = new LearningDomainModelBuilder()
-            .WithGeneratedCosts(3)
+            .WithGeneratedCosts(1)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
@@ -40,7 +41,7 @@ public class WhenExpectedEndDateWithMultiplePricesIsUpdated
             .OrderBy(x => x.StartDate)
             .ToList();
 
-        prices.Count().Should().Be(3);
+        prices.Count().Should().Be(1);
         prices.Last().EndDate.Should().Be(new DateTime(2026, 07, 31));
     }
 

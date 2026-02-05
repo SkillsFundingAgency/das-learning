@@ -1,20 +1,20 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
-using AutoFixture;
-using SFA.DAS.Learning.Domain.Events;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning.ChangeOfPersonalDetails;
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPersonalDetails;
 
 [TestFixture]
-public class WhenEmailAddressIsUpdated
+public class WhenLastNameIsUpdated
 {
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
-    private string _emailAddress;
+    private string _lastName;
 
     [SetUp]
     public void SetUp()
@@ -25,8 +25,8 @@ public class WhenEmailAddressIsUpdated
 
         var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
 
-        _emailAddress = fixture.Create<string>();
-        updateModel.Learning.EmailAddress = _emailAddress;
+        _lastName = fixture.Create<string>();
+        updateModel.Learning.LastName = _lastName;
 
         //Act
         _result = _learning.UpdateLearnerDetails(updateModel);
@@ -41,7 +41,7 @@ public class WhenEmailAddressIsUpdated
     [Test]
     public void DomainModelIsUpdated()
     {
-        _learning.EmailAddress.Should().Be(_emailAddress);
+        _learning.LastName.Should().Be(_lastName);
     }
 
     [Test]
@@ -54,8 +54,8 @@ public class WhenEmailAddressIsUpdated
             ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
             LearningKey = _learning.Key,
             FirstName = _learning.FirstName,
-            LastName = _learning.LastName,
-            EmailAddress = _emailAddress
+            LastName = _lastName,
+            EmailAddress = _learning.EmailAddress ?? ""
         };
 
         events.Should().ContainEquivalentOf(expectedEvent);

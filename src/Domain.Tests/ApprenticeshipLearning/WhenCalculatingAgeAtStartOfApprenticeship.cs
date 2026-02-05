@@ -6,7 +6,7 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Learning
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning
 {
     [TestFixture]
     public class WhenCalculatingAgeAtStartOfApprenticeship
