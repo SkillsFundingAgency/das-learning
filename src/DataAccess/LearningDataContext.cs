@@ -9,29 +9,29 @@ namespace SFA.DAS.Learning.DataAccess;
 [ExcludeFromCodeCoverage]
 public class LearningDataContext(DbContextOptions<LearningDataContext> options) : DbContext(options)
 {
-    public IQueryable<Entities.Learning.ApprenticeshipLearning> Apprenticeships => ApprenticeshipsDbSet;
-    public virtual DbSet<Entities.Learning.ApprenticeshipLearning> ApprenticeshipsDbSet { get; set; }
+    public IQueryable<Learner> Learners => LearnersDbSet;
+    public virtual DbSet<Learner> LearnersDbSet { get; set; }
+    public virtual DbSet<Entities.Learning.ApprenticeshipLearning> ApprenticeshipLearningDbSet { get; set; }
     public virtual DbSet<ApprenticeshipEpisode> Episodes { get; set; }
     public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
-    public virtual DbSet<FreezeRequest> FreezeRequests { get; set; }
     public virtual DbSet<MathsAndEnglish> MathsAndEnglish { get; set; }
     public virtual DbSet<LearningSupport> LearningSupport { get; set; }
     public virtual DbSet<EpisodeBreakInLearning> EpisodeBreakInLearnings { get; set; }
     public virtual DbSet<MathsAndEnglishBreakInLearning> MathsAndEnglishBreakInLearnings { get; set; }
 
     public virtual DbSet<LearningHistory> LearningHistories { get; set; }
-        public virtual DbSet<Entities.Learning.ShortCourseLearning> ShortCourseLearnings { get; set; }
-        public virtual DbSet<Entities.Learning.ShortCourseEpisode> ShortCourseEpisodes { get; set; }
-        public virtual DbSet<Entities.Learning.ShortCourseMilestone> ShortCourseMilestones { get; set; }
+    public virtual DbSet<Entities.Learning.ShortCourseLearning> ShortCourseLearnings { get; set; }
+    public virtual DbSet<Entities.Learning.ShortCourseEpisode> ShortCourseEpisodes { get; set; }
+    public virtual DbSet<Entities.Learning.ShortCourseMilestone> ShortCourseMilestones { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder
-                .LogTo(Console.WriteLine)
-                .EnableSensitiveDataLogging();
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder
+            .LogTo(Console.WriteLine)
+            .EnableSensitiveDataLogging();
 
-            base.OnConfiguring(optionsBuilder);
-        }
+        base.OnConfiguring(optionsBuilder);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,15 +96,6 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
                 .WithMany(e => e.Prices)
                 .HasForeignKey(e => e.EpisodeKey)
                 .HasPrincipalKey(ae => ae.Key);
-
-        // FreezeRequest
-        modelBuilder.Entity<FreezeRequest>()
-            .HasKey(x => x.Key);
-            modelBuilder.Entity<FreezeRequest>()
-                .HasOne<ApprenticeshipLearning>() 
-                .WithMany(al => al.FreezeRequests)
-                .HasForeignKey(e => e.LearningKey)
-                .HasPrincipalKey(al => al.Key);
 
         // MathsAndEnglish
         modelBuilder.Entity<MathsAndEnglish>()

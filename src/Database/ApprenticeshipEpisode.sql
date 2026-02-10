@@ -13,7 +13,7 @@
     [TrainingCode] NCHAR(10) NOT NULL,
     [TrainingCourseVersion] NVARCHAR(10) NULL,
     [PaymentsFrozen] BIT NOT NULL DEFAULT (0), 
-    [LastDayOfLearning] DATETIME NULL, 
+    [WithdrawalDate] DATETIME NULL, 
     [PauseDate] DATETIME NULL
 )
 GO
