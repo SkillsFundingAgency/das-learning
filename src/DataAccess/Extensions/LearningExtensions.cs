@@ -22,9 +22,9 @@ public static class LearningExtensions
     public static int GetAgeAtStartOfApprenticeship(this Entities.Learning.ApprenticeshipLearning learning)
     {
         var startDate = learning.Episodes.SelectMany(e => e.Prices).Min(p => p.StartDate);
-        var age = startDate.Year - learning.DateOfBirth.Year;
+        var age = startDate.Year - learning.Learner.DateOfBirth.Year;
 
-        if (startDate < learning.DateOfBirth.AddYears(age)) age--;
+        if (startDate < learning.Learner.DateOfBirth.AddYears(age)) age--;
 
         return age;
     }
@@ -39,9 +39,9 @@ public static class LearningExtensions
         return learning.Episodes.SelectMany(e => e.Prices).Max(p => p.EndDate);
     }
 
-    public static DateTime? GetLastDayOfLearning(this Entities.Learning.ApprenticeshipLearning learning)
+    public static DateTime? GetWithdrawalDate(this Entities.Learning.ApprenticeshipLearning learning)
     {
-        return GetLatestActiveEpisode(learning)?.LastDayOfLearning;
+        return GetLatestActiveEpisode(learning)?.WithdrawalDate;
     }
 
     private static ApprenticeshipEpisode? GetLatestActiveEpisode(Entities.Learning.ApprenticeshipLearning learning)

@@ -16,15 +16,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
 
     public Guid Key => _entity.Key;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
-    public string Uln => _entity.Uln;
-    public string FirstName => _entity.FirstName;
-    public string LastName => _entity.LastName;
-    public string? EmailAddress => _entity.EmailAddress;
-    public bool HasEHCP => _entity.HasEHCP;
-    public bool IsCareLeaver => _entity.IsCareLeaver;
-    public bool CareLeaverEmployerConsentGiven => _entity.CareLeaverEmployerConsentGiven;
-    public DateTime DateOfBirth => _entity.DateOfBirth;
     public DateTime? CompletionDate => _entity.CompletionDate;
+    public LearnerDomainModel Learner => LearnerDomainModel.Get(_entity.Learner);
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<FreezeRequestDomainModel> FreezeRequests => new ReadOnlyCollection<FreezeRequestDomainModel>(_freezeRequests);
     public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList());
@@ -72,25 +65,18 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         }
     }
 
-    public int AgeAtStartOfLearning => DateOfBirth.CalculateAgeAtDate(StartDate);
+    public int AgeAtStartOfLearning => Learner.DateOfBirth.CalculateAgeAtDate(StartDate);
 
     internal static ApprenticeshipLearningDomainModel New(
         long approvalsApprenticeshipId,
-        string uln,
-        DateTime dateOfBirth,
-        string firstName,
-        string lastName,
-        string apprenticeshipHashedId)
+        Learning.DataAccess.Entities.Learning.Learner learner)
     {
         return new ApprenticeshipLearningDomainModel(new Learning.DataAccess.Entities.Learning.ApprenticeshipLearning
         {
             Key = Guid.NewGuid(),
             ApprovalsApprenticeshipId = approvalsApprenticeshipId,
-            Uln = uln,
-            FirstName = firstName,
-            LastName = lastName,
-            DateOfBirth = dateOfBirth,
-            ApprenticeshipHashedId = apprenticeshipHashedId
+            LearnerKey = learner.Key,
+            Learner = learner
         });
     }
 
@@ -103,7 +89,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
     {
         _entity = entity;
         _episodes = entity.Episodes.Select(ApprenticeshipEpisodeDomainModel.Get).ToList();
-        _freezeRequests = entity.FreezeRequests.Select(FreezeRequestDomainModel.Get).ToList();
     }
 
     public void AddEpisode(
@@ -151,27 +136,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         return _entity;
     }
 
-    public void SetPaymentsFrozen(bool newPaymentsFrozenStatus, string userId, DateTime changeDateTime, string? reason = null)
-    {
-        if (LatestEpisode.PaymentsFrozen == newPaymentsFrozenStatus)
-        {
-            throw new InvalidOperationException($"Payments are already {(newPaymentsFrozenStatus ? "frozen" : "unfrozen")} for this apprenticeship: {Key}.");
-        }
-
-        LatestEpisode.UpdatePaymentStatus(newPaymentsFrozenStatus);
-
-        if (newPaymentsFrozenStatus)
-        {
-            var freezeRequest = FreezeRequestDomainModel.New(_entity.Key, userId, changeDateTime, reason);
-            _freezeRequests.Add(freezeRequest);
-            _entity.FreezeRequests.Add(freezeRequest.GetEntity());
-        }
-        else
-        {
-            var freezeRequest = _freezeRequests.Single(x => !x.Unfrozen);
-            freezeRequest.Unfreeze(userId, changeDateTime);
-        }
-    }
 
     public LearningUpdateChanges[] UpdateLearnerDetails(LearnerUpdateModel updateModel)
     {
@@ -206,44 +170,44 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
 
     private void UpdateLearnerDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
-        if (updateModel.Learning.FirstName != FirstName || updateModel.Learning.LastName != LastName ||
-            updateModel.Learning.EmailAddress != EmailAddress)
-        {
-            _entity.FirstName = updateModel.Learning.FirstName;
-            _entity.LastName = updateModel.Learning.LastName;
-            _entity.EmailAddress = updateModel.Learning.EmailAddress;
+        //if (updateModel.Learning.FirstName != FirstName || updateModel.Learning.LastName != LastName ||
+        //    updateModel.Learning.EmailAddress != EmailAddress)
+        //{
+        //    _entity.FirstName = updateModel.Learning.FirstName;
+        //    _entity.LastName = updateModel.Learning.LastName;
+        //    _entity.EmailAddress = updateModel.Learning.EmailAddress;
 
-            changes.Add(LearningUpdateChanges.PersonalDetails);
+        //    changes.Add(LearningUpdateChanges.PersonalDetails);
 
-            var @event = new PersonalDetailsChangedEvent
-            {
-                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
-                LearningKey = Key,
-                FirstName = FirstName,
-                LastName = LastName,
-                EmailAddress = EmailAddress
-            };
+        //    var @event = new PersonalDetailsChangedEvent
+        //    {
+        //        ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+        //        LearningKey = Key,
+        //        FirstName = FirstName,
+        //        LastName = LastName,
+        //        EmailAddress = EmailAddress
+        //    };
 
-            AddEvent(@event);
-        }
+        //    AddEvent(@event);
+        //}
     }
 
     private void UpdateLearnerDateOfBirth(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
-        if (updateModel.Learning.DateOfBirth != DateOfBirth)
-        {
-            _entity.DateOfBirth = updateModel.Learning.DateOfBirth;
+        //if (updateModel.Learning.DateOfBirth != DateOfBirth)
+        //{
+        //    _entity.DateOfBirth = updateModel.Learning.DateOfBirth;
 
-            changes.Add(LearningUpdateChanges.DateOfBirthChanged);
+        //    changes.Add(LearningUpdateChanges.DateOfBirthChanged);
 
-            var @event = new DateOfBirthChangedEvent
-            {
-                LearningKey = Key,
-                DateOfBirth = DateOfBirth
-            };
+        //    var @event = new DateOfBirthChangedEvent
+        //    {
+        //        LearningKey = Key,
+        //        DateOfBirth = DateOfBirth
+        //    };
 
-            AddEvent(@event);
-        }
+        //    AddEvent(@event);
+        //}
     }
 
 
@@ -424,14 +388,14 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
 
     private void UpdateCareDetails(LearnerUpdateModel updateModel, List<LearningUpdateChanges> changes)
     {
-        if (_entity.HasEHCP != updateModel.Learning.Care.HasEHCP ||
-            _entity.IsCareLeaver != updateModel.Learning.Care.IsCareLeaver ||
-            _entity.CareLeaverEmployerConsentGiven != updateModel.Learning.Care.CareLeaverEmployerConsentGiven)
-        {
-            _entity.HasEHCP = updateModel.Learning.Care.HasEHCP;
-            _entity.IsCareLeaver = updateModel.Learning.Care.IsCareLeaver;
-            _entity.CareLeaverEmployerConsentGiven = updateModel.Learning.Care.CareLeaverEmployerConsentGiven;
-            changes.Add(LearningUpdateChanges.Care);
-        }
+        //if (_entity.HasEHCP != updateModel.Learning.Care.HasEHCP ||
+        //    _entity.IsCareLeaver != updateModel.Learning.Care.IsCareLeaver ||
+        //    _entity.CareLeaverEmployerConsentGiven != updateModel.Learning.Care.CareLeaverEmployerConsentGiven)
+        //{
+        //    _entity.HasEHCP = updateModel.Learning.Care.HasEHCP;
+        //    _entity.IsCareLeaver = updateModel.Learning.Care.IsCareLeaver;
+        //    _entity.CareLeaverEmployerConsentGiven = updateModel.Learning.Care.CareLeaverEmployerConsentGiven;
+        //    changes.Add(LearningUpdateChanges.Care);
+        //}
     }
 }

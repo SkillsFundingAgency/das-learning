@@ -259,7 +259,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                                 new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
                         .ToList(),
                     apprenticeship.GetAgeAtStartOfApprenticeship(),
-                    apprenticeship.GetLastDayOfLearning(),
+                    apprenticeship.GetWithdrawalDate(),
                     apprenticeship.CompletionDate)
             ).ToList();
 

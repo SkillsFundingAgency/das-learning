@@ -37,13 +37,23 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     {
             modelBuilder.Ignore<Entities.Learning.Learning>();
 
+        // Learner
+        modelBuilder.Entity<Learner>()
+            .HasKey(x => x.Key);
+
         // Learning
+        modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
+            .HasOne(x => x.Learner)
+            .WithMany() 
+            .HasForeignKey(x => x.LearnerKey)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
             .HasMany(x => x.Episodes)
             .WithOne()
             .HasForeignKey(fk => fk.LearningKey);
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
-                .HasKey(a => new { a.Key });
+             .HasKey(a => new { a.Key });
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
             .HasMany(x => x.MathsAndEnglishCourses)
             .WithOne()
@@ -54,7 +64,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .WithOne()
             .HasForeignKey(fk => fk.LearningKey);
         modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
-        .HasKey(a => new { a.Key });
+            .HasKey(a => new { a.Key });
 
         
 
