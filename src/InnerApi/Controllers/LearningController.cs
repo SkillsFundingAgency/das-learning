@@ -5,11 +5,7 @@ using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
-using SFA.DAS.Learning.Queries.GetApprenticeshipStartDate;
-using SFA.DAS.Learning.Queries.GetCurrentPartyIds;
-using SFA.DAS.Learning.Queries.GetLearningKey;
 using SFA.DAS.Learning.Queries.GetLearningKeyByLearningId;
-using SFA.DAS.Learning.Queries.GetLearningPrice;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Command.UpdateLearner;
@@ -18,6 +14,9 @@ using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
+///<summary>
+/// Controller for handling learning for full apprenticeships
+///</summary>
 [Route("")]
 [ApiController]
 public class LearningController : ControllerBase
@@ -82,51 +81,6 @@ public class LearningController : ControllerBase
     }
 
     /// <summary>
-    /// Get Learning Price
-    /// </summary>
-    /// <param name="learningKey"></param>
-    /// <returns>Learning Price</returns>
-    [HttpGet("{learningKey}/price")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> GetLearningPrice(Guid learningKey)
-    {
-        var request = new GetLearningPriceRequest { ApprenticeshipKey = learningKey };
-        var response = await _queryDispatcher.Send<GetLearningPriceRequest, GetLearningPriceResponse?>(request);
-        if (response == null) return NotFound();
-        return Ok(response);
-    }
-
-    /// <summary>
-    /// Get Learning Start Date
-    /// </summary>
-    /// <param name="learningKey">Guid</param>
-    /// <returns>Learning Start Date or NotFound</returns>
-    [HttpGet("{learningKey}/startDate")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> GetStartDate(Guid learningKey)
-    {
-        var request = new GetLearningStartDateRequest { ApprenticeshipKey = learningKey };
-        var response = await _queryDispatcher.Send<GetLearningStartDateRequest, GetLearningStartDateResponse?>(request);
-        if (response == null || response.LearningStartDate == null) return NotFound();
-        return Ok(response.LearningStartDate);
-    }
-
-    /// <summary>
-    /// Get Learning Key
-    /// </summary>
-    /// <param name="apprenticeshipHashedId">This should be the hashed id for the apprenticeship not the commitment</param>
-    /// <returns>Learning Key</returns>
-    [HttpGet("{apprenticeshipHashedId}/key")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> GetLearningKey(string apprenticeshipHashedId)
-    {
-        var request = new GetLearningKeyRequest { ApprenticeshipHashedId = apprenticeshipHashedId };
-        var response = await _queryDispatcher.Send<GetLearningKeyRequest, GetLearningKeyResponse>(request);
-        if (response.LearningKey == null) return NotFound();
-        return Ok(response.LearningKey);
-    }
-
-    /// <summary>
     /// Get Learning Key
     /// </summary>
     /// <param name="learningId">This should be the id for the learning not the commitment</param>
@@ -167,22 +121,6 @@ public class LearningController : ControllerBase
             return Ok(response);
         else
             return Ok(response.Items);
-    }
-
-
-    /// <summary>
-    /// Get the provider and employer ids for the current state of the learning, this may differ from the original owner
-    /// </summary>
-    /// <param name="learningKey">Guid</param>
-    /// <returns>Provider and employer ids</returns>
-    [HttpGet("{learningKey}/currentPartyIds")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> GetCurrentPartyIds(Guid learningKey)
-    {
-        var request = new GetCurrentPartyIdsRequest { ApprenticeshipKey = learningKey };
-        var response = await _queryDispatcher.Send<GetCurrentPartyIdsRequest, GetCurrentPartyIdsResponse?>(request);
-        if (response == null) return NotFound();
-        return Ok(response);
     }
 
     /// <summary>

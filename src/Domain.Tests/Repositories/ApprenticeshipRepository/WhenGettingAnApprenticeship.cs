@@ -11,55 +11,54 @@ using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepository
+namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepository;
+
+public class WhenGettingAnApprenticeship
 {
-    public class WhenGettingAnApprenticeship
+    private ApprenticeshipLearningRepository _sut;
+    private Fixture _fixture;
+    private LearningDataContext _dbContext;
+    private Mock<IDomainEventDispatcher> _domainEventDispatcher;
+    private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory;
+
+    [SetUp]
+    public void Arrange()
     {
-        private ApprenticeshipLearningRepository _sut;
-        private Fixture _fixture;
-        private LearningDataContext _dbContext;
-        private Mock<IDomainEventDispatcher> _domainEventDispatcher;
-        private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory;
+        _fixture = new Fixture();
+        _fixture.Customize(new ApprenticeshipCustomization());
+    }
 
-        [SetUp]
-        public void Arrange()
-        {
-            _fixture = new Fixture();
-            _fixture.Customize(new ApprenticeshipCustomization());
-        }
+    [TearDown]
+    public void CleanUp()
+    {
+        _dbContext.Dispose();
+    }
 
-        [TearDown]
-        public void CleanUp()
-        {
-            _dbContext.Dispose();
-        }
+    [Test]
+    public async Task ThenApprenticeshipIsRetrieved()
+    {
+        // Arrange
+        SetUpApprenticeshipRepository();
+        var expectedApprenticeship = ApprenticeshipLearningDomainModel.Get(_fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>());
+        _apprenticeshipFactory
+            .Setup(x => x.GetExisting(It.IsAny<DataAccess.Entities.Learning.ApprenticeshipLearning>())).Returns(expectedApprenticeship);
 
-        [Test]
-        public async Task ThenApprenticeshipIsRetrieved()
-        {
-            // Arrange
-            SetUpApprenticeshipRepository();
-            var expectedApprenticeship = ApprenticeshipLearningDomainModel.Get(_fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>());
-            _apprenticeshipFactory
-                .Setup(x => x.GetExisting(It.IsAny<DataAccess.Entities.Learning.ApprenticeshipLearning>())).Returns(expectedApprenticeship);
+        // Act
+        await _sut.Add(expectedApprenticeship);
+        var actualApprenticeship = await _sut.Get(expectedApprenticeship.Key);
 
-            // Act
-            await _sut.Add(expectedApprenticeship);
-            var actualApprenticeship = await _sut.Get(expectedApprenticeship.Key);
+        // Assert
+        actualApprenticeship.Should().BeEquivalentTo(expectedApprenticeship);
+    }
 
-            // Assert
-            actualApprenticeship.Should().BeEquivalentTo(expectedApprenticeship);
-        }
-
-        private void SetUpApprenticeshipRepository()
-        {
-            _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
-            _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
-            
-            _dbContext =
-                InMemoryDbContextCreator.SetUpInMemoryDbContext();
-            _sut = new ApprenticeshipLearningRepository(new Lazy<LearningDataContext>(_dbContext),
-                _domainEventDispatcher.Object, _apprenticeshipFactory.Object);
-        }
+    private void SetUpApprenticeshipRepository()
+    {
+        _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
+        _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
+        
+        _dbContext =
+            InMemoryDbContextCreator.SetUpInMemoryDbContext();
+        _sut = new ApprenticeshipLearningRepository(new Lazy<LearningDataContext>(_dbContext),
+            _domainEventDispatcher.Object, _apprenticeshipFactory.Object);
     }
 }

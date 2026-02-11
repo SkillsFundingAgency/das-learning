@@ -4,11 +4,11 @@ namespace SFA.DAS.Learning.Command.UpdateLearner;
 
 public class UpdateLearnerCommand : ICommand
 {
-    public Guid LearnerKey { get; }
-    public LearnerUpdateModel UpdateModel { get; }
-    public UpdateLearnerCommand(Guid learnerKey, LearnerUpdateModel updateModel)
+    public Guid LearningKey { get; }
+    public LearningUpdateContext UpdateModel { get; }
+    public UpdateLearnerCommand(Guid learningKey, LearningUpdateContext updateModel)
     {
-        LearnerKey = learnerKey;
+        LearningKey = learningKey;
         UpdateModel = updateModel;
     }
 }

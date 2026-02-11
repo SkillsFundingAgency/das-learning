@@ -13,6 +13,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPrice
 [TestFixture]
 public class WhenANewPriceIsAdded
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
@@ -29,12 +30,12 @@ public class WhenANewPriceIsAdded
             }
         };
 
-        _learning = new LearningDomainModelBuilder()
+        (_learning, _learner) = new LearningDomainModelBuilder()
             .WithCosts(existingCosts)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         updateModel.OnProgrammeDetails.Costs.Add(new Cost
         {

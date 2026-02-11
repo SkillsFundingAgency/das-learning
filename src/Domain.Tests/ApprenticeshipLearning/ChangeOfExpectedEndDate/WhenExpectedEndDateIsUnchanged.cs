@@ -12,6 +12,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfExpec
 [TestFixture]
 public class WhenExpectedEndDateIsUnchanged
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
@@ -20,14 +21,14 @@ public class WhenExpectedEndDateIsUnchanged
     {
         //_learning = CreateLearner(1, new DateTime(2025, 07, 31), 15000);
 
-        _learning = new LearningDomainModelBuilder()
+        (_learning, _learner) = new LearningDomainModelBuilder()
             .WithGeneratedCosts(1)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
 
         //Act
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2025, 07, 31);
 
         _result = _learning.UpdateLearnerDetails(updateModel);

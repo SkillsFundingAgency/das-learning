@@ -10,20 +10,21 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPerso
 [TestFixture]
 public class WhenEmailAddressIsRemoved
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
     [SetUp]
     public void SetUp()
     {
-        _learning = new LearningDomainModelBuilder().Build();
+        (_learning, _learner) = new LearningDomainModelBuilder().Build();
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
-        updateModel.Learning.EmailAddress = null;
+        updateModel.Learner.EmailAddress = null;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learner.Update(updateModel);
     }
 
     [Test]
@@ -35,20 +36,20 @@ public class WhenEmailAddressIsRemoved
     [Test]
     public void DomainModelIsUpdated()
     {
-        _learning.EmailAddress.Should().BeNull();
+        _learner.EmailAddress.Should().BeNull();
     }
 
     [Test]
     public void ThenAPersonalDetailsEventIsEmitted()
     {
-        var events = _learning.FlushEvents();
+        var events = _learner.FlushEvents();
 
         var expectedEvent = new PersonalDetailsChangedEvent
         {
             ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
             LearningKey = _learning.Key,
-            FirstName = _learning.FirstName,
-            LastName = _learning.LastName,
+            FirstName = _learner.FirstName,
+            LastName = _learner.LastName,
             EmailAddress = null
         };
 

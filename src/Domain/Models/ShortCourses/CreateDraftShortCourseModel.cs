@@ -5,7 +5,7 @@ namespace SFA.DAS.Learning.Domain.Models.ShortCourses;
 
 public class CreateDraftShortCourseModel
 {
-    public Learner Learner { get; set; }
+    public LearnerModel Learner { get; set; }
     public List<LearningSupportDetails> LearningSupport { get; set; }
     public OnProgramme OnProgramme { get; set; }
 }

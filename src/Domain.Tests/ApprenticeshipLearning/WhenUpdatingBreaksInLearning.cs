@@ -28,9 +28,9 @@ public class WhenUpdatingBreaksInLearning
     {
         // Arrange
         var breaks = new List<EpisodeBreakInLearning>();
-        var learning = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Clear();
 
         // Act
@@ -46,9 +46,9 @@ public class WhenUpdatingBreaksInLearning
     {
         // Arrange
         var breaks = new List<EpisodeBreakInLearning>();
-        var learning = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(),learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Add(new BreakInLearningUpdateDetails
         {
             StartDate = DateTime.Now.Date,
@@ -82,9 +82,9 @@ public class WhenUpdatingBreaksInLearning
             }
         };
 
-        var learning = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Clear();
 
         // Act
@@ -110,9 +110,9 @@ public class WhenUpdatingBreaksInLearning
             }
         };
 
-        var learning = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Add(new BreakInLearningUpdateDetails
         {
             StartDate = DateTime.Now.Date,
@@ -142,9 +142,9 @@ public class WhenUpdatingBreaksInLearning
             }
         };
 
-        var learning = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.First().PriorPeriodExpectedEndDate = DateTime.Now.AddYears(1);
 
         // Act
@@ -154,7 +154,7 @@ public class WhenUpdatingBreaksInLearning
         result.Should().Contain(LearningUpdateChanges.BreaksInLearningUpdated);
     }
 
-    private ApprenticeshipLearningDomainModel CreateLearner(List<EpisodeBreakInLearning> breaks)
+    private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(List<EpisodeBreakInLearning> breaks)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
@@ -181,6 +181,9 @@ public class WhenUpdatingBreaksInLearning
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
 
-        return ApprenticeshipLearningDomainModel.Get(entity);
+        var learnerEntity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
+        learnerEntity.Key = entity.LearnerKey;
+
+        return (ApprenticeshipLearningDomainModel.Get(entity), LearnerDomainModel.Get(learnerEntity));
     }
 }

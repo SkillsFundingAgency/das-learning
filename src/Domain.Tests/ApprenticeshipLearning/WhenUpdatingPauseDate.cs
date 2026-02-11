@@ -25,16 +25,17 @@ public class WhenUpdatingPauseDate
     public void AndNoPauseDateProvided_ThenNoChangeMade()
     {
         //Arrange
-        var domainModel = GetLearningDomainModel(null);
-        var updateModel = GetLearnerUpdateModel(domainModel, null);
+        var learnerDomainModel = GetLearnerDomainModel();
+        var learningDomainModel = GetLearningDomainModel(null);
+        var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.BreakInLearningStarted ||
             x == LearningUpdateChanges.BreakInLearningRemoved);
-        domainModel.Episodes.First().PauseDate.Should().BeNull();
+        learningDomainModel.Episodes.First().PauseDate.Should().BeNull();
     }
 
     [Test]
@@ -42,16 +43,17 @@ public class WhenUpdatingPauseDate
     {
         //Arrange
         var pauseDate = _fixture.Create<DateTime>();
-        var domainModel = GetLearningDomainModel(pauseDate);
-        var updateModel = GetLearnerUpdateModel(domainModel, pauseDate);
+        var learnerDomainModel = GetLearnerDomainModel();
+        var learningDomainModel = GetLearningDomainModel(pauseDate);
+        var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, pauseDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.BreakInLearningStarted ||
             x == LearningUpdateChanges.BreakInLearningRemoved);
-        domainModel.Episodes.First().PauseDate.Should().Be(pauseDate);
+        learningDomainModel.Episodes.First().PauseDate.Should().Be(pauseDate);
     }
 
     [Test]
@@ -59,15 +61,16 @@ public class WhenUpdatingPauseDate
     {
         //Arrange
         var pauseDate = _fixture.Create<DateTime>();
-        var domainModel = GetLearningDomainModel(pauseDate);
-        var updateModel = GetLearnerUpdateModel(domainModel, null);
+        var learnerDomainModel = GetLearnerDomainModel();
+        var learningDomainModel = GetLearningDomainModel(pauseDate);
+        var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.BreakInLearningRemoved);
-        domainModel.Episodes.First().PauseDate.Should().BeNull();
+        learningDomainModel.Episodes.First().PauseDate.Should().BeNull();
     }
 
     [Test]
@@ -75,15 +78,22 @@ public class WhenUpdatingPauseDate
     {
         //Arrange
         var pauseDate = _fixture.Create<DateTime>();
-        var domainModel = GetLearningDomainModel(null);
-        var updateModel = GetLearnerUpdateModel(domainModel, pauseDate);
+        var learnerDomainModel = GetLearnerDomainModel();
+        var learningDomainModel = GetLearningDomainModel(null);
+        var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, pauseDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.BreakInLearningStarted);
-        domainModel.Episodes.First().PauseDate.Should().Be(pauseDate);
+        learningDomainModel.Episodes.First().PauseDate.Should().Be(pauseDate);
+    }
+
+    private LearnerDomainModel GetLearnerDomainModel()
+    {
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
+        return LearnerDomainModel.Get(entity);
     }
 
     private ApprenticeshipLearningDomainModel GetLearningDomainModel(DateTime? pauseDate)
@@ -97,9 +107,9 @@ public class WhenUpdatingPauseDate
         return ApprenticeshipLearningDomainModel.Get(entity);
     }
 
-    private LearnerUpdateModel GetLearnerUpdateModel(ApprenticeshipLearningDomainModel domainModel, DateTime? pauseDate)
+    private LearningUpdateContext GetLearnerUpdateModel(ApprenticeshipLearningDomainModel domainModel, LearnerDomainModel learnerDomainModel, DateTime? pauseDate)
     {
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(domainModel.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(domainModel.GetEntity(), learnerDomainModel.GetEntity());
         updateModel.OnProgrammeDetails.PauseDate = pauseDate;
         return updateModel;
     }

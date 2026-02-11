@@ -1,11 +1,12 @@
 ﻿using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Types;
 
 namespace SFA.DAS.Learning.Domain.Extensions;
 
 public static class IntegrationEventExtensions
 {
-    public static LearningEpisode BuildEpisodeForIntegrationEvent(this ApprenticeshipLearningDomainModel learning)
+    public static LearningEpisode BuildEpisodeForIntegrationEvent(this ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner)
     {
         var latestEpisode = learning.LatestEpisode;
         var activePrices = latestEpisode.ActiveEpisodePrices;
@@ -30,7 +31,7 @@ public static class IntegrationEventExtensions
             FundingEmployerAccountId = latestEpisode.FundingEmployerAccountId,
             LegalEntityName = latestEpisode.LegalEntityName,
             AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
-            AgeAtStartOfLearning = learning.AgeAtStartOfLearning,
+            AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
             TrainingCode = latestEpisode.TrainingCode,
             TrainingCourseVersion = latestEpisode.TrainingCourseVersion,
             PaymentsFrozen = latestEpisode.PaymentsFrozen,

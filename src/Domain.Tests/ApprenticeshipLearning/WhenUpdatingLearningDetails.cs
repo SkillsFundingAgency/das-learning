@@ -9,7 +9,7 @@ using SFA.DAS.Learning.Enums;
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
 [TestFixture]
-public class WhenUpdatingLearnerDetails
+public class WhenUpdatingLearningDetails
 {
     private Fixture _fixture;
 
@@ -21,28 +21,27 @@ public class WhenUpdatingLearnerDetails
 
     [TestCase(true)]
     [TestCase(false)]
-    public void ThenDateOfBirthIsUpdated(bool changed)
+    public void ThenCompletionDateIsUpdated(bool changed)
     {
-        // Arrange
+        //Arrange
         var learnerEntity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
         var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        learnerEntity.DateOfBirth = learnerEntity.DateOfBirth.Date; // normalize
+        learningEntity.CompletionDate = learningEntity.CompletionDate?.Date;
         learningEntity.LearnerKey = learnerEntity.Key;
 
         var learner = LearnerDomainModel.Get(learnerEntity);
+        var learning = ApprenticeshipLearningDomainModel.Get(learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
 
-        if (changed)
-            updateModel.Learner.DateOfBirth = _fixture.Create<DateTime>();
+        if (changed) updateModel.Learning.CompletionDate = _fixture.Create<DateTime>();
 
-        // Act
-        var result = learner.Update(updateModel);
+        //Act
+        var result = learning.UpdateLearnerDetails(updateModel);
 
-        // Assert
-        learnerEntity.DateOfBirth.Should().Be(updateModel.Learner.DateOfBirth);
-
-        if (changed)
-            result.Should().Contain(x => x == LearningUpdateChanges.DateOfBirthChanged);
+        //Assert
+        learning.CompletionDate.Should().Be(updateModel.Learning.CompletionDate?.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.CompletionDate);
     }
+
 }

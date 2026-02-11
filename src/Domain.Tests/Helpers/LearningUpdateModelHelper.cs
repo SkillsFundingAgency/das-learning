@@ -6,25 +6,33 @@ using SFA.DAS.Learning.Domain.Models.Shared;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Helpers;
 
-public static class LearnerUpdateModelHelper
+public static class LearningUpdateModelHelper
 {
-    public static LearnerUpdateModel CreateFromLearningEntity(DataAccess.Entities.Learning.ApprenticeshipLearning learning)
+    public static LearningUpdateContext CreateUpdateModel(
+        DataAccess.Entities.Learning.ApprenticeshipLearning learning,
+        DataAccess.Entities.Learning.Learner learner)
     {
-        return new LearnerUpdateModel
+        return new LearningUpdateContext
         {
+            LearningKey = learning.Key,
+            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
+            Learner = new LearnerModel
+            {
+                Uln = learner.Uln,
+                FirstName = learner.FirstName,
+                LastName = learner.LastName,
+                DateOfBirth = learner.DateOfBirth,
+                EmailAddress = learner.EmailAddress
+            },
+            Care = new CareDetails
+            {
+                HasEHCP = learner.HasEHCP,
+                IsCareLeaver = learner.IsCareLeaver,
+                CareLeaverEmployerConsentGiven = learner.CareLeaverEmployerConsentGiven
+            },
             Learning = new LearningUpdateDetails
             {
-                FirstName = learning.FirstName,
-                LastName = learning.LastName,
-                EmailAddress = learning.EmailAddress ?? "",
-                CompletionDate = learning.CompletionDate,
-                DateOfBirth = learning.DateOfBirth,
-                Care = new CareDetails
-                {
-                    HasEHCP = learning.HasEHCP,
-                    IsCareLeaver = learning.IsCareLeaver,
-                    CareLeaverEmployerConsentGiven = learning.CareLeaverEmployerConsentGiven
-                }
+                CompletionDate = learning.CompletionDate
             },
             MathsAndEnglishCourses = learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails
             {
@@ -68,7 +76,7 @@ public static class LearnerUpdateModelHelper
             },
             Delivery = new DeliveryDetails
             {
-                WithdrawalDate = learning.GetEpisode().LastDayOfLearning
+                WithdrawalDate = learning.GetEpisode().WithdrawalDate
             }
         };
     }

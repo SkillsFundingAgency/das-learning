@@ -33,8 +33,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
 
     public async Task<ApprenticeshipLearningDomainModel> Get(Guid key)
     {
-        var apprenticeship = await DbContext.ApprenticeshipsDbSet
-            .Include(x => x.FreezeRequests)
+        var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.MathsAndEnglishCourses).ThenInclude(y => y.BreaksInLearning)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
@@ -46,23 +45,23 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
 
     public async Task<ApprenticeshipLearningDomainModel?> Get(string uln, long approvalsApprenticeshipId)
     {
-        var apprenticeship = await DbContext.Apprenticeships
-            .Include(x => x.FreezeRequests)
+        var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
+            .Include(x => x.Learner)
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
-            .SingleOrDefaultAsync(x => x.Uln == uln && x.ApprovalsApprenticeshipId == approvalsApprenticeshipId);
+            .SingleOrDefaultAsync(x => x.Learner.Uln == uln && x.ApprovalsApprenticeshipId == approvalsApprenticeshipId);
         return apprenticeship == null ? null : _learningFactory.GetExisting(apprenticeship);
     }
     
     public async Task<ApprenticeshipLearningDomainModel?> GetByUln(string uln)
     {
-        var apprenticeship = await DbContext.Apprenticeships
-            .Include(x => x.FreezeRequests)
+        var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
+            .Include(x => x.Learner)
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
             .ThenInclude(y => y.Prices)
-            .SingleOrDefaultAsync(x => x.Uln == uln);
+            .SingleOrDefaultAsync(x => x.Learner.Uln == uln);
 
         if (apprenticeship == null)
         {

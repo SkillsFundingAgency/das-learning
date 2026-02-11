@@ -1,4 +1,6 @@
-﻿using SFA.DAS.Learning.Domain.Models.Apprenticeships;
+﻿using SFA.DAS.Learning.Domain.Events;
+using SFA.DAS.Learning.Domain.Models.Apprenticeships;
+using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -47,52 +49,73 @@ public class LearnerDomainModel : LearningDomainModel
         return _entity;
     }
 
-    /// <summary>
-    /// Returns true if personal details were updated
-    /// </summary>
-    public bool UpdatePersonalDetails(LearningUpdateDetails updateModel)
+    public LearningUpdateChanges[] Update(LearningUpdateContext updateContext)
     {
-        if (updateModel.FirstName != FirstName || 
-            updateModel.LastName != LastName ||
-            updateModel.EmailAddress != EmailAddress)
-        {
-            _entity.FirstName = updateModel.FirstName;
-            _entity.LastName = updateModel.LastName;
-            _entity.EmailAddress = updateModel.EmailAddress;
+        var changes = new List<LearningUpdateChanges>();
 
-            return true;
-        }
+        UpdatePersonalDetails(updateContext, changes);
 
-        return false;
+        UpdateLearnerDateOfBirth(updateContext, changes);
+
+        UpdateCareDetails(updateContext, changes);
+
+       // if (changes.Any()) AddEvent(this.ToLearnerUpdatedEvent(updateContext.Learner));
+
+        return changes.ToArray();
     }
 
-    /// <summary>
-    /// Returns true if date of birth was updated
-    /// </summary>
-    public bool UpdateLearnerDateOfBirth(LearnerUpdateModel updateModel)
+    private void UpdatePersonalDetails(LearningUpdateContext updateContext, List<LearningUpdateChanges> changes)
     {
-        if (updateModel.Learning.DateOfBirth != DateOfBirth)
+        if (updateContext.Learner.FirstName != FirstName || updateContext.Learner.LastName != LastName ||
+            updateContext.Learner.EmailAddress != EmailAddress)
         {
-            _entity.DateOfBirth = updateModel.Learning.DateOfBirth;
+            _entity.FirstName = updateContext.Learner.FirstName;
+            _entity.LastName = updateContext.Learner.LastName;
+            _entity.EmailAddress = updateContext.Learner.EmailAddress;
 
-            return true;
+            changes.Add(LearningUpdateChanges.PersonalDetails);
+
+            var @event = new PersonalDetailsChangedEvent
+            {
+                ApprovalsApprenticeshipId = updateContext.ApprovalsApprenticeshipId,
+                LearningKey = updateContext.LearningKey,
+                FirstName = FirstName,
+                LastName = LastName,
+                EmailAddress = EmailAddress
+            };
+
+            AddEvent(@event);
         }
-
-        return false;
     }
 
-    public bool UpdateCareDetails(LearnerUpdateModel updateModel)
+    private void UpdateLearnerDateOfBirth(LearningUpdateContext updateContext, List<LearningUpdateChanges> changes)
     {
-        if (_entity.HasEHCP != updateModel.Learning.Care.HasEHCP ||
-            _entity.IsCareLeaver != updateModel.Learning.Care.IsCareLeaver ||
-            _entity.CareLeaverEmployerConsentGiven != updateModel.Learning.Care.CareLeaverEmployerConsentGiven)
+        if (updateContext.Learner.DateOfBirth != DateOfBirth)
         {
-            _entity.HasEHCP = updateModel.Learning.Care.HasEHCP;
-            _entity.IsCareLeaver = updateModel.Learning.Care.IsCareLeaver;
-            _entity.CareLeaverEmployerConsentGiven = updateModel.Learning.Care.CareLeaverEmployerConsentGiven;
-            
-            return true;
+            _entity.DateOfBirth = updateContext.Learner.DateOfBirth;
+
+            changes.Add(LearningUpdateChanges.DateOfBirthChanged);
+
+            var @event = new DateOfBirthChangedEvent
+            {
+                LearningKey = Key,
+                DateOfBirth = DateOfBirth
+            };
+
+            AddEvent(@event);
         }
-        return false;
+    }
+
+    private void UpdateCareDetails(LearningUpdateContext updateContext, List<LearningUpdateChanges> changes)
+    {
+        if (_entity.HasEHCP != updateContext.Care.HasEHCP ||
+            _entity.IsCareLeaver != updateContext.Care.IsCareLeaver ||
+            _entity.CareLeaverEmployerConsentGiven != updateContext.Care.CareLeaverEmployerConsentGiven)
+        {
+            _entity.HasEHCP = updateContext.Care.HasEHCP;
+            _entity.IsCareLeaver = updateContext.Care.IsCareLeaver;
+            _entity.CareLeaverEmployerConsentGiven = updateContext.Care.CareLeaverEmployerConsentGiven;
+            changes.Add(LearningUpdateChanges.Care);
+        }
     }
 }

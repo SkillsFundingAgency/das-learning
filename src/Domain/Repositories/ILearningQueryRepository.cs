@@ -8,10 +8,6 @@ public interface ILearningQueryRepository
     Task<IEnumerable<DataTransferObjects.Learning>> GetAll(long ukprn, FundingPlatform? fundingPlatform);
     Task<PagedResult<DataTransferObjects.Learning>> GetByDates(long ukprn, DateRange dates, int limit, int offset, CancellationToken cancellationToken);
     Task<Guid?> GetKeyByLearningId(long learningId);
-    Task<ApprenticeshipPrice?> GetPrice(Guid learningKey);
-    Task<ApprenticeshipStartDate?> GetStartDate(Guid learningKey);
-    Task<Guid?> GetKey(string apprenticeshipHashedId);
-    Task<PaymentStatus?> GetPaymentStatus(Guid learningKey);
 
     /// <summary>
     /// Get learnings with episodes for a provider
@@ -22,5 +18,5 @@ public interface ILearningQueryRepository
     /// <param name="offset">pagination offset</param>
     /// <param name="cancellationToken">Cancellation Token</param>
     Task<PagedResult<LearningWithEpisodes>?> GetLearningsWithEpisodes(long ukprn, DateTime? activeOnDate = null, int? limit = null, int? offset = null, CancellationToken cancellationToken = default);
-    Task<CurrentPartyIds?> GetCurrentPartyIds(Guid apprenticeshipKey);
+
 }

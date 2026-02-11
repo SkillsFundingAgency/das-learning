@@ -30,7 +30,7 @@ public class WhenAnEpisodeIsAdded
         var episode = ApprenticeshipEpisodeDomainModel.Get(_fixture.Build<ApprenticeshipEpisode>()
             .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
             .With(x => x.PaymentsFrozen, false)
-            .With(x => x.LastDayOfLearning, (DateTime?)null)
+            .With(x => x.WithdrawalDate, (DateTime?)null)
             .With(x => x.PauseDate, (DateTime?)null)
             .Create());
 

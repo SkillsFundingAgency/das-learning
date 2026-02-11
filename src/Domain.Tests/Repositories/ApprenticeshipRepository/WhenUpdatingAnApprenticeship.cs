@@ -14,122 +14,122 @@ using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepository
+namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipRepository;
+
+public class WhenUpdatingAnApprenticeship
 {
-    public class WhenUpdatingAnApprenticeship
+    private ApprenticeshipLearningRepository _sut;
+    private Fixture _fixture;
+    private LearningDataContext _dbContext;
+    private Mock<IDomainEventDispatcher> _domainEventDispatcher;
+    private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory;
+
+    [SetUp]
+    public void Arrange()
     {
-        private ApprenticeshipLearningRepository _sut;
-        private Fixture _fixture;
-        private LearningDataContext _dbContext;
-        private Mock<IDomainEventDispatcher> _domainEventDispatcher;
-        private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory;
+        _fixture = new Fixture();
+        _fixture.Customize(new ApprenticeshipCustomization());
+    }
 
-        [SetUp]
-        public void Arrange()
-        {
-            _fixture = new Fixture();
-            _fixture.Customize(new ApprenticeshipCustomization());
-        }
+    [TearDown]
+    public void CleanUp()
+    {
+        _dbContext.Dispose();
+    }
 
-        [TearDown]
-        public void CleanUp()
-        {
-            _dbContext.Dispose();
-        }
+    [Test]
+    public async Task ThenApprenticeshipUpdatedInDataStore()
+    {
+        // Arrange
+        SetUpApprenticeshipRepository();
+        var apprenticeshipKey = _fixture.Create<Guid>();
+        await _dbContext.AddApprenticeship(apprenticeshipKey);
+        var apprenticeship = await _dbContext.ApprenticeshipLearningDbSet
+            .Include(x => x.Episodes)
+            .Include(x =>x.Learner)
+            .SingleAsync(x => x.Key == apprenticeshipKey);
+        var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
+        var newCompletionDate = _fixture.Create<DateTime>();
+        domainModel.GetEntity().CompletionDate = newCompletionDate;
 
-        [Test]
-        public async Task ThenApprenticeshipUpdatedInDataStore()
-        {
-            // Arrange
-            SetUpApprenticeshipRepository();
-            var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey);
-            var apprenticeship = await _dbContext.Apprenticeships
-                .Include(x => x.Episodes)
-                .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
-            var newDateOfBirth = _fixture.Create<DateTime>();
-            domainModel.GetEntity().DateOfBirth = newDateOfBirth;
+        // Act
+        await _sut.Update(domainModel);
+        
+        // Assert
+        _dbContext.ApprenticeshipLearningDbSet.Count().Should().Be(1);
+        _dbContext.ApprenticeshipLearningDbSet.Single().CompletionDate.Should().Be(newCompletionDate);
+    }
 
-            // Act
-            await _sut.Update(domainModel);
-            
-            // Assert
-            _dbContext.ApprenticeshipsDbSet.Count().Should().Be(1);
-            _dbContext.Apprenticeships.Single().DateOfBirth.Should().Be(newDateOfBirth);
-        }
+    [Test]
+    public async Task ThenEpisodeUpdatedInDataStore()
+    {
+        // Arrange
+        SetUpApprenticeshipRepository();
+        var apprenticeshipKey = _fixture.Create<Guid>();
+        await _dbContext.AddApprenticeship(apprenticeshipKey);
+        var apprenticeship = await _dbContext.Apprenticeships
+            .Include(x => x.Episodes)
+            .SingleAsync(x => x.Key == apprenticeshipKey);
+        var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
+        domainModel.LatestEpisode.GetEntity().LegalEntityName = "alternative_name";
 
-        [Test]
-        public async Task ThenEpisodeUpdatedInDataStore()
-        {
-            // Arrange
-            SetUpApprenticeshipRepository();
-            var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey);
-            var apprenticeship = await _dbContext.Apprenticeships
-                .Include(x => x.Episodes)
-                .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
-            domainModel.LatestEpisode.GetEntity().LegalEntityName = "alternative_name";
+        // Act
+        await _sut.Update(domainModel);
+        
+        // Assert
+        _dbContext.Apprenticeships.Count().Should().Be(1);
+        _dbContext.Episodes.Single().LegalEntityName.Should().Be("alternative_name");
+    }
 
-            // Act
-            await _sut.Update(domainModel);
-            
-            // Assert
-            _dbContext.Apprenticeships.Count().Should().Be(1);
-            _dbContext.Episodes.Single().LegalEntityName.Should().Be("alternative_name");
-        }
+    [Test]
+    public async Task ThenEpisodePriceUpdatedInDataStore()
+    {
+        // Arrange
+        SetUpApprenticeshipRepository();
+        var apprenticeshipKey = _fixture.Create<Guid>();
+        await _dbContext.AddApprenticeship(apprenticeshipKey);
+        var apprenticeship = await _dbContext.Apprenticeships
+            .Include(x => x.Episodes)
+            .ThenInclude(y => y.Prices)
+            .SingleAsync(x => x.Key == apprenticeshipKey);
+        var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
 
-        [Test]
-        public async Task ThenEpisodePriceUpdatedInDataStore()
-        {
-            // Arrange
-            SetUpApprenticeshipRepository();
-            var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey);
-            var apprenticeship = await _dbContext.Apprenticeships
-                .Include(x => x.Episodes)
-                .ThenInclude(y => y.Prices)
-                .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
+        // Act
+        await _sut.Update(domainModel);
+        
+        // Assert
+        _dbContext.Apprenticeships.Count().Should().Be(1);
+    }
 
-            // Act
-            await _sut.Update(domainModel);
-            
-            // Assert
-            _dbContext.Apprenticeships.Count().Should().Be(1);
-        }
+    [Test]
+    public async Task ThenEpisodeBreakInLearningUpdatedInDataStore()
+    {
+        // Arrange
+        SetUpApprenticeshipRepository();
+        var apprenticeshipKey = _fixture.Create<Guid>();
+        await _dbContext.AddApprenticeship(apprenticeshipKey);
+        var apprenticeship = await _dbContext.Apprenticeships
+            .Include(x => x.Episodes)
+            .ThenInclude(y => y.BreaksInLearning)
+            .SingleAsync(x => x.Key == apprenticeshipKey);
+        var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
+        var expectedBreakStart = _fixture.Create<DateTime>();
+        domainModel.LatestEpisode.EpisodeBreaksInLearning.Single().GetEntity().StartDate = expectedBreakStart;
 
-        [Test]
-        public async Task ThenEpisodeBreakInLearningUpdatedInDataStore()
-        {
-            // Arrange
-            SetUpApprenticeshipRepository();
-            var apprenticeshipKey = _fixture.Create<Guid>();
-            await _dbContext.AddApprenticeship(apprenticeshipKey);
-            var apprenticeship = await _dbContext.Apprenticeships
-                .Include(x => x.Episodes)
-                .ThenInclude(y => y.BreaksInLearning)
-                .SingleAsync(x => x.Key == apprenticeshipKey);
-            var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
-            var expectedBreakStart = _fixture.Create<DateTime>();
-            domainModel.LatestEpisode.EpisodeBreaksInLearning.Single().GetEntity().StartDate = expectedBreakStart;
+        // Act
+        await _sut.Update(domainModel);
 
-            // Act
-            await _sut.Update(domainModel);
+        // Assert
+        _dbContext.Apprenticeships.Count().Should().Be(1);
+        _dbContext.Episodes.Single().BreaksInLearning.Single().StartDate.Should().Be(expectedBreakStart);
+    }
 
-            // Assert
-            _dbContext.Apprenticeships.Count().Should().Be(1);
-            _dbContext.Episodes.Single().BreaksInLearning.Single().StartDate.Should().Be(expectedBreakStart);
-        }
-
-        private void SetUpApprenticeshipRepository()
-        {
-            _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
-            _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
-            _dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
-            _sut = new ApprenticeshipLearningRepository(new Lazy<LearningDataContext>(_dbContext),
-                _domainEventDispatcher.Object, _apprenticeshipFactory.Object);
-        }
+    private void SetUpApprenticeshipRepository()
+    {
+        _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
+        _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
+        _dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
+        _sut = new ApprenticeshipLearningRepository(new Lazy<LearningDataContext>(_dbContext),
+            _domainEventDispatcher.Object, _apprenticeshipFactory.Object);
     }
 }

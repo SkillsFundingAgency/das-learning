@@ -90,7 +90,7 @@ public static class CreateDraftShortCourseRequestExtensions
     {
         return new CreateDraftShortCourseModel
         {
-            Learner = new Learner
+            Learner = new LearnerModel
             {
                 FirstName = request.LearnerUpdateDetails.FirstName,
                 LastName = request.LearnerUpdateDetails.LastName,

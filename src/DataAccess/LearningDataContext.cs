@@ -9,7 +9,7 @@ namespace SFA.DAS.Learning.DataAccess;
 [ExcludeFromCodeCoverage]
 public class LearningDataContext(DbContextOptions<LearningDataContext> options) : DbContext(options)
 {
-    public IQueryable<Learner> Learners => LearnersDbSet;
+    public IQueryable<ApprenticeshipLearning> Apprenticeships => ApprenticeshipLearningDbSet;
     public virtual DbSet<Learner> LearnersDbSet { get; set; }
     public virtual DbSet<Entities.Learning.ApprenticeshipLearning> ApprenticeshipLearningDbSet { get; set; }
     public virtual DbSet<ApprenticeshipEpisode> Episodes { get; set; }

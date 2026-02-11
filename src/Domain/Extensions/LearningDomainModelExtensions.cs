@@ -1,21 +1,23 @@
 ﻿using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
+using SFA.DAS.Learning.Domain.Models.Apprenticeships;
+using SFA.DAS.Learning.Domain.Models.Shared;
 
 namespace SFA.DAS.Learning.Domain.Extensions;
 
 public static class LearningDomainModelExtensions
 {
-    public static LearnerUpdatedEvent ToLearnerUpdatedEvent(this ApprenticeshipLearningDomainModel learner)
+    public static LearnerUpdatedEvent ToLearnerUpdatedEvent(this ApprenticeshipLearningDomainModel learner, LearnerModel learnerModel)
     {
         return new LearnerUpdatedEvent
         {
             Key = learner.Key,
             ApprovalsApprenticeshipId = learner.ApprovalsApprenticeshipId,
-            Uln = learner.Uln,
-            FirstName = learner.FirstName,
-            LastName = learner.LastName,
-            EmailAddress = learner.EmailAddress,
-            DateOfBirth = learner.DateOfBirth,
+            Uln = learnerModel.Uln,
+            FirstName = learnerModel.FirstName,
+            LastName = learnerModel.LastName,
+            EmailAddress = learnerModel.EmailAddress,
+            DateOfBirth = learnerModel.DateOfBirth,
             CompletionDate = learner.CompletionDate,
 
             Episodes = learner.Episodes.Select(e => new Episode
@@ -31,7 +33,7 @@ public static class LearningDomainModelExtensions
                 TrainingCode = e.TrainingCode,
                 TrainingCourseVersion = e.TrainingCourseVersion,
                 PaymentsFrozen = e.PaymentsFrozen,
-                LastDayOfLearning = e.LastDayOfLearning,
+                WithdrawalDate = e.WithdrawalDate,
                 PauseDate = e.PauseDate,
 
                 LearningSupport = e.LearningSupport.Select(ls => new LearningSupport
@@ -59,17 +61,6 @@ public static class LearningDomainModelExtensions
                     TrainingPrice = p.TrainingPrice,
                     EndPointAssessmentPrice = p.EndPointAssessmentPrice
                 }).ToList()
-            }).ToList(),
-
-            FreezeRequests = learner.FreezeRequests.Select(f => new FreezeRequest
-            {
-                Key = f.Key,
-                FrozenBy = f.FrozenBy,
-                FrozenDateTime = f.FrozenDateTime,
-                Unfrozen = f.Unfrozen,
-                UnfrozenDateTime = f.UnfrozenDateTime,
-                UnfrozenBy = f.UnfrozenBy,
-                Reason = f.Reason
             }).ToList(),
 
             MathsAndEnglishCourses = learner.MathsAndEnglishCourses.Select(m => new MathsAndEnglish

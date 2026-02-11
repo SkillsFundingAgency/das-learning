@@ -18,7 +18,6 @@ namespace SFA.DAS.Learning.Command.UnitTests.CreateDraftShortCourse
         private CreateDraftShortCourseCommandHandler _commandHandler = null!;
         private Mock<IShortCourseLearningFactory> _learningFactory = null!;
         private Mock<IShortCourseLearningRepository> _learningRepository = null!;
-        private Mock<IMessageSession> _messageSession = null!;
         private Mock<ILogger<CreateDraftShortCourseCommandHandler>> _logger = null!;
         private Fixture _fixture = null!;
 
@@ -27,13 +26,11 @@ namespace SFA.DAS.Learning.Command.UnitTests.CreateDraftShortCourse
         {
             _learningFactory = new Mock<IShortCourseLearningFactory>();
             _learningRepository = new Mock<IShortCourseLearningRepository>();
-            _messageSession = new Mock<IMessageSession>();
             _logger = new Mock<ILogger<CreateDraftShortCourseCommandHandler>>();
 
             _commandHandler = new CreateDraftShortCourseCommandHandler(
                 _learningRepository.Object,
                 _learningFactory.Object,
-                _messageSession.Object,
                 _logger.Object);
 
             _fixture = new Fixture();

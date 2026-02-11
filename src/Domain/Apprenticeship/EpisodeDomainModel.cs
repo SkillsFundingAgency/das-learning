@@ -27,13 +27,13 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public string TrainingCode => _entity.TrainingCode;
     public string TrainingCourseVersion => _entity.TrainingCourseVersion;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
-    public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
+    public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime? PauseDate => _entity.PauseDate;
     public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
-    public bool IsWithdrawnBackToStart => _entity.LastDayOfLearning == FirstPrice.StartDate;
+    public bool IsWithdrawnBackToStart => _entity.WithdrawalDate == FirstPrice.StartDate;
     public EpisodePriceDomainModel LatestPrice
     {
         get
@@ -300,14 +300,14 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         return new ApprenticeshipEpisodeDomainModel(entity);
     }
 
-    internal void Withdraw(DateTime lastDateOfLearning)
+    internal void Withdraw(DateTime withdrawalDate)
     {
-        _entity.LastDayOfLearning = lastDateOfLearning;
+        _entity.WithdrawalDate = withdrawalDate;
     }
 
     internal void ReverseWithdrawal()
     {
-        _entity.LastDayOfLearning = null;
+        _entity.WithdrawalDate = null;
     }
 
     internal void SetPauseDate(DateTime? pauseDate)

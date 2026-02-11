@@ -4,21 +4,9 @@ namespace SFA.DAS.Learning.Domain.Factories
 {
     public class ApprenticeshipLearningFactory : IApprenticeshipLearningFactory
     {
-        public ApprenticeshipLearningDomainModel CreateNew(
-            long approvalsApprenticeshipId,
-            string uln, 
-            DateTime dateOfBirth,
-            string firstName, 
-            string lastName, 
-            string apprenticeshipHashedId)
+        public ApprenticeshipLearningDomainModel CreateNew(long approvalsApprenticeshipId, Guid learnerKey)
         {
-            return ApprenticeshipLearningDomainModel.New(
-                approvalsApprenticeshipId,
-                uln,
-                dateOfBirth,
-                firstName,
-                lastName,
-                apprenticeshipHashedId);
+            return ApprenticeshipLearningDomainModel.New(approvalsApprenticeshipId, learnerKey);
         }
 
         public ApprenticeshipLearningDomainModel GetExisting(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)

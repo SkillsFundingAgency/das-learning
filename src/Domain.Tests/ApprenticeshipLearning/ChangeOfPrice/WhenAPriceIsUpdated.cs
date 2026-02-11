@@ -13,6 +13,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPrice
 [TestFixture]
 public class WhenAPriceIsUpdated
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
@@ -29,7 +30,7 @@ public class WhenAPriceIsUpdated
             }
         };
 
-        _learning = new LearningDomainModelBuilder()
+        (_learning, _learner) = new LearningDomainModelBuilder()
             .WithCosts(existingCosts)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
@@ -39,7 +40,7 @@ public class WhenAPriceIsUpdated
     public void AndStartDateIsChangedThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 06, 01);
 
         //Act
@@ -60,7 +61,7 @@ public class WhenAPriceIsUpdated
     public void AndTrainingPriceIsChangedThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
 
         //Act
@@ -81,7 +82,7 @@ public class WhenAPriceIsUpdated
     public void AndEpaoPriceIsChangedThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().EpaoPrice += 200;
 
         //Act
@@ -102,7 +103,7 @@ public class WhenAPriceIsUpdated
     public void AndEpaoPriceIsChangedToUnknownThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().EpaoPrice = null;
 
         //Act

@@ -5,67 +5,70 @@ using System.Collections.Generic;
 using System.Linq;
 using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.Helpers
+namespace SFA.DAS.Learning.Domain.UnitTests.Helpers;
+
+public class LearningDomainModelBuilder
 {
-    public class LearningDomainModelBuilder
+    private readonly IFixture _fixture = new Fixture();
+    private List<Cost> _costs;
+    private int _numberOfCosts = 1;
+    private DateTime _plannedEndDate;
+
+    public LearningDomainModelBuilder WithCosts(List<Cost> costs)
     {
-        private readonly IFixture _fixture = new Fixture();
-        private List<Cost> _costs;
-        private int _numberOfCosts = 1;
-        private DateTime _plannedEndDate;
+        _costs = costs;
+        return this;
+    }
 
-        public LearningDomainModelBuilder WithCosts(List<Cost> costs)
+    public LearningDomainModelBuilder WithGeneratedCosts(int count)
+    {
+        _numberOfCosts = count;
+        return this;
+    }
+
+    public LearningDomainModelBuilder WithPlannedEndDate(DateTime date)
+    {
+        _plannedEndDate = date;
+        return this;
+    }
+
+    public (ApprenticeshipLearningDomainModel, LearnerDomainModel) Build()
+    {
+        var costs = _costs ?? _fixture.CreateMany<Cost>(_numberOfCosts).ToList();
+        var orderedCosts = costs.OrderBy(c => c.FromDate).ToList();
+
+        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
+        entity.CompletionDate = entity.CompletionDate?.Date;
+        entity.MathsAndEnglishCourses.Clear();
+
+        var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
+        episode.LearningKey = entity.Key;
+        episode.Prices.Clear();
+        episode.LearningSupport.Clear();
+
+        for (int i = 0; i < orderedCosts.Count; i++)
         {
-            _costs = costs;
-            return this;
-        }
+            var cost = orderedCosts[i];
+            var isLast = i == orderedCosts.Count - 1;
+            var endDate = isLast ? _plannedEndDate : orderedCosts[i + 1].FromDate.AddDays(-1);
 
-        public LearningDomainModelBuilder WithGeneratedCosts(int count)
-        {
-            _numberOfCosts = count;
-            return this;
-        }
-
-        public LearningDomainModelBuilder WithPlannedEndDate(DateTime date)
-        {
-            _plannedEndDate = date;
-            return this;
-        }
-
-        public ApprenticeshipLearningDomainModel Build()
-        {
-            var costs = _costs ?? _fixture.CreateMany<Cost>(_numberOfCosts).ToList();
-            var orderedCosts = costs.OrderBy(c => c.FromDate).ToList();
-
-            var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-            entity.CompletionDate = entity.CompletionDate?.Date;
-            entity.DateOfBirth = entity.DateOfBirth.Date;
-            entity.MathsAndEnglishCourses.Clear();
-
-            var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
-            episode.LearningKey = entity.Key;
-            episode.Prices.Clear();
-            episode.LearningSupport.Clear();
-
-            for (int i = 0; i < orderedCosts.Count; i++)
+            episode.Prices.Add(new DataAccess.Entities.Learning.EpisodePrice
             {
-                var cost = orderedCosts[i];
-                var isLast = i == orderedCosts.Count - 1;
-                var endDate = isLast ? _plannedEndDate : orderedCosts[i + 1].FromDate.AddDays(-1);
-
-                episode.Prices.Add(new DataAccess.Entities.Learning.EpisodePrice
-                {
-                    Key = Guid.NewGuid(),
-                    StartDate = cost.FromDate,
-                    EndDate = endDate,
-                    TrainingPrice = cost.TrainingPrice,
-                    EndPointAssessmentPrice = cost.EpaoPrice,
-                    TotalPrice = cost.TotalPrice
-                });
-            }
-
-            entity.Episodes = [episode];
-            return ApprenticeshipLearningDomainModel.Get(entity);
+                Key = Guid.NewGuid(),
+                StartDate = cost.FromDate,
+                EndDate = endDate,
+                TrainingPrice = cost.TrainingPrice,
+                EndPointAssessmentPrice = cost.EpaoPrice,
+                TotalPrice = cost.TotalPrice
+            });
         }
+
+        entity.Episodes = [episode];
+
+        var learnerEntity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
+        learnerEntity.DateOfBirth = learnerEntity.DateOfBirth.Date;
+        learnerEntity.Key = entity.LearnerKey;
+
+        return new (ApprenticeshipLearningDomainModel.Get(entity), LearnerDomainModel.Get(learnerEntity));
     }
 }

@@ -27,8 +27,8 @@ public class WhenUpdatingLearningSupport
     {
         //Arrange
         var learningSupport = new List<LearningSupportDetails>();
-        var learning = CreateLearner(learningSupport);
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        (var learning, var learner) = CreateLearner(learningSupport);
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
 
         //Act
         var result = learning.UpdateLearnerDetails(updateModel);
@@ -43,8 +43,8 @@ public class WhenUpdatingLearningSupport
     {
         //Arrange
         var learningSupport = new List<LearningSupportDetails>();
-        var learning = CreateLearner(learningSupport);
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        (var learning, var learner) = CreateLearner(learningSupport);
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
 
         updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)});
 
@@ -68,8 +68,8 @@ public class WhenUpdatingLearningSupport
         {
             new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)}
         };
-        var learning = CreateLearner(learningSupport);
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        (var learning, var learner) = CreateLearner(learningSupport);
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.LearningSupport.Clear();
 
         //Act
@@ -88,8 +88,8 @@ public class WhenUpdatingLearningSupport
         {
             new LearningSupportDetails{ StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30) }
         };
-        var learning = CreateLearner(learningSupport);
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(learning.GetEntity());
+        (var learning, var learner) = CreateLearner(learningSupport);
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now.AddDays(31), EndDate = DateTime.Now.AddDays(60) });
 
         //Act
@@ -100,19 +100,19 @@ public class WhenUpdatingLearningSupport
     }
 
 
-    private ApprenticeshipLearningDomainModel CreateLearner(List<LearningSupportDetails> learningSupport)
+    private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(List<LearningSupportDetails> learningSupport)
     {
-        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        entity.CompletionDate = entity.CompletionDate?.Date;
+        var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
+        learningEntity.CompletionDate = learningEntity.CompletionDate?.Date;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
-        episode.LearningKey = entity.Key;
+        episode.LearningKey = learningEntity.Key;
         episode.PauseDate = null;
 
         episode.LearningSupport = learningSupport.ConvertAll(x => new DataAccess.Entities.Learning.LearningSupport
         {
             Key = _fixture.Create<Guid>(),
-            LearningKey = entity.Key,
+            LearningKey = learningEntity.Key,
             EpisodeKey = episode.Key,
             StartDate = x.StartDate,
             EndDate = x.EndDate
@@ -122,9 +122,12 @@ public class WhenUpdatingLearningSupport
         episode.Prices.Add(_fixture.Build<EpisodePrice>()
             .Create());
 
-        entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
+        learningEntity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
 
-        return ApprenticeshipLearningDomainModel.Get(entity);
+        var learnerEntity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
+        learnerEntity.Key = learningEntity.LearnerKey;
+
+        return new (ApprenticeshipLearningDomainModel.Get(learningEntity), LearnerDomainModel.Get(learnerEntity));
     }
 
 }

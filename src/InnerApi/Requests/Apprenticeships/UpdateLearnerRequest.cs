@@ -213,27 +213,31 @@ public static class UpdateLearnerRequestExtensions
     /// </summary>
     /// <param name="request">The request containing learner details</param>
     /// <returns>A command to update the learner</returns>
-    public static LearnerUpdateModel ToUpdateModel(this UpdateLearnerRequest request)
+    public static LearningUpdateContext ToUpdateModel(this UpdateLearnerRequest request)
     {
-        return new LearnerUpdateModel
+        return new LearningUpdateContext
         {
+            Learner = new Domain.Models.Shared.LearnerModel
+            {
+                FirstName = request.Learner.FirstName,
+                LastName = request.Learner.LastName,
+                EmailAddress = request.Learner.EmailAddress,
+                DateOfBirth = request.Learner.DateOfBirth
+            },
+            Care = new Domain.Models.Shared.CareDetails
+            {
+                HasEHCP = request.Learner.Care.HasEHCP,
+                IsCareLeaver = request.Learner.Care.IsCareLeaver,
+                CareLeaverEmployerConsentGiven = request.Learner.Care.CareLeaverEmployerConsentGiven
+            },
             Delivery = new DeliveryDetails
             {
                 WithdrawalDate = request.Delivery.WithdrawalDate
             },
             Learning = new LearningUpdateDetails
             {
-                FirstName = request.Learner.FirstName,
-                LastName = request.Learner.LastName,
-                EmailAddress = request.Learner.EmailAddress,
-                CompletionDate = request.Learner.CompletionDate,
-                DateOfBirth = request.Learner.DateOfBirth,
-                Care = new Domain.Models.Apprenticeships.CareDetails
-                {
-                    HasEHCP = request.Learner.Care.HasEHCP,
-                    IsCareLeaver = request.Learner.Care.IsCareLeaver,
-                    CareLeaverEmployerConsentGiven = request.Learner.Care.CareLeaverEmployerConsentGiven
-                }
+                CompletionDate = request.Learner.CompletionDate
+                
             },
             MathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x =>
                 new MathsAndEnglishUpdateDetails

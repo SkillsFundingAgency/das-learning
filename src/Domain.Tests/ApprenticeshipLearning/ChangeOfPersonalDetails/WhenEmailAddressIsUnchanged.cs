@@ -10,7 +10,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPerso
 [TestFixture]
 public class WhenEmailAddressIsUnchanged
 {
-    private ApprenticeshipLearningDomainModel _learning;
+    private LearnerDomainModel _learner;
     private LearningUpdateChanges[] _result;
 
     private string? _emailAddress;
@@ -18,14 +18,14 @@ public class WhenEmailAddressIsUnchanged
     [SetUp]
     public void SetUp()
     {
-        _learning = new LearningDomainModelBuilder().Build();
+        (var learning, _learner) = new LearningDomainModelBuilder().Build();
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), _learner.GetEntity());
 
-        _emailAddress = updateModel.Learning.EmailAddress;
+        _emailAddress = updateModel.Learner.EmailAddress;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learner.Update(updateModel);
     }
 
     [Test]
@@ -37,12 +37,12 @@ public class WhenEmailAddressIsUnchanged
     [Test]
     public void DomainModelIsUnchanged()
     {
-        _learning.EmailAddress.Should().Be(_emailAddress);
+        _learner.EmailAddress.Should().Be(_emailAddress);
     }
 
     [Test]
     public void ThenAPersonalDetailsEventIsNotEmitted()
     {
-        _learning.FlushEvents().Should().NotContain(x => x.GetType() == typeof(PersonalDetailsChangedEvent));
+        _learner.FlushEvents().Should().NotContain(x => x.GetType() == typeof(PersonalDetailsChangedEvent));
     }
 }

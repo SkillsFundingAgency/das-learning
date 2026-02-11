@@ -11,6 +11,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPerso
 [TestFixture]
 public class WhenLastNameIsUpdated
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
@@ -21,15 +22,15 @@ public class WhenLastNameIsUpdated
     {
         var fixture = new Fixture();
 
-        _learning = new LearningDomainModelBuilder().Build();
+        (_learning, _learner) = new LearningDomainModelBuilder().Build();
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         _lastName = fixture.Create<string>();
-        updateModel.Learning.LastName = _lastName;
+        updateModel.Learner.LastName = _lastName;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learner.Update(updateModel);
     }
 
     [Test]
@@ -41,21 +42,21 @@ public class WhenLastNameIsUpdated
     [Test]
     public void DomainModelIsUpdated()
     {
-        _learning.LastName.Should().Be(_lastName);
+        _learner.LastName.Should().Be(_lastName);
     }
 
     [Test]
     public void ThenAPersonalDetailsEventIsEmitted()
     {
-        var events = _learning.FlushEvents();
+        var events = _learner.FlushEvents();
 
         var expectedEvent = new PersonalDetailsChangedEvent
         {
             ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
             LearningKey = _learning.Key,
-            FirstName = _learning.FirstName,
+            FirstName = _learner.FirstName,
             LastName = _lastName,
-            EmailAddress = _learning.EmailAddress ?? ""
+            EmailAddress = _learner.EmailAddress ?? ""
         };
 
         events.Should().ContainEquivalentOf(expectedEvent);

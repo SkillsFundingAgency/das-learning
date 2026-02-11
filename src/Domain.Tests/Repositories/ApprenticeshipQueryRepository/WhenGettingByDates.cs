@@ -41,7 +41,7 @@ public class WhenGettingByDates
 
         result.Should().NotBeNull();
         result.Data.Count().Should().Be(0);
-        result.Data.Select(x => x.Uln).Should().NotContain(nonUkPrnApprenticeship.Uln);
+        result.Data.Select(x => x.Key).Should().NotContain(nonUkPrnApprenticeship.Key);
     }
 
     [Test]
@@ -62,11 +62,11 @@ public class WhenGettingByDates
 
         result.Should().NotBeNull();
         result.Data.Count().Should().Be(4);
-        result.Data.Select(x => x.Uln).Should().Contain(apprenticeship1.Uln);
-        result.Data.Select(x => x.Uln).Should().Contain(apprenticeship2.Uln);
-        result.Data.Select(x => x.Uln).Should().Contain(apprenticeship3.Uln);
-        result.Data.Select(x => x.Uln).Should().Contain(apprenticeship4.Uln);
-        result.Data.Select(x => x.Uln).Should().NotContain(nonUkPrnApprenticeship.Uln);
+        result.Data.Select(x => x.Key).Should().Contain(apprenticeship1.Key);
+        result.Data.Select(x => x.Key).Should().Contain(apprenticeship2.Key);
+        result.Data.Select(x => x.Key).Should().Contain(apprenticeship3.Key);
+        result.Data.Select(x => x.Key).Should().Contain(apprenticeship4.Key);
+        result.Data.Select(x => x.Key).Should().NotContain(nonUkPrnApprenticeship.Key);
     }
 
     [Test]
@@ -105,19 +105,19 @@ public class WhenGettingByDates
         var academicYear = new DateRange(new DateTime(2025, 8, 1), new DateTime(2026, 7, 31));
         SetUpApprenticeshipQueryRepository();
 
-        var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(1), lastDayOfLearning: academicYear.Start.AddDays(1));
-        var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(2), lastDayOfLearning: academicYear.Start.AddDays(2));
-        var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(3), lastDayOfLearning: academicYear.Start.AddDays(3));
-        var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(4), lastDayOfLearning: academicYear.Start.AddDays(4));
+        var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(1), withdrawalDate: academicYear.Start.AddDays(1));
+        var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(2), withdrawalDate: academicYear.Start.AddDays(2));
+        var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(3), withdrawalDate: academicYear.Start.AddDays(3));
+        var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, startDate: academicYear.Start.AddDays(4), withdrawalDate: academicYear.Start.AddDays(4));
 
         var result = await _sut.GetByDates(ukprn, academicYear, 100, 0, CancellationToken.None);
 
         result.Should().NotBeNull();
         result.Data.Count().Should().Be(0);
-        result.Data.Select(x => x.Uln).Should().NotContain(apprenticeship1.Uln);
-        result.Data.Select(x => x.Uln).Should().NotContain(apprenticeship2.Uln);
-        result.Data.Select(x => x.Uln).Should().NotContain(apprenticeship3.Uln);
-        result.Data.Select(x => x.Uln).Should().NotContain(apprenticeship4.Uln);
+        result.Data.Select(x => x.Key).Should().NotContain(apprenticeship1.Key);
+        result.Data.Select(x => x.Key).Should().NotContain(apprenticeship2.Key);
+        result.Data.Select(x => x.Key).Should().NotContain(apprenticeship3.Key);
+        result.Data.Select(x => x.Key).Should().NotContain(apprenticeship4.Key);
     }
 
     private void SetUpApprenticeshipQueryRepository()
