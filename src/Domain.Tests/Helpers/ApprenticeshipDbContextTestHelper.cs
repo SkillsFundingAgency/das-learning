@@ -23,7 +23,7 @@ public static class ApprenticeshipDbContextTestHelper
         return new LearningQueryRepository(new Lazy<LearningDataContext>(dbContext), logger);
     }
 
-    public static async Task<DataAccess.Entities.Learning.ApprenticeshipLearning> AddApprenticeship(
+    public static async Task<(DataAccess.Entities.Learning.ApprenticeshipLearning, DataAccess.Entities.Learning.Learner)> AddApprenticeship(
         this LearningDataContext dbContext, 
         Guid learningKey, 
         long? ukprn = null,
@@ -64,7 +64,14 @@ public static class ApprenticeshipDbContextTestHelper
             .Create();
 
         await dbContext.AddAsync(apprenticeship);
+
+        var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+            .With(x => x.Key, apprenticeship.LearnerKey)
+            .With(x => x.Uln, _fixture.Create<long>().ToString())
+            .Create();
+        await dbContext.AddAsync(learner);
+
         await dbContext.SaveChangesAsync();
-        return apprenticeship;
+        return new (apprenticeship, learner);
     }
 }

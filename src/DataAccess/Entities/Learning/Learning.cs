@@ -8,5 +8,4 @@ public abstract class Learning
     public Guid Key { get; set; }
     public DateTime? CompletionDate { get; set; }
     public Guid LearnerKey;
-    public Learner Learner { get; set; }
 }

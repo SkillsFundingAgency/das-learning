@@ -13,61 +13,84 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
 {
     private LearningDataContext DbContext => dbContext.Value;
 
-    public async Task<IEnumerable<Learning.DataTransferObjects.Learning>> GetAll(long ukprn, FundingPlatform? fundingPlatform)
+    public async Task<IEnumerable<Learning.DataTransferObjects.Learning>> GetAll(
+        long ukprn,
+        FundingPlatform? fundingPlatform)
     {
-        var apprenticeships = await DbContext.ApprenticeshipLearningDbSet
-            .Include(x => x.Episodes)
-            .Include(x => x.Learner)
-            .Where(x => x.Episodes.Any(y => y.Ukprn == ukprn && (fundingPlatform == null || y.FundingPlatform == fundingPlatform)))
+        return await DbContext.ApprenticeshipLearningDbSet
+            .Where(al => al.Episodes.Any(e =>
+                e.Ukprn == ukprn &&
+                (!fundingPlatform.HasValue || e.FundingPlatform == fundingPlatform)))
+            .Join(
+                DbContext.LearnersDbSet,
+                al => al.LearnerKey,
+                learner => learner.Key,
+                (al, learner) => new Learning.DataTransferObjects.Learning
+                {
+                    Uln = learner.Uln,
+                    FirstName = learner.FirstName,
+                    LastName = learner.LastName
+                })
+            .AsNoTracking()
             .ToListAsync();
-
-        var result = apprenticeships.Select(x => new Learning.DataTransferObjects.Learning { Uln = x.Learner.Uln, LastName = x.Learner.LastName, FirstName = x.Learner.FirstName });
-        return result;
     }
 
-    public async Task<PagedResult<Learning.DataTransferObjects.Learning>> GetByDates(long ukprn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
+
+    public async Task<PagedResult<Learning.DataTransferObjects.Learning>> GetByDates(
+        long ukprn,
+        DateRange dates,
+        int limit,
+        int offset,
+        CancellationToken cancellationToken)
     {
-        var query = DbContext.ApprenticeshipLearningDbSet
-            .Include(x => x.Learner)
-            .Include(x => x.Episodes)
-            .ThenInclude(x => x.Prices)
+        var baseQuery = DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))
             .Where(x => x.Episodes.Any(e =>
                 e.Prices.Any(p =>
-                    (p.StartDate >= dates.Start && p.StartDate <= dates.End)    // Start date is within academic year
-                    | (p.EndDate >= dates.Start && p.EndDate <= dates.End)      // End date is within academic year     
-                    | (p.StartDate <= dates.End && p.EndDate >= dates.Start)    // Start date is before academic year and end date is after academic year
-                    &&
-                    ( !e.WithdrawalDate.HasValue ||
-                    ( 
-                        e.WithdrawalDate.Value >= dates.Start &&             // Last day of learning is after the start of academic year
-                        e.WithdrawalDate != p.StartDate)                     // and last day of learning is not the same as start date
+                    (
+                        // Standard date range overlap check
+                        p.StartDate <= dates.End &&
+                        p.EndDate >= dates.Start
                     )
-                ))
-            )
-            .OrderBy(x => x.ApprovalsApprenticeshipId)
+                    &&
+                    (
+                        !e.WithdrawalDate.HasValue ||
+                        (
+                            e.WithdrawalDate.Value >= dates.Start &&
+                            e.WithdrawalDate != p.StartDate
+                        )
+                    )
+                )))
             .AsNoTracking();
 
-        var totalItems = await query.CountAsync(cancellationToken);
+        // Count query
+        var totalItems = await baseQuery.CountAsync(cancellationToken);
         var totalPages = (int)Math.Ceiling((double)totalItems / limit);
 
-        var result = await query
+        // Paged + joined query
+        var result = await baseQuery
+            .OrderBy(x => x.ApprovalsApprenticeshipId)
             .Skip(offset)
             .Take(limit)
-            .Select(x => new Learning.DataTransferObjects.Learning
-            {
-                Uln = x.Learner.Uln,
-                Key = x.Key
-            })
+            .Join(
+                DbContext.LearnersDbSet.AsNoTracking(),
+                learning => learning.LearnerKey,
+                learner => learner.Key,
+                (learning, learner) => new Learning.DataTransferObjects.Learning
+                {
+                    Uln = learner.Uln,
+                    Key = learning.Key
+                })
             .ToListAsync(cancellationToken);
 
         return new PagedResult<Learning.DataTransferObjects.Learning>
         {
             Data = result,
             TotalItems = totalItems,
-            TotalPages = totalPages,
+            TotalPages = totalPages
         };
     }
+
 
     public async Task<Guid?> GetKeyByLearningId(long learningId)
     {
@@ -89,7 +112,6 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
         try
         {
             var query = DbContext.ApprenticeshipLearningDbSet
-                .Include(x => x.Learner)
                 .Include(x => x.Episodes)
                 .ThenInclude(x => x.Prices)
                 .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn && e.FundingPlatform == FundingPlatform.DAS))
@@ -99,7 +121,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                         episode.Prices.Any(price => price.StartDate <= activeOnDate.Value) &&      // start date is at least before the requested date
                         !(episode.WithdrawalDate.HasValue && episode.WithdrawalDate.Value == episode.Prices.Min(p => p.StartDate)) //not withdrawn back to start
                         ))
-                .OrderBy(x => x.Learner.Uln)
+                .OrderBy(x => x.ApprovalsApprenticeshipId)
                 .AsNoTracking();
 
             List<DataAccess.Entities.Learning.ApprenticeshipLearning> apprenticeships;
@@ -120,18 +142,23 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             }
 
             var apprenticeshipWithEpisodes = apprenticeships.Select(apprenticeship =>
-                new LearningWithEpisodes(
+            {
+                var learner = DbContext.LearnersDbSet.Single(l => l.Key == apprenticeship.LearnerKey);
+
+                return new LearningWithEpisodes(
                     apprenticeship.Key,
-                    apprenticeship.Learner.Uln,
+                    learner.Uln,
                     apprenticeship.GetStartDate(),
                     apprenticeship.GetPlannedEndDate(),
                     apprenticeship.Episodes.Select(ep =>
                             new Episode(ep.Key, ep.TrainingCode, ep.WithdrawalDate, ep.Prices.Select(p =>
                                 new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
                         .ToList(),
-                    apprenticeship.GetAgeAtStartOfApprenticeship(),
+                    apprenticeship.GetAgeAtStartOfApprenticeship(learner.DateOfBirth),
                     apprenticeship.GetWithdrawalDate(),
-                    apprenticeship.CompletionDate)
+                    apprenticeship.CompletionDate);
+            }
+
             ).ToList();
 
             return new PagedResult<LearningWithEpisodes>

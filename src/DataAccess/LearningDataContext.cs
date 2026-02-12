@@ -41,12 +41,13 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<Learner>()
             .HasKey(x => x.Key);
 
-        // Learning
+        // ApprenticeshipLearning
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
-            .HasOne(x => x.Learner)
-            .WithMany() 
-            .HasForeignKey(x => x.LearnerKey)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasKey(a => a.Key);
+
+        modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
+            .Property(a => a.LearnerKey)
+            .IsRequired();
 
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
             .HasMany(x => x.Episodes)

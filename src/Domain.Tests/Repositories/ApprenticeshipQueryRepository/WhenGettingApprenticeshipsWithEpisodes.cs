@@ -71,19 +71,19 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice4 = CreateEpisodePrice(episode2Key, startDate.AddYears(1), endDate);
         var episode2 = CreateEpisode(episode2Key, ukprn, trainingCode, episodePrice3, episodePrice4);
 
-        var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
-                .With(x => x.Key, learningKey)
-                .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode1, episode2 })
-                .Create();
-
         var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
-            .With(x => x.Key, apprenticeshipLearningRecord.LearnerKey)
             .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
             .With(x => x.Uln, _fixture.Create<long>().ToString())
             .Create();
 
-        await _dbContext.AddRangeAsync(new[] { apprenticeshipLearningRecord });
+        var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
+            .With(x => x.Key, learningKey)
+            .With(x => x.LearnerKey, learner.Key)
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode1, episode2 })
+            .Create();
+
         await _dbContext.AddRangeAsync(new[] { learner });
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipLearningRecord });
         await _dbContext.SaveChangesAsync();
 
         // Act
@@ -308,8 +308,8 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
 
 
-        await _dbContext.AddRangeAsync(new[] { learners });
-        await _dbContext.AddRangeAsync(new[] { apprenticeships });
+        await _dbContext.AddRangeAsync(learners);
+        await _dbContext.AddRangeAsync(apprenticeships);
         await _dbContext.SaveChangesAsync();
 
         // Getting page 2 with page size of 2
@@ -329,10 +329,10 @@ public class WhenGettingApprenticeshipsWithEpisodes
         result.TotalPages.Should().Be((int)Math.Ceiling((double)apprenticeships.Count / pageSize));
 
         var expectedUlnsForPage = apprenticeships
-            .OrderBy(a => a.Learner.Uln)
+            .OrderBy(a => a.ApprovalsApprenticeshipId)
             .Skip(pageOffset)
             .Take(pageSize)
-            .Select(a => a.Learner.Uln)
+            .Select(a => learners.Single(x=> x.Key == a.LearnerKey).Uln)
             .ToList();
 
         result.Data.Select(a => a.Uln).Should().BeEquivalentTo(expectedUlnsForPage);

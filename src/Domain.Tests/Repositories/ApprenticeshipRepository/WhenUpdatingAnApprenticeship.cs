@@ -46,7 +46,7 @@ public class WhenUpdatingAnApprenticeship
         await _dbContext.AddApprenticeship(apprenticeshipKey);
         var apprenticeship = await _dbContext.ApprenticeshipLearningDbSet
             .Include(x => x.Episodes)
-            .Include(x =>x.Learner)
+            //.Include(x =>x.Learner)
             .SingleAsync(x => x.Key == apprenticeshipKey);
         var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
         var newCompletionDate = _fixture.Create<DateTime>();

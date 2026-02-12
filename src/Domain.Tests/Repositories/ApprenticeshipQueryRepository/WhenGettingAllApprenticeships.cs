@@ -38,10 +38,10 @@ public class WhenGettingAllApprenticeships
         // Arrange
         var ukprn = _fixture.Create<long>();
         SetUpApprenticeshipQueryRepository();
-        var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
-        var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
-        var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
-        var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+        (var apprenticeship1, var learner1) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+        (var apprenticeship2, var learner2) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
+        (var apprenticeship3, var learner3) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
+        (var apprenticeship4, var learner4) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
 
         // Act
         var result = await _sut.GetAll(ukprn, null);
@@ -49,10 +49,10 @@ public class WhenGettingAllApprenticeships
         // Assert
         result.Should().NotBeNull();
         result.Count().Should().Be(3);
-        result.Should().Contain(x => x.Uln == apprenticeship1.Learner.Uln);
-        result.Should().NotContain(x => x.Uln == apprenticeship2.Learner.Uln);
-        result.Should().Contain(x => x.Uln == apprenticeship3.Learner.Uln);
-        result.Should().Contain(x => x.Uln == apprenticeship4.Learner.Uln);
+        result.Should().Contain(x => x.Uln == learner1.Uln);
+        result.Should().NotContain(x => x.Uln == learner2.Uln);
+        result.Should().Contain(x => x.Uln == learner3.Uln);
+        result.Should().Contain(x => x.Uln == learner4.Uln);
     }
 
     [Test]
@@ -61,20 +61,20 @@ public class WhenGettingAllApprenticeships
         // Arrange
         var ukprn = _fixture.Create<long>();
         SetUpApprenticeshipQueryRepository();
-        var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
-        var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
-        var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
-        var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+        (var apprenticeship1, var learner1) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+        (var apprenticeship2, var learner2) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
+        (var apprenticeship3, var learner3) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
+        (var apprenticeship4, var learner4) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
 
         // Act
         var result = await _sut.GetAll(ukprn, FundingPlatform.SLD);
 
         // Assert
         result.Count().Should().Be(1);
-        result.Should().NotContain(x => x.Uln == apprenticeship1.Learner.Uln);
-        result.Should().NotContain(x => x.Uln == apprenticeship2.Learner.Uln);
-        result.Should().Contain(x => x.Uln == apprenticeship3.Learner.Uln);
-        result.Should().NotContain(x => x.Uln == apprenticeship4.Learner.Uln);
+        result.Should().NotContain(x => x.Uln == learner1.Uln);
+        result.Should().NotContain(x => x.Uln == learner2.Uln);
+        result.Should().Contain(x => x.Uln == learner3.Uln);
+        result.Should().NotContain(x => x.Uln == learner4.Uln);
     }
 
     [Test]
@@ -83,20 +83,20 @@ public class WhenGettingAllApprenticeships
         // Arrange
         var ukprn = _fixture.Create<long>();
         SetUpApprenticeshipQueryRepository();
-        var apprenticeship1 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
-        var apprenticeship2 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
-        var apprenticeship3 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
-        var apprenticeship4 = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+        (var apprenticeship1, var learner1) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
+        (var apprenticeship2, var learner2) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>());
+        (var apprenticeship3, var learner3) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.SLD);
+        (var apprenticeship4, var learner4) = await _dbContext.AddApprenticeship(_fixture.Create<Guid>(), ukprn, fundingPlatform: FundingPlatform.DAS);
 
         // Act
         var result = await _sut.GetAll(ukprn, FundingPlatform.DAS);
 
         // Assert
         result.Count().Should().Be(2);
-        result.Should().Contain(x => x.Uln == apprenticeship1.Learner.Uln);
-        result.Should().NotContain(x => x.Uln == apprenticeship2.Learner.Uln);
-        result.Should().NotContain(x => x.Uln == apprenticeship3.Learner.Uln);
-        result.Should().Contain(x => x.Uln == apprenticeship4.Learner.Uln);
+        result.Should().Contain(x => x.Uln == learner1.Uln);
+        result.Should().NotContain(x => x.Uln == learner2.Uln);
+        result.Should().NotContain(x => x.Uln == learner3.Uln);
+        result.Should().Contain(x => x.Uln == learner4.Uln);
     }
 
     private void SetUpApprenticeshipQueryRepository()

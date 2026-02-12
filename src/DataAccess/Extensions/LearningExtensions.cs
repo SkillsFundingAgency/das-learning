@@ -19,12 +19,12 @@ public static class LearningExtensions
         return episode;
     }
 
-    public static int GetAgeAtStartOfApprenticeship(this Entities.Learning.ApprenticeshipLearning learning)
+    public static int GetAgeAtStartOfApprenticeship(this Entities.Learning.ApprenticeshipLearning learning, DateTime dateOfBirth)
     {
         var startDate = learning.Episodes.SelectMany(e => e.Prices).Min(p => p.StartDate);
-        var age = startDate.Year - learning.Learner.DateOfBirth.Year;
+        var age = startDate.Year - dateOfBirth.Year;
 
-        if (startDate < learning.Learner.DateOfBirth.AddYears(age)) age--;
+        if (startDate < dateOfBirth.AddYears(age)) age--;
 
         return age;
     }

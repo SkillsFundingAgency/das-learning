@@ -43,32 +43,56 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         return _learningFactory.GetExisting(apprenticeship);
     }
 
-    public async Task<ApprenticeshipLearningDomainModel?> Get(string uln, long approvalsApprenticeshipId)
+    public async Task<ApprenticeshipLearningDomainModel?> Get(
+        string uln,
+        long approvalsApprenticeshipId)
     {
+        var learnerKey = await DbContext.LearnersDbSet
+            .Where(l => l.Uln == uln)
+            .Select(l => l.Key)
+            .SingleOrDefaultAsync();
+
+        if (learnerKey == default)
+            return null;
+
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
-            .Include(x => x.Learner)
+            .Where(x => x.LearnerKey == learnerKey &&
+                        x.ApprovalsApprenticeshipId == approvalsApprenticeshipId)
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
-            .ThenInclude(y => y.Prices)
-            .SingleOrDefaultAsync(x => x.Learner.Uln == uln && x.ApprovalsApprenticeshipId == approvalsApprenticeshipId);
-        return apprenticeship == null ? null : _learningFactory.GetExisting(apprenticeship);
+                .ThenInclude(e => e.Prices)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
+
+        return apprenticeship == null
+            ? null
+            : _learningFactory.GetExisting(apprenticeship);
     }
-    
+
+
     public async Task<ApprenticeshipLearningDomainModel?> GetByUln(string uln)
     {
+        var learnerKey = await DbContext.LearnersDbSet
+            .Where(l => l.Uln == uln)
+            .Select(l => l.Key)
+            .SingleOrDefaultAsync();
+
+        if (learnerKey == default)
+            return null;
+
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
-            .Include(x => x.Learner)
+            .Where(x => x.LearnerKey == learnerKey)
             .Include(x => x.MathsAndEnglishCourses)
             .Include(x => x.Episodes)
-            .ThenInclude(y => y.Prices)
-            .SingleOrDefaultAsync(x => x.Learner.Uln == uln);
+                .ThenInclude(e => e.Prices)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
 
-        if (apprenticeship == null)
-        {
-            return null;
-        }
-
-        return _learningFactory.GetExisting(apprenticeship);
+        return apprenticeship == null
+            ? null
+            : _learningFactory.GetExisting(apprenticeship);
     }
 
     public async Task Update(ApprenticeshipLearningDomainModel learning)

@@ -82,12 +82,11 @@ public class LearningExtensionsTests
     {
         // Arrange
         var apprenticeship = _fixture.Build<Entities.Learning.ApprenticeshipLearning>()
-            .With(a => a.Learner, new Entities.Learning.Learner { DateOfBirth = DateTime.Parse(dob) })
             .Create();
         apprenticeship.Episodes.Add(CreateEpisode(startDate: DateTime.Parse(startDate)));
 
         // Act
-        var result = apprenticeship.GetAgeAtStartOfApprenticeship();
+        var result = apprenticeship.GetAgeAtStartOfApprenticeship(DateTime.Parse(dob));
 
         // Assert
         result.Should().Be(expectedAge);
