@@ -9,5 +9,10 @@ public class ShortCourseEpisode : Episode
         Milestones = new List<ShortCourseMilestone>();
     }
 
+    public DateTime? WithdrawalDate { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime ExpectedEndDate { get; set; }
+    public bool IsApproved { get; set; }
+
     public List<ShortCourseMilestone> Milestones { get; set; }
 }

@@ -5,9 +5,16 @@ namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
 
 internal static class SqlConnectionExtensions
 {
-    internal static DataAccess.Entities.Learning.ApprenticeshipLearning GetLearning(this SqlConnection dbConnection, string uln)
+    internal static DataAccess.Entities.Learning.Learner GetLearner(this SqlConnection dbConnection, string uln)
     {
-        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.Uln == uln);
+        var learner = dbConnection.GetAll<DataAccess.Entities.Learning.Learner>().Single(x => x.Uln == uln);
+
+        return learner;
+    }
+
+    internal static DataAccess.Entities.Learning.ApprenticeshipLearning GetLearningByLearnerKey(this SqlConnection dbConnection, Guid learnerKey)
+    {
+        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.LearnerKey == learnerKey);
         learning.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipEpisode>().Where(x => x.LearningKey == learning.Key).ToList();
         learning.MathsAndEnglishCourses = dbConnection.GetAll<DataAccess.Entities.Learning.MathsAndEnglish>().Where(x => x.LearningKey == learning.Key).ToList();
 
@@ -26,6 +33,13 @@ internal static class SqlConnectionExtensions
         return learning;
     }
 
+    internal static DataAccess.Entities.Learning.ApprenticeshipLearning GetLearning(this SqlConnection dbConnection, string uln)
+    {
+        var learner = dbConnection.GetLearner(uln);
+        var learning = dbConnection.GetLearningByLearnerKey(learner.Key);
+        return learning;
+    }
+
     internal static List<DataAccess.Entities.Learning.LearningHistory> GetHistories(this SqlConnection dbConnection, Guid learningKey)
     {
         return dbConnection.GetAll<DataAccess.Entities.Learning.LearningHistory>().Where(x => x.LearningId == learningKey).ToList();
@@ -33,7 +47,8 @@ internal static class SqlConnectionExtensions
 
     internal static Guid GetLearningKey(this SqlConnection dbConnection, string uln)
     {
-        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.Uln == uln);
+        var learner = dbConnection.GetLearner(uln);
+        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.LearnerKey == learner.Key);
         return learning.Key;
     }
 }

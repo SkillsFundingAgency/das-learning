@@ -6,12 +6,12 @@ using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Enums;
 using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglish;
+using ApprenticeshipLearningEntity = SFA.DAS.Learning.DataAccess.Entities.Learning.ApprenticeshipLearning;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class ApprenticeshipLearningDomainModel : LearningDomainModel
+public class ApprenticeshipLearningDomainModel : LearningDomainModel<ApprenticeshipLearningEntity>
 {
-    private readonly Learning.DataAccess.Entities.Learning.ApprenticeshipLearning _entity;
     private readonly List<ApprenticeshipEpisodeDomainModel> _episodes;
 
     public Guid Key => _entity.Key;
@@ -26,7 +26,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             var startDate = AllPrices.MinBy(x => x.StartDate)?.StartDate;
             if (startDate == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(StartDate)} could not be found in the {nameof(LearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(StartDate)} could not be found in the {nameof(LearningDomainModel<ApprenticeshipLearningEntity>) }.");
             }
 
             return startDate.Value;
@@ -43,7 +43,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             var latestPrice = AllPrices.MaxBy(x => x.StartDate);
             if (latestPrice == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(LearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(LearningDomainModel<ApprenticeshipLearningEntity>) }.");
             }
 
             return latestPrice;
@@ -56,7 +56,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
             var latestEpisode = _episodes.MaxBy(x => x.EpisodePrices.Max(y => y.StartDate));
             if (latestEpisode == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestEpisode)} could not be found in the {nameof(LearningDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestEpisode)} could not be found in the {nameof(LearningDomainModel<ApprenticeshipLearningEntity>) }.");
             }
 
             return latestEpisode;
@@ -67,7 +67,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
 
     internal static ApprenticeshipLearningDomainModel New(long approvalsApprenticeshipId, Guid learnerKey)
     {
-        return new ApprenticeshipLearningDomainModel(new Learning.DataAccess.Entities.Learning.ApprenticeshipLearning
+        return new ApprenticeshipLearningDomainModel(new ApprenticeshipLearningEntity
         {
             Key = Guid.NewGuid(),
             ApprovalsApprenticeshipId = approvalsApprenticeshipId,
@@ -75,12 +75,12 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel
         });
     }
 
-    public static ApprenticeshipLearningDomainModel Get(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)
+    public static ApprenticeshipLearningDomainModel Get(ApprenticeshipLearningEntity entity)
     {
         return new ApprenticeshipLearningDomainModel(entity);
     }
 
-    private ApprenticeshipLearningDomainModel(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)
+    private ApprenticeshipLearningDomainModel(ApprenticeshipLearningEntity entity): base(entity)
     {
         _entity = entity;
         _episodes = entity.Episodes.Select(ApprenticeshipEpisodeDomainModel.Get).ToList();

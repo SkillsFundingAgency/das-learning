@@ -66,6 +66,14 @@ public class ApprenticeshipLearnerUpdateDetails : LearnerUpdateDetails
 }
 
 /// <summary>
+/// Learner details to be updated for Short Courses
+/// </summary>
+public class ShortCourseLearnerUpdateDetails : LearnerUpdateDetails
+{
+    public string Uln { get; set; }
+}
+
+/// <summary>
 /// OnProgramme details
 /// </summary>
 public class OnProgrammeDetails

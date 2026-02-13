@@ -6,17 +6,12 @@ namespace SFA.DAS.Learning.Domain.Factories;
 public class ShortCourseLearningFactory : IShortCourseLearningFactory
 {
     public ShortCourseLearningDomainModel CreateNew(
-        DateTime? withdrawalDate,
-        DateTime expectedEndDate,
-        DateTime? completionDate,
-        bool isApproved)
+        Guid learnerKey,
+        DateTime? completionDate)
     {
         return ShortCourseLearningDomainModel.New(
-            Guid.NewGuid(), 
-            withdrawalDate,
-            expectedEndDate,
-            completionDate,
-            isApproved);
+            learnerKey, 
+            completionDate);
     }
 
     public ShortCourseLearningDomainModel GetExisting(ShortCourseLearning model)

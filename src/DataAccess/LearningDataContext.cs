@@ -60,6 +60,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .WithOne()
             .HasForeignKey(fk => fk.LearningKey);
 
+        // ShortCourseLearning
         modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
             .HasMany(x => x.Episodes)
             .WithOne()
@@ -67,7 +68,9 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
             .HasKey(a => new { a.Key });
 
-        
+        modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
+            .Property(a => a.LearnerKey)
+            .IsRequired();
 
 
         // Episode

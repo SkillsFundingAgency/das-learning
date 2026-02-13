@@ -76,7 +76,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         var learner = _fixture.Create<LearnerDomainModel>();
 
-        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, string.Empty)).Returns(learner);
+        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName)).Returns(learner);
         _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
         
         await _commandHandler.Handle(command);
@@ -96,7 +96,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var learner = _fixture.Create<LearnerDomainModel>();
 
-        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, string.Empty)).Returns(learner);
+        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName)).Returns(learner);
         _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
 
         await _commandHandler.Handle(command);
@@ -116,7 +116,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var learner = _fixture.Create<LearnerDomainModel>();
 
-        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, string.Empty)).Returns(learner);
+        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName)).Returns(learner);
         _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
 
         // Act
@@ -140,7 +140,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         var learner = _fixture.Create<LearnerDomainModel>();
 
-        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, string.Empty)).Returns(learner);
+        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName)).Returns(learner);
         _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
 
         // Act

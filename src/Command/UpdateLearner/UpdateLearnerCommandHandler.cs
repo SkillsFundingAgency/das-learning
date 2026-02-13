@@ -13,17 +13,24 @@ public class UpdateLearnerCommandHandler(
     {
         logger.LogInformation("Handling UpdateLearnerCommand for learner with key {LearnerKey}", command.LearningKey);
         
-        var learner = await learnerRepository.GetByLearningKey(command.LearningKey);
-
-
         var learning = await learningRepository.Get(command.LearningKey);
+
         if (learning == null)
         {
             logger.LogWarning("No learning found for learner key {LearnerKey}", command.LearningKey);
             throw new KeyNotFoundException($"Learning with key {command.LearningKey} not found.");
         }
 
-        var changes = learning.UpdateLearnerDetails(command.UpdateModel);
+        var learner = await learnerRepository.Get(learning.LearnerKey);
+        if (learner == null)
+        {
+            logger.LogWarning("No learner found for learner key {LearnerKey}", learning.LearnerKey);
+            throw new KeyNotFoundException($"Learner with key {learning.LearnerKey} not found.");
+        }
+
+        var learningChanges = learning.UpdateLearnerDetails(command.UpdateModel);
+        var learnerChanges = learner.Update(command.UpdateModel);
+        var changes = learningChanges.Concat(learnerChanges).ToArray();
 
         if (changes.Length == 0)
         {

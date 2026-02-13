@@ -1,9 +1,10 @@
-﻿using SFA.DAS.Learning.AcceptanceTests.Helpers;
-using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
-using SFA.DAS.Learning.Enums;
+﻿using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
-using Dapper.Contrib.Extensions;
+using SFA.DAS.Learning.AcceptanceTests.Helpers;
+using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
+using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 {
@@ -40,11 +41,12 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
                         Milestone.ThirtyPercentLearningComplete
                     }
                 },
-                LearnerUpdateDetails = new LearnerUpdateDetails
+                LearnerUpdateDetails = new ShortCourseLearnerUpdateDetails
                 {
                     FirstName = "Frank",
                     LastName = "Frankinson",
                     DateOfBirth = new DateTime(2000, 1, 1),
+                    Uln = "123213"
                 },
                 LearningSupport = new List<LearningSupportDetails>()
             };

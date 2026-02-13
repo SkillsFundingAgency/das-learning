@@ -97,7 +97,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             return learner;
         }
 
-        var newLearner = _learnerFactory.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, string.Empty);
+        var newLearner = _learnerFactory.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName);
         await _learnerRepository.Add(newLearner);
         return newLearner;
     }

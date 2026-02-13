@@ -4,7 +4,7 @@ using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class LearnerDomainModel : LearningDomainModel
+public class LearnerDomainModel : AggregateRoot
 {
     private readonly Learning.DataAccess.Entities.Learning.Learner _entity;
 

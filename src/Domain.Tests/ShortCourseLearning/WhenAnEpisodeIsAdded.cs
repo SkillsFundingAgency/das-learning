@@ -24,12 +24,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
         {
             // Arrange
             var learnerKey = Guid.NewGuid();
-            var shortCourse = ShortCourseLearningDomainModel.New(
-                learnerKey,
-                null,
-                DateTime.UtcNow.AddMonths(6),
-                null,
-                false);
+            var shortCourse = ShortCourseLearningDomainModel.New(learnerKey, null);
 
             var ukprn = _fixture.Create<long>();
             var employerAccountId = _fixture.Create<long>();
@@ -41,6 +36,10 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
                 ukprn,
                 employerAccountId,
                 trainingCode,
+                false,
+                DateTime.UtcNow.AddMonths(-2),
+                DateTime.UtcNow.AddMonths(6),
+                null,
                 milestones);
 
             // Assert

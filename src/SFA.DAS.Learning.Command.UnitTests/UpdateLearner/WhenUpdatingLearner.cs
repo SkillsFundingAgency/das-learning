@@ -38,7 +38,7 @@ public class WhenUpdatingLearner
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        _learnerRepository.Setup(x => x.GetByLearningKey(command.LearningKey))
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
         _learningRepository.Setup(x => x.Get(command.LearningKey))
             .ReturnsAsync(learningDomainModel);
@@ -70,12 +70,13 @@ public class WhenUpdatingLearner
 
         TestHelper.SetEpisode(learningDomainModel, singleEpisode);
 
-        _learnerRepository.Setup(x => x.GetByLearningKey(command.LearningKey))
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
         _learningRepository.Setup(x => x.Get(command.LearningKey))
             .ReturnsAsync(learningDomainModel);
 
         _ = learningDomainModel.UpdateLearnerDetails(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
 
         // Act
         var result = await _commandHandler.Handle(command);

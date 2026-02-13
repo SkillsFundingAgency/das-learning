@@ -14,6 +14,9 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
     public string TrainingCode => _entity.TrainingCode;
+    public DateTime? WithdrawalDate => _entity.WithdrawalDate;
+    public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
+    public bool IsApproved => _entity.IsApproved;
 
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
@@ -21,14 +24,22 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     internal static ShortCourseEpisodeDomainModel New(
         long ukprn,
         long employerAccountId,
-        string trainingCode)
+        string trainingCode,
+        bool isApproved,
+        DateTime startDate,
+        DateTime expectedEndDate,
+        DateTime? withdrawalDate)
     {
         return new ShortCourseEpisodeDomainModel(new ShortCourseEpisode
         {
             Key = Guid.NewGuid(),
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
-            TrainingCode = trainingCode
+            TrainingCode = trainingCode,
+            IsApproved = isApproved,
+            StartDate = startDate,
+            ExpectedEndDate = expectedEndDate,
+            WithdrawalDate = withdrawalDate,
         });
     }
 

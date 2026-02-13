@@ -1,41 +1,37 @@
-﻿using System.Collections.ObjectModel;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
+﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Enums;
+using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public abstract class LearningDomainModel : AggregateRoot
+public abstract class LearningDomainModel<T> : AggregateRoot where T : Learning.DataAccess.Entities.Learning.Learning
 {
+    protected T _entity;
+    public Guid LearnerKey => _entity.LearnerKey;
+
+    protected LearningDomainModel(T entity)
+    {
+        _entity = entity;
+    }
 }
 
-public class ShortCourseLearningDomainModel : LearningDomainModel
+public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataAccess.Entities.Learning.ShortCourseLearning>
 {
-    private readonly Learning.DataAccess.Entities.Learning.ShortCourseLearning _entity;
     private readonly List<ShortCourseEpisodeDomainModel> _episodes;
 
     public Guid Key => _entity.Key;
-    public Guid LearnerKey => _entity.LearnerKey;
-    public DateTime? WithdrawalDate => _entity.WithdrawalDate;
-    public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
-    public bool IsApproved => _entity.IsApproved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<ShortCourseEpisodeDomainModel> Episodes => new ReadOnlyCollection<ShortCourseEpisodeDomainModel>(_episodes);
 
     internal static ShortCourseLearningDomainModel New(
         Guid learnerKey,
-        DateTime? withdrawalDate,
-        DateTime expectedEndDate,
-        DateTime? completionDate,
-        bool isApproved)
+        DateTime? completionDate)
     {
         return new ShortCourseLearningDomainModel(new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
             LearnerKey = learnerKey,
-            ExpectedEndDate = expectedEndDate,
-            CompletionDate = completionDate,
-            WithdrawalDate = withdrawalDate,
-            IsApproved = isApproved
+            CompletionDate = completionDate
         });
     }
 
@@ -53,12 +49,20 @@ public class ShortCourseLearningDomainModel : LearningDomainModel
         long ukprn,
         long employerAccountId,
         string trainingCode,
+        bool isApproved,
+        DateTime startDate,
+        DateTime expectedEndDate,
+        DateTime? withdrawalDate,
         IEnumerable<Milestone> milestones)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
             ukprn,
             employerAccountId,
-            trainingCode
+            trainingCode,
+            isApproved,
+            startDate,
+            expectedEndDate,
+            withdrawalDate
         );
 
         foreach (var milestone in milestones)
@@ -70,7 +74,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel
         _entity.Episodes.Add(episode.GetEntity());
     }
 
-    private ShortCourseLearningDomainModel(ShortCourseLearning entity)
+    private ShortCourseLearningDomainModel(ShortCourseLearning entity): base(entity)
     {
         _entity = entity;
         _episodes = entity.Episodes

@@ -2,7 +2,7 @@
 using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Domain.Models.ShortCourses;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.InnerApi.Requests.Shared;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 namespace SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 
@@ -15,7 +15,7 @@ public class CreateDraftShortCourseRequest
     /// <summary>
     /// Learner details to be updated
     /// </summary>
-    public LearnerUpdateDetails LearnerUpdateDetails { get; set; }
+    public ShortCourseLearnerUpdateDetails LearnerUpdateDetails { get; set; }
 
     /// <summary>
     /// Learning support details
@@ -95,7 +95,8 @@ public static class CreateDraftShortCourseRequestExtensions
                 FirstName = request.LearnerUpdateDetails.FirstName,
                 LastName = request.LearnerUpdateDetails.LastName,
                 EmailAddress = request.LearnerUpdateDetails.EmailAddress,
-                DateOfBirth = request.LearnerUpdateDetails.DateOfBirth
+                DateOfBirth = request.LearnerUpdateDetails.DateOfBirth,
+                Uln = request.LearnerUpdateDetails.Uln
             },
             LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
                 new Domain.Models.Shared.LearningSupportDetails

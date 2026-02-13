@@ -6,6 +6,8 @@
 [System.ComponentModel.DataAnnotations.Schema.Table("Learner")]
 public class Learner
 {
+    [Key]
+    [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None)]
     public Guid Key { get; set; }
     public string Uln { get; set; } 
     public string FirstName { get; set; }
