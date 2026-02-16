@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -19,13 +20,13 @@ public class WhenEmailAddressIsUnchanged
     public void SetUp()
     {
         (var learning, _learner) = new LearningDomainModelBuilder().Build();
-
+        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, learning);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), _learner.GetEntity());
 
         _emailAddress = updateModel.Learner.EmailAddress;
 
         //Act
-        _result = _learner.Update(updateModel);
+        _result = _learner.Update(updateModel, eventBuilder);
     }
 
     [Test]

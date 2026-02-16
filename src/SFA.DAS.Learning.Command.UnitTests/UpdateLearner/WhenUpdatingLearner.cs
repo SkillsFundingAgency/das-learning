@@ -78,7 +78,7 @@ public class WhenUpdatingLearner
             .ReturnsAsync(learningDomainModel);
 
         _ = learningDomainModel.UpdateLearnerDetails(command.UpdateModel, eventBuilder);
-        _ = learnerDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel, eventBuilder);
 
         // Act
         var result = await _commandHandler.Handle(command);

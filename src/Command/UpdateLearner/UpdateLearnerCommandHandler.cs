@@ -31,7 +31,7 @@ public class UpdateLearnerCommandHandler(
 
         var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
         var learningChanges = learning.UpdateLearnerDetails(command.UpdateModel, eventBuilder);
-        var learnerChanges = learner.Update(command.UpdateModel);
+        var learnerChanges = learner.Update(command.UpdateModel, eventBuilder);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
 
         if (changes.Length == 0)

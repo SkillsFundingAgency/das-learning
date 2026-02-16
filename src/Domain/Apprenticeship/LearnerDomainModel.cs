@@ -1,4 +1,5 @@
-﻿using SFA.DAS.Learning.Domain.Events;
+﻿using SFA.DAS.Learning.Domain.Builders;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
 
@@ -49,7 +50,7 @@ public class LearnerDomainModel : AggregateRoot
         return _entity;
     }
 
-    public LearningUpdateChanges[] Update(LearningUpdateContext updateContext)
+    public LearningUpdateChanges[] Update(LearningUpdateContext updateContext, LearnerUpdatedEventBuilder eventBuilder)
     {
         var changes = new List<LearningUpdateChanges>();
 
@@ -59,7 +60,7 @@ public class LearnerDomainModel : AggregateRoot
 
         UpdateCareDetails(updateContext, changes);
 
-        //if (changes.Any()) AddOrReplaceEvent<LearnerUpdatedEvent>(this.ToLearnerUpdatedEvent(updateContext.Learner));
+        if (changes.Any()) AddOrReplaceEvent<LearnerUpdatedEvent>(eventBuilder.CreateEvent());
 
         return changes.ToArray();
     }

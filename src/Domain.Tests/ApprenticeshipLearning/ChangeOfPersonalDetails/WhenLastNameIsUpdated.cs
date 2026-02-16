@@ -2,6 +2,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -23,6 +24,7 @@ public class WhenLastNameIsUpdated
         var fixture = new Fixture();
 
         (_learning, _learner) = new LearningDomainModelBuilder().Build();
+        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
@@ -30,7 +32,7 @@ public class WhenLastNameIsUpdated
         updateModel.Learner.LastName = _lastName;
 
         //Act
-        _result = _learner.Update(updateModel);
+        _result = _learner.Update(updateModel, eventBuilder);
     }
 
     [Test]
