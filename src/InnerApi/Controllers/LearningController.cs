@@ -47,7 +47,7 @@ public class LearningController : ControllerBase
     /// <remarks>Gets all apprenticeships. The response from this endpoint only contains summary apprenticeship information.</remarks>
     /// <response code="200">Apprenticeships retrieved</response>
     [HttpGet("{ukprn}/learnings")]
-    [ProducesResponseType(typeof(IEnumerable<Models.Learning>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<Models.Dtos.Learning>), 200)]
     public async Task<IActionResult> GetAll(long ukprn, FundingPlatform? fundingPlatform)
     {
         var request = new GetLearningsRequest(ukprn, fundingPlatform);

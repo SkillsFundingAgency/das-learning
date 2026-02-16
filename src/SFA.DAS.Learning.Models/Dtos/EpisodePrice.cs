@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.Learning.Models;
+namespace SFA.DAS.Learning.Models.Dtos;
 
 [ExcludeFromCodeCoverage]
 public class EpisodePrice

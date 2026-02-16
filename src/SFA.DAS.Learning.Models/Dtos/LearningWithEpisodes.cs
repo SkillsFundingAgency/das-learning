@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
-namespace SFA.DAS.Learning.Models;
+namespace SFA.DAS.Learning.Models.Dtos;
 
 [ExcludeFromCodeCoverage]
 public class LearningWithEpisodes

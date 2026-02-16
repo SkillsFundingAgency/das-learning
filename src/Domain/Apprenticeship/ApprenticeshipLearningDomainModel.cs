@@ -151,7 +151,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateBreaksInLearning(updateContext, changes);
 
-        if (changes.Any()) AddEvent(this.ToLearnerUpdatedEvent(updateContext.Learner));
+        if (changes.Any()) AddOrReplaceEvent<LearnerUpdatedEvent>(this.ToLearnerUpdatedEvent(updateContext.Learner));
 
         return changes.ToArray();
     }

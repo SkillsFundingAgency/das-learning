@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Models;
+﻿using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 

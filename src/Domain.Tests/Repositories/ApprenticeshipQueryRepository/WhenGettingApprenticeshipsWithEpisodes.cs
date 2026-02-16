@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
-using SFA.DAS.Learning.Models;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.TestHelpers;
 using System;
@@ -13,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using EpisodePrice = SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodePrice;
+using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepository;
 
@@ -355,7 +355,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         actual.Episodes.Count.Should().Be(expectedLearning.Episodes.Count);
     }
 
-    private void AssertEpisode(ApprenticeshipEpisode expected, Learning.Models.Episode actual)
+    private void AssertEpisode(ApprenticeshipEpisode expected, Models.Dtos.Episode actual)
     {
         actual.Should().NotBeNull();
         actual.TrainingCode.Should().Be(expected.TrainingCode);
@@ -363,7 +363,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         actual.LastDayOfLearning.Should().Be(expected.WithdrawalDate);
     }
 
-    private bool AssertPrice(EpisodePrice expected, Learning.Models.EpisodePrice actual)
+    private bool AssertPrice(EpisodePrice expected, Models.Dtos.EpisodePrice actual)
     {
         return actual.EndDate == expected.EndDate
             && actual.EndPointAssessmentPrice == expected.EndPointAssessmentPrice

@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Extensions;
-using SFA.DAS.Learning.Models;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
@@ -13,7 +13,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
 {
     private LearningDataContext DbContext => dbContext.Value;
 
-    public async Task<IEnumerable<Learning.Models.Learning>> GetAll(
+    public async Task<IEnumerable<Models.Dtos.Learning>> GetAll(
         long ukprn,
         FundingPlatform? fundingPlatform)
     {
@@ -25,7 +25,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 DbContext.LearnersDbSet,
                 al => al.LearnerKey,
                 learner => learner.Key,
-                (al, learner) => new Learning.Models.Learning
+                (al, learner) => new Models.Dtos.Learning
                 {
                     Uln = learner.Uln,
                     FirstName = learner.FirstName,
@@ -36,7 +36,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
     }
 
 
-    public async Task<PagedResult<Learning.Models.Learning>> GetByDates(
+    public async Task<PagedResult<Models.Dtos.Learning>> GetByDates(
         long ukprn,
         DateRange dates,
         int limit,
@@ -76,14 +76,14 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 DbContext.LearnersDbSet.AsNoTracking(),
                 learning => learning.LearnerKey,
                 learner => learner.Key,
-                (learning, learner) => new Learning.Models.Learning
+                (learning, learner) => new Models.Dtos.Learning
                 {
                     Uln = learner.Uln,
                     Key = learning.Key
                 })
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<Learning.Models.Learning>
+        return new PagedResult<Models.Dtos.Learning>
         {
             Data = result,
             TotalItems = totalItems,

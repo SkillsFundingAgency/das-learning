@@ -1,12 +1,12 @@
-﻿using SFA.DAS.Learning.Models;
-using SFA.DAS.Learning.Enums;
+﻿using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
 public interface ILearningQueryRepository
 {
-    Task<IEnumerable<Learning.Models.Learning>> GetAll(long ukprn, FundingPlatform? fundingPlatform);
-    Task<PagedResult<Learning.Models.Learning>> GetByDates(long ukprn, DateRange dates, int limit, int offset, CancellationToken cancellationToken);
+    Task<IEnumerable<Models.Dtos.Learning>> GetAll(long ukprn, FundingPlatform? fundingPlatform);
+    Task<PagedResult<Models.Dtos.Learning>> GetByDates(long ukprn, DateRange dates, int limit, int offset, CancellationToken cancellationToken);
     Task<Guid?> GetKeyByLearningId(long learningId);
 
     /// <summary>

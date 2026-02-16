@@ -1,7 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
 using Moq;
-using SFA.DAS.Learning.Models;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Queries.GetLearnings;
 
@@ -27,7 +26,7 @@ public class WhenGetLearnings
     {
         //Arrange
         var query = _fixture.Create<GetLearningsRequest>();
-        var expectedResult = _fixture.Create<IEnumerable<Models.Learning>>();
+        var expectedResult = _fixture.Create<IEnumerable<Models.Dtos.Learning>>();
 
         _apprenticeshipQueryRepository
             .Setup(x => x.GetAll(query.Ukprn, query.FundingPlatform))
