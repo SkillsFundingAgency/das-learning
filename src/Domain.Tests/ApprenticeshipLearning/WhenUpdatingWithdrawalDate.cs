@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AutoFixture;
+﻿using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
@@ -27,10 +28,11 @@ public class WhenUpdatingWithdrawalDate
     {
         //Arrange
         var domainModel = GetLearningDomainModel(null);
+        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
@@ -43,10 +45,11 @@ public class WhenUpdatingWithdrawalDate
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
         var domainModel = GetLearningDomainModel(withdrawalDate);
+        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
@@ -59,10 +62,11 @@ public class WhenUpdatingWithdrawalDate
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
         var domainModel = GetLearningDomainModel(withdrawalDate);
+        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.ReverseWithdrawal);
@@ -80,10 +84,11 @@ public class WhenUpdatingWithdrawalDate
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
         var domainModel = GetLearningDomainModel(withdrawalDate.AddDays(30));
+        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.Withdrawal);

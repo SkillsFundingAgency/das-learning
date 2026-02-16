@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Repositories;
 
@@ -28,7 +29,8 @@ public class UpdateLearnerCommandHandler(
             throw new KeyNotFoundException($"Learner with key {learning.LearnerKey} not found.");
         }
 
-        var learningChanges = learning.UpdateLearnerDetails(command.UpdateModel);
+        var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
+        var learningChanges = learning.UpdateLearnerDetails(command.UpdateModel, eventBuilder);
         var learnerChanges = learner.Update(command.UpdateModel);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
 

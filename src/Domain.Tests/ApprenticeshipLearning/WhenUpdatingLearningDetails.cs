@@ -3,6 +3,7 @@ using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 
@@ -31,13 +32,14 @@ public class WhenUpdatingLearningDetails
 
         var learner = LearnerDomainModel.Get(learnerEntity);
         var learning = ApprenticeshipLearningDomainModel.Get(learningEntity);
+        var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
 
         if (changed) updateModel.Learning.CompletionDate = _fixture.Create<DateTime>();
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel);
+        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         learning.CompletionDate.Should().Be(updateModel.Learning.CompletionDate?.Date);

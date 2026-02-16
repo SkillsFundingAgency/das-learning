@@ -8,6 +8,7 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SFA.DAS.Learning.Domain.Builders;
 
 namespace SFA.DAS.Learning.Command.UnitTests.UpdateLearner;
 
@@ -64,6 +65,7 @@ public class WhenUpdatingLearner
 
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var eventBuilder = new LearnerUpdatedEventBuilder(learnerDomainModel, learningDomainModel);
 
         // Create a single episode
         var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
@@ -75,7 +77,7 @@ public class WhenUpdatingLearner
         _learningRepository.Setup(x => x.Get(command.LearningKey))
             .ReturnsAsync(learningDomainModel);
 
-        _ = learningDomainModel.UpdateLearnerDetails(command.UpdateModel);
+        _ = learningDomainModel.UpdateLearnerDetails(command.UpdateModel, eventBuilder);
         _ = learnerDomainModel.Update(command.UpdateModel);
 
         // Act

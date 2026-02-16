@@ -5,6 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
@@ -27,11 +28,11 @@ public class WhenUpdatingLearningSupport
     {
         //Arrange
         var learningSupport = new List<LearningSupportDetails>();
-        (var learning, var learner) = CreateLearner(learningSupport);
+        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel);
+        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().BeEmpty();
@@ -43,13 +44,13 @@ public class WhenUpdatingLearningSupport
     {
         //Arrange
         var learningSupport = new List<LearningSupportDetails>();
-        (var learning, var learner) = CreateLearner(learningSupport);
+        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
 
         updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)});
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel);
+        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
@@ -68,12 +69,12 @@ public class WhenUpdatingLearningSupport
         {
             new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)}
         };
-        (var learning, var learner) = CreateLearner(learningSupport);
+        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.LearningSupport.Clear();
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel);
+        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
@@ -88,19 +89,19 @@ public class WhenUpdatingLearningSupport
         {
             new LearningSupportDetails{ StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30) }
         };
-        (var learning, var learner) = CreateLearner(learningSupport);
+        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now.AddDays(31), EndDate = DateTime.Now.AddDays(60) });
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel);
+        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
     }
 
 
-    private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(List<LearningSupportDetails> learningSupport)
+    private (ApprenticeshipLearningDomainModel, LearnerDomainModel, LearnerUpdatedEventBuilder) CreateLearner(List<LearningSupportDetails> learningSupport)
     {
         var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         learningEntity.CompletionDate = learningEntity.CompletionDate?.Date;
@@ -127,7 +128,11 @@ public class WhenUpdatingLearningSupport
         var learnerEntity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
         learnerEntity.Key = learningEntity.LearnerKey;
 
-        return new (ApprenticeshipLearningDomainModel.Get(learningEntity), LearnerDomainModel.Get(learnerEntity));
+        var learner = LearnerDomainModel.Get(learnerEntity);
+        var learning = ApprenticeshipLearningDomainModel.Get(learningEntity);
+        var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
+
+        return new(learning, learner, eventBuilder);
     }
 
 }

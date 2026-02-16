@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPrice;
 
@@ -35,6 +36,8 @@ public class WhenANewPriceIsAdded
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
+        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
+
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         updateModel.OnProgrammeDetails.Costs.Add(new Cost
@@ -45,7 +48,7 @@ public class WhenANewPriceIsAdded
         });
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learning.UpdateLearnerDetails(updateModel, eventBuilder);
     }
 
     [Test]

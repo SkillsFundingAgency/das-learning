@@ -5,6 +5,7 @@ using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -27,10 +28,11 @@ public class WhenUpdatingPauseDate
         //Arrange
         var learnerDomainModel = GetLearnerDomainModel();
         var learningDomainModel = GetLearningDomainModel(null);
+        var eventBuilder = new LearnerUpdatedEventBuilder(learnerDomainModel, learningDomainModel);
         var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, null);
 
         //Act
-        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.BreakInLearningStarted ||
@@ -45,10 +47,11 @@ public class WhenUpdatingPauseDate
         var pauseDate = _fixture.Create<DateTime>();
         var learnerDomainModel = GetLearnerDomainModel();
         var learningDomainModel = GetLearningDomainModel(pauseDate);
+        var eventBuilder = new LearnerUpdatedEventBuilder(learnerDomainModel, learningDomainModel);
         var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, pauseDate);
 
         //Act
-        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.BreakInLearningStarted ||
@@ -63,10 +66,11 @@ public class WhenUpdatingPauseDate
         var pauseDate = _fixture.Create<DateTime>();
         var learnerDomainModel = GetLearnerDomainModel();
         var learningDomainModel = GetLearningDomainModel(pauseDate);
+        var eventBuilder = new LearnerUpdatedEventBuilder(learnerDomainModel, learningDomainModel);
         var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, null);
 
         //Act
-        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.BreakInLearningRemoved);
@@ -80,10 +84,11 @@ public class WhenUpdatingPauseDate
         var pauseDate = _fixture.Create<DateTime>();
         var learnerDomainModel = GetLearnerDomainModel();
         var learningDomainModel = GetLearningDomainModel(null);
+        var eventBuilder = new LearnerUpdatedEventBuilder(learnerDomainModel, learningDomainModel);
         var updateModel = GetLearnerUpdateModel(learningDomainModel, learnerDomainModel, pauseDate);
 
         //Act
-        var result = learningDomainModel.UpdateLearnerDetails(updateModel);
+        var result = learningDomainModel.UpdateLearnerDetails(updateModel, eventBuilder);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.BreakInLearningStarted);

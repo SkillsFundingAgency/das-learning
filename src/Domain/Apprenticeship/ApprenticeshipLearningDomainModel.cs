@@ -1,4 +1,5 @@
-﻿using SFA.DAS.Learning.Domain.Enums;
+﻿using SFA.DAS.Learning.Domain.Builders;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
@@ -123,7 +124,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         _entity.Episodes.Add(episode.GetEntity());
     }
 
-    public void MarkAsCreated(LearnerModel learnerModel) => AddEvent(this.ToLearnerUpdatedEvent(learnerModel));
+    public void MarkAsCreated(LearnerUpdatedEvent learnerUpdatedEvent) => AddEvent(learnerUpdatedEvent);
 
     public Learning.DataAccess.Entities.Learning.ApprenticeshipLearning GetEntity()
     {
@@ -131,7 +132,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     }
 
 
-    public LearningUpdateChanges[] UpdateLearnerDetails(LearningUpdateContext updateContext)
+    public LearningUpdateChanges[] UpdateLearnerDetails(LearningUpdateContext updateContext, LearnerUpdatedEventBuilder learnerUpdatedEventBuilder)
     {
         var changes = new List<LearningUpdateChanges>();
 
@@ -151,7 +152,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateBreaksInLearning(updateContext, changes);
 
-        if (changes.Any()) AddOrReplaceEvent<LearnerUpdatedEvent>(this.ToLearnerUpdatedEvent(updateContext.Learner));
+        if (changes.Any()) AddOrReplaceEvent<LearnerUpdatedEvent>(learnerUpdatedEventBuilder.CreateEvent());
 
         return changes.ToArray();
     }
