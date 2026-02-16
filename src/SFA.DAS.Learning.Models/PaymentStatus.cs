@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.Learning.DataTransferObjects;
+﻿namespace SFA.DAS.Learning.Models;
 
 public class PaymentStatus
 {

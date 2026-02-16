@@ -1,9 +1,9 @@
 ﻿using AutoFixture;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Models.UpdateModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Helpers;
 

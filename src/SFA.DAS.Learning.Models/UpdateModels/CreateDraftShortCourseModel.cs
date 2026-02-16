@@ -1,8 +1,9 @@
-﻿using SFA.DAS.Learning.Domain.Models.Shared;
-using SFA.DAS.Learning.Enums;
+﻿using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
-namespace SFA.DAS.Learning.Domain.Models.ShortCourses;
+namespace SFA.DAS.Learning.Models.UpdateModels;
 
+#pragma warning disable CS8618 // Required properties must be set in the constructor
 public class CreateDraftShortCourseModel
 {
     public LearnerModel Learner { get; set; }
@@ -22,3 +23,4 @@ public class OnProgramme
     public List<Milestone> Milestones { get; set; }
     public decimal Price { get; init; }
 }
+#pragma warning restore CS8618

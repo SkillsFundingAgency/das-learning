@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using SFA.DAS.Learning.DataAccess.Extensions;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
-using SFA.DAS.Learning.Domain.Models.Shared;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Helpers;
 

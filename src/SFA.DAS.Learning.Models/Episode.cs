@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.Learning.DataTransferObjects;
+namespace SFA.DAS.Learning.Models;
 
 [ExcludeFromCodeCoverage]
 public class Episode

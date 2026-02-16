@@ -1,7 +1,6 @@
 ﻿using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
-using SFA.DAS.Learning.Domain.Models.Shared;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 namespace SFA.DAS.Learning.Domain.Extensions;
 

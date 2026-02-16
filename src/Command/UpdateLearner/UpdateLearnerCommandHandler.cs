@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using SFA.DAS.Learning.Domain.Models.Shared;
+using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Repositories;
 
 namespace SFA.DAS.Learning.Command.UpdateLearner;

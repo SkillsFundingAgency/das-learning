@@ -2,7 +2,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SFA.DAS.Learning.DataTransferObjects;
+using SFA.DAS.Learning.Models;
 using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;

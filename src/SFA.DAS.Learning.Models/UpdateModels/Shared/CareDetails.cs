@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.Learning.Domain.Models.Shared;
+﻿namespace SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 public class CareDetails
 {

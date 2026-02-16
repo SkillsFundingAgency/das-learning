@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Extensions;
-using SFA.DAS.Learning.DataTransferObjects;
+using SFA.DAS.Learning.Models;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
 
@@ -13,7 +13,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
 {
     private LearningDataContext DbContext => dbContext.Value;
 
-    public async Task<IEnumerable<Learning.DataTransferObjects.Learning>> GetAll(
+    public async Task<IEnumerable<Learning.Models.Learning>> GetAll(
         long ukprn,
         FundingPlatform? fundingPlatform)
     {
@@ -25,7 +25,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 DbContext.LearnersDbSet,
                 al => al.LearnerKey,
                 learner => learner.Key,
-                (al, learner) => new Learning.DataTransferObjects.Learning
+                (al, learner) => new Learning.Models.Learning
                 {
                     Uln = learner.Uln,
                     FirstName = learner.FirstName,
@@ -36,7 +36,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
     }
 
 
-    public async Task<PagedResult<Learning.DataTransferObjects.Learning>> GetByDates(
+    public async Task<PagedResult<Learning.Models.Learning>> GetByDates(
         long ukprn,
         DateRange dates,
         int limit,
@@ -76,14 +76,14 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                 DbContext.LearnersDbSet.AsNoTracking(),
                 learning => learning.LearnerKey,
                 learner => learner.Key,
-                (learning, learner) => new Learning.DataTransferObjects.Learning
+                (learning, learner) => new Learning.Models.Learning
                 {
                     Uln = learner.Uln,
                     Key = learning.Key
                 })
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<Learning.DataTransferObjects.Learning>
+        return new PagedResult<Learning.Models.Learning>
         {
             Data = result,
             TotalItems = totalItems,

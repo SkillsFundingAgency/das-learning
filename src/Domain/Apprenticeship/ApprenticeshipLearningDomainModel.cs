@@ -1,11 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using SFA.DAS.Learning.Domain.Enums;
+﻿using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
-using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Enums;
-using MathsAndEnglish = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglish;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
+using System.Collections.ObjectModel;
 using ApprenticeshipLearningEntity = SFA.DAS.Learning.DataAccess.Entities.Learning.ApprenticeshipLearning;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -136,10 +135,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     {
         var changes = new List<LearningUpdateChanges>();
 
-        UpdateLearnerDetails(updateContext, changes);
-
-        UpdateLearnerDateOfBirth(updateContext, changes);
-
         UpdateLearningDetails(updateContext, changes);
 
         UpdateMathsAndEnglishDetails(updateContext, changes);
@@ -156,55 +151,10 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateBreaksInLearning(updateContext, changes);
 
-        UpdateCareDetails(updateContext, changes);
-
         if (changes.Any()) AddEvent(this.ToLearnerUpdatedEvent(updateContext.Learner));
 
         return changes.ToArray();
     }
-
-    private void UpdateLearnerDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
-    {
-        //if (updateModel.Learning.FirstName != FirstName || updateModel.Learning.LastName != LastName ||
-        //    updateModel.Learning.EmailAddress != EmailAddress)
-        //{
-        //    _entity.FirstName = updateModel.Learning.FirstName;
-        //    _entity.LastName = updateModel.Learning.LastName;
-        //    _entity.EmailAddress = updateModel.Learning.EmailAddress;
-
-        //    changes.Add(LearningUpdateChanges.PersonalDetails);
-
-         //   var @event = new PersonalDetailsChangedEvent
-        //    {
-        //        ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
-        //        LearningKey = Key,
-        //        FirstName = FirstName,
-        //        LastName = LastName,
-        //        EmailAddress = EmailAddress
-        //    };
-
-        //    AddEvent(@event);
-        //}
-    }
-
-    private void UpdateLearnerDateOfBirth(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
-    {
-        //if (updateModel.Learning.DateOfBirth != DateOfBirth)
-        //{
-        //    _entity.DateOfBirth = updateModel.Learning.DateOfBirth;
-
-        //    changes.Add(LearningUpdateChanges.DateOfBirthChanged);
-
-        //    var @event = new DateOfBirthChangedEvent
-        //    {
-        //        LearningKey = Key,
-        //        DateOfBirth = DateOfBirth
-        //    };
-
-        //    AddEvent(@event);
-        //}
-    }
-
 
     public void RemoveLearner()
     {
@@ -381,16 +331,4 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdateCareDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
-    {
-        //if (_entity.HasEHCP != updateModel.Learning.Care.HasEHCP ||
-        //    _entity.IsCareLeaver != updateModel.Learning.Care.IsCareLeaver ||
-        //    _entity.CareLeaverEmployerConsentGiven != updateModel.Learning.Care.CareLeaverEmployerConsentGiven)
-        //{
-        //    _entity.HasEHCP = updateModel.Learning.Care.HasEHCP;
-        //    _entity.IsCareLeaver = updateModel.Learning.Care.IsCareLeaver;
-        //    _entity.CareLeaverEmployerConsentGiven = updateModel.Learning.Care.CareLeaverEmployerConsentGiven;
-        //    changes.Add(LearningUpdateChanges.Care);
-        //}
-    }
 }

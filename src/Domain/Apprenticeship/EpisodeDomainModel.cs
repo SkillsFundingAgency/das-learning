@@ -1,8 +1,8 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
-using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;

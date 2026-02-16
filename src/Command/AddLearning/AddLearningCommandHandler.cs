@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
-using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;

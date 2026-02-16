@@ -1,6 +1,7 @@
 ﻿using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using LearningSupportDetails = SFA.DAS.Learning.InnerApi.Requests.Shared.LearningSupportDetails;
 
 namespace SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
@@ -225,14 +226,14 @@ public static class UpdateLearnerRequestExtensions
     {
         return new LearningUpdateContext
         {
-            Learner = new Domain.Models.Shared.LearnerModel
+            Learner = new LearnerModel
             {
                 FirstName = request.Learner.FirstName,
                 LastName = request.Learner.LastName,
                 EmailAddress = request.Learner.EmailAddress,
                 DateOfBirth = request.Learner.DateOfBirth
             },
-            Care = new Domain.Models.Shared.CareDetails
+            Care = new Models.UpdateModels.Shared.CareDetails
             {
                 HasEHCP = request.Learner.Care.HasEHCP,
                 IsCareLeaver = request.Learner.Care.IsCareLeaver,
@@ -268,14 +269,14 @@ public static class UpdateLearnerRequestExtensions
                         })
                 }),
             LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
-                new Domain.Models.Shared.LearningSupportDetails
+                new Models.UpdateModels.Shared.LearningSupportDetails
                 {
                     StartDate = x.StartDate, EndDate = x.EndDate
                 }),
-            OnProgrammeDetails = new Domain.Models.Apprenticeships.OnProgrammeDetails
+            OnProgrammeDetails = new Models.UpdateModels.OnProgrammeDetails
             {
                 ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
-                Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Domain.Models.Apprenticeships.Cost
+                Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Models.UpdateModels.Cost
                 {
                     TrainingPrice = x.TrainingPrice,
                     EpaoPrice = x.EpaoPrice,
@@ -283,7 +284,7 @@ public static class UpdateLearnerRequestExtensions
                 }),
                 PauseDate = request.OnProgramme.PauseDate,
                 BreaksInLearning = request.OnProgramme.BreaksInLearning.SelectOrEmptyList(x => 
-                    new Domain.Models.Apprenticeships.BreakInLearningUpdateDetails
+                    new Models.UpdateModels.BreakInLearningUpdateDetails
                     {
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,

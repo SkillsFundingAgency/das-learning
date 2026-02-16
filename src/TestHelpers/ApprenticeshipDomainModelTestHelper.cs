@@ -1,8 +1,8 @@
 ﻿using AutoFixture;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Types;
 using System.Reflection;
-using SFA.DAS.Learning.Domain.Models.Shared;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 using FundingType = SFA.DAS.Learning.Enums.FundingType;
 

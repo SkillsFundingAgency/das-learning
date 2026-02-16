@@ -6,9 +6,9 @@ using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 

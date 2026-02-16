@@ -1,9 +1,8 @@
-﻿using SFA.DAS.Learning.Domain.Models.Shared;
+﻿using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
-namespace SFA.DAS.Learning.Domain.Models.Apprenticeships;
+namespace SFA.DAS.Learning.Models.UpdateModels;
 
 #pragma warning disable CS8618 // Required properties must be set in the constructor
-
 public class LearningUpdateContext
 {
     public Guid LearningKey { get; set; }

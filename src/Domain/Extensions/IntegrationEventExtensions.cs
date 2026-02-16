@@ -1,5 +1,4 @@
 ﻿using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Models.Shared;
 using SFA.DAS.Learning.Types;
 
 namespace SFA.DAS.Learning.Domain.Extensions;

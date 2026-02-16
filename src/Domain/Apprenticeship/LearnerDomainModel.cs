@@ -1,6 +1,6 @@
 ﻿using SFA.DAS.Learning.Domain.Events;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 

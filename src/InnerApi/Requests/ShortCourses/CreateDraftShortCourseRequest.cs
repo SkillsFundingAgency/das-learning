@@ -1,8 +1,8 @@
 ﻿using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models.Shared;
-using SFA.DAS.Learning.Domain.Models.ShortCourses;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 namespace SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 
@@ -99,12 +99,12 @@ public static class CreateDraftShortCourseRequestExtensions
                 Uln = request.LearnerUpdateDetails.Uln
             },
             LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
-                new Domain.Models.Shared.LearningSupportDetails
+                new Learning.Models.UpdateModels.Shared.LearningSupportDetails
                 {
                     StartDate = x.StartDate,
                     EndDate = x.EndDate
                 }),
-            OnProgramme = new Domain.Models.ShortCourses.OnProgramme
+            OnProgramme = new Learning.Models.UpdateModels.OnProgramme
             {
                 CourseCode = request.OnProgramme.CourseCode,
                 EmployerId = request.OnProgramme.EmployerId,
