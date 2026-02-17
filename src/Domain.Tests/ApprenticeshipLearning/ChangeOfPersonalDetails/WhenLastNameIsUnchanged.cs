@@ -20,14 +20,13 @@ public class WhenLastNameIsUnchanged
     public void SetUp()
     {
         (var learning, _learner) = new LearningDomainModelBuilder().Build();
-        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, learning);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), _learner.GetEntity());
 
         _lastName = updateModel.Learner.LastName;
 
         //Act
-        _result = _learner.Update(updateModel, eventBuilder);
+        _result = _learner.Update(updateModel);
     }
 
     [Test]

@@ -68,7 +68,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TrainingCourseVersion);
 
         var eventBuilder = new LearnerUpdatedEventBuilder(learner,learning);
-        learning.MarkAsCreated(eventBuilder.CreateEvent());
+        learning.AddUpdatedEvent(eventBuilder.CreateEvent());
 
         try
         {

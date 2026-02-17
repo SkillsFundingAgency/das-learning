@@ -1,5 +1,4 @@
-﻿using SFA.DAS.Learning.Domain.Builders;
-using SFA.DAS.Learning.Domain.Enums;
+﻿using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
@@ -124,7 +123,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         _entity.Episodes.Add(episode.GetEntity());
     }
 
-    public void MarkAsCreated(LearnerUpdatedEvent learnerUpdatedEvent) => AddEvent(learnerUpdatedEvent);
+    /// <summary>
+    /// This adds a learner updated event which will be emitted by the repository on save.
+    /// the current purpose of this event is to trigger history generation
+    /// </summary>
+    public void AddUpdatedEvent(LearnerUpdatedEvent learnerUpdatedEvent) => AddEvent(learnerUpdatedEvent);
 
     public Learning.DataAccess.Entities.Learning.ApprenticeshipLearning GetEntity()
     {
@@ -132,7 +135,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     }
 
 
-    public LearningUpdateChanges[] UpdateLearnerDetails(LearningUpdateContext updateContext, LearnerUpdatedEventBuilder learnerUpdatedEventBuilder)
+    public LearningUpdateChanges[] Update(LearningUpdateContext updateContext)
     {
         var changes = new List<LearningUpdateChanges>();
 
@@ -151,8 +154,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         UpdatePauseDate(updateContext, changes);
 
         UpdateBreaksInLearning(updateContext, changes);
-
-        if (changes.Any()) AddOrReplaceEvent<LearnerUpdatedEvent>(learnerUpdatedEventBuilder.CreateEvent());
 
         return changes.ToArray();
     }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Builders;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Repositories;
 
@@ -30,8 +31,8 @@ public class UpdateLearnerCommandHandler(
         }
 
         var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
-        var learningChanges = learning.UpdateLearnerDetails(command.UpdateModel, eventBuilder);
-        var learnerChanges = learner.Update(command.UpdateModel, eventBuilder);
+        var learningChanges = learning.Update(command.UpdateModel);
+        var learnerChanges = learner.Update(command.UpdateModel);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
 
         if (changes.Length == 0)
@@ -49,7 +50,10 @@ public class UpdateLearnerCommandHandler(
         }
 
         logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearningKey, changes);
-        await learningRepository.Update(learning);
+
+        learning.AddUpdatedEvent(eventBuilder.CreateEvent());
+
+        await learningRepository.Update(learning); // We only need to call one update as the repo's share a dbcontext which tracks changes across both aggregates
 
         logger.LogInformation("Successfully updated learner with key {LearnerKey}", command.LearningKey);
 

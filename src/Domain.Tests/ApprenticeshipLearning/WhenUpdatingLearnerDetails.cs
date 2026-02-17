@@ -31,7 +31,6 @@ public class WhenUpdatingLearnerDetails
         learningEntity.LearnerKey = learnerEntity.Key;
 
         var learner = LearnerDomainModel.Get(learnerEntity);
-        var eventBuilder = new LearnerUpdatedEventBuilder(learner, ApprenticeshipLearningDomainModel.Get(learningEntity));
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
 
@@ -39,7 +38,7 @@ public class WhenUpdatingLearnerDetails
             updateModel.Learner.DateOfBirth = _fixture.Create<DateTime>();
 
         // Act
-        var result = learner.Update(updateModel, eventBuilder);
+        var result = learner.Update(updateModel);
 
         // Assert
         learnerEntity.DateOfBirth.Should().Be(updateModel.Learner.DateOfBirth);

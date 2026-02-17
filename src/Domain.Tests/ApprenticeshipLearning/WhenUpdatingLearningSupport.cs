@@ -28,11 +28,11 @@ public class WhenUpdatingLearningSupport
     {
         //Arrange
         var learningSupport = new List<LearningSupportDetails>();
-        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
+        (var learning, var learner) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         result.Should().BeEmpty();
@@ -44,13 +44,13 @@ public class WhenUpdatingLearningSupport
     {
         //Arrange
         var learningSupport = new List<LearningSupportDetails>();
-        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
+        (var learning, var learner) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
 
         updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)});
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
@@ -69,12 +69,12 @@ public class WhenUpdatingLearningSupport
         {
             new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)}
         };
-        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
+        (var learning, var learner) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.LearningSupport.Clear();
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
@@ -89,19 +89,19 @@ public class WhenUpdatingLearningSupport
         {
             new LearningSupportDetails{ StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30) }
         };
-        (var learning, var learner, var eventBuilder) = CreateLearner(learningSupport);
+        (var learning, var learner) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now.AddDays(31), EndDate = DateTime.Now.AddDays(60) });
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
     }
 
 
-    private (ApprenticeshipLearningDomainModel, LearnerDomainModel, LearnerUpdatedEventBuilder) CreateLearner(List<LearningSupportDetails> learningSupport)
+    private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(List<LearningSupportDetails> learningSupport)
     {
         var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         learningEntity.CompletionDate = learningEntity.CompletionDate?.Date;
@@ -130,9 +130,8 @@ public class WhenUpdatingLearningSupport
 
         var learner = LearnerDomainModel.Get(learnerEntity);
         var learning = ApprenticeshipLearningDomainModel.Get(learningEntity);
-        var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
 
-        return new(learning, learner, eventBuilder);
+        return new(learning, learner);
     }
 
 }

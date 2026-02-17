@@ -43,14 +43,12 @@ public class WhenAPriceIsRemoved
             .WithPlannedEndDate(PlannedEndDate)
             .Build();
 
-        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
-
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         updateModel.OnProgrammeDetails.Costs.RemoveAt(1);
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        _result = _learning.Update(updateModel);
     }
 
     [Test]

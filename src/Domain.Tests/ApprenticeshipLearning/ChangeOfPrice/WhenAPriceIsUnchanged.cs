@@ -36,12 +36,10 @@ public class WhenAPriceIsUnchanged
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
-        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
-
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        _result = _learning.Update(updateModel);
     }
 
     [Test]

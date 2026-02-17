@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -17,7 +16,6 @@ public class WhenAPriceIsUpdated
     private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
-    private LearnerUpdatedEventBuilder _eventBuilder;
 
     [SetUp]
     public void SetUp()
@@ -36,8 +34,6 @@ public class WhenAPriceIsUpdated
             .WithCosts(existingCosts)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
-
-        _eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
     }
 
     [Test]
@@ -48,7 +44,7 @@ public class WhenAPriceIsUpdated
         updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 06, 01);
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel, _eventBuilder);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);
@@ -69,7 +65,7 @@ public class WhenAPriceIsUpdated
         updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel, _eventBuilder);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);
@@ -90,7 +86,7 @@ public class WhenAPriceIsUpdated
         updateModel.OnProgrammeDetails.Costs.Single().EpaoPrice += 200;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel, _eventBuilder);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);
@@ -111,7 +107,7 @@ public class WhenAPriceIsUpdated
         updateModel.OnProgrammeDetails.Costs.Single().EpaoPrice = null;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel, _eventBuilder);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);

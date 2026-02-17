@@ -29,13 +29,13 @@ public class WhenUpdatingBreaksInLearning
     {
         // Arrange
         var breaks = new List<EpisodeBreakInLearning>();
-        (var learning, var learner, var eventBuilder) = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Clear();
 
         // Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         // Assert
         result.Should().BeEmpty();
@@ -47,7 +47,7 @@ public class WhenUpdatingBreaksInLearning
     {
         // Arrange
         var breaks = new List<EpisodeBreakInLearning>();
-        (var learning, var learner, var eventBuilder) = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(),learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Add(new BreakInLearningUpdateDetails
@@ -57,7 +57,7 @@ public class WhenUpdatingBreaksInLearning
         });
 
         // Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         // Assert
         result.Should().Contain(LearningUpdateChanges.BreaksInLearningUpdated);
@@ -83,13 +83,13 @@ public class WhenUpdatingBreaksInLearning
             }
         };
 
-        (var learning, var learner, var eventBuilder) = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Clear();
 
         // Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         // Assert
         result.Should().Contain(LearningUpdateChanges.BreaksInLearningUpdated);
@@ -111,7 +111,7 @@ public class WhenUpdatingBreaksInLearning
             }
         };
 
-        (var learning, var learner, var eventBuilder) = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.Add(new BreakInLearningUpdateDetails
@@ -121,7 +121,7 @@ public class WhenUpdatingBreaksInLearning
         });
 
         // Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         // Assert
         result.Should().Contain(LearningUpdateChanges.BreaksInLearningUpdated);
@@ -143,19 +143,19 @@ public class WhenUpdatingBreaksInLearning
             }
         };
 
-        (var learning, var learner, var eventBuilder) = CreateLearner(breaks);
+        (var learning, var learner) = CreateLearner(breaks);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
         updateModel.OnProgrammeDetails.BreaksInLearning.First().PriorPeriodExpectedEndDate = DateTime.Now.AddYears(1);
 
         // Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         // Assert
         result.Should().Contain(LearningUpdateChanges.BreaksInLearningUpdated);
     }
 
-    private (ApprenticeshipLearningDomainModel, LearnerDomainModel, LearnerUpdatedEventBuilder) CreateLearner(List<EpisodeBreakInLearning> breaks)
+    private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(List<EpisodeBreakInLearning> breaks)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
@@ -187,7 +187,6 @@ public class WhenUpdatingBreaksInLearning
 
         var learner = LearnerDomainModel.Get(learnerEntity);
         var learning = ApprenticeshipLearningDomainModel.Get(entity);
-        var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
-        return (learning, learner, eventBuilder);
+        return (learning, learner);
     }
 }

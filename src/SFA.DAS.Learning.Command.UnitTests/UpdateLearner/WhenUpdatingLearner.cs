@@ -65,7 +65,6 @@ public class WhenUpdatingLearner
 
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
-        var eventBuilder = new LearnerUpdatedEventBuilder(learnerDomainModel, learningDomainModel);
 
         // Create a single episode
         var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
@@ -77,8 +76,8 @@ public class WhenUpdatingLearner
         _learningRepository.Setup(x => x.Get(command.LearningKey))
             .ReturnsAsync(learningDomainModel);
 
-        _ = learningDomainModel.UpdateLearnerDetails(command.UpdateModel, eventBuilder);
-        _ = learnerDomainModel.Update(command.UpdateModel, eventBuilder);
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
 
         // Act
         var result = await _commandHandler.Handle(command);

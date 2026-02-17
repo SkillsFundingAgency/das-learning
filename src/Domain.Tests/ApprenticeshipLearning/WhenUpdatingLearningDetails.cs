@@ -32,14 +32,13 @@ public class WhenUpdatingLearningDetails
 
         var learner = LearnerDomainModel.Get(learnerEntity);
         var learning = ApprenticeshipLearningDomainModel.Get(learningEntity);
-        var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
 
         if (changed) updateModel.Learning.CompletionDate = _fixture.Create<DateTime>();
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         learning.CompletionDate.Should().Be(updateModel.Learning.CompletionDate?.Date);

@@ -19,13 +19,12 @@ public class WhenEmailAddressIsRemoved
     public void SetUp()
     {
         (_learning, _learner) = new LearningDomainModelBuilder().Build();
-        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         updateModel.Learner.EmailAddress = null;
 
         //Act
-        _result = _learner.Update(updateModel, eventBuilder);
+        _result = _learner.Update(updateModel);
     }
 
     [Test]

@@ -1,14 +1,13 @@
-﻿using System;
-using System.Linq;
-using AutoFixture;
+﻿using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
+using System;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
@@ -29,7 +28,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     {
         //Arrange
         (var learnerEntity, var learningEntity) = CreateEntities();
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
         MathsAndEnglishUpdateDetails newCourse = null;
@@ -41,7 +40,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         }
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         learningEntity.MathsAndEnglishCourses.Count.Should().Be(updateModel.MathsAndEnglishCourses.Count);
@@ -60,7 +59,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learnerEntity, var learningEntity) = CreateEntities();
         learningEntity.MathsAndEnglishCourses.ForEach(x => x.CompletionDate = x.CompletionDate?.Date);
 
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.FirstOrDefault();
@@ -68,7 +67,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         if (changed) mathsAndEnglishUpdateModel.CompletionDate = _fixture.Create<DateTime>();
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).CompletionDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.CompletionDate?.Date);
@@ -85,7 +84,7 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         learningEntity.MathsAndEnglishCourses.ForEach(x => x.WithdrawalDate = x.WithdrawalDate?.Date);
 
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.FirstOrDefault();
@@ -94,7 +93,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         if (changed) mathsAndEnglishUpdateModel.WithdrawalDate = _fixture.Create<DateTime>();
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         learning.MathsAndEnglishCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
@@ -110,7 +109,7 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         learningEntity.MathsAndEnglishCourses.ForEach(x => x.StartDate = x.StartDate.Date);
 
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
@@ -118,7 +117,7 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         if (changed) mathsAndEnglishUpdateModel.StartDate = _fixture.Create<DateTime>().Date;
 
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).StartDate.Should().Be(mathsAndEnglishUpdateModel.StartDate.Date);
         learningEntity.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).StartDate.Should().Be(mathsAndEnglishUpdateModel.StartDate.Date);
@@ -133,14 +132,14 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         learningEntity.MathsAndEnglishCourses.ForEach(x => x.PlannedEndDate = x.PlannedEndDate.Date);
 
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
 
         if (changed) mathsAndEnglishUpdateModel.PlannedEndDate = _fixture.Create<DateTime>().Date;
 
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PlannedEndDate.Should().Be(mathsAndEnglishUpdateModel.PlannedEndDate.Date);
         learningEntity.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PlannedEndDate.Should().Be(mathsAndEnglishUpdateModel.PlannedEndDate.Date);
@@ -152,7 +151,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     public void ThenPriorLearningPercentageIsUpdated(bool changed)
     {
         (var learnerEntity, var learningEntity) = CreateEntities();
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
@@ -163,7 +162,7 @@ public class WhenUpdatingMathsAndEnglishDetails
             mathsAndEnglishUpdateModel.PriorLearningPercentage = newValue;
         }
 
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PriorLearningPercentage.Should().Be(mathsAndEnglishUpdateModel.PriorLearningPercentage);
         learningEntity.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PriorLearningPercentage.Should().Be(mathsAndEnglishUpdateModel.PriorLearningPercentage);
@@ -181,7 +180,7 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         learningEntity.MathsAndEnglishCourses = [new MathsAndEnglish { Course = course.Course, LearnAimRef = course.LearnAimRef }];
 
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
 
@@ -191,7 +190,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         }
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         if (changed)
@@ -212,7 +211,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     public void ThenAmountIsUpdated(bool changed)
     {
         (var learnerEntity, var learningEntity) = CreateEntities();
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
         var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
@@ -223,7 +222,7 @@ public class WhenUpdatingMathsAndEnglishDetails
             mathsAndEnglishUpdateModel.Amount = newValue;
         }
 
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         learning.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).Amount.Should().Be(mathsAndEnglishUpdateModel.Amount);
         learningEntity.MathsAndEnglishCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).Amount.Should().Be(mathsAndEnglishUpdateModel.Amount);
@@ -236,7 +235,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     {
         //Arrange
         (var learnerEntity, var learningEntity) = CreateEntities();
-        (var learner, var learning, var eventBuilder) = CreateDomainObjects(learnerEntity, learningEntity);
+        (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
         MathsAndEnglishUpdateDetails newCourse = null;
@@ -249,7 +248,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         }
 
         //Act
-        var result = learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = learning.Update(updateModel);
 
         //Assert
         learningEntity.MathsAndEnglishCourses.Count.Should().Be(updateModel.MathsAndEnglishCourses.Count);
@@ -268,15 +267,14 @@ public class WhenUpdatingMathsAndEnglishDetails
         return (learnerEntity, learningEntity);
     }
 
-    private (LearnerDomainModel, ApprenticeshipLearningDomainModel, LearnerUpdatedEventBuilder) CreateDomainObjects(
+    private (LearnerDomainModel, ApprenticeshipLearningDomainModel) CreateDomainObjects(
         DataAccess.Entities.Learning.Learner learnerEntity,
         DataAccess.Entities.Learning.ApprenticeshipLearning learningEntity
         )
     {
         var learning = ApprenticeshipLearningDomainModel.Get(learningEntity);
         var learner = LearnerDomainModel.Get(learnerEntity);
-        var eventBuilder = new LearnerUpdatedEventBuilder(learner, learning);
 
-        return (learner, learning, eventBuilder);
+        return (learner, learning);
     }
 }

@@ -24,7 +24,6 @@ public class WhenFirstNameIsUpdated
         var fixture = new Fixture();
 
         (_learning, _learner) = new LearningDomainModelBuilder().Build();
-        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
@@ -32,7 +31,7 @@ public class WhenFirstNameIsUpdated
         updateModel.Learner.FirstName = _firstName;
 
         //Act
-        _result = _learner.Update(updateModel, eventBuilder);
+        _result = _learner.Update(updateModel);
     }
 
     [Test]

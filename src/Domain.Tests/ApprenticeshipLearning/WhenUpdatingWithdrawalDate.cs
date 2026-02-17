@@ -2,7 +2,6 @@
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -28,11 +27,10 @@ public class WhenUpdatingWithdrawalDate
     {
         //Arrange
         var domainModel = GetLearningDomainModel(null);
-        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
@@ -45,11 +43,10 @@ public class WhenUpdatingWithdrawalDate
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
         var domainModel = GetLearningDomainModel(withdrawalDate);
-        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
@@ -62,11 +59,10 @@ public class WhenUpdatingWithdrawalDate
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
         var domainModel = GetLearningDomainModel(withdrawalDate);
-        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.ReverseWithdrawal);
@@ -84,11 +80,10 @@ public class WhenUpdatingWithdrawalDate
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
         var domainModel = GetLearningDomainModel(withdrawalDate.AddDays(30));
-        var eventBuilder = new LearnerUpdatedEventBuilder(GetLearnerDomainModel(), domainModel);
         var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel, eventBuilder);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.Withdrawal);

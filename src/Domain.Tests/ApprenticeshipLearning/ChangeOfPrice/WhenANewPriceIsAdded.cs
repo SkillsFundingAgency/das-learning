@@ -36,8 +36,6 @@ public class WhenANewPriceIsAdded
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
-        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
-
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         updateModel.OnProgrammeDetails.Costs.Add(new Cost
@@ -48,7 +46,7 @@ public class WhenANewPriceIsAdded
         });
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        _result = _learning.Update(updateModel);
     }
 
     [Test]

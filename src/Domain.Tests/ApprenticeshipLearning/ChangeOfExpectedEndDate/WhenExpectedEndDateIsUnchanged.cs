@@ -27,13 +27,11 @@ public class WhenExpectedEndDateIsUnchanged
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
-        var eventBuilder = new LearnerUpdatedEventBuilder(_learner, _learning);
-
         //Act
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2025, 07, 31);
 
-        _result = _learning.UpdateLearnerDetails(updateModel, eventBuilder);
+        _result = _learning.Update(updateModel);
     }
 
     [Test]
