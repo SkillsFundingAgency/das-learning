@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Domain.Models.ShortCourses;
+﻿using SFA.DAS.Learning.Models.UpdateModels;
 
 namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 

@@ -1,33 +1,35 @@
-﻿using System;
-using System.Linq;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
+using System;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfExpectedEndDate;
 
 [TestFixture]
 public class WhenExpectedEndDateWithMultiplePricesIsUpdated
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
     [SetUp]
     public void SetUp()
     {
-        _learning = new LearningDomainModelBuilder()
+        (_learning, _learner) = new LearningDomainModelBuilder()
             .WithGeneratedCosts(3)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
 
         //Act
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2026, 07, 31);
 
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learning.Update(updateModel);
     }
 
     [Test]

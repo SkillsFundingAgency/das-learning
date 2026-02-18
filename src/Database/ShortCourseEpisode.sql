@@ -4,7 +4,11 @@
     [LearningKey] UNIQUEIDENTIFIER NOT NULL,
     [Ukprn] BIGINT NOT NULL,
     [EmployerAccountId] BIGINT NOT NULL,
-    [TrainingCode] NCHAR(10) NOT NULL
+    [StartDate] DATETIME NOT NULL,
+    [ExpectedEndDate] DATETIME NOT NULL,
+    [WithdrawalDate] DATETIME NULL,
+    [TrainingCode] NCHAR(10) NOT NULL,
+    [IsApproved] BIT NOT NULL DEFAULT 0
 )
 GO
 

@@ -41,7 +41,7 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand,
 
         _logger.LogInformation("Successfully updated repository after removing learner from start with key {LearnerKey}", command.LearnerKey);
 
-        var lastDayOfLearning = learning.LatestEpisode.LastDayOfLearning!.Value;
+        var lastDayOfLearning = learning.LatestEpisode.WithdrawalDate!.Value;
 
         if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
         {

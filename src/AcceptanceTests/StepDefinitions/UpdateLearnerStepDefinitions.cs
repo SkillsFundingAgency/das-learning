@@ -97,7 +97,7 @@ public class UpdateLearnerStepDefinitions
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.Episodes.First().LastDayOfLearning = withdrawDate.DateTime;
+        learning.Episodes.First().WithdrawalDate = withdrawDate.DateTime;
     }
 
     [Then(@"the Earnings for the Learning are recalculated")]
@@ -278,8 +278,8 @@ public class UpdateLearnerStepDefinitions
     public async Task ThenTheDateOfBirthForTheLearningIsSetTo(TokenisableDateTime dateOfBirth)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.DateOfBirth.Should().Be(dateOfBirth.DateTime);
+        var learner = dbConnection.GetLearner(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learner.DateOfBirth.Should().Be(dateOfBirth.DateTime);
     }
 
     [Given(@"the Care details for the Learning is")]
@@ -287,10 +287,10 @@ public class UpdateLearnerStepDefinitions
     public async Task ThenTheCareDetailsForTheLearningIs(Table table)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.HasEHCP.Should().Be(table.GetBoolean("HasEHCP"));
-        learning.IsCareLeaver.Should().Be(table.GetBoolean("IsCareLeaver"));
-        learning.CareLeaverEmployerConsentGiven.Should().Be(table.GetBoolean("CareLeaverEmployerConsentGiven"));
+        var learner = dbConnection.GetLearner(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learner.HasEHCP.Should().Be(table.GetBoolean("HasEHCP"));
+        learner.IsCareLeaver.Should().Be(table.GetBoolean("IsCareLeaver"));
+        learner.CareLeaverEmployerConsentGiven.Should().Be(table.GetBoolean("CareLeaverEmployerConsentGiven"));
     }
 
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)

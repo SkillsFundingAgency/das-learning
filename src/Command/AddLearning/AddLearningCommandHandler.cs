@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -12,18 +13,24 @@ namespace SFA.DAS.Learning.Command.AddLearning;
 
 public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 {
+    private readonly ILearnerFactory _learnerFactory;
     private readonly IApprenticeshipLearningFactory _learningFactory;
+    private readonly ILearnerRepository _learnerRepository;
     private readonly IApprenticeshipLearningRepository _learningRepository;
     private readonly IMessageSession _messageSession;
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
     public AddLearningCommandHandler(
+        ILearnerFactory learnerFactory,
         IApprenticeshipLearningFactory learningFactory,
+        ILearnerRepository learnerRepository,
         IApprenticeshipLearningRepository learningRepository,
         IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {
+        _learnerFactory = learnerFactory;
         _learningFactory = learningFactory;
+        _learnerRepository = learnerRepository;
         _learningRepository = learningRepository;
         _messageSession = messageSession;
         _logger = logger;
@@ -38,15 +45,11 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             return;
         }
 
+        var learner = await GetOrCreateLearner(command);
+
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
-        var learning = _learningFactory.CreateNew(
-            command.ApprovalsApprenticeshipId,
-            command.Uln,
-            command.DateOfBirth,
-            command.FirstName,
-            command.LastName,
-            command.ApprenticeshipHashedId);
+        var learning = _learningFactory.CreateNew(command.ApprovalsApprenticeshipId, learner.Key);
 
         learning.AddEpisode(
             command.UKPRN,
@@ -64,7 +67,8 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TrainingCode,
             command.TrainingCourseVersion);
 
-        learning.MarkAsCreated();
+        var eventBuilder = new LearnerUpdatedEventBuilder(learner,learning);
+        learning.AddUpdatedEvent(eventBuilder.CreateEvent());
 
         try
         {
@@ -81,24 +85,39 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
         {
-            await SendEvent(learning);
+            await SendEvent(learning, learner);
         }
     }
 
-    private async Task SendEvent(ApprenticeshipLearningDomainModel learning)
+    private async Task<LearnerDomainModel> GetOrCreateLearner(AddLearningCommand command)
     {
+        var learner = await _learnerRepository.GetByUln(command.Uln);
+
+        if (learner != null)
+        {
+            return learner;
+        }
+
+        var newLearner = _learnerFactory.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName);
+        await _learnerRepository.Add(newLearner);
+        return newLearner;
+    }
+
+    private async Task SendEvent(ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner)
+    {
+
         _logger.LogInformation(
             "Sending LearningCreatedEvent for ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
             learning.ApprovalsApprenticeshipId);
         var learningCreatedEvent = new LearningCreatedEvent
         {
             LearningKey = learning.Key,
-            Uln = learning.Uln,
+            Uln = learner.Uln,
             ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
-            DateOfBirth = learning.DateOfBirth,
-            FirstName = learning.FirstName,
-            LastName = learning.LastName,
-            Episode = learning.BuildEpisodeForIntegrationEvent()
+            DateOfBirth = learner.DateOfBirth,
+            FirstName = learner.FirstName,
+            LastName = learner.LastName,
+            Episode = learning.BuildEpisodeForIntegrationEvent(learner)
         };
 
         await _messageSession.Publish(learningCreatedEvent);

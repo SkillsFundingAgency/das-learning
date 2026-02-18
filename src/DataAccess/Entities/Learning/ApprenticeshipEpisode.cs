@@ -21,7 +21,7 @@ public class ApprenticeshipEpisode : Episode
     public string? TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
     public List<EpisodePrice> Prices { get; set; }
-    public DateTime? LastDayOfLearning { get; set; }
+    public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }
     public List<LearningSupport> LearningSupport { get; set; }
     public List<EpisodeBreakInLearning> BreaksInLearning { get; set; }

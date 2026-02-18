@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPrice;
 
 [TestFixture]
 public class WhenAPriceIsUpdated
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
@@ -29,7 +30,7 @@ public class WhenAPriceIsUpdated
             }
         };
 
-        _learning = new LearningDomainModelBuilder()
+        (_learning, _learner) = new LearningDomainModelBuilder()
             .WithCosts(existingCosts)
             .WithPlannedEndDate(new DateTime(2025, 07, 31))
             .Build();
@@ -39,11 +40,11 @@ public class WhenAPriceIsUpdated
     public void AndStartDateIsChangedThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 06, 01);
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);
@@ -60,11 +61,11 @@ public class WhenAPriceIsUpdated
     public void AndTrainingPriceIsChangedThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);
@@ -81,11 +82,11 @@ public class WhenAPriceIsUpdated
     public void AndEpaoPriceIsChangedThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().EpaoPrice += 200;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);
@@ -102,11 +103,11 @@ public class WhenAPriceIsUpdated
     public void AndEpaoPriceIsChangedToUnknownThenPricesAreUpdated()
     {
         //Arrange
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().EpaoPrice = null;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learning.Update(updateModel);
 
         //Assert
         _result.Should().Contain(LearningUpdateChanges.Prices);

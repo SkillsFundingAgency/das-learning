@@ -3,6 +3,7 @@ using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 
@@ -21,43 +22,26 @@ public class WhenUpdatingLearnerDetails
 
     [TestCase(true)]
     [TestCase(false)]
-    public void ThenCompletionDateIsUpdated(bool changed)
-    {
-        //Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        entity.CompletionDate = entity.CompletionDate?.Date;
-        var learning = ApprenticeshipLearningDomainModel.Get(entity);
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
-
-        if (changed) updateModel.Learning.CompletionDate = _fixture.Create<DateTime>();
-
-        //Act
-        var result = learning.UpdateLearnerDetails(updateModel);
-
-        //Assert
-        learning.CompletionDate.Should().Be(updateModel.Learning.CompletionDate?.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.CompletionDate);
-    }
-
-    [TestCase(true)]
-    [TestCase(false)]
     public void ThenDateOfBirthIsUpdated(bool changed)
     {
         // Arrange
-        var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        entity.DateOfBirth = entity.DateOfBirth.Date; // normalize
+        var learnerEntity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
+        var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
+        learnerEntity.DateOfBirth = learnerEntity.DateOfBirth.Date; // normalize
+        learningEntity.LearnerKey = learnerEntity.Key;
 
-        var learning = ApprenticeshipLearningDomainModel.Get(entity);
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(entity);
+        var learner = LearnerDomainModel.Get(learnerEntity);
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
 
         if (changed)
-            updateModel.Learning.DateOfBirth = _fixture.Create<DateTime>();
+            updateModel.Learner.DateOfBirth = _fixture.Create<DateTime>();
 
         // Act
-        var result = learning.UpdateLearnerDetails(updateModel);
+        var result = learner.Update(updateModel);
 
         // Assert
-        learning.DateOfBirth.Should().Be(updateModel.Learning.DateOfBirth);
+        learnerEntity.DateOfBirth.Should().Be(updateModel.Learner.DateOfBirth);
 
         if (changed)
             result.Should().Contain(x => x == LearningUpdateChanges.DateOfBirthChanged);

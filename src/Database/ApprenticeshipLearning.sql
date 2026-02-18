@@ -1,19 +1,15 @@
 ﻿CREATE TABLE [dbo].[ApprenticeshipLearning]
 (
 	[Key] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
-    [ApprovalsApprenticeshipId] BIGINT NOT NULL,
-    [Uln] NVARCHAR(10) NOT NULL, 
-    [FirstName] NVARCHAR(100) NOT NULL,
-    [LastName] NVARCHAR(100) NOT NULL,
-    [DateOfBirth] DATETIME NOT NULL,
-    [ApprenticeshipHashedId] NVARCHAR(100) NULL, 
-    [CompletionDate] DATETIME NULL,
-    [EmailAddress] NVARCHAR(320) NULL,
-    [HasEHCP] BIT NOT NULL DEFAULT 0, 
-    [IsCareLeaver] BIT NOT NULL DEFAULT 0, 
-    [CareLeaverEmployerConsentGiven] BIT NOT NULL DEFAULT 0,
-    CONSTRAINT UQ_ApprenticeshipLearning_ApprovalsApprenticeshipId_Uln UNIQUE (ApprovalsApprenticeshipId, Uln)
+    [LearnerKey] UNIQUEIDENTIFIER NOT NULL,
+    [ApprovalsApprenticeshipId] BIGINT NOT NULL, 
+    [CompletionDate] DATETIME NULL
 )
 GO
-CREATE INDEX IX_ApprenticeshipLearning_Uln ON ApprenticeshipLearning (Uln)
+CREATE INDEX IX_ApprenticeshipLearning_LearnerKey ON ApprenticeshipLearning (LearnerKey)
+GO
+
+GO
+ALTER TABLE dbo.ApprenticeshipLearning
+ADD CONSTRAINT FK_ApprenticeshipLearning_Learner FOREIGN KEY (LearnerKey) REFERENCES dbo.Learner ([Key])
 GO

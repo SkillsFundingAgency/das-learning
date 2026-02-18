@@ -9,9 +9,5 @@ public class ShortCourseLearning : Learning
         Episodes = new List<ShortCourseEpisode>();
     }
 
-    public Guid LearnerKey { get; set; }
-    public DateTime? WithdrawalDate { get; set; }
-    public DateTime ExpectedEndDate { get; set; }
-    public bool IsApproved { get; set; }
     public List<ShortCourseEpisode> Episodes { get; set; }
 }

@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -10,7 +11,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPerso
 [TestFixture]
 public class WhenLastNameIsUnchanged
 {
-    private ApprenticeshipLearningDomainModel _learning;
+    private LearnerDomainModel _learner;
     private LearningUpdateChanges[] _result;
 
     private string _lastName;
@@ -18,14 +19,14 @@ public class WhenLastNameIsUnchanged
     [SetUp]
     public void SetUp()
     {
-        _learning = new LearningDomainModelBuilder().Build();
+        (var learning, _learner) = new LearningDomainModelBuilder().Build();
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), _learner.GetEntity());
 
-        _lastName = updateModel.Learning.LastName;
+        _lastName = updateModel.Learner.LastName;
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learner.Update(updateModel);
     }
 
     [Test]
@@ -37,12 +38,12 @@ public class WhenLastNameIsUnchanged
     [Test]
     public void DomainModelIsUnchanged()
     {
-        _learning.LastName.Should().Be(_lastName);
+        _learner.LastName.Should().Be(_lastName);
     }
 
     [Test]
     public void ThenAPersonalDetailsEventIsNotEmitted()
     {
-        _learning.FlushEvents().Should().NotContain(x => x.GetType() == typeof(PersonalDetailsChangedEvent));
+        _learner.FlushEvents().Should().NotContain(x => x.GetType() == typeof(PersonalDetailsChangedEvent));
     }
 }

@@ -8,6 +8,7 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SFA.DAS.Learning.Domain.Builders;
 
 namespace SFA.DAS.Learning.Command.UnitTests.UpdateLearner;
 
@@ -15,6 +16,7 @@ namespace SFA.DAS.Learning.Command.UnitTests.UpdateLearner;
 public class WhenUpdatingLearner
 {
     private UpdateLearnerCommandHandler _commandHandler;
+    private Mock<ILearnerRepository> _learnerRepository;
     private Mock<IApprenticeshipLearningRepository> _learningRepository;
     private Mock<ILogger<UpdateLearnerCommandHandler>> _logger;
     private Fixture _fixture;
@@ -22,9 +24,10 @@ public class WhenUpdatingLearner
     [SetUp]
     public void SetUp()
     {
+        _learnerRepository = new Mock<ILearnerRepository>();
         _learningRepository = new Mock<IApprenticeshipLearningRepository>();
         _logger = new Mock<ILogger<UpdateLearnerCommandHandler>>();
-        _commandHandler = new UpdateLearnerCommandHandler(_logger.Object, _learningRepository.Object);
+        _commandHandler = new UpdateLearnerCommandHandler(_logger.Object, _learnerRepository.Object, _learningRepository.Object);
         _fixture = new Fixture();
     }
 
@@ -33,17 +36,20 @@ public class WhenUpdatingLearner
     {
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
-        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
-                           .ReturnsAsync(domainModel);
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        _learningRepository.Setup(x => x.Get(command.LearningKey))
+            .ReturnsAsync(learningDomainModel);
 
         // Act
         var result = await _commandHandler.Handle(command);
 
         // Assert
         result.Changes.Should().NotBeEmpty();
-        _learningRepository.Verify(x => x.Update(domainModel), Times.Once);
+        _learningRepository.Verify(x => x.Update(learningDomainModel), Times.Once);
 
         // Note this test works because the random generated domainModel will not match the random generated command.UpdateModel and at least
         // one change will be detected.
@@ -57,17 +63,21 @@ public class WhenUpdatingLearner
         command.UpdateModel.LearningSupport.Clear();
         command.UpdateModel.MathsAndEnglishCourses.Clear();
 
-        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         // Create a single episode
         var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
 
-        TestHelper.SetEpisode(domainModel, singleEpisode);
+        TestHelper.SetEpisode(learningDomainModel, singleEpisode);
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
-                           .ReturnsAsync(domainModel);
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        _learningRepository.Setup(x => x.Get(command.LearningKey))
+            .ReturnsAsync(learningDomainModel);
 
-        _ = domainModel.UpdateLearnerDetails(command.UpdateModel);
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -85,12 +95,12 @@ public class WhenUpdatingLearner
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+        _learningRepository.Setup(x => x.Get(command.LearningKey))
                            .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
-        Assert.That(ex!.Message, Is.EqualTo($"Learning with key {command.LearnerKey} not found."));
+        Assert.That(ex!.Message, Is.EqualTo($"Learning with key {command.LearningKey} not found."));
     }
 #pragma warning restore CS8620, CS8600
 }

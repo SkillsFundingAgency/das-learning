@@ -177,7 +177,7 @@ public class WhenRemovingLearner
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x =>
         {
             x.FundingPlatform = FundingPlatform.DAS;
-            x.LastDayOfLearning = DateTime.Today;
+            x.WithdrawalDate = DateTime.Today;
         });
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
@@ -194,7 +194,7 @@ public class WhenRemovingLearner
                 e.LearningKey == domainModel.Key &&
                 e.ApprovalsApprenticeshipId == domainModel.ApprovalsApprenticeshipId &&
                 e.Reason == WithdrawReason.WithdrawFromStart.ToString() &&
-                e.LastDayOfLearning == latestEpisode.LastDayOfLearning &&
+                e.LastDayOfLearning == latestEpisode.WithdrawalDate &&
                 e.EmployerAccountId == latestEpisode.EmployerAccountId), 
             It.IsAny<PublishOptions>(),
             It.IsAny<CancellationToken>()), Times.Once);
@@ -218,6 +218,6 @@ public class WhenRemovingLearner
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.LastDayOfLearning.Should().Be(latestEpisode.LastDayOfLearning);
+        result.LastDayOfLearning.Should().Be(latestEpisode.WithdrawalDate);
     }
 }

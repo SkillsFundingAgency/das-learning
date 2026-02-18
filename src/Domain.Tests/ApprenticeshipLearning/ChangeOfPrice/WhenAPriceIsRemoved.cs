@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
+using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfPrice;
 
 [TestFixture]
 public class WhenAPriceIsRemoved
 {
+    private LearnerDomainModel _learner;
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
     private static readonly DateTime PlannedEndDate = new(2025, 07, 31);
@@ -36,17 +38,17 @@ public class WhenAPriceIsRemoved
             }
         };
 
-        _learning = new LearningDomainModelBuilder()
+        (_learning, _learner) = new LearningDomainModelBuilder()
             .WithCosts(existingCosts)
             .WithPlannedEndDate(PlannedEndDate)
             .Build();
 
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(_learning.GetEntity());
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
 
         updateModel.OnProgrammeDetails.Costs.RemoveAt(1);
 
         //Act
-        _result = _learning.UpdateLearnerDetails(updateModel);
+        _result = _learning.Update(updateModel);
     }
 
     [Test]

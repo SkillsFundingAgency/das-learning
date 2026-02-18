@@ -1,8 +1,8 @@
 ﻿using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models.Shared;
-using SFA.DAS.Learning.Domain.Models.ShortCourses;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.InnerApi.Requests.Shared;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 namespace SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 
@@ -15,7 +15,7 @@ public class CreateDraftShortCourseRequest
     /// <summary>
     /// Learner details to be updated
     /// </summary>
-    public LearnerUpdateDetails LearnerUpdateDetails { get; set; }
+    public ShortCourseLearnerUpdateDetails LearnerUpdateDetails { get; set; }
 
     /// <summary>
     /// Learning support details
@@ -90,20 +90,21 @@ public static class CreateDraftShortCourseRequestExtensions
     {
         return new CreateDraftShortCourseModel
         {
-            Learner = new Learner
+            Learner = new LearnerModel
             {
                 FirstName = request.LearnerUpdateDetails.FirstName,
                 LastName = request.LearnerUpdateDetails.LastName,
                 EmailAddress = request.LearnerUpdateDetails.EmailAddress,
-                DateOfBirth = request.LearnerUpdateDetails.DateOfBirth
+                DateOfBirth = request.LearnerUpdateDetails.DateOfBirth,
+                Uln = request.LearnerUpdateDetails.Uln
             },
             LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
-                new Domain.Models.Shared.LearningSupportDetails
+                new Learning.Models.UpdateModels.Shared.LearningSupportDetails
                 {
                     StartDate = x.StartDate,
                     EndDate = x.EndDate
                 }),
-            OnProgramme = new Domain.Models.ShortCourses.OnProgramme
+            OnProgramme = new Learning.Models.UpdateModels.OnProgramme
             {
                 CourseCode = request.OnProgramme.CourseCode,
                 EmployerId = request.OnProgramme.EmployerId,

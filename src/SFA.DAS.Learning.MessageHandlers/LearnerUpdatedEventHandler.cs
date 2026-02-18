@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.ArchiveLearningHistory;
 using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Events;

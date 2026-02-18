@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AutoFixture;
+﻿using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
-using SFA.DAS.Learning.Domain.Models.Apprenticeships;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
@@ -30,11 +30,11 @@ public class WhenUpdatingWithdrawalDate
         var updateModel = GetLearnerUpdateModel(domainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
-        domainModel.Episodes.First().LastDayOfLearning.Should().BeNull();
+        domainModel.Episodes.First().WithdrawalDate.Should().BeNull();
     }
 
     [Test]
@@ -46,11 +46,11 @@ public class WhenUpdatingWithdrawalDate
         var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
-        domainModel.Episodes.First().LastDayOfLearning.Should().Be(withdrawalDate);
+        domainModel.Episodes.First().WithdrawalDate.Should().Be(withdrawalDate);
     }
 
     [Test]
@@ -62,11 +62,11 @@ public class WhenUpdatingWithdrawalDate
         var updateModel = GetLearnerUpdateModel(domainModel, null);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.ReverseWithdrawal);
-        domainModel.Episodes.First().LastDayOfLearning.Should().Be(null);
+        domainModel.Episodes.First().WithdrawalDate.Should().Be(null);
         domainModel.FlushEvents().Should().ContainEquivalentOf(new WithdrawalRevertedEvent
         {
             ApprovalsApprenticeshipId = domainModel.ApprovalsApprenticeshipId,
@@ -83,11 +83,17 @@ public class WhenUpdatingWithdrawalDate
         var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
 
         //Act
-        var result = domainModel.UpdateLearnerDetails(updateModel);
+        var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.Withdrawal);
-        domainModel.Episodes.First().LastDayOfLearning.Should().Be(withdrawalDate);
+        domainModel.Episodes.First().WithdrawalDate.Should().Be(withdrawalDate);
+    }
+
+    private LearnerDomainModel GetLearnerDomainModel()
+    {
+        var entity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
+        return LearnerDomainModel.Get(entity);
     }
 
     private ApprenticeshipLearningDomainModel GetLearningDomainModel(DateTime? withdrawalDate)
@@ -95,15 +101,16 @@ public class WhenUpdatingWithdrawalDate
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
 
-        episode.LastDayOfLearning = withdrawalDate;
+        episode.WithdrawalDate = withdrawalDate;
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
         return ApprenticeshipLearningDomainModel.Get(entity);
     }
 
-    private LearnerUpdateModel GetLearnerUpdateModel(ApprenticeshipLearningDomainModel domainModel, DateTime? withdrawalDate)
+    private LearningUpdateContext GetLearnerUpdateModel(ApprenticeshipLearningDomainModel domainModel, DateTime? withdrawalDate)
     {
-        var updateModel = LearnerUpdateModelHelper.CreateFromLearningEntity(domainModel.GetEntity());
+        var learnerDomainModel = GetLearnerDomainModel();
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(domainModel.GetEntity(), learnerDomainModel.GetEntity());
         updateModel.Delivery.WithdrawalDate = withdrawalDate;
         return updateModel;
     }

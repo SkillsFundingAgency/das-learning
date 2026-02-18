@@ -7,4 +7,5 @@ public abstract class Learning
     [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None)]
     public Guid Key { get; set; }
     public DateTime? CompletionDate { get; set; }
+    public Guid LearnerKey;
 }
