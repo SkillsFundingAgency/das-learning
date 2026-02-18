@@ -244,3 +244,96 @@ CREATE INDEX IX_LearningKey
     ON [dbo].[ApprenticeshipEpisode] (LearningKey);
 END
 GO
+
+------------------------------------------------------------
+-- Move EpisodeBreakInLearning FK to ApprenticeshipEpisode
+------------------------------------------------------------
+
+-- 1. Drop old FK if it exists
+IF EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_EpisodeBreakInLearning_Episode'
+      AND parent_object_id = OBJECT_ID('[dbo].[EpisodeBreakInLearning]')
+)
+BEGIN
+ALTER TABLE dbo.EpisodeBreakInLearning
+DROP CONSTRAINT FK_EpisodeBreakInLearning_Episode;
+END
+GO
+
+-- 2. Create new FK if not exists
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_EpisodeBreakInLearning_ApprenticeshipEpisode'
+      AND parent_object_id = OBJECT_ID('[dbo].[EpisodeBreakInLearning]')
+)
+BEGIN
+ALTER TABLE dbo.EpisodeBreakInLearning
+    ADD CONSTRAINT FK_EpisodeBreakInLearning_ApprenticeshipEpisode
+        FOREIGN KEY (EpisodeKey)
+            REFERENCES dbo.ApprenticeshipEpisode ([Key]);
+END
+GO
+
+
+------------------------------------------------------------
+-- Move EpisodePrice FK to ApprenticeshipEpisode
+------------------------------------------------------------
+
+-- 1. Drop old FK if it exists
+IF EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_EpisodePrice_Episode'
+      AND parent_object_id = OBJECT_ID('[dbo].[EpisodePrice]')
+)
+BEGIN
+ALTER TABLE dbo.EpisodePrice
+DROP CONSTRAINT FK_EpisodePrice_Episode;
+END
+GO
+
+-- 2. Drop old index if it exists
+IF EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_StartDateEndDate'
+      AND object_id = OBJECT_ID('[dbo].[EpisodePrice]')
+)
+BEGIN
+DROP INDEX [IX_StartDateEndDate]
+    ON dbo.EpisodePrice;
+END
+GO
+
+-- 3. Create new FK if not exists
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_EpisodePrice_ApprenticeshipEpisode'
+      AND parent_object_id = OBJECT_ID('[dbo].[EpisodePrice]')
+)
+BEGIN
+ALTER TABLE dbo.EpisodePrice
+    ADD CONSTRAINT FK_EpisodePrice_ApprenticeshipEpisode
+        FOREIGN KEY (EpisodeKey)
+            REFERENCES dbo.ApprenticeshipEpisode ([Key]);
+END
+GO
+
+-- 4. Recreate index if not exists
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_StartDateEndDate'
+      AND object_id = OBJECT_ID('[dbo].[EpisodePrice]')
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_StartDateEndDate]
+        ON dbo.EpisodePrice (EpisodeKey ASC, StartDate ASC, EndDate ASC);
+END
+GO
+
+
