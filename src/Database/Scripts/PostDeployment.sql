@@ -184,3 +184,63 @@ BEGIN
         ON [History].[LearningHistory] ([LearningId]);
 END
 GO
+
+------------------------------------------------------------
+-- Move Episode FK from Learning → ApprenticeshipLearning
+------------------------------------------------------------
+
+-- 1. Drop old FK on Episode if it exists
+IF EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_Episode_Learning'
+      AND parent_object_id = OBJECT_ID('[dbo].[Episode]')
+)
+BEGIN
+ALTER TABLE [dbo].[Episode]
+DROP CONSTRAINT FK_Episode_Learning;
+END
+GO
+
+-- 2. Drop old index on Episode if it exists
+IF EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_LearningKey'
+      AND object_id = OBJECT_ID('[dbo].[Episode]')
+)
+BEGIN
+DROP INDEX [IX_LearningKey]
+    ON [dbo].[Episode];
+END
+GO
+
+-- Now ensure the NEW FK + index exist on ApprenticeshipEpisode
+
+-- 3. Create new FK if not already present
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_ApprenticeshipEpisode_Learning'
+      AND parent_object_id = OBJECT_ID('[dbo].[ApprenticeshipEpisode]')
+)
+BEGIN
+ALTER TABLE [dbo].[ApprenticeshipEpisode]
+    ADD CONSTRAINT FK_ApprenticeshipEpisode_Learning
+    FOREIGN KEY (LearningKey)
+    REFERENCES dbo.ApprenticeshipLearning ([Key]);
+END
+GO
+
+-- 4. Create new index if not already present
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_LearningKey'
+      AND object_id = OBJECT_ID('[dbo].[ApprenticeshipEpisode]')
+)
+BEGIN
+CREATE INDEX IX_LearningKey
+    ON [dbo].[ApprenticeshipEpisode] (LearningKey);
+END
+GO
