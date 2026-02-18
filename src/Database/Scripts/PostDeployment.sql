@@ -124,3 +124,63 @@ WHERE NOT EXISTS
     FROM dbo.ApprenticeshipEpisode AE
     WHERE AE.[Key] = E.[Key]
     );
+
+
+
+-----------------------------------------------------------------
+-- Move LearningHistory FK from Learning → ApprenticeshipLearning
+-----------------------------------------------------------------
+
+-- 1. Drop old FK if it exists
+IF EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_LearningHistory_Learning'
+      AND parent_object_id = OBJECT_ID('[History].[LearningHistory]')
+)
+BEGIN
+ALTER TABLE [History].[LearningHistory]
+DROP CONSTRAINT FK_LearningHistory_Learning;
+END
+GO
+
+-- 2. Drop old index if it exists
+IF EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_LearningHistory_LearningId'
+      AND object_id = OBJECT_ID('[History].[LearningHistory]')
+)
+BEGIN
+DROP INDEX [IX_LearningHistory_LearningId]
+    ON [History].[LearningHistory];
+END
+GO
+
+-- 3. Create new FK to ApprenticeshipLearning
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys
+    WHERE name = 'FK_LearningHistory_ApprenticeshipLearning'
+      AND parent_object_id = OBJECT_ID('[History].[LearningHistory]')
+)
+BEGIN
+ALTER TABLE [History].[LearningHistory]
+    ADD CONSTRAINT FK_LearningHistory_ApprenticeshipLearning
+    FOREIGN KEY ([LearningId])
+    REFERENCES [dbo].[ApprenticeshipLearning]([Key]);
+END
+GO
+
+-- 4. Recreate the index
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_LearningHistory_LearningId'
+      AND object_id = OBJECT_ID('[History].[LearningHistory]')
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_LearningHistory_LearningId]
+        ON [History].[LearningHistory] ([LearningId]);
+END
+GO
