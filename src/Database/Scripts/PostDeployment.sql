@@ -53,13 +53,13 @@ WHERE d.rn = 1
 -- Migrate ApprenticeshipLearning rows from Learning
 INSERT INTO dbo.ApprenticeshipLearning
 (
-[Key],
+    [Key],
     [LearnerKey],
     [ApprovalsApprenticeshipId],
     [CompletionDate]
 )
 SELECT
-    NEWID() AS [Key],
+    L.[Key],
     LR.[Key] AS LearnerKey,
     L.ApprovalsApprenticeshipId,
     L.CompletionDate
