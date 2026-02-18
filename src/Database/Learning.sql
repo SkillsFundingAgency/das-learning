@@ -10,8 +10,9 @@
     [CompletionDate] DATETIME NULL,
     [EmailAddress] NVARCHAR(320) NULL,
     [HasEHCP] BIT NOT NULL DEFAULT 0, 
-    [IsCareLeaver] BIT NOT NULL DEFAULT 0, 
-    [CareLeaverEmployerConsentGiven] BIT NOT NULL DEFAULT 0
+    [IsCareLeaver] BIT NOT NULL DEFAULT 0,
+    [CareLeaverEmployerConsentGiven] BIT NOT NULL DEFAULT 0,
+    CONSTRAINT UQ_Learning_ApprovalsApprenticeshipId_Uln UNIQUE (ApprovalsApprenticeshipId, Uln)
 )
 GO
 CREATE INDEX IX_Learning_Uln ON Learning (Uln)
