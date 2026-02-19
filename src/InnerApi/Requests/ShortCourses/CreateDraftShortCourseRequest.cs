@@ -96,7 +96,7 @@ public static class CreateDraftShortCourseRequestExtensions
                 LastName = request.LearnerUpdateDetails.LastName,
                 EmailAddress = request.LearnerUpdateDetails.EmailAddress,
                 DateOfBirth = request.LearnerUpdateDetails.DateOfBirth,
-                Uln = request.LearnerUpdateDetails.Uln
+                Uln = request.LearnerUpdateDetails.Uln.ToString()
             },
             LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
                 new Learning.Models.UpdateModels.Shared.LearningSupportDetails

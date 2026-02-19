@@ -46,7 +46,7 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
                     FirstName = "Frank",
                     LastName = "Frankinson",
                     DateOfBirth = new DateTime(2000, 1, 1),
-                    Uln = "123213"
+                    Uln = 123213
                 },
                 LearningSupport = new List<LearningSupportDetails>()
             };
