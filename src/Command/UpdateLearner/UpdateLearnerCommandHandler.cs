@@ -53,9 +53,10 @@ public class UpdateLearnerCommandHandler(
 
         learning.AddUpdatedEvent(eventBuilder.CreateEvent());
 
-        await learningRepository.Update(learning); // We only need to call one update as the repo's share a dbcontext which tracks changes across both aggregates
+        await learningRepository.Update(learning); // We only need to call one update to persist as the repo's share a dbcontext which tracks changes across both aggregates
+        await learnerRepository.Update(learner); //But, there can be events on the learner aggregate as well so have to do this also
 
-        logger.LogInformation("Successfully updated learner with key {LearnerKey}", command.LearningKey);
+        logger.LogInformation("Successfully updated learning with key {LearnerKey}", command.LearningKey);
 
         return new UpdateLearnerResult
         {
