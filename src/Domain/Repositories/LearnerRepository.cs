@@ -63,8 +63,13 @@ public class LearnerRepository : ILearnerRepository
         return _learnerFactory.GetExisting(learner);
     }
 
-    public Task Update(LearnerDomainModel learning)
+    public async Task Update(LearnerDomainModel learner)
     {
-        throw new NotImplementedException();
+        await DbContext.SaveChangesAsync();
+
+        foreach (dynamic domainEvent in learner.FlushEvents())
+        {
+            await _domainEventDispatcher.Send(domainEvent);
+        }
     }
 }
