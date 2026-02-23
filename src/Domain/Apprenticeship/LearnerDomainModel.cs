@@ -22,7 +22,8 @@ public class LearnerDomainModel : AggregateRoot
         string uln,
         DateTime dateOfBirth,
         string firstName,
-        string lastName)
+        string lastName,
+        string? email = null)
     {
         return new LearnerDomainModel(new Learning.DataAccess.Entities.Learning.Learner
         {
@@ -30,7 +31,8 @@ public class LearnerDomainModel : AggregateRoot
             Uln = uln,
             FirstName = firstName,
             LastName = lastName,
-            DateOfBirth = dateOfBirth
+            DateOfBirth = dateOfBirth,
+            EmailAddress = email
         });
     }
 

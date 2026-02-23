@@ -66,7 +66,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             command.Model.Learner.Uln, 
             command.Model.Learner.DateOfBirth, 
             command.Model.Learner.FirstName, 
-            command.Model.Learner.LastName);
+            command.Model.Learner.LastName,
+            command.Model.Learner.EmailAddress);
 
         await _learnerRepository.Add(newLearner);
         return newLearner;

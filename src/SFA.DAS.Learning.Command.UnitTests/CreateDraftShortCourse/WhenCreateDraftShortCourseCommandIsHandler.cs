@@ -51,7 +51,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
         var domainModel = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(),It.IsAny<DateTime>(),It.IsAny<string>(),It.IsAny<string>())).Returns(learnerDomainModel);
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(),It.IsAny<DateTime>(),It.IsAny<string>(),It.IsAny<string>(), It.IsAny<string?>())).Returns(learnerDomainModel);
         _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), command.Model.OnProgramme.CompletionDate)).Returns(domainModel);
 
         // Act
