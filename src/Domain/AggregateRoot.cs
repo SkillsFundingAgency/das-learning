@@ -4,7 +4,7 @@ public abstract class AggregateRoot
 {
     private readonly List<IDomainEvent> _events = new List<IDomainEvent>();
 
-    protected void AddEvent(IDomainEvent @event)
+    public void AddEvent(IDomainEvent @event)
     {
         lock (_events)
         {

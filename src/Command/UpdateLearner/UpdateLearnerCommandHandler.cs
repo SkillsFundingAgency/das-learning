@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
@@ -52,9 +53,9 @@ public class UpdateLearnerCommandHandler(
         logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearningKey, changes);
 
         learning.AddUpdatedEvent(eventBuilder.CreateEvent());
+        TransferEvents(learner, learning);
 
         await learningRepository.Update(learning); // We only need to call one update to persist as the repo's share a dbcontext which tracks changes across both aggregates
-        await learnerRepository.Update(learner); //But, there can be events on the learner aggregate as well so have to do this also
 
         logger.LogInformation("Successfully updated learning with key {LearnerKey}", command.LearningKey);
 
@@ -67,5 +68,22 @@ public class UpdateLearnerCommandHandler(
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                 .ToList()
         };
+    }
+
+    /// <summary>
+    /// TEMPORARY WORKAROUND
+    /// 
+    /// Because our repositories share a dbcontext, it is enough to update one of the 
+    /// aggregates for changes across both to be persisted. 
+    /// However, events are stored against the aggregate that raised them, so we need to transfer any events raised 
+    /// on the learner to the learning aggregate before saving so they get persisted and dispatched.
+    /// </summary>
+    private static void TransferEvents(LearnerDomainModel learner, ApprenticeshipLearningDomainModel learning)
+    {
+        var learnerEvents = learner.FlushEvents();
+        foreach (var domainEvent in learnerEvents)
+        {
+            learning.AddEvent(domainEvent);
+        }
     }
 }
