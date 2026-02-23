@@ -68,7 +68,11 @@ public class ApprovalCreatedStepDefinitions
         if (row.ContainsKey("PlannedStartDate") && !string.IsNullOrWhiteSpace(row["PlannedStartDate"]))
             plannedStartDate = TokenisableDateTime.FromString(row["PlannedStartDate"]).DateTime!.Value;
 
-        var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(actualStartDate,  endDate, trainingPrice, epaPrice, plannedStartDate);
+        string? uln = null;
+        if (row.ContainsKey("Uln") && !string.IsNullOrWhiteSpace(row["Uln"]))
+            uln = row["Uln"];
+
+        var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(actualStartDate,  endDate, trainingPrice, epaPrice, plannedStartDate, uln);
 
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
 

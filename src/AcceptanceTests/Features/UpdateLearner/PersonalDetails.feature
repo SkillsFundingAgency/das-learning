@@ -7,10 +7,11 @@ Scenario: Learner First Name is updated
         | StartDate       | EndDate      | TrainingPrice | EpaPrice |
         | currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
     And an update request has the following data
-        | Property  | Value |
-        | FirstName | Dave  |
+        | Property  | Value    |
+        | FirstName | Dave     |
+        | LastName  | Davidson |
     When the update request is sent
-    Then the First name for the Learner is set to Dave
+	Then the Learners name is updated to Dave Davidson
     And the following changes are returned
         | Change             |
         | PersonalDetails |

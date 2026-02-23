@@ -70,6 +70,9 @@ public class UpdateLearnerStepDefinitions
                 case "FirstName":
                     updateRequest.Learner.FirstName = valueString;
                     break;
+                case "LastName":
+                    updateRequest.Learner.LastName = valueString;
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -285,12 +288,14 @@ public class UpdateLearnerStepDefinitions
         learner.DateOfBirth.Should().Be(dateOfBirth.DateTime);
     }
 
-    [Then(@"the First name for the Learner is set to (.*)")]
-    public async Task ThenTheFirstnameForTheLearnerIsSetTo(string firstName)
+    [Then(@"the Learners name is updated to (.*) (.*)")]
+    [Then(@"the Apprenticeship Learners name is updated to (.*) (.*)")]
+    public async Task ThenTheNameForTheLearnerIsSetTo(string firstName, string lastName)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learner = dbConnection.GetLearner(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
         learner.FirstName.Should().Be(firstName);
+        learner.LastName.Should().Be(lastName);
     }
 
     [Given(@"the Care details for the Learning is")]

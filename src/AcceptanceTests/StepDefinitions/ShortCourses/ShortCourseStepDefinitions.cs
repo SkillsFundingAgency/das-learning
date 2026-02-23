@@ -25,7 +25,53 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
         [Given(@"SLD has informed the system that a new short course has been created")]
         public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated()
         {
-            var request = new CreateDraftShortCourseRequest
+            var request = GetDefaultShortCourse();
+            await CallCreateShortCourseEndpoint(request);
+        }
+
+        [Given(@"A new SLD course with the following information is sent")]
+        public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated(Table table)
+        {
+            var request = GetDefaultShortCourse();
+
+            var row = table.Rows[0];
+            var firstName = row["FirstName"];
+            if (!string.IsNullOrWhiteSpace(firstName))
+                request.LearnerUpdateDetails.FirstName = firstName;
+
+            var lastName = row["LastName"];
+            if (!string.IsNullOrWhiteSpace(lastName))
+                request.LearnerUpdateDetails.LastName = lastName;
+
+            if (row.TryGetValue("Uln", out var uln) && long.TryParse(uln, out var parsedUln))
+                request.LearnerUpdateDetails.Uln = parsedUln;
+
+            await CallCreateShortCourseEndpoint(request);
+        }
+
+        [Then("a short course record is created")]
+        public async Task AShortCourseRecordIsCreated()
+        {
+            await WaitHelper.WaitForIt(async () => await ShortCourseRecordMatchesExpectation(), $"Failed to find the short course record");
+        }
+
+        [Then(@"a short course record is created with")]
+        public async Task ThenAShortCourseRecordIsCreatedWith(Table table)
+        {
+            var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+
+            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+            var learner = dbConnection.GetLearnerByShortCourseKey(shortCourseLearningKey);
+
+            var firstName = table.Rows[0]["FirstName"];
+            var lastName = table.Rows[0]["LastName"];
+            learner.FirstName.Should().Be(firstName);
+            learner.LastName.Should().Be(lastName);
+        }
+
+        private CreateDraftShortCourseRequest GetDefaultShortCourse()
+        {
+            return new CreateDraftShortCourseRequest
             {
                 OnProgramme = new OnProgramme
                 {
@@ -50,14 +96,12 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
                 },
                 LearningSupport = new List<LearningSupportDetails>()
             };
-            var response = await _testContext.TestInnerApi.Post<CreateDraftShortCourseRequest, Guid>($"/shortCourses", request);
-            _scenarioContext[ShortCourseLearningKey] = response;
         }
 
-        [Then("a short course record is created")]
-        public async Task AShortCourseRecordIsCreated()
+        private async Task CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
         {
-            await WaitHelper.WaitForIt(async () => await ShortCourseRecordMatchesExpectation(), $"Failed to find the short course record");
+            var response = await _testContext.TestInnerApi.Post<CreateDraftShortCourseRequest, Guid>($"/shortCourses", request);
+            _scenarioContext[ShortCourseLearningKey] = response;
         }
 
         private async Task<bool> ShortCourseRecordMatchesExpectation()

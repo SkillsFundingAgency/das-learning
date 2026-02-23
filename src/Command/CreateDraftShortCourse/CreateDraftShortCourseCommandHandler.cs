@@ -2,6 +2,8 @@
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 
@@ -46,6 +48,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             command.Model.OnProgramme.WithdrawalDate,
             command.Model.OnProgramme.Milestones);
 
+        TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Add(learning);
 
         //todo we may want to send an event here in a future story but there isn't one on the tech design at present (event on tech design is LearningDataEvent which comes from outer)
@@ -59,7 +62,27 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         if (learner != null)
         {
+            var updateContext = new LearningUpdateContext()
+            {
+                Learner = new LearnerModel
+                {
+                    FirstName = command.Model.Learner.FirstName,
+                    LastName = command.Model.Learner.LastName,
+                    DateOfBirth = command.Model.Learner.DateOfBirth,
+                    EmailAddress = command.Model.Learner.EmailAddress
+                },
+                Care = new CareDetails // We need to pass in the same details so they don't get overwritten
+                {
+                    HasEHCP = learner.HasEHCP,
+                    IsCareLeaver = learner.IsCareLeaver,
+                    CareLeaverEmployerConsentGiven = learner.CareLeaverEmployerConsentGiven
+                }
+            };
+
+            learner.Update(updateContext);
+
             return learner;
+
         }
 
         var newLearner = _learnerFactory.CreateNew(
@@ -71,5 +94,22 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         await _learnerRepository.Add(newLearner);
         return newLearner;
+    }
+
+    /// <summary>
+    /// TEMPORARY WORKAROUND
+    /// 
+    /// Because our repositories share a dbcontext, it is enough to update one of the 
+    /// aggregates for changes across both to be persisted. 
+    /// However, events are stored against the aggregate that raised them, so we need to transfer any events raised 
+    /// on the learner to the learning aggregate before saving so they get persisted and dispatched.
+    /// </summary>
+    private static void TransferEvents(LearnerDomainModel learner, ShortCourseLearningDomainModel learning)
+    {
+        var learnerEvents = learner.FlushEvents();
+        foreach (var domainEvent in learnerEvents)
+        {
+            learning.AddEvent(domainEvent);
+        }
     }
 }
