@@ -67,6 +67,9 @@ public class UpdateLearnerStepDefinitions
                 case "CareDetails":
                     updateRequest.Learner.Care = GetCareDetailsFromString(valueString);
                     break;
+                case "FirstName":
+                    updateRequest.Learner.FirstName = valueString;
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -282,6 +285,14 @@ public class UpdateLearnerStepDefinitions
         learner.DateOfBirth.Should().Be(dateOfBirth.DateTime);
     }
 
+    [Then(@"the First name for the Learner is set to (.*)")]
+    public async Task ThenTheFirstnameForTheLearnerIsSetTo(string firstName)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learner = dbConnection.GetLearner(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learner.FirstName.Should().Be(firstName);
+    }
+
     [Given(@"the Care details for the Learning is")]
     [Then(@"the Care details for the Learning is")]
     public async Task ThenTheCareDetailsForTheLearningIs(Table table)
@@ -291,6 +302,14 @@ public class UpdateLearnerStepDefinitions
         learner.HasEHCP.Should().Be(table.GetBoolean("HasEHCP"));
         learner.IsCareLeaver.Should().Be(table.GetBoolean("IsCareLeaver"));
         learner.CareLeaverEmployerConsentGiven.Should().Be(table.GetBoolean("CareLeaverEmployerConsentGiven"));
+    }
+
+    [Then(@"the PersonalDetailsChangedEvent is emitted")]
+    public async Task ThenTheExpectedEventIsSent()
+    {
+        await WaitHelper.WaitForIt(() => 
+            _testContext.MessageSession.ReceivedEvents<PersonalDetailsChangedEvent>().Any(), 
+            $"Failed to find published {nameof(PersonalDetailsChangedEvent)} event");
     }
 
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
