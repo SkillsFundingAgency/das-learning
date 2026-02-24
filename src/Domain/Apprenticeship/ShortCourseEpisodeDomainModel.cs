@@ -1,6 +1,8 @@
-﻿using System.Collections.ObjectModel;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
+﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
+using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -21,7 +23,10 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
 
+    public IReadOnlyCollection<ShortCourseLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ShortCourseLearningSupportDomainModel.Get);
+
     internal static ShortCourseEpisodeDomainModel New(
+        Guid learningKey,
         long ukprn,
         long employerAccountId,
         string trainingCode,
@@ -33,13 +38,14 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         return new ShortCourseEpisodeDomainModel(new ShortCourseEpisode
         {
             Key = Guid.NewGuid(),
+            LearningKey = learningKey,
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
             TrainingCode = trainingCode,
             IsApproved = isApproved,
             StartDate = startDate,
             ExpectedEndDate = expectedEndDate,
-            WithdrawalDate = withdrawalDate,
+            WithdrawalDate = withdrawalDate            
         });
     }
 
@@ -57,6 +63,17 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         _entity.Milestones.Add(milestoneDomainModel.GetEntity());
     }
 
+    public void AddLearningSupport(DateTime startDate, DateTime endDate)
+    {
+        _entity.LearningSupport.Add(new ShortCourseLearningSupport
+        {
+            StartDate = startDate,
+            EndDate = endDate,
+            LearningKey = _entity.LearningKey,
+            EpisodeKey = _entity.Key,
+            Key = Guid.NewGuid()
+        });
+    }
 
     private ShortCourseEpisodeDomainModel(ShortCourseEpisode entity)
     {

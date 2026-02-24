@@ -15,7 +15,8 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     public virtual DbSet<ApprenticeshipEpisode> Episodes { get; set; }
     public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
     public virtual DbSet<MathsAndEnglish> MathsAndEnglish { get; set; }
-    public virtual DbSet<LearningSupport> LearningSupport { get; set; }
+    public virtual DbSet<ApprenticeshipLearningSupport> ApprenticeshipLearningSupport { get; set; }
+    public virtual DbSet<ShortCourseLearningSupport> ShortCourseLearningSupport { get; set; }
     public virtual DbSet<EpisodeBreakInLearning> EpisodeBreakInLearnings { get; set; }
     public virtual DbSet<MathsAndEnglishBreakInLearning> MathsAndEnglishBreakInLearnings { get; set; }
 
@@ -35,7 +36,8 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-            modelBuilder.Ignore<Entities.Learning.Learning>();
+        modelBuilder.Ignore<Entities.Learning.Learning>();
+        modelBuilder.Ignore<LearningSupport>();
 
         // Learner
         modelBuilder.Entity<Learner>()
@@ -121,15 +123,25 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasForeignKey(e => e.LearningKey)
             .HasPrincipalKey(al => al.Key);
 
-        // LearningSupport
-        modelBuilder.Entity<LearningSupport>()
+        // ApprenticeshipLearningSupport
+        modelBuilder.Entity<ApprenticeshipLearningSupport>()
             .HasKey(x => x.Key);
 
-        modelBuilder.Entity<LearningSupport>()
+        modelBuilder.Entity<ApprenticeshipLearningSupport>()
             .HasOne<ApprenticeshipEpisode>()
             .WithMany(e => e.LearningSupport)
             .HasForeignKey(e => e.EpisodeKey)
             .HasPrincipalKey(ae => ae.Key);
+
+        // ShortCourseLearningSupport
+        modelBuilder.Entity<ShortCourseLearningSupport>()
+            .HasKey(x => x.Key);
+
+        modelBuilder.Entity<ShortCourseLearningSupport>()
+            .HasOne<ShortCourseEpisode>()
+            .WithMany(e => e.LearningSupport)
+            .HasForeignKey(e => e.EpisodeKey)
+            .HasPrincipalKey(se => se.Key);
 
         // EpisodeBreakInLearning
         modelBuilder.Entity<EpisodeBreakInLearning>()

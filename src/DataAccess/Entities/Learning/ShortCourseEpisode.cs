@@ -7,6 +7,7 @@ public class ShortCourseEpisode : Episode
     public ShortCourseEpisode()
     {
         Milestones = new List<ShortCourseMilestone>();
+        LearningSupport = new List<ShortCourseLearningSupport>();
     }
 
     public DateTime? WithdrawalDate { get; set; }
@@ -15,4 +16,5 @@ public class ShortCourseEpisode : Episode
     public bool IsApproved { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
+    public List<ShortCourseLearningSupport> LearningSupport { get; set; }
 }

@@ -2,22 +2,37 @@
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class LearningSupportDomainModel
+public abstract class LearningSupportDomainModel<T> where T : LearningSupport
 {
-    private readonly LearningSupport _entity;
+    private readonly T _entity;
     public Guid Key => _entity.Key;
     public Guid LearningKey => _entity.LearningKey;
     public Guid EpisodeKey => _entity.EpisodeKey;
     public DateTime StartDate => _entity.StartDate;
     public DateTime EndDate => _entity.EndDate;
 
-    internal LearningSupportDomainModel(LearningSupport entity)
+    internal LearningSupportDomainModel(T entity)
     {
         _entity = entity;
     }
+}
 
-    public static LearningSupportDomainModel Get(LearningSupport entity)
+public class ApprenticeshipLearningSupportDomainModel : LearningSupportDomainModel<ApprenticeshipLearningSupport>
+{
+    public ApprenticeshipLearningSupportDomainModel(ApprenticeshipLearningSupport entity) : base(entity) { }
+
+    public static ApprenticeshipLearningSupportDomainModel Get(ApprenticeshipLearningSupport entity)
     {
-        return new LearningSupportDomainModel(entity);
+        return new ApprenticeshipLearningSupportDomainModel(entity);
+    }
+}
+
+public class ShortCourseLearningSupportDomainModel : LearningSupportDomainModel<ShortCourseLearningSupport>
+{
+    public ShortCourseLearningSupportDomainModel(ShortCourseLearningSupport entity) : base(entity) { }
+
+    public static ShortCourseLearningSupportDomainModel Get(ShortCourseLearningSupport entity)
+    {
+        return new ShortCourseLearningSupportDomainModel(entity);
     }
 }

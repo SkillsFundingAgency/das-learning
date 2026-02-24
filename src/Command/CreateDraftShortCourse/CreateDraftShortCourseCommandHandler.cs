@@ -34,11 +34,12 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         _logger.LogInformation("Handling CreateDraftShortCourseCommand");
 
         var learner = await GetOrCreateLearner(command);
+
         var learning = _shortCourseLearningFactory.CreateNew(
             learner.Key,
             command.Model.OnProgramme.CompletionDate);
 
-        learning.AddEpisode(
+        var episode = learning.AddEpisode(
             command.Model.OnProgramme.Ukprn, 
             command.Model.OnProgramme.EmployerId,
             command.Model.OnProgramme.CourseCode,
@@ -47,6 +48,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             command.Model.OnProgramme.ExpectedEndDate,
             command.Model.OnProgramme.WithdrawalDate,
             command.Model.OnProgramme.Milestones);
+
+        foreach (var learningSupport in command.Model.LearningSupport)
+        {
+            episode.AddLearningSupport(learningSupport.StartDate, learningSupport.EndDate);
+        }
 
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Add(learning);

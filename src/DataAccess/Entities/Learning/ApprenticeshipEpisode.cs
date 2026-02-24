@@ -9,7 +9,7 @@ public class ApprenticeshipEpisode : Episode
     public ApprenticeshipEpisode()
     {
         Prices = new List<EpisodePrice>();
-        LearningSupport = new List<LearningSupport>();
+        LearningSupport = new List<ApprenticeshipLearningSupport>();
         BreaksInLearning = new List<EpisodeBreakInLearning>();
     }
 
@@ -23,6 +23,6 @@ public class ApprenticeshipEpisode : Episode
     public List<EpisodePrice> Prices { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }
-    public List<LearningSupport> LearningSupport { get; set; }
+    public List<ApprenticeshipLearningSupport> LearningSupport { get; set; }
     public List<EpisodeBreakInLearning> BreaksInLearning { get; set; }
 }
