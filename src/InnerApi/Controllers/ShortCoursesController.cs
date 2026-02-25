@@ -4,6 +4,7 @@ using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
+using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -27,6 +28,30 @@ public class ShortCoursesController : ControllerBase
         _commandDispatcher = commandDispatcher;
         _logger = logger;
         _pagedLinkHeaderService = pagedLinkHeaderService;
+    }
+
+    /// <summary>
+    /// Get paginated short courses for a provider within an academic year.
+    /// </summary>
+    /// <param name="ukprn">UkPrn filter value</param>
+    /// <param name="academicYear">Academic year in yyyy format (e.g. 2425)</param>
+    /// <param name="page">Page number</param>
+    /// <param name="pageSize">Number of items per page</param>
+    /// <returns>GetShortCoursesByAcademicYearResponse</returns>
+    [HttpGet("{ukprn:long}/academicyears/{academicYear:int}/shortCourses")]
+    [ProducesResponseType(typeof(GetShortCoursesByAcademicYearResponse), 200)]
+    public async Task<IActionResult> GetByAcademicYear(long ukprn, int academicYear, [FromQuery] int page = 1, [FromQuery] int? pageSize = 20)
+    {
+        pageSize = pageSize.HasValue ? Math.Clamp(pageSize.Value, 1, 100) : pageSize;
+
+        var request = new GetShortCoursesByAcademicYearRequest(ukprn, academicYear, page, pageSize);
+        var response = await _queryDispatcher.Send<GetShortCoursesByAcademicYearRequest, GetShortCoursesByAcademicYearResponse>(request);
+
+        var pageLinks = _pagedLinkHeaderService.GetPageLinks(request, response);
+
+        Response?.Headers.Add(pageLinks);
+
+        return Ok(response);
     }
 
     /// <summary>
