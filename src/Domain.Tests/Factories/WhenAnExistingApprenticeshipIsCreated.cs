@@ -8,20 +8,20 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Factories
     [TestFixture]
     public class WhenAnExistingApprenticeshipIsCreated
     {
-        private LearningFactory _learningFactory;
+        private ApprenticeshipLearningFactory _learningFactory;
         private Fixture _fixture;
 
         [SetUp]
         public void SetUp()
         {
-            _learningFactory = new LearningFactory();
+            _learningFactory = new ApprenticeshipLearningFactory();
             _fixture = new Fixture();
         }
 
         [Test]
         public void ThenAnApprenticeshipCreatedEventIsAdded()
         {
-            var expectedModel = _fixture.Create<DataAccess.Entities.Learning.Learning>();
+            var expectedModel = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
             var apprenticeship = _learningFactory.GetExisting(expectedModel);
             apprenticeship.GetEntity().Should().BeSameAs(expectedModel);
         }

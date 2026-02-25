@@ -16,16 +16,18 @@ internal class LearningDataSeeder
     }
 
     internal async Task<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent> CreateLearner(
-        DateTime? actualStartDate, DateTime endDate, decimal trainingPrice, decimal epaPrice, DateTime? plannedStartDate = null)
+        DateTime? actualStartDate, DateTime endDate, decimal trainingPrice, decimal epaPrice, DateTime? plannedStartDate = null, string? uln = null)
     {
         if (actualStartDate == null && plannedStartDate == null)
             throw new ArgumentException("Either StartDate (ActualStartDate) or PlannedStartDate must be provided");
+
+        string ulnToUse = uln ?? _scenarioContext.GetNextUln().ToString();
 
         var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
             .With(_ => _.ProviderId, Constants.UkPrn)
             .With(_ => _.TrainingCourseVersion, "1.0")
             .With(_ => _.IsOnFlexiPaymentPilot, true)
-            .With(_ => _.Uln, _scenarioContext.GetNextUln().ToString)
+            .With(_ => _.Uln, ulnToUse)
             .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
             .With(_ => _.DateOfBirth, actualStartDate?.AddYears(-19) ?? plannedStartDate.GetValueOrDefault().AddYears(-19))
             .With(_ => _.ActualStartDate, actualStartDate)

@@ -3,9 +3,10 @@ using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.InnerApi.Requests;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.Types;
-using Cost = SFA.DAS.Learning.InnerApi.Requests.Cost;
+using Cost = SFA.DAS.Learning.InnerApi.Requests.Apprenticeships.Cost;
 using MathsAndEnglishBreakInLearning = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
@@ -66,6 +67,12 @@ public class UpdateLearnerStepDefinitions
                 case "CareDetails":
                     updateRequest.Learner.Care = GetCareDetailsFromString(valueString);
                     break;
+                case "FirstName":
+                    updateRequest.Learner.FirstName = valueString;
+                    break;
+                case "LastName":
+                    updateRequest.Learner.LastName = valueString;
+                    break;
                 default:
                     throw new ArgumentException($"Property '{propertyName}' is not recognized.");
             }
@@ -96,7 +103,7 @@ public class UpdateLearnerStepDefinitions
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.Episodes.First().LastDayOfLearning = withdrawDate.DateTime;
+        learning.Episodes.First().WithdrawalDate = withdrawDate.DateTime;
     }
 
     [Then(@"the Earnings for the Learning are recalculated")]
@@ -209,7 +216,7 @@ public class UpdateLearnerStepDefinitions
 
         foreach (var row in table.Rows)
         {
-            var expectedLearningSupport = new DataAccess.Entities.Learning.LearningSupport
+            var expectedLearningSupport = new DataAccess.Entities.Learning.ApprenticeshipLearningSupport
             {
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
                 EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value
@@ -277,8 +284,18 @@ public class UpdateLearnerStepDefinitions
     public async Task ThenTheDateOfBirthForTheLearningIsSetTo(TokenisableDateTime dateOfBirth)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.DateOfBirth.Should().Be(dateOfBirth.DateTime);
+        var learner = dbConnection.GetLearner(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learner.DateOfBirth.Should().Be(dateOfBirth.DateTime);
+    }
+
+    [Then(@"the Learners name is updated to (.*) (.*)")]
+    [Then(@"the Apprenticeship Learners name is updated to (.*) (.*)")]
+    public async Task ThenTheNameForTheLearnerIsSetTo(string firstName, string lastName)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learner = dbConnection.GetLearner(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learner.FirstName.Should().Be(firstName);
+        learner.LastName.Should().Be(lastName);
     }
 
     [Given(@"the Care details for the Learning is")]
@@ -286,10 +303,18 @@ public class UpdateLearnerStepDefinitions
     public async Task ThenTheCareDetailsForTheLearningIs(Table table)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.HasEHCP.Should().Be(table.GetBoolean("HasEHCP"));
-        learning.IsCareLeaver.Should().Be(table.GetBoolean("IsCareLeaver"));
-        learning.CareLeaverEmployerConsentGiven.Should().Be(table.GetBoolean("CareLeaverEmployerConsentGiven"));
+        var learner = dbConnection.GetLearner(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        learner.HasEHCP.Should().Be(table.GetBoolean("HasEHCP"));
+        learner.IsCareLeaver.Should().Be(table.GetBoolean("IsCareLeaver"));
+        learner.CareLeaverEmployerConsentGiven.Should().Be(table.GetBoolean("CareLeaverEmployerConsentGiven"));
+    }
+
+    [Then(@"the PersonalDetailsChangedEvent is emitted")]
+    public async Task ThenTheExpectedEventIsSent()
+    {
+        await WaitHelper.WaitForIt(() => 
+            _testContext.MessageSession.ReceivedEvents<PersonalDetailsChangedEvent>().Any(), 
+            $"Failed to find published {nameof(PersonalDetailsChangedEvent)} event");
     }
 
     private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
@@ -340,14 +365,14 @@ public class UpdateLearnerStepDefinitions
         return courses;
     }
 
-    private List<LearningSupportUpdatedDetails> GetLearningSupportFromString(string valueString)
+    private List<LearningSupportDetails> GetLearningSupportFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
-        var learningSupport = new List<LearningSupportUpdatedDetails>();
+        var learningSupport = new List<LearningSupportDetails>();
 
         if (parsedValues.Any())
         {
-            learningSupport.Add(new LearningSupportUpdatedDetails
+            learningSupport.Add(new LearningSupportDetails
             {
                 StartDate = TokenisableDateTime.FromString(parsedValues["StartDate"]).DateTime!.Value,
                 EndDate = TokenisableDateTime.FromString(parsedValues["EndDate"]).DateTime!.Value
@@ -393,10 +418,10 @@ public class UpdateLearnerStepDefinitions
         return breaks;
     }
 
-    private InnerApi.Requests.CareDetails GetCareDetailsFromString(string valueString)
+    private CareDetails GetCareDetailsFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
-        var careDetails = new InnerApi.Requests.CareDetails();
+        var careDetails = new CareDetails();
 
         if (parsedValues.Any())
         {

@@ -21,7 +21,9 @@ public static class ServiceCollectionExtensions
         serviceCollection
             .AddCommandHandlers(AddCommandHandlerDecorators)
             .AddScoped<ICommandDispatcher, CommandDispatcher>()
-            .AddScoped<ILearningFactory, LearningFactory>()
+            .AddScoped<ILearnerFactory, LearnerFactory>()
+            .AddScoped<IApprenticeshipLearningFactory, ApprenticeshipLearningFactory>()
+            .AddScoped<IShortCourseLearningFactory, ShortCourseLearningFactory>()
             .AddScoped<ILearningHistoryRepository, LearningHistoryRepository>()
             .AddSingleton<ISystemClockService, SystemClockService>()
             .AddEncodingServices(configuration)
@@ -58,7 +60,9 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddPersistenceServices(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        serviceCollection.AddScoped<ILearningRepository, LearningRepository>();
+        serviceCollection.AddScoped<ILearnerRepository, LearnerRepository>();
+        serviceCollection.AddScoped<IApprenticeshipLearningRepository, ApprenticeshipLearningRepository>();
+        serviceCollection.AddScoped<IShortCourseLearningRepository, ShortCourseLearningRepository>();
         return serviceCollection;
     }
 

@@ -17,8 +17,8 @@
   <ItemGroup>
     <ProjectReference Include="..\DataAccess\SFA.DAS.Learning.DataAccess.csproj" />
     <ProjectReference Include="..\Infrastructure\SFA.DAS.Learning.Infrastructure.csproj" />
-    <ProjectReference Include="..\SFA.DAS.Learning.DataTransferObjects\SFA.DAS.Learning.DataTransferObjects.csproj" />
     <ProjectReference Include="..\SFA.DAS.Learning.Enums\SFA.DAS.Learning.Enums.csproj" />
+    <ProjectReference Include="..\SFA.DAS.Learning.Models\SFA.DAS.Learning.Models.csproj" />
     <ProjectReference Include="..\Types\SFA.DAS.Learning.Types.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,7 @@
 ﻿using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
 

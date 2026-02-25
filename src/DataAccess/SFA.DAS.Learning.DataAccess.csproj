@@ -30,7 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Infrastructure\SFA.DAS.Learning.Infrastructure.csproj" />
-    <ProjectReference Include="..\SFA.DAS.Learning.DataTransferObjects\SFA.DAS.Learning.DataTransferObjects.csproj" />
     <ProjectReference Include="..\SFA.DAS.Learning.Enums\SFA.DAS.Learning.Enums.csproj" />
   </ItemGroup>
 

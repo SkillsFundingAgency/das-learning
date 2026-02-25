@@ -1,16 +1,19 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Domain.Models;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System.Collections.ObjectModel;
-using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class EpisodeDomainModel
+public abstract class EpisodeDomainModel
 {
-    private readonly DataAccess.Entities.Learning.Episode _entity;
+}
+
+public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
+{
+    private readonly DataAccess.Entities.Learning.ApprenticeshipEpisode _entity;
     private readonly List<EpisodePriceDomainModel> _episodePrices;
     private readonly List<EpisodeBreakInLearningDomainModel> _episodeBreaksInLearning;
     public Guid Key => _entity.Key;
@@ -24,13 +27,13 @@ public class EpisodeDomainModel
     public string TrainingCode => _entity.TrainingCode;
     public string TrainingCourseVersion => _entity.TrainingCourseVersion;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
-    public DateTime? LastDayOfLearning => _entity.LastDayOfLearning;
+    public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime? PauseDate => _entity.PauseDate;
-    public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
+    public IReadOnlyCollection<ApprenticeshipLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ApprenticeshipLearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
-    public bool IsWithdrawnBackToStart => _entity.LastDayOfLearning == FirstPrice.StartDate;
+    public bool IsWithdrawnBackToStart => _entity.WithdrawalDate == FirstPrice.StartDate;
     public EpisodePriceDomainModel LatestPrice
     {
         get
@@ -38,7 +41,7 @@ public class EpisodeDomainModel
             var latestPrice = _episodePrices.MaxBy(x => x.StartDate);
             if (latestPrice == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(LatestPrice)} could not be found in the {nameof(ApprenticeshipEpisodeDomainModel)}.");
             }
 
             return latestPrice;
@@ -52,14 +55,14 @@ public class EpisodeDomainModel
             var firstPrice = _episodePrices.MinBy(x => x.StartDate);
             if (firstPrice == null)
             {
-                throw new InvalidOperationException($"Unexpected error. {nameof(FirstPrice)} could not be found in the {nameof(EpisodeDomainModel)}.");
+                throw new InvalidOperationException($"Unexpected error. {nameof(FirstPrice)} could not be found in the {nameof(ApprenticeshipEpisodeDomainModel)}.");
             }
 
             return firstPrice;
         }
     }
 
-    internal static EpisodeDomainModel New(
+    internal static ApprenticeshipEpisodeDomainModel New(
         long ukprn,
         long employerAccountId,
         FundingType fundingType, 
@@ -70,7 +73,7 @@ public class EpisodeDomainModel
         string trainingCode,
         string? trainingCourseVersion)
     {
-        return new EpisodeDomainModel(new Episode
+        return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
         {
             Key = Guid.NewGuid(),
             Ukprn = ukprn,
@@ -220,7 +223,7 @@ public class EpisodeDomainModel
             {
                 newLearningSupportRecordsAdded = true;
 
-                _entity.LearningSupport.Add(new LearningSupport
+                _entity.LearningSupport.Add(new ApprenticeshipLearningSupport
                 {
                     StartDate = newLearningSupport.StartDate,
                     EndDate = newLearningSupport.EndDate,
@@ -287,24 +290,24 @@ public class EpisodeDomainModel
         return changed;
     }
 
-    public Episode GetEntity()
+    public ApprenticeshipEpisode GetEntity()
     {
         return _entity;
     }
 
-    public static EpisodeDomainModel Get(Episode entity)
+    public static ApprenticeshipEpisodeDomainModel Get(ApprenticeshipEpisode entity)
     {
-        return new EpisodeDomainModel(entity);
+        return new ApprenticeshipEpisodeDomainModel(entity);
     }
 
-    internal void Withdraw(DateTime lastDateOfLearning)
+    internal void Withdraw(DateTime withdrawalDate)
     {
-        _entity.LastDayOfLearning = lastDateOfLearning;
+        _entity.WithdrawalDate = withdrawalDate;
     }
 
     internal void ReverseWithdrawal()
     {
-        _entity.LastDayOfLearning = null;
+        _entity.WithdrawalDate = null;
     }
 
     internal void SetPauseDate(DateTime? pauseDate)
@@ -312,7 +315,7 @@ public class EpisodeDomainModel
         _entity.PauseDate = pauseDate;
     }
 
-    private EpisodeDomainModel(Episode entity)
+    private ApprenticeshipEpisodeDomainModel(ApprenticeshipEpisode entity)
     {
         _entity = entity;
         _episodePrices = entity.Prices.Select(EpisodePriceDomainModel.Get).ToList();
