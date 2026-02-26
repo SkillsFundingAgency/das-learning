@@ -1,4 +1,5 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using Azure.Core;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -67,6 +68,13 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             if (row.TryGetValue("ExpectedEndDate", out var expectedEndDate) && DateTime.TryParse(expectedEndDate, out var parsedExpectedEndDate))
                 request.OnProgramme.ExpectedEndDate = parsedExpectedEndDate;
 
+            var learningSupportDetails = GetLearningSupportDetails(table);
+
+            foreach (var learningSupport in learningSupportDetails)
+            {
+                request.LearningSupport.Add(learningSupport);
+            }
+
             await CallCreateShortCourseEndpoint(request);
         }
 
@@ -87,15 +95,21 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
         [Then(@"a short course record is created with")]
         public async Task ThenAShortCourseRecordIsCreatedWith(Table table)
         {
+            var row = table.Rows[0];
             var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
 
             await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
             var learner = dbConnection.GetLearnerByShortCourseKey(shortCourseLearningKey);
+            var shortCourseLearning = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
 
-            var firstName = table.Rows[0]["FirstName"];
-            var lastName = table.Rows[0]["LastName"];
-            learner.FirstName.Should().Be(firstName);
-            learner.LastName.Should().Be(lastName);
+            if (row.TryGetValue("FirstName", out var firstName))
+            {
+                learner.FirstName.Should().Be(firstName);
+            }
+
+            if(row.TryGetValue("LastName", out var lastName))
+            {
+                learner.LastName.Should().Be(lastName);
         }
 
         [Then(@"short courses are returned for the following Ulns")]
@@ -107,6 +121,15 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             {
                 response.Items.Should().Contain(i => i.Uln == row["Uln"]);
             }
+            }
+
+            var learningSupportDetails = GetLearningSupportDetails(table);
+
+            foreach(var learningSupport in learningSupportDetails)
+            {
+                shortCourseLearning.Episodes.First().LearningSupport.Should().Contain(ls => ls.StartDate == learningSupport.StartDate && ls.EndDate == learningSupport.EndDate);
+            }
+
         }
 
         private CreateDraftShortCourseRequest GetDefaultShortCourse()
@@ -151,6 +174,25 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             var shortCourse = shortCourses.SingleOrDefault();
 
             return shortCourse != null;
+        }
+
+        private static List<LearningSupportDetails> GetLearningSupportDetails(Table table)
+        {
+            var learningSupportDetails = new List<LearningSupportDetails>();
+            var learningSupportStrings = table.GetIndexedListValues("LearningSupport");
+
+            foreach (var learningSupportString in learningSupportStrings)
+            {
+                var startDate = learningSupportString.GetPropertyValue("startDate");
+                var endDate = learningSupportString.GetPropertyValue("endDate");
+                learningSupportDetails.Add(new LearningSupportDetails
+                {
+                    StartDate = TokenisableDateTime.FromString(startDate!).DateTime!.Value,
+                    EndDate = TokenisableDateTime.FromString(endDate!).DateTime!.Value
+                });
+            }
+
+            return learningSupportDetails;
         }
     }
 }

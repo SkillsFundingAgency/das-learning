@@ -216,7 +216,7 @@ public class UpdateLearnerStepDefinitions
 
         foreach (var row in table.Rows)
         {
-            var expectedLearningSupport = new DataAccess.Entities.Learning.LearningSupport
+            var expectedLearningSupport = new DataAccess.Entities.Learning.ApprenticeshipLearningSupport
             {
                 StartDate = TokenisableDateTime.FromString(row["StartDate"]).DateTime!.Value,
                 EndDate = TokenisableDateTime.FromString(row["EndDate"]).DateTime!.Value

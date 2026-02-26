@@ -21,7 +21,7 @@ internal static class SqlConnectionExtensions
         foreach (var episode in learning.Episodes)
         {
             episode.Prices = dbConnection.GetAll<DataAccess.Entities.Learning.EpisodePrice>().Where(x => x.EpisodeKey == episode.Key).ToList();
-            episode.LearningSupport = dbConnection.GetAll<DataAccess.Entities.Learning.LearningSupport>().Where(x => x.EpisodeKey == episode.Key).ToList();
+            episode.LearningSupport = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearningSupport>().Where(x => x.EpisodeKey == episode.Key).ToList();
             episode.BreaksInLearning = dbConnection.GetAll<DataAccess.Entities.Learning.EpisodeBreakInLearning>().Where(x => x.EpisodeKey == episode.Key).ToList();
         }
 
@@ -57,5 +57,19 @@ internal static class SqlConnectionExtensions
         var shortCourse = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseLearning>().Single(x => x.Key == shortCourseLearningKey);
         var learner = dbConnection.GetAll<DataAccess.Entities.Learning.Learner>().Single(x => x.Key == shortCourse.LearnerKey);
         return learner;
+    }
+
+    internal static DataAccess.Entities.Learning.ShortCourseLearning GetShortCourseLearning(this SqlConnection dbConnection, Guid shortCourseLearningKey)
+    {
+        var shortCourse = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseLearning>().Single(x => x.Key == shortCourseLearningKey);
+        shortCourse.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseEpisode>().Where(x => x.LearningKey == shortCourse.Key).ToList();
+        
+        foreach (var episode in shortCourse.Episodes)
+        {
+            episode.Milestones = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseMilestone>().Where(x => x.EpisodeKey == episode.Key).ToList();
+            episode.LearningSupport = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseLearningSupport>().Where(x => x.EpisodeKey == episode.Key).ToList();
+        }
+
+        return shortCourse;
     }
 }

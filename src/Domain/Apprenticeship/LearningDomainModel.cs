@@ -45,7 +45,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return _entity;
     }
 
-    public void AddEpisode(
+    public ShortCourseEpisodeDomainModel AddEpisode(
         long ukprn,
         long employerAccountId,
         string trainingCode,
@@ -56,6 +56,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         IEnumerable<Milestone> milestones)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
+            _entity.Key,
             ukprn,
             employerAccountId,
             trainingCode,
@@ -72,6 +73,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
         _episodes.Add(episode);
         _entity.Episodes.Add(episode.GetEntity());
+
+        return episode;
     }
 
     private ShortCourseLearningDomainModel(ShortCourseLearning entity): base(entity)

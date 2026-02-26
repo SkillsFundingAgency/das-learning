@@ -110,7 +110,7 @@ public class WhenUpdatingLearningSupport
         episode.LearningKey = learningEntity.Key;
         episode.PauseDate = null;
 
-        episode.LearningSupport = learningSupport.ConvertAll(x => new DataAccess.Entities.Learning.LearningSupport
+        episode.LearningSupport = learningSupport.ConvertAll(x => new DataAccess.Entities.Learning.ApprenticeshipLearningSupport
         {
             Key = _fixture.Create<Guid>(),
             LearningKey = learningEntity.Key,

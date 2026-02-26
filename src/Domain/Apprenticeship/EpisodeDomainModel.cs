@@ -29,7 +29,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime? PauseDate => _entity.PauseDate;
-    public IReadOnlyCollection<LearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(LearningSupportDomainModel.Get);
+    public IReadOnlyCollection<ApprenticeshipLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ApprenticeshipLearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
@@ -223,7 +223,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             {
                 newLearningSupportRecordsAdded = true;
 
-                _entity.LearningSupport.Add(new LearningSupport
+                _entity.LearningSupport.Add(new ApprenticeshipLearningSupport
                 {
                     StartDate = newLearningSupport.StartDate,
                     EndDate = newLearningSupport.EndDate,
