@@ -8,7 +8,7 @@ using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
-[Route("shortCourses")]
+[Route("")]
 [ApiController]
 public class ShortCoursesController : ControllerBase
 {
@@ -59,7 +59,7 @@ public class ShortCoursesController : ControllerBase
     /// </summary>
     /// <param name="request">The learner and short course details.</param>
     /// <returns>The newly created LearningKey.</returns>
-    [HttpPost("")]
+    [HttpPost("shortCourses")]
     [ProducesResponseType(200)]
     public async Task<IActionResult> CreateDraftShortCourse([FromBody] CreateDraftShortCourseRequest request)
     {
