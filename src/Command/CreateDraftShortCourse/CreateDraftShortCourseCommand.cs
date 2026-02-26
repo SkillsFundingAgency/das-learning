@@ -14,5 +14,12 @@ public class CreateDraftShortCourseCommand : ICommand
 
 public class CreateDraftShortCourseResult
 {
-    public Guid LearningKey { get; set; }
+    public Guid? LearningKey { get; set; }
+    public CreateDraftShortCourseResultTypes ResultType { get; set; }
+}
+
+public enum CreateDraftShortCourseResultTypes
+{
+    Success,
+    ApprovedAlreadyExists
 }

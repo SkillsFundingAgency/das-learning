@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
@@ -44,5 +45,30 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
             .SingleAsync(x => x.Key == key);
 
         return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
+    public async Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey)
+    {
+        var shortCourseLearning = await DbContext
+            .ShortCourseLearnings
+            .IncludeAllChildren()
+            .SingleOrDefaultAsync(x => x.Key == learnerKey);
+
+        if (shortCourseLearning == null)
+            return null;
+
+        return _learningFactory.GetExisting(shortCourseLearning);
+    }
+}
+
+internal static class ShortCourseDbContextExtensions
+{
+    public static IQueryable<ShortCourseLearning> IncludeAllChildren(this DbSet<ShortCourseLearning> dbSet)
+    {
+        return dbSet
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.LearningSupport)
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.Milestones);
     }
 }

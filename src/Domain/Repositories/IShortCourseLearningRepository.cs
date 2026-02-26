@@ -6,4 +6,5 @@ public interface IShortCourseLearningRepository
 {
     Task Add(ShortCourseLearningDomainModel learning);
     Task<ShortCourseLearningDomainModel> Get(Guid key);
+    Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey);
 }

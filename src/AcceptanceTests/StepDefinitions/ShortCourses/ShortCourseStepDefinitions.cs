@@ -16,6 +16,7 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
         private readonly TestContext _testContext;
 
         private string ShortCourseLearningKey = "ShortCourseLearningKey";
+        private string ShortCourseEndpointResponseCodeKey = "ShortCourseEndpointResponseCode";
 
         public ShortCourseStepDefinitions(ScenarioContext scenarioContext, TestContext testContext)
         {
@@ -30,18 +31,17 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             await CallCreateShortCourseEndpoint(request);
         }
 
-        [Given(@"A new SLD course with the following information is sent")]
+        [Given(@"SLD call the create short course endpoint with the following information")]
         public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated(Table table)
         {
             var request = GetDefaultShortCourse();
 
             var row = table.Rows[0];
-            var firstName = row["FirstName"];
-            if (!string.IsNullOrWhiteSpace(firstName))
+
+            if (row.TryGetValue("FirstName", out var firstName))
                 request.LearnerUpdateDetails.FirstName = firstName;
 
-            var lastName = row["LastName"];
-            if (!string.IsNullOrWhiteSpace(lastName))
+            if (row.TryGetValue("LastName", out var lastName))
                 request.LearnerUpdateDetails.LastName = lastName;
 
             if (row.TryGetValue("Uln", out var uln) && long.TryParse(uln, out var parsedUln))
@@ -64,6 +64,7 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
         }
 
         [Then(@"a short course record is created with")]
+        [Then(@"a short course record exists with")]
         public async Task ThenAShortCourseRecordIsCreatedWith(Table table)
         {
             var row = table.Rows[0];
@@ -89,7 +90,18 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             {
                 shortCourseLearning.Episodes.First().LearningSupport.Should().Contain(ls => ls.StartDate == learningSupport.StartDate && ls.EndDate == learningSupport.EndDate);
             }
+        }
 
+        [Then(@"the response from the create short course endpoint is (.*)")]
+        public void ThenTheResponseFromTheCreateShortCourseEndpointIs(int p0)
+        {
+            _scenarioContext.Pending();
+        }
+
+        [Then(@"for learner with Uln (.*) there is only (.*) short course record")]
+        public void ThenForLearnerWithUlnThereIsOnlyShortCourseRecord(int p0, int p1)
+        {
+            _scenarioContext.Pending();
         }
 
         private CreateDraftShortCourseRequest GetDefaultShortCourse()
