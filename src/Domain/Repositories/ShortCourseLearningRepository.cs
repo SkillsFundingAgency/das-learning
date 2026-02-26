@@ -50,6 +50,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
     public async Task<PagedResult<Models.Dtos.Learning>> GetByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
     {
         var baseQuery = DbContext.ShortCourseLearnings
+            .Include(x => x.Episodes)
             .Where(x => x.Episodes.Any(e => e.Ukprn == ukPrn))
             .Where(x => x.Episodes.Any(e =>
                 e.StartDate <= dates.End &&

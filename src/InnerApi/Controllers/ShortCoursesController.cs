@@ -33,7 +33,7 @@ public class ShortCoursesController : ControllerBase
     /// <summary>
     /// Get paginated short courses for a provider within an academic year.
     /// </summary>
-    /// <param name="ukprn">UkPrn filter value</param>
+    /// <param name="ukprn">Ukprn</param>
     /// <param name="academicYear">Academic year in yyyy format (e.g. 2425)</param>
     /// <param name="page">Page number</param>
     /// <param name="pageSize">Number of items per page</param>

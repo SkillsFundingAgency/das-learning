@@ -5,6 +5,7 @@ using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
+using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 {
@@ -22,6 +23,15 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             _testContext = testContext;
         }
 
+        [Given(@"SLD has informed the system of the following short courses")]
+        public async Task SLDHasInformedTheSystemOfTheFollowingShortCourses(Table table)
+        {
+            foreach (var tableRow in table.Rows)
+            {
+                await CallShortCourseEndpointFromTableRow(tableRow);
+            }
+        }
+
         [Given(@"SLD has informed the system that a new short course has been created")]
         public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated()
         {
@@ -32,9 +42,14 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
         [Given(@"A new SLD course with the following information is sent")]
         public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated(Table table)
         {
-            var request = GetDefaultShortCourse();
-
             var row = table.Rows[0];
+            await CallShortCourseEndpointFromTableRow(row);
+        }
+
+        private async Task CallShortCourseEndpointFromTableRow(TableRow row)
+        {
+            var request = GetDefaultShortCourse();
+            request.OnProgramme.WithdrawalDate = null;
             var firstName = row["FirstName"];
             if (!string.IsNullOrWhiteSpace(firstName))
                 request.LearnerUpdateDetails.FirstName = firstName;
@@ -46,7 +61,21 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             if (row.TryGetValue("Uln", out var uln) && long.TryParse(uln, out var parsedUln))
                 request.LearnerUpdateDetails.Uln = parsedUln;
 
+            if (row.TryGetValue("StartDate", out var startDate) && DateTime.TryParse(startDate, out var parsedStartDate))
+                request.OnProgramme.StartDate = parsedStartDate;
+
+            if (row.TryGetValue("ExpectedEndDate", out var expectedEndDate) && DateTime.TryParse(expectedEndDate, out var parsedExpectedEndDate))
+                request.OnProgramme.ExpectedEndDate = parsedExpectedEndDate;
+
             await CallCreateShortCourseEndpoint(request);
+        }
+
+        [When("SLD requests the list of short courses for academic year (.*)")]
+        public async Task WhenSLDRequestsTheListOfShortCoursesForAcademicYear(int academicYear)
+        {
+            var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
+            var response = await _testContext.TestInnerApi.Get<GetShortCoursesByAcademicYearResponse>($"/shortCourses/{ukprn}/academicyears/{academicYear}/shortCourses");
+            _scenarioContext.Set<GetShortCoursesByAcademicYearResponse>(response);
         }
 
         [Then("a short course record is created")]
@@ -67,6 +96,17 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             var lastName = table.Rows[0]["LastName"];
             learner.FirstName.Should().Be(firstName);
             learner.LastName.Should().Be(lastName);
+        }
+
+        [Then(@"short courses are returned for the following Ulns")]
+        public void ThenShortCoursesAreReturnedForTheFollowingUlns(Table table)
+        {
+            var response = _scenarioContext.Get<GetShortCoursesByAcademicYearResponse>();
+            response.Items.Count().Should().Be(table.RowCount);
+            foreach (var row in table.Rows)
+            {
+                response.Items.Should().Contain(i => i.Uln == row["Uln"]);
+            }
         }
 
         private CreateDraftShortCourseRequest GetDefaultShortCourse()
