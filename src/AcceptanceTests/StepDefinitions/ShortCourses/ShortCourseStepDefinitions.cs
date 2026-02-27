@@ -86,9 +86,7 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 
             var learningKey = await CallCreateShortCourseEndpoint(request);
 
-            // If the row doesn't specify IsApproved as false, we will approve the course in the DB to allow it to be returned in the GetShortCoursesByAcademicYear endpoint.
-            // This is because the approval process isn't currently built, but will be in future (FLP-1415)
-            if (!(row.TryGetValue("IsApproved", out var isApproved) && bool.TryParse(isApproved, out var parsedIsApproved) && !parsedIsApproved))
+            if(row.TryGetValue("IsApproved", out var isApproved) && isApproved.ToLower() == "true")
                 await ApproveCourseInDb(learningKey);
         }
 
@@ -103,19 +101,7 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
         {
             var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
 
-            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-            await dbConnection.OpenAsync();
-
-            var sql = @"
-                UPDATE ep
-                SET ep.IsApproved = 1
-                FROM ShortCourseEpisode ep
-                WHERE ep.LearningKey = @shortCourseLearningKey";
-
-            await dbConnection.ExecuteAsync(sql, new
-            {
-                shortCourseLearningKey
-            });
+            await ApproveCourseInDb(shortCourseLearningKey);
         }
 
         [When("SLD requests the list of short courses for academic year (.*)")]
@@ -228,6 +214,7 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, Guid?>($"/shortCourses", request);
             _scenarioContext[ShortCourseLearningKey] = responseBody;
             _scenarioContext[ShortCourseEndpointResponseCodeKey] = (int)statusCode;
+            return responseBody ?? Guid.Empty;
         }
 
         private async Task<bool> ShortCourseRecordMatchesExpectation()
