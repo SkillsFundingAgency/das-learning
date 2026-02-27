@@ -76,7 +76,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         });
     }
 
-    internal void Update(ShortCourseUpdateContext updateContext)
+    public void Update(ShortCourseUpdateContext updateContext)
     {
         _entity.Ukprn = updateContext.OnProgramme.Ukprn;
         _entity.EmployerAccountId = updateContext.OnProgramme.EmployerId;
