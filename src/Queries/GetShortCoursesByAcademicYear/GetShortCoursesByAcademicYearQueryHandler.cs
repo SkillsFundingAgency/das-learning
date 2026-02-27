@@ -11,7 +11,7 @@ public class GetShortCoursesByAcademicYearQueryHandler(
     {
         var academicYearDates = AcademicYearParser.ParseFrom(query.AcademicYear);
 
-        var response = await repository.GetByDates(
+        var response = await repository.GetApprovedByDates(
             query.UkPrn,
             academicYearDates,
             query.Limit,

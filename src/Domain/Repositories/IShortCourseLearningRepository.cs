@@ -9,4 +9,5 @@ public interface IShortCourseLearningRepository
     Task<ShortCourseLearningDomainModel> Get(Guid key);
     Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey);
     Task<PagedResult<Models.Dtos.Learning>> GetByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken);
+    Task<PagedResult<Models.Dtos.Learning>> GetApprovedByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken);
 }
