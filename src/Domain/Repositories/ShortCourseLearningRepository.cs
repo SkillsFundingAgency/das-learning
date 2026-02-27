@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
-using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
@@ -39,6 +37,16 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         }
     }
 
+    public async Task Update(ShortCourseLearningDomainModel learning)
+    {
+        await DbContext.SaveChangesAsync();
+
+        foreach (dynamic domainEvent in learning.FlushEvents())
+        {
+            await _domainEventDispatcher.Send(domainEvent);
+        }
+    }
+
     public async Task<ShortCourseLearningDomainModel> Get(Guid key)
     {
         var shortCourseLearning = await DbContext.Set<ShortCourseLearning>()
@@ -53,26 +61,14 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         var shortCourseLearning = await DbContext
             .ShortCourseLearnings
             .IncludeAllChildren()
-            .SingleOrDefaultAsync(x => x.Key == learnerKey);
+            .SingleOrDefaultAsync(x => x.LearnerKey == learnerKey);
 
         if (shortCourseLearning == null)
             return null;
 
         return _learningFactory.GetExisting(shortCourseLearning);
     }
-}
 
-internal static class ShortCourseDbContextExtensions
-{
-    public static IQueryable<ShortCourseLearning> IncludeAllChildren(this DbSet<ShortCourseLearning> dbSet)
-    {
-        return dbSet
-            .Include(x => x.Episodes)
-            .ThenInclude(x => x.LearningSupport)
-            .Include(x => x.Episodes)
-            .ThenInclude(x => x.Milestones);
-    }
-}
     public async Task<PagedResult<Models.Dtos.Learning>> GetByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
     {
         var baseQuery = DbContext.ShortCourseLearnings
@@ -108,5 +104,17 @@ internal static class ShortCourseDbContextExtensions
             TotalItems = totalItems,
             TotalPages = totalPages
         };
+    }
+}
+
+internal static class ShortCourseDbContextExtensions
+{
+    public static IQueryable<ShortCourseLearning> IncludeAllChildren(this DbSet<ShortCourseLearning> dbSet)
+    {
+        return dbSet
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.LearningSupport)
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.Milestones);
     }
 }

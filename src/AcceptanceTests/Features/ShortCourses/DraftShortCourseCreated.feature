@@ -28,21 +28,22 @@ Scenario: Create Draft is called for a learner with an approved short course (No
 	Given SLD call the create short course endpoint with the following information
 		| Uln   |
 		| 54321 |
+	And short course is approved
 	And SLD call the create short course endpoint with the following information
 		| Uln   |
 		| 54321 |
 	Then the response from the create short course endpoint is 409
-	And for learner with Uln 54321 there is only 1 short course record
+	And for learner with Uln 54321 there is 1 short course record
 
 Scenario: Create Draft is called for a learner with an unapproved short course (unapproved record is updated)
 	Given SLD call the create short course endpoint with the following information
-		| Uln   | FirstName | LastName |
-		| 54321 | Robert    | Oldname  |
+		| Uln   | FirstName | LastName | Milestone                     | LearningSupport[0]                             |
+		| 54321 | Robert    | Oldname  | ThirtyPercentLearningComplete | startDate:currentAY-09-25 endDate:nextAY-07-31 |
 	And SLD call the create short course endpoint with the following information
-		| Uln   | FirstName | LastName |
-		| 54321 | Bob       | Newname  |
+		| Uln   | FirstName | LastName | Milestone        | LearningSupport[0]                             |
+		| 54321 | Bob       | Newname  | LearningComplete | startDate:currentAY-08-25 endDate:nextAY-06-30 |
 	Then the response from the create short course endpoint is 200
-	And for learner with Uln 54321 there is only 1 short course record
+	And for learner with Uln 54321 there is 1 short course record
 	And a short course record exists with
-		| FirstName | LastName |
-		| Bob       | Newname  |
+		| FirstName | LastName | LearningSupport[0]                             | Milestone        |
+		| Bob       | Newname  | startDate:currentAY-08-25 endDate:nextAY-06-30 | LearningComplete |

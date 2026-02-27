@@ -1,4 +1,5 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -68,6 +69,14 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             if (row.TryGetValue("ExpectedEndDate", out var expectedEndDate) && DateTime.TryParse(expectedEndDate, out var parsedExpectedEndDate))
                 request.OnProgramme.ExpectedEndDate = parsedExpectedEndDate;
 
+            if(row.TryGetValue("Milestone", out var milestone))
+            {
+                if (Enum.TryParse<Milestone>(milestone, out var parsedMilestone))
+                {
+                    request.OnProgramme.Milestones = new List<Milestone> { parsedMilestone };
+                }
+            }
+
             var learningSupportDetails = GetLearningSupportDetails(row);
 
             foreach (var learningSupport in learningSupportDetails)
@@ -76,6 +85,26 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             }
 
             await CallCreateShortCourseEndpoint(request);
+        }
+
+        [Given(@"short course is approved")]
+        public async Task GivenShortCourseWithUlnIsApproved()
+        {
+            var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+
+            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+            await dbConnection.OpenAsync();
+
+            var sql = @"
+                UPDATE ep
+                SET ep.IsApproved = 1
+                FROM ShortCourseEpisode ep
+                WHERE ep.LearningKey = @shortCourseLearningKey";
+
+            await dbConnection.ExecuteAsync(sql, new
+            {
+                shortCourseLearningKey
+            });
         }
 
         [When("SLD requests the list of short courses for academic year (.*)")]
@@ -119,18 +148,28 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             {
                 shortCourseLearning.Episodes.First().LearningSupport.Should().Contain(ls => ls.StartDate == learningSupport.StartDate && ls.EndDate == learningSupport.EndDate);
             }
+
+            if (row.TryGetValue("Milestone", out var milestone))
+            {
+                shortCourseLearning.Episodes.First().Milestones.Should().Contain(m => m.Milestone.ToString() == milestone);
+            }
         }
 
         [Then(@"the response from the create short course endpoint is (.*)")]
-        public void ThenTheResponseFromTheCreateShortCourseEndpointIs(int p0)
+        public void ThenTheResponseFromTheCreateShortCourseEndpointIs(string statusCode)
         {
-            _scenarioContext.Pending();
+            var expectedStatusCode = _scenarioContext[ShortCourseEndpointResponseCodeKey].ToString();
+            expectedStatusCode.Should().Be(statusCode);
         }
 
-        [Then(@"for learner with Uln (.*) there is only (.*) short course record")]
-        public void ThenForLearnerWithUlnThereIsOnlyShortCourseRecord(int p0, int p1)
+        [Then(@"for learner with Uln (.*) there is (.*) short course record")]
+        public async Task ThenForLearnerWithUlnThereIsOnlyShortCourseRecord(string uln, int numberOfRecords)
         {
-            _scenarioContext.Pending();
+            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+            var learner = dbConnection.GetLearner(uln);
+            var shortCourseLearnings = dbConnection.GetShortCourseLearningsForLearner(learner.Key);
+
+            shortCourseLearnings.Count().Should().Be(numberOfRecords);
         }
         
         [Then(@"short courses are returned for the following Ulns")]
@@ -175,8 +214,9 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 
         private async Task CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
         {
-            var response = await _testContext.TestInnerApi.Post<CreateDraftShortCourseRequest, Guid>($"/shortCourses", request);
-            _scenarioContext[ShortCourseLearningKey] = response;
+            (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, Guid?>($"/shortCourses", request);
+            _scenarioContext[ShortCourseLearningKey] = responseBody;
+            _scenarioContext[ShortCourseEndpointResponseCodeKey] = (int)statusCode;
         }
 
         private async Task<bool> ShortCourseRecordMatchesExpectation()

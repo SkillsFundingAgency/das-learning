@@ -72,4 +72,12 @@ internal static class SqlConnectionExtensions
 
         return shortCourse;
     }
+
+    internal static List<DataAccess.Entities.Learning.ShortCourseLearning> GetShortCourseLearningsForLearner(this SqlConnection dbConnection, Guid learnerKey)
+    {
+        var shortCourses = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseLearning>()
+            .Where(x => x.LearnerKey == learnerKey);
+
+        return shortCourses.ToList();
+    }
 }

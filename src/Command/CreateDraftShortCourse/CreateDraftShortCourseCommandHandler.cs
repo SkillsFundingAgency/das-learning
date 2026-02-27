@@ -37,32 +37,33 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         var learning = await _shortCourseLearningRepository.GetByLearnerKey(learner.Key);
 
+        //  Create if learning does not exist
         if(learning == null)
         {
-            learning = CreateNewLearning(command, learner);
-        }
-        else
-        {
-            if (learning.Episodes.Any(x => x.IsApproved))
-            {
-                _logger.LogWarning("A approved short course learning already exists for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-                return new CreateDraftShortCourseResult() { ResultType = CreateDraftShortCourseResultTypes.ApprovedAlreadyExists };
-            }
 
-            UpdateExistingLearning(command, learning);
+            learning = CreateNewLearning(command, learner);
+
+            TransferEvents(learner, learning);
+            await _shortCourseLearningRepository.Add(learning);
+
+            return new CreateDraftShortCourseResult() { LearningKey = learning.Key, ResultType = CreateDraftShortCourseResultTypes.Success };
         }
+
+        //  Do nothing and return ApprovedAlreadyExists if an approved episode already exists
+        if (learning.Episodes.Any(x => x.IsApproved))
+        {
+            _logger.LogWarning("A approved short course learning already exists for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
+            return new CreateDraftShortCourseResult() { ResultType = CreateDraftShortCourseResultTypes.ApprovedAlreadyExists };
+        }
+
+        //  Update existing learning if no approved episode exists
+        learning.Update(command.Model);
 
         TransferEvents(learner, learning);
-        await _shortCourseLearningRepository.Add(learning);
-
-        //todo we may want to send an event here in a future story but there isn't one on the tech design at present (event on tech design is LearningDataEvent which comes from outer)
+        await _shortCourseLearningRepository.Update(learning);
 
         return new CreateDraftShortCourseResult() { LearningKey = learning.Key, ResultType = CreateDraftShortCourseResultTypes.Success };
-    }
 
-    private void UpdateExistingLearning(CreateDraftShortCourseCommand command, ShortCourseLearningDomainModel learning)
-    {
-        throw new NotImplementedException();
     }
 
     private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)

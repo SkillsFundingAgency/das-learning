@@ -9,7 +9,6 @@ using Newtonsoft.Json;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.DataAccess;
-using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.MessageHandlers.Extensions;
 using SFA.DAS.Learning.Queries;
@@ -89,16 +88,19 @@ public class TestInnerApi : IDisposable
 
     public async Task<T2> Post<T1, T2>(string route, T1 body)
     {
-        var content = new StringContent(JsonConvert.SerializeObject(body), System.Text.Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync(route, content);
-        return JsonConvert.DeserializeObject<T2>(await response.Content.ReadAsStringAsync())!;
+        (var responseBody, var statusCode) = await PostWithResponseCode<T1, T2>(route, body);
+        return responseBody!;
     }
 
-    public async Task<(T2, HttpStatusCode)> PostWithResponseCode<T1, T2>(string route, T1 body)
+    public async Task<(T2?, HttpStatusCode)> PostWithResponseCode<T1, T2>(string route, T1 body)
     {
         var content = new StringContent(JsonConvert.SerializeObject(body), System.Text.Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(route, content);
-        return new (JsonConvert.DeserializeObject<T2>(await response.Content.ReadAsStringAsync())!, response.StatusCode);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        T2? responseBody = responseString.DeserializeOrDefault<T2>();
+
+        return new (responseBody, response.StatusCode);
     }
 
     internal async Task<T2> Put<T, T2>(string route, T body)
