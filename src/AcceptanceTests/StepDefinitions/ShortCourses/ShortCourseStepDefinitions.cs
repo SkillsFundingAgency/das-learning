@@ -74,7 +74,18 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
                 request.LearningSupport.Add(learningSupport);
             }
 
-            await CallCreateShortCourseEndpoint(request);
+            var learningKey = await CallCreateShortCourseEndpoint(request);
+
+            // If the row doesn't specify IsApproved as false, we will approve the course in the DB to allow it to be returned in the GetShortCoursesByAcademicYear endpoint.
+            // This is because the approval process isn't currently built, but will be in future (FLP-1415)
+            if (!(row.TryGetValue("IsApproved", out var isApproved) && bool.TryParse(isApproved, out var parsedIsApproved) && !parsedIsApproved))
+                await ApproveCourseInDb(learningKey);
+        }
+
+        private async Task ApproveCourseInDb(Guid learningKey) //todo we may wish to replace or update this when the approve short course process is in place (FLP-1415)
+        {
+            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+            dbConnection.SetAllEpisodesForShortCourseToApproved(learningKey);
         }
 
         [When("SLD requests the list of short courses for academic year (.*)")]
@@ -159,10 +170,11 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             };
         }
 
-        private async Task CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
+        private async Task<Guid> CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
         {
             var response = await _testContext.TestInnerApi.Post<CreateDraftShortCourseRequest, Guid>($"/shortCourses", request);
             _scenarioContext[ShortCourseLearningKey] = response;
+            return response;
         }
 
         private async Task<bool> ShortCourseRecordMatchesExpectation()

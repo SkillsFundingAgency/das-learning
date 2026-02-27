@@ -1,4 +1,5 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 
 namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
@@ -63,7 +64,7 @@ internal static class SqlConnectionExtensions
     {
         var shortCourse = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseLearning>().Single(x => x.Key == shortCourseLearningKey);
         shortCourse.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseEpisode>().Where(x => x.LearningKey == shortCourse.Key).ToList();
-        
+
         foreach (var episode in shortCourse.Episodes)
         {
             episode.Milestones = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseMilestone>().Where(x => x.EpisodeKey == episode.Key).ToList();
@@ -71,5 +72,12 @@ internal static class SqlConnectionExtensions
         }
 
         return shortCourse;
+    }
+
+    internal static void SetAllEpisodesForShortCourseToApproved(this SqlConnection dbConnection, Guid shortCourseLearningKey)
+    {
+        dbConnection.Execute(
+            "UPDATE dbo.ShortCourseEpisode SET IsApproved = 1 WHERE LearningKey = @shortCourseLearningKey",
+            new { shortCourseLearningKey });
     }
 }
