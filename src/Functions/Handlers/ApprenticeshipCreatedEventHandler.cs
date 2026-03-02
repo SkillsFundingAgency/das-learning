@@ -11,9 +11,7 @@ namespace SFA.DAS.Learning.Functions.Handlers
     {
         public async Task Handle(ApprenticeshipCreatedEvent @event, IMessageHandlerContext context)
         {
-            if(@event.LearningType == LearningType.ApprenticeshipUnit) { return; }
-
-            logger.LogInformation("Handling ApprenticeshipCreatedEvent - for adding Learning");
+            logger.LogInformation("Handling ApprenticeshipCreatedEvent");
 
             await commandDispatcher.Send(ApprenticeshipCreatedEventMapper.ToAddLearningCommand(@event));
         }
