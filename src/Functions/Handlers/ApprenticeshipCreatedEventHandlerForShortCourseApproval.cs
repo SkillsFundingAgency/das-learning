@@ -13,6 +13,8 @@ namespace SFA.DAS.Learning.Functions.Handlers
         {
             if (@event.LearningType != LearningType.ApprenticeshipUnit) { return; }
 
+            logger.LogInformation("Handling ApprenticeshipCreatedEvent - for GSO ShortCourse Approval");
+
             //todo: get the learner, by uln (if it doesn't exist, log error and exit)
             //get the first (should only be one) ShortCourse for the learner
             //mark it as approved and save (this will emit an event used in earnings)

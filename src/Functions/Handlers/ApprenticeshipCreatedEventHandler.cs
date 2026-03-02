@@ -13,7 +13,7 @@ namespace SFA.DAS.Learning.Functions.Handlers
         {
             if(@event.LearningType == LearningType.ApprenticeshipUnit) { return; }
 
-            logger.LogInformation("Handling ApprenticeshipCreatedEvent");
+            logger.LogInformation("Handling ApprenticeshipCreatedEvent - for adding Learning");
 
             await commandDispatcher.Send(ApprenticeshipCreatedEventMapper.ToAddLearningCommand(@event));
         }
