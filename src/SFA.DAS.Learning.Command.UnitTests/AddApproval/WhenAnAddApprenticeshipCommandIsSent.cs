@@ -13,6 +13,7 @@ using SFA.DAS.Learning.Types;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using SFA.DAS.Learning.Enums;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -60,8 +61,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var command = _fixture.Create<AddLearningCommand>();
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-		_apprenticeshipRepository.Setup(x => x.Get(command.Uln, command.ApprovalsApprenticeshipId)).ReturnsAsync(apprenticeship);
-        _learningService.Setup(x => x.GetLearning(command.Uln,  LearningType.Apprenticeship,false, command.ApprovalsApprenticeshipId))
+        _learningService.Setup(x => x.GetLearning(command.Uln,  LearningType.Apprenticeship, false, command.ApprovalsApprenticeshipId))
             .ReturnsAsync(apprenticeship);
 
         await _commandHandler.Handle(command);
@@ -150,6 +150,40 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         // Assert
         _messageSession.Verify(x => x.Publish(It.IsAny<LearningCreatedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+
+    [Test]
+    public async Task WhenAnUnapprovedShortCourseExistsThenItIsApproved()
+    {
+        var command = _fixture.Build<AddLearningCommand>()
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .Create();
+
+        var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
+
+        _learningService.Setup(x => x.GetLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
+            .ReturnsAsync(shortCourseLearning);
+
+        await _commandHandler.Handle(command);
+
+        shortCourseLearning.LatestEpisode.IsApproved.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(shortCourseLearning, LearningType.ApprenticeshipUnit));
+    }
+
+    [Test]
+    public async Task WhenAnUnapprovedShortCourseDoesNotExistThenDoNothing()
+    {
+        var command = _fixture.Build<AddLearningCommand>()
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .Create();
+
+        _learningService.Setup(x => x.GetLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
+            .ReturnsAsync(() => null);
+
+        await _commandHandler.Handle(command);
+
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>(), It.IsAny<LearningType>()), Times.Never);
     }
 
     private static bool DoApprenticeshipDetailsMatchDomainModel(

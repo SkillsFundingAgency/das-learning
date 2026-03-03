@@ -42,24 +42,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
     public async Task Handle(AddLearningCommand command, CancellationToken cancellationToken = default)
     {
-        /*
-         * ApprenticeshipCreatedEventHandler will be updated to first check if an unapproved learning record with a LearningType matching the learning type on the event.
-            If an approved record with the same learning type exists the handler will exit
-           If an unapproved record with the same learning type exists then the handler will set the IsApproved field to true and publish a new 
-            Apprenticeship Units - Approval | LearningApprovedEvent will be published.
-           If no matching record exists (this should not happen for Short Courses)
-           then the Learning will be created using the data from approvals as per the current process.
-         */
-
-        //get by uln and type? and, if apprenticeship, the ApprovalsApprenticeshipId? and by status? so that we can get unapproved only?
-        //would also be great if it could return a base type or something...?
-        //so get by ULN, type, and Unapproved = false (plus optional approvalsApprenticeshipId)
-        //if any result, set IsApproved to true and exit (this will emit a new event)
-        //otherwise... if shortcourse, log error and exit, if apprenticeship AddLearning as below
-
-        //could I do an .Exists() instead? is that really what is needed? and if true, and is ShortCourse, then in another repo call Get the shortcourse
-        //or create a new interface, ILearning, that both apprenticeships and shortcourses implement. we could then get that from a new repo/service
-
         var existingLearning = await _learningService.GetLearning(command.Uln, command.LearningType, false, command.ApprovalsApprenticeshipId);
 
         if (existingLearning != null && command.LearningType == LearningType.ApprenticeshipUnit)
@@ -77,16 +59,11 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             return;
         }
 
-        //By the time we get to this line, we are only dealing with Apprenticeships (and Foundation Apprenticeships)
-
         if (existingLearning != null)
         {
             _logger.LogInformation("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
             return;
         }
-
-        //By the time we get to this line, we are dealing with Apprenticeships that don't exist
-        //So we fall into our original behaviour of creating it
 
         var learner = await GetOrCreateLearner(command);
 
