@@ -1,6 +1,7 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Enums;
 using System.Collections.ObjectModel;
+using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
@@ -85,7 +86,11 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     public override void Approve()
     {
         LatestEpisode.Approve();
-        //todo: AddEvent();
+
+        AddEvent(new LearningApprovedEvent
+        {
+            LearningKey = Key
+        });
     }
 
     public ShortCourseEpisodeDomainModel LatestEpisode

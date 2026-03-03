@@ -27,7 +27,6 @@ public class WhenAnAddApprenticeshipCommandIsSent
     private Mock<ILearnerFactory> _learnerFactory = null!;
     private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
-    private Mock<IApprenticeshipLearningRepository> _apprenticeshipRepository = null!;
     private Mock<IMessageSession> _messageSession = null!;
     private Mock<ILogger<AddLearningCommandHandler>> _logger = null!;
     private Fixture _fixture = null!;
@@ -39,7 +38,6 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _learnerFactory = new Mock<ILearnerFactory>();
         _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
         _learnerRepository = new Mock<ILearnerRepository>();
-        _apprenticeshipRepository = new Mock<IApprenticeshipLearningRepository>();
         _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<AddLearningCommandHandler>>();
         _commandHandler = new AddLearningCommandHandler(
@@ -47,7 +45,6 @@ public class WhenAnAddApprenticeshipCommandIsSent
             _learnerFactory.Object,
             _apprenticeshipFactory.Object, 
             _learnerRepository.Object,
-            _apprenticeshipRepository.Object, 
             _messageSession.Object,
             _logger.Object);
 
@@ -66,7 +63,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never());
+        _learningService.Verify(x => x.AddLearning(It.IsAny<ApprenticeshipLearningDomainModel>(), It.IsAny<LearningType>()), Times.Never());
     }
 	
     [Test]
@@ -83,8 +80,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
         
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Count == 1)));
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1)));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Count == 1), It.IsAny<LearningType>()));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1), It.IsAny<LearningType>()));
     }
 
     [Test]
@@ -103,7 +100,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate), It.IsAny<LearningType>()));
     }
 
     [Test]
@@ -169,6 +166,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         shortCourseLearning.LatestEpisode.IsApproved.Should().BeTrue();
         _learningService.Verify(x => x.UpdateLearning(shortCourseLearning, LearningType.ApprenticeshipUnit));
+        _messageSession.Verify(x => x.Publish(It.Is<LearningApprovedEvent>(e => e.LearningKey == shortCourseLearning.Key), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]

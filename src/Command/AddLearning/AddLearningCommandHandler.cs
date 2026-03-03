@@ -18,7 +18,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
     private readonly ILearnerFactory _learnerFactory;
     private readonly IApprenticeshipLearningFactory _learningFactory;
     private readonly ILearnerRepository _learnerRepository;
-    private readonly IApprenticeshipLearningRepository _learningRepository;
     private readonly IMessageSession _messageSession;
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
@@ -27,7 +26,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         ILearnerFactory learnerFactory,
         IApprenticeshipLearningFactory learningFactory,
         ILearnerRepository learnerRepository,
-        IApprenticeshipLearningRepository learningRepository,
         IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {
@@ -35,7 +33,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         _learnerFactory = learnerFactory;
         _learningFactory = learningFactory;
         _learnerRepository = learnerRepository;
-        _learningRepository = learningRepository;
         _messageSession = messageSession;
         _logger = logger;
     }
@@ -61,7 +58,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         if (existingLearning != null)
         {
-            _logger.LogInformation("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
+            _logger.LogWarning("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
             return;
         }
 
@@ -92,7 +89,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         try
         {
-            await _learningRepository.Add(learning); //todo: can we use the abstract repo service to add this? I think... so?
+            await _learningService.AddLearning(learning, LearningType.Apprenticeship);
         }
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {
