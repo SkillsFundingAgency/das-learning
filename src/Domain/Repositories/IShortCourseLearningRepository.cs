@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
-public interface IShortCourseLearningRepository
+public interface IShortCourseLearningRepository : ILearningRepository
 {
     Task Add(ShortCourseLearningDomainModel learning);
     Task<ShortCourseLearningDomainModel> Get(Guid key);

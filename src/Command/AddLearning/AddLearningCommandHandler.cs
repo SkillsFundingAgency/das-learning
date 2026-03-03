@@ -6,6 +6,7 @@ using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -13,6 +14,7 @@ namespace SFA.DAS.Learning.Command.AddLearning;
 
 public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 {
+    private readonly ILearningService _learningService;
     private readonly ILearnerFactory _learnerFactory;
     private readonly IApprenticeshipLearningFactory _learningFactory;
     private readonly ILearnerRepository _learnerRepository;
@@ -21,6 +23,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
     public AddLearningCommandHandler(
+        ILearningService learningService,
         ILearnerFactory learnerFactory,
         IApprenticeshipLearningFactory learningFactory,
         ILearnerRepository learnerRepository,
@@ -28,6 +31,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {
+        _learningService = learningService;
         _learnerFactory = learnerFactory;
         _learningFactory = learningFactory;
         _learnerRepository = learnerRepository;
@@ -38,6 +42,35 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
     public async Task Handle(AddLearningCommand command, CancellationToken cancellationToken = default)
     {
+        /*
+         * ApprenticeshipCreatedEventHandler will be updated to first check if an unapproved learning record with a LearningType matching the learning type on the event.
+            If an approved record with the same learning type exists the handler will exit
+           If an unapproved record with the same learning type exists then the handler will set the IsApproved field to true and publish a new 
+            Apprenticeship Units - Approval | LearningApprovedEvent will be published.
+           If no matching record exists (this should not happen for Short Courses)
+           then the Learning will be created using the data from approvals as per the current process.
+         */
+
+        //get by uln and type? and, if apprenticeship, the ApprovalsApprenticeshipId? and by status? so that we can get unapproved only?
+        //would also be great if it could return a base type or something...?
+        //so get by ULN, type, and Unapproved = false (plus optional approvalsApprenticeshipId)
+        //if any result, set IsApproved to true and exit (this will emit a new event)
+        //otherwise... if shortcourse, log error and exit, if apprenticeship AddLearning as below
+
+        //could I do an .Exists() instead? is that really what is needed? and if true, and is ShortCourse, then in another repo call Get the shortcourse
+        //or create a new interface, ILearning, that both apprenticeships and shortcourses implement. we could then get that from a new repo/service
+
+
+        var existingAbstractedLearning = await _learningService.GetLearning(command.Uln, command.LearningType, false, command.ApprovalsApprenticeshipId);
+
+        if (existingAbstractedLearning != null && command.LearningType == LearningType.ApprenticeshipUnit)
+        {
+            //So, we're here because an Unapproved ShortCourse exists already for this uln. So, we want to Approve it
+            existingAbstractedLearning.Approve();
+            
+
+        }
+
         var existingLearning = await _learningRepository.Get(command.Uln, command.ApprovalsApprenticeshipId);
         if (existingLearning != null)
         {

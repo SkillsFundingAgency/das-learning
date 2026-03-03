@@ -4,7 +4,15 @@ using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public abstract class LearningDomainModel<T> : AggregateRoot where T : Learning.DataAccess.Entities.Learning.Learning
+public class LearningDomainModel : AggregateRoot
+{
+    public void Approve()
+    {
+
+    }
+}
+
+public abstract class LearningDomainModel<T> : LearningDomainModel where T : Learning.DataAccess.Entities.Learning.Learning
 {
     protected T _entity;
     public Guid LearnerKey => _entity.LearnerKey;
