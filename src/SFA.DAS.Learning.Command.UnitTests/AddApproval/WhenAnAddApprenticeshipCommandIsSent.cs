@@ -4,17 +4,16 @@ using Moq;
 using NServiceBus;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.AddLearning;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 using SFA.DAS.Learning.Types;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using SFA.DAS.Learning.Enums;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.UnitTests.AddApproval;
@@ -23,6 +22,7 @@ namespace SFA.DAS.Learning.Command.UnitTests.AddApproval;
 public class WhenAnAddApprenticeshipCommandIsSent
 {
     private AddLearningCommandHandler _commandHandler = null!;
+    private Mock<ILearningService> _learningService = null!;
     private Mock<ILearnerFactory> _learnerFactory = null!;
     private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
@@ -34,6 +34,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
     [SetUp]
     public void SetUp()
     {
+        _learningService = new Mock<ILearningService>();
         _learnerFactory = new Mock<ILearnerFactory>();
         _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
         _learnerRepository = new Mock<ILearnerRepository>();
@@ -41,6 +42,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<AddLearningCommandHandler>>();
         _commandHandler = new AddLearningCommandHandler(
+            _learningService.Object,
             _learnerFactory.Object,
             _apprenticeshipFactory.Object, 
             _learnerRepository.Object,
@@ -50,8 +52,6 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         _fixture = new Fixture();
         _fixture.Customize(new ApprenticeshipCustomization());
-
-
     }
 
     [Test]
@@ -61,6 +61,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
 		_apprenticeshipRepository.Setup(x => x.Get(command.Uln, command.ApprovalsApprenticeshipId)).ReturnsAsync(apprenticeship);
+        _learningService.Setup(x => x.GetLearning(command.Uln,  LearningType.Apprenticeship,false, command.ApprovalsApprenticeshipId))
+            .ReturnsAsync(apprenticeship);
 
         await _commandHandler.Handle(command);
 

@@ -18,8 +18,9 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public string TrainingCode => _entity.TrainingCode;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
+    public DateTime StartDate => _entity.StartDate;
     public bool IsApproved => _entity.IsApproved;
-
+    
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
 
@@ -73,6 +74,11 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             EpisodeKey = _entity.Key,
             Key = Guid.NewGuid()
         });
+    }
+
+    public void Approve()
+    {
+        _entity.IsApproved = true;
     }
 
     private ShortCourseEpisodeDomainModel(ShortCourseEpisode entity)

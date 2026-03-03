@@ -60,23 +60,33 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         //could I do an .Exists() instead? is that really what is needed? and if true, and is ShortCourse, then in another repo call Get the shortcourse
         //or create a new interface, ILearning, that both apprenticeships and shortcourses implement. we could then get that from a new repo/service
 
+        var existingLearning = await _learningService.GetLearning(command.Uln, command.LearningType, false, command.ApprovalsApprenticeshipId);
 
-        var existingAbstractedLearning = await _learningService.GetLearning(command.Uln, command.LearningType, false, command.ApprovalsApprenticeshipId);
-
-        if (existingAbstractedLearning != null && command.LearningType == LearningType.ApprenticeshipUnit)
+        if (existingLearning != null && command.LearningType == LearningType.ApprenticeshipUnit)
         {
-            //So, we're here because an Unapproved ShortCourse exists already for this uln. So, we want to Approve it
-            existingAbstractedLearning.Approve();
-            
+            _logger.LogInformation($"Approving unapproved ShortCourse for ULN {command.Uln}");
 
+            existingLearning.Approve();
+            await _learningService.UpdateLearning(existingLearning, LearningType.ApprenticeshipUnit);
+            return;
         }
 
-        var existingLearning = await _learningRepository.Get(command.Uln, command.ApprovalsApprenticeshipId);
+        if (command.LearningType == LearningType.ApprenticeshipUnit)
+        {
+            _logger.LogWarning($"Unable to approve ShortCourse for ULN {command.Uln} - no ShortCourse was found");
+            return;
+        }
+
+        //By the time we get to this line, we are only dealing with Apprenticeships (and Foundation Apprenticeships)
+
         if (existingLearning != null)
         {
             _logger.LogInformation("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
             return;
         }
+
+        //By the time we get to this line, we are dealing with Apprenticeships that don't exist
+        //So we fall into our original behaviour of creating it
 
         var learner = await GetOrCreateLearner(command);
 
@@ -105,7 +115,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         try
         {
-            await _learningRepository.Add(learning);
+            await _learningRepository.Add(learning); //todo: can we use the abstract repo service to add this? I think... so?
         }
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {

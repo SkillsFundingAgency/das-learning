@@ -4,12 +4,9 @@ using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class LearningDomainModel : AggregateRoot
+public abstract class LearningDomainModel : AggregateRoot
 {
-    public void Approve()
-    {
-
-    }
+    public abstract void Approve();
 }
 
 public abstract class LearningDomainModel<T> : LearningDomainModel where T : Learning.DataAccess.Entities.Learning.Learning
@@ -84,6 +81,22 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
         return episode;
     }
+
+    public override void Approve()
+    {
+        LatestEpisode.Approve();
+        //todo: AddEvent();
+    }
+
+    public ShortCourseEpisodeDomainModel LatestEpisode
+    {
+        get
+        {
+            var latestEpisode = _episodes.MaxBy(x => x.StartDate);
+            return latestEpisode;
+        }
+    }
+
 
     private ShortCourseLearningDomainModel(ShortCourseLearning entity): base(entity)
     {

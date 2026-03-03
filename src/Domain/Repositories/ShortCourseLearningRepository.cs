@@ -45,4 +45,48 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
 
         return _learningFactory.GetExisting(shortCourseLearning);
     }
+
+    public async Task<ShortCourseLearningDomainModel> Get(string uln)
+    {
+        var learnerKey = await DbContext.LearnersDbSet
+            .Where(l => l.Uln == uln)
+            .Select(l => l.Key)
+            .SingleOrDefaultAsync();
+
+        if (learnerKey == default)
+            return null;
+
+        var shortCourseLearning = await DbContext.Set<ShortCourseLearning>()
+            .Include(x => x.Episodes)
+            .SingleAsync(x => x.Key == learnerKey);
+
+        return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
+    public async Task Update(ShortCourseLearningDomainModel learning)
+    {
+        await DbContext.SaveChangesAsync();
+
+        foreach (dynamic domainEvent in learning.FlushEvents())
+        {
+            await _domainEventDispatcher.Send(domainEvent);
+        }
+    }
+
+    public Task AddLearning(LearningDomainModel model)
+    {
+        if (model is not ShortCourseLearningDomainModel domainModel) throw new InvalidOperationException();
+        return Add(domainModel);
+    }
+
+    public Task UpdateLearning(LearningDomainModel model)
+    {
+        if (model is not ShortCourseLearningDomainModel domainModel) throw new InvalidOperationException();
+        return Update(domainModel);
+    }
+
+    async Task<LearningDomainModel?> ILearningRepository.GetLearning(string uln, long apprenticeshipId)
+    {
+        return await Get(uln);
+    }
 }
