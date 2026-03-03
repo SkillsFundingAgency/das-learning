@@ -8,6 +8,9 @@ using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
+/// <summary>
+/// Controller for managing short courses.
+/// </summary>
 [Route("")]
 [ApiController]
 public class ShortCoursesController : ControllerBase
@@ -70,6 +73,18 @@ public class ShortCoursesController : ControllerBase
         var result =
             await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseResult>(command);
 
-        return new OkObjectResult(result.LearningKey);
+        if(result.ResultType == CreateDraftShortCourseResultTypes.Success)
+        {
+            _logger.LogInformation("Successfully created draft short course learning with key {LearningKey} for ukprn {ukprn}", result.LearningKey, request.OnProgramme.Ukprn);
+            return new OkObjectResult(result.LearningKey);
+        }
+
+        if(result.ResultType == CreateDraftShortCourseResultTypes.ApprovedAlreadyExists)
+        {
+            _logger.LogWarning("Cannot create draft short course learning for ukprn {ukprn} as an approved learning already exists for the learner", request.OnProgramme.Ukprn);
+            return new ConflictResult();
+        }
+
+        throw new InvalidOperationException($"Unexpected result type {result.ResultType} when creating draft short course learning for ukprn {request.OnProgramme.Ukprn}");
     }
 }

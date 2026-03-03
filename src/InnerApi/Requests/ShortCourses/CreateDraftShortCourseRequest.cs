@@ -82,13 +82,13 @@ public class OnProgramme
 public static class CreateDraftShortCourseRequestExtensions
 {
     /// <summary>
-    /// Maps a <see cref="CreateDraftShortCourseRequest"/> to a <see cref="CreateDraftShortCourseModel"/>.
+    /// Maps a <see cref="CreateDraftShortCourseRequest"/> to a <see cref="ShortCourseUpdateContext"/>.
     /// </summary>
     /// <param name="request">The request to map.</param>
-    /// <returns>A new instance of <see cref="CreateDraftShortCourseModel"/>.</returns>
-    public static CreateDraftShortCourseModel ToCreateModel(this CreateDraftShortCourseRequest request)
+    /// <returns>A new instance of <see cref="ShortCourseUpdateContext"/>.</returns>
+    public static ShortCourseUpdateContext ToCreateModel(this CreateDraftShortCourseRequest request)
     {
-        return new CreateDraftShortCourseModel
+        return new ShortCourseUpdateContext
         {
             Learner = new LearnerModel
             {

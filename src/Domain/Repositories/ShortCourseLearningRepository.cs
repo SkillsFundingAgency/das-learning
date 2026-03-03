@@ -3,7 +3,6 @@ using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
-using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
@@ -38,11 +37,34 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         }
     }
 
+    public async Task Update(ShortCourseLearningDomainModel learning)
+    {
+        await DbContext.SaveChangesAsync();
+
+        foreach (dynamic domainEvent in learning.FlushEvents())
+        {
+            await _domainEventDispatcher.Send(domainEvent);
+        }
+    }
+
     public async Task<ShortCourseLearningDomainModel> Get(Guid key)
     {
         var shortCourseLearning = await DbContext.Set<ShortCourseLearning>()
             .Include(x => x.Episodes)
             .SingleAsync(x => x.Key == key);
+
+        return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
+    public async Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey)
+    {
+        var shortCourseLearning = await DbContext
+            .ShortCourseLearnings
+            .IncludeAllChildren()
+            .SingleOrDefaultAsync(x => x.LearnerKey == learnerKey);
+
+        if (shortCourseLearning == null)
+            return null;
 
         return _learningFactory.GetExisting(shortCourseLearning);
     }
@@ -83,5 +105,17 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
             TotalItems = totalItems,
             TotalPages = totalPages
         };
+    }
+}
+
+internal static class ShortCourseDbContextExtensions
+{
+    public static IQueryable<ShortCourseLearning> IncludeAllChildren(this DbSet<ShortCourseLearning> dbSet)
+    {
+        return dbSet
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.LearningSupport)
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.Milestones);
     }
 }
