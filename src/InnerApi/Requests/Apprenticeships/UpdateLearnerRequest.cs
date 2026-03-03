@@ -222,10 +222,11 @@ public static class UpdateLearnerRequestExtensions
     /// </summary>
     /// <param name="request">The request containing learner details</param>
     /// <returns>A command to update the learner</returns>
-    public static LearningUpdateContext ToUpdateModel(this UpdateLearnerRequest request)
+    public static LearningUpdateContext ToUpdateModel(this UpdateLearnerRequest request, Guid learningKey)
     {
         return new LearningUpdateContext
         {
+            LearningKey = learningKey,
             Learner = new LearnerModel
             {
                 FirstName = request.Learner.FirstName,
