@@ -1,6 +1,6 @@
 ﻿using SFA.DAS.CommitmentsV2.Types;
 using System;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace SFA.DAS.CommitmentsV2.Messages.Events;

@@ -46,21 +46,35 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
-    public async Task<ShortCourseLearningDomainModel> Get(string uln)
+    public async Task<ShortCourseLearningDomainModel> Get(string uln, bool unapprovedOnly=false)
     {
         var learnerKey = await DbContext.LearnersDbSet
             .Where(l => l.Uln == uln)
             .Select(l => l.Key)
             .SingleOrDefaultAsync();
 
-        if (learnerKey == default)
-            return null;
+        if (learnerKey == Guid.Empty) return null;
 
-        var shortCourseLearning = await DbContext.Set<ShortCourseLearning>()
-            .Include(x => x.Episodes)
-            .SingleAsync(x => x.Key == learnerKey);
+        var query = DbContext.Set<ShortCourseLearning>()
+            .Where(x => x.LearnerKey == learnerKey);
+
+        if (unapprovedOnly)
+        {
+            query = query
+                .Include(x => x.Episodes.Where(e => e.IsApproved == false));
+        }
+        else
+        {
+            query = query
+                .Include(x => x.Episodes);
+        }
+
+        var shortCourseLearning = await query.SingleOrDefaultAsync();
+
+        if (shortCourseLearning is { Episodes.Count: 0 }) return null; //learnings without an episode are treated as if not exists
 
         return _learningFactory.GetExisting(shortCourseLearning);
+
     }
 
     public async Task Update(ShortCourseLearningDomainModel learning)
@@ -85,8 +99,8 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return Update(domainModel);
     }
 
-    async Task<LearningDomainModel?> ILearningRepository.GetLearning(string uln, long apprenticeshipId)
+    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId)
     {
-        return await Get(uln);
+        return await Get(uln, true);
     }
 }

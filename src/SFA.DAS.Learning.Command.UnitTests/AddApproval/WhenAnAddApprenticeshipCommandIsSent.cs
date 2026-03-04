@@ -58,7 +58,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var command = _fixture.Create<AddLearningCommand>();
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetLearning(command.Uln,  LearningType.Apprenticeship, false, command.ApprovalsApprenticeshipId))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln,  LearningType.Apprenticeship, false, command.ApprovalsApprenticeshipId))
             .ReturnsAsync(apprenticeship);
 
         await _commandHandler.Handle(command);
@@ -159,7 +159,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         await _commandHandler.Handle(command);
@@ -176,7 +176,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
             .Create();
 
-        _learningService.Setup(x => x.GetLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
             .ReturnsAsync(() => null);
 
         await _commandHandler.Handle(command);

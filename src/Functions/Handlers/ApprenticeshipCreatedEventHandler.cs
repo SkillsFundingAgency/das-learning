@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NServiceBus;
 using SFA.DAS.CommitmentsV2.Messages.Events;
@@ -12,8 +13,8 @@ namespace SFA.DAS.Learning.Functions.Handlers
         public async Task Handle(ApprenticeshipCreatedEvent @event, IMessageHandlerContext context)
         {
             logger.LogInformation("Handling ApprenticeshipCreatedEvent");
-
-            await commandDispatcher.Send(ApprenticeshipCreatedEventMapper.ToAddLearningCommand(@event));
+            var command = ApprenticeshipCreatedEventMapper.ToAddLearningCommand(@event);
+            await commandDispatcher.Send(command, CancellationToken.None);
         }
     }
 }

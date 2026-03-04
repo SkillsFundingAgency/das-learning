@@ -12,14 +12,13 @@ public class LearningService : ILearningService
         _provider = provider;
     }
 
-    public Task<LearningDomainModel?> GetLearning(
+    public Task<LearningDomainModel?> GetUnapprovedLearning(
         string uln,
         LearningType type,
-        bool isApproved,
         long approvalsApprenticeshipId)
     {
         var repo = _provider.GetRepository(type);
-        return repo.GetLearning(uln, approvalsApprenticeshipId);
+        return repo.GetUnapprovedLearning(uln, approvalsApprenticeshipId);
     }
 
     public Task AddLearning(LearningDomainModel model, LearningType type)

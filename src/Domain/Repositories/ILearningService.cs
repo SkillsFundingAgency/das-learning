@@ -5,10 +5,9 @@ namespace SFA.DAS.Learning.Domain.Repositories;
 
 public interface ILearningService
 {
-    Task<LearningDomainModel?> GetLearning(
+    Task<LearningDomainModel?> GetUnapprovedLearning(
         string uln,
         LearningType type,
-        bool isApproved,
         long approvalsApprenticeshipId);
 
     Task AddLearning(LearningDomainModel model, LearningType type);

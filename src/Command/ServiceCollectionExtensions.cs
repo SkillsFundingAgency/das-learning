@@ -63,6 +63,8 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped<ILearnerRepository, LearnerRepository>();
         serviceCollection.AddScoped<IApprenticeshipLearningRepository, ApprenticeshipLearningRepository>();
         serviceCollection.AddScoped<IShortCourseLearningRepository, ShortCourseLearningRepository>();
+        serviceCollection.AddScoped<ILearningService, LearningService>();
+        serviceCollection.AddScoped<ILearningRepositoryProvider, LearningRepositoryProvider>();
         return serviceCollection;
     }
 

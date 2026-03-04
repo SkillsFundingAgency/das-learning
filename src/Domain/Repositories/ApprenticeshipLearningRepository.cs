@@ -116,8 +116,9 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         return Update(domainModel);
     }
 
-    async Task<LearningDomainModel?> ILearningRepository.GetLearning(string uln, long apprenticeshipId)
+    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId)
     {
+        //Nb, currently all ApprenticeshipLearning is regarded as being "unapproved"
         return await Get(uln, apprenticeshipId);
     }
 }

@@ -2,7 +2,6 @@
 using SFA.DAS.Learning.Command.AddLearning;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.CommitmentsV2.Types;
-using LearningType = SFA.DAS.CommitmentsV2.Messages.Events.LearningType;
 
 namespace SFA.DAS.Learning.Functions.Mappers;
 
