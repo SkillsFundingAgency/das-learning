@@ -23,16 +23,16 @@ public static class ApprenticeshipDbContextTestHelper
         return new LearningQueryRepository(new Lazy<LearningDataContext>(dbContext), logger);
     }
 
-    public static async Task<DataAccess.Entities.Learning.Learning> AddApprenticeship(
+    public static async Task<(DataAccess.Entities.Learning.ApprenticeshipLearning, DataAccess.Entities.Learning.Learner)> AddApprenticeship(
         this LearningDataContext dbContext, 
-        Guid apprenticeshipKey, 
+        Guid learningKey, 
         long? ukprn = null,
         string? initiator = null,
         long? approvalsApprenticeshipId = null,
         FundingPlatform? fundingPlatform = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        DateTime? lastDayOfLearning = null)
+        DateTime? withdrawalDate = null)
     {
         var episodeKey = _fixture.Create<Guid>();
         var episodePrice = _fixture.Build<EpisodePrice>()
@@ -47,24 +47,31 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.EndDate, _fixture.Create<DateTime>())
             .Create();
 
-        var episode = _fixture.Build<Episode>()
-            .With(x => x.LearningKey, apprenticeshipKey)
+        var episode = _fixture.Build<ApprenticeshipEpisode>()
+            .With(x => x.LearningKey, learningKey)
             .With(x => x.Key, episodeKey)
             .With(x => x.Ukprn, ukprn ?? _fixture.Create<long>())
             .With(x => x.FundingPlatform, fundingPlatform ?? _fixture.Create<FundingPlatform>())
             .With(x => x.Prices, new List<EpisodePrice> { episodePrice })
-            .With(x => x.LastDayOfLearning, lastDayOfLearning)
+            .With(x => x.WithdrawalDate, withdrawalDate)
             .With(x => x.BreaksInLearning, new List<EpisodeBreakInLearning>{ episodeBreakInLearning })
             .Create();
 
-        var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.Learning>()
-            .With(x => x.Key, apprenticeshipKey)
+        var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
+            .With(x => x.Key, learningKey)
             .With(x => x.ApprovalsApprenticeshipId, approvalsApprenticeshipId ?? _fixture.Create<long>())
-            .With(x => x.Episodes, new List<Episode>() { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode })
             .Create();
 
         await dbContext.AddAsync(apprenticeship);
+
+        var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+            .With(x => x.Key, apprenticeship.LearnerKey)
+            .With(x => x.Uln, _fixture.Create<long>().ToString())
+            .Create();
+        await dbContext.AddAsync(learner);
+
         await dbContext.SaveChangesAsync();
-        return apprenticeship;
+        return new (apprenticeship, learner);
     }
 }

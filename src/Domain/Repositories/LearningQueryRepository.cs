@@ -2,14 +2,9 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Extensions;
-using SFA.DAS.Learning.DataTransferObjects;
-using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using System.Threading;
-using System.Linq;
+using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
@@ -18,192 +13,90 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
 {
     private LearningDataContext DbContext => dbContext.Value;
 
-    public async Task<IEnumerable<Learning.DataTransferObjects.Learning>> GetAll(long ukprn, FundingPlatform? fundingPlatform)
+    public async Task<IEnumerable<Models.Dtos.Learning>> GetAll(
+        long ukprn,
+        FundingPlatform? fundingPlatform)
     {
-        var apprenticeships = await DbContext.Apprenticeships
-            .Include(x => x.Episodes)
-            .Where(x => x.Episodes.Any(y => y.Ukprn == ukprn && (fundingPlatform == null || y.FundingPlatform == fundingPlatform)))
+        return await DbContext.ApprenticeshipLearningDbSet
+            .Where(al => al.Episodes.Any(e =>
+                e.Ukprn == ukprn &&
+                (!fundingPlatform.HasValue || e.FundingPlatform == fundingPlatform)))
+            .Join(
+                DbContext.LearnersDbSet,
+                al => al.LearnerKey,
+                learner => learner.Key,
+                (al, learner) => new Models.Dtos.Learning
+                {
+                    Uln = learner.Uln,
+                    FirstName = learner.FirstName,
+                    LastName = learner.LastName
+                })
+            .AsNoTracking()
             .ToListAsync();
-
-        var result = apprenticeships.Select(x => new Learning.DataTransferObjects.Learning { Uln = x.Uln, LastName = x.LastName, FirstName = x.FirstName });
-        return result;
     }
 
-    public async Task<PagedResult<Learning.DataTransferObjects.Learning>> GetByDates(long ukprn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
+
+    public async Task<PagedResult<Models.Dtos.Learning>> GetByDates(
+        long ukprn,
+        DateRange dates,
+        int limit,
+        int offset,
+        CancellationToken cancellationToken)
     {
-        var query = DbContext.ApprenticeshipsDbSet
-            .Include(x => x.Episodes)
-            .ThenInclude(x => x.Prices)
+        var baseQuery = DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn))
             .Where(x => x.Episodes.Any(e =>
                 e.Prices.Any(p =>
-                    (p.StartDate >= dates.Start && p.StartDate <= dates.End)    // Start date is within academic year
-                    | (p.EndDate >= dates.Start && p.EndDate <= dates.End)      // End date is within academic year     
-                    | (p.StartDate <= dates.End && p.EndDate >= dates.Start)    // Start date is before academic year and end date is after academic year
-                    &&
-                    ( !e.LastDayOfLearning.HasValue ||
-                    ( 
-                        e.LastDayOfLearning.Value >= dates.Start &&             // Last day of learning is after the start of academic year
-                        e.LastDayOfLearning != p.StartDate)                     // and last day of learning is not the same as start date
+                    (
+                        // Standard date range overlap check
+                        p.StartDate <= dates.End &&
+                        p.EndDate >= dates.Start
                     )
-                ))
-            )
-            .OrderBy(x => x.ApprovalsApprenticeshipId)
+                    &&
+                    (
+                        !e.WithdrawalDate.HasValue ||
+                        (
+                            e.WithdrawalDate.Value >= dates.Start &&
+                            e.WithdrawalDate != p.StartDate
+                        )
+                    )
+                )))
             .AsNoTracking();
 
-        var totalItems = await query.CountAsync(cancellationToken);
+        // Count query
+        var totalItems = await baseQuery.CountAsync(cancellationToken);
         var totalPages = (int)Math.Ceiling((double)totalItems / limit);
 
-        var result = await query
+        // Paged + joined query
+        var result = await baseQuery
+            .OrderBy(x => x.ApprovalsApprenticeshipId)
             .Skip(offset)
             .Take(limit)
-            .Select(x => new Learning.DataTransferObjects.Learning
-            {
-                Uln = x.Uln,
-                Key = x.Key
-            })
+            .Join(
+                DbContext.LearnersDbSet.AsNoTracking(),
+                learning => learning.LearnerKey,
+                learner => learner.Key,
+                (learning, learner) => new Models.Dtos.Learning
+                {
+                    Uln = learner.Uln,
+                    Key = learning.Key
+                })
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<Learning.DataTransferObjects.Learning>
+        return new PagedResult<Models.Dtos.Learning>
         {
             Data = result,
             TotalItems = totalItems,
-            TotalPages = totalPages,
+            TotalPages = totalPages
         };
     }
+
 
     public async Task<Guid?> GetKeyByLearningId(long learningId)
     {
-        var apprenticeshipWithMatchingId = await DbContext.Apprenticeships
+        var apprenticeshipWithMatchingId = await DbContext.ApprenticeshipLearningDbSet
             .SingleOrDefaultAsync(x => x.ApprovalsApprenticeshipId == learningId);
         return apprenticeshipWithMatchingId?.Key;
-    }
-
-    public async Task<ApprenticeshipPrice?> GetPrice(Guid learningKey)
-    {
-        var apprenticeship = await DbContext.Apprenticeships
-            .Include(x => x.Episodes)
-            .ThenInclude(x => x.Prices)
-            .FirstOrDefaultAsync(x => x.Key == learningKey);
-
-        var episodes = apprenticeship?.Episodes.ToList();
-        var prices = episodes?.SelectMany(x => x.Prices).ToList();
-
-        var latestPrice = prices?.MaxBy(x => x.StartDate);
-        if (latestPrice == null)
-        {
-            return null;
-        }
-
-        var latestEpisode = episodes?.MaxBy(x => x.Prices.Select(x => x.StartDate));
-        if (latestEpisode == null)
-        {
-            return null;
-        }
-
-        var firstPrice = prices?.MinBy(x => x.StartDate);
-        if (firstPrice == null)
-        {
-            return null;
-        }
-
-        return new ApprenticeshipPrice
-        {
-            TotalPrice = latestPrice.TotalPrice,
-            AssessmentPrice = latestPrice.EndPointAssessmentPrice,
-            TrainingPrice = latestPrice.TrainingPrice,
-            ApprenticeshipActualStartDate = firstPrice.StartDate,
-            ApprenticeshipPlannedEndDate = latestPrice.EndDate,
-            AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
-            UKPRN = latestEpisode.Ukprn
-        };
-    }
-
-    public async Task<ApprenticeshipStartDate?> GetStartDate(Guid learningKey)
-    {
-        var apprenticeship = await DbContext.Apprenticeships
-            .Include(x => x.Episodes)
-            .ThenInclude(x => x.Prices)
-            .FirstOrDefaultAsync(x => x.Key == learningKey);
-
-        var episodes = apprenticeship?.Episodes.ToList();
-        var prices = episodes?.SelectMany(x => x.Prices).ToList();
-
-        var latestPrice = prices?.MaxBy(x => x.StartDate);
-        if (latestPrice == null)
-        {
-            return null;
-        }
-
-        var latestEpisode = episodes?.MaxBy(x => x.Prices.Max(y => y.StartDate));
-        if (latestEpisode == null)
-        {
-            return null;
-        }
-
-        var firstPrice = prices?.MinBy(x => x.StartDate);
-        if (firstPrice == null)
-        {
-            return null;
-        }
-
-        return apprenticeship == null
-            ? null
-            : new ApprenticeshipStartDate
-            {
-                LearningKey = apprenticeship.Key,
-                ActualStartDate = firstPrice.StartDate,
-                PlannedEndDate = latestPrice.EndDate,
-                AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
-                UKPRN = latestEpisode.Ukprn,
-                DateOfBirth = apprenticeship.DateOfBirth,
-                CourseCode = latestEpisode.TrainingCode,
-                CourseVersion = latestEpisode.TrainingCourseVersion,
-                SimplifiedPaymentsMinimumStartDate = Constants.SimplifiedPaymentsMinimumStartDate
-            };
-    }
-
-    
-    public async Task<Guid?> GetKey(string apprenticeshipHashedId)
-    {
-        var apprenticeship = await DbContext.Apprenticeships.FirstOrDefaultAsync(x =>
-            x.ApprenticeshipHashedId == apprenticeshipHashedId);
-        return apprenticeship?.Key;
-    }
-
-    public async Task<PaymentStatus?> GetPaymentStatus(Guid learningKey)
-    {
-        PaymentStatus? paymentStatus = null;
-
-        try
-        {
-            var apprenticeship = await DbContext.Apprenticeships
-                .Include(x => x.Episodes)
-                .Include(x => x.FreezeRequests)
-                .FirstOrDefaultAsync(x => x.Key == learningKey);
-
-            var episodes = apprenticeship?.Episodes.ToList();
-            var latestEpisode = episodes?.MaxBy(x => x.Prices.Select(x => x.StartDate));
-            if (latestEpisode == null)
-            {
-                return null;
-            }
-
-            paymentStatus = new PaymentStatus() { IsFrozen = latestEpisode.PaymentsFrozen };
-
-            if (paymentStatus.IsFrozen)
-            {
-                var activeFreezeRequest = apprenticeship!.FreezeRequests.Single(x => x.LearningKey == learningKey && !x.Unfrozen);
-                paymentStatus.Reason = activeFreezeRequest.Reason;
-                paymentStatus.FrozenOn = activeFreezeRequest.FrozenDateTime;
-            }
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error getting payment status for apprenticeship {learningKey}", learningKey);
-        }
-
-        return paymentStatus;
     }
 
     /// <summary>
@@ -218,7 +111,7 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
     {
         try
         {
-            var query = DbContext.Apprenticeships
+            var query = DbContext.ApprenticeshipLearningDbSet
                 .Include(x => x.Episodes)
                 .ThenInclude(x => x.Prices)
                 .Where(x => x.Episodes.Any(e => e.Ukprn == ukprn && e.FundingPlatform == FundingPlatform.DAS))
@@ -226,12 +119,12 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
                     x.Episodes.Any(episode =>
                         episode.Prices.Any(price => price.EndDate >= activeOnDate.Value.StartOfCurrentAcademicYear()) && // end date is at least after the start of this academic year
                         episode.Prices.Any(price => price.StartDate <= activeOnDate.Value) &&      // start date is at least before the requested date
-                        !(episode.LastDayOfLearning.HasValue && episode.LastDayOfLearning.Value == episode.Prices.Min(p => p.StartDate)) //not withdrawn back to start
+                        !(episode.WithdrawalDate.HasValue && episode.WithdrawalDate.Value == episode.Prices.Min(p => p.StartDate)) //not withdrawn back to start
                         ))
-                .OrderBy(x => x.Uln)
+                .OrderBy(x => x.ApprovalsApprenticeshipId)
                 .AsNoTracking();
 
-            List<DataAccess.Entities.Learning.Learning> apprenticeships;
+            List<DataAccess.Entities.Learning.ApprenticeshipLearning> apprenticeships;
 
             var totalItems = await query.CountAsync(cancellationToken);
             var totalPages = (int)Math.Ceiling((double)totalItems / limit.GetValueOrDefault());
@@ -249,18 +142,23 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
             }
 
             var apprenticeshipWithEpisodes = apprenticeships.Select(apprenticeship =>
-                new LearningWithEpisodes(
+            {
+                var learner = DbContext.LearnersDbSet.Single(l => l.Key == apprenticeship.LearnerKey);
+
+                return new LearningWithEpisodes(
                     apprenticeship.Key,
-                    apprenticeship.Uln,
+                    learner.Uln,
                     apprenticeship.GetStartDate(),
                     apprenticeship.GetPlannedEndDate(),
                     apprenticeship.Episodes.Select(ep =>
-                            new Episode(ep.Key, ep.TrainingCode, ep.LastDayOfLearning, ep.Prices.Select(p =>
+                            new Episode(ep.Key, ep.TrainingCode, ep.WithdrawalDate, ep.Prices.Select(p =>
                                 new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
                         .ToList(),
-                    apprenticeship.GetAgeAtStartOfApprenticeship(),
-                    apprenticeship.GetLastDayOfLearning(),
-                    apprenticeship.CompletionDate)
+                    apprenticeship.GetAgeAtStartOfApprenticeship(learner.DateOfBirth),
+                    apprenticeship.GetWithdrawalDate(),
+                    apprenticeship.CompletionDate);
+            }
+
             ).ToList();
 
             return new PagedResult<LearningWithEpisodes>
@@ -277,28 +175,4 @@ public class LearningQueryRepository(Lazy<LearningDataContext> dbContext, ILogge
         }
     }
 
-    public async Task<CurrentPartyIds?> GetCurrentPartyIds(Guid apprenticeshipKey)
-    {
-        CurrentPartyIds? currentPartyIds = null;
-
-        try
-        {
-            var apprenticeship = await DbContext.Apprenticeships
-                .Where(a => a.Key == apprenticeshipKey)
-                .Include(a => a.Episodes)
-                .SingleOrDefaultAsync();
-
-            if (apprenticeship == null)
-                return null;
-
-            var episode = apprenticeship.GetEpisode();
-            currentPartyIds = new CurrentPartyIds(episode.Ukprn, episode.EmployerAccountId, apprenticeship.ApprovalsApprenticeshipId);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error getting current party ids for apprenticeship key {key}", apprenticeshipKey);
-        }
-
-        return currentPartyIds;
-    }
 }

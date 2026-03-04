@@ -7,13 +7,13 @@ namespace SFA.DAS.Learning.Command.UnitTests;
 
 internal static class AutoFixtureExtensions
 {
-    internal static EpisodeDomainModel CreateEpisodeDomainModel(this Fixture fixture, Action<Episode>? configure = null)
+    internal static ApprenticeshipEpisodeDomainModel CreateEpisodeDomainModel(this Fixture fixture, Action<ApprenticeshipEpisode>? configure = null)
     {
-        var entityModel = fixture.Create<Episode>();
+        var entityModel = fixture.Create<ApprenticeshipEpisode>();
 
         configure?.Invoke(entityModel); // apply custom changes
 
-        var domainModel = EpisodeDomainModel.Get(entityModel);
+        var domainModel = ApprenticeshipEpisodeDomainModel.Get(entityModel);
 
         return domainModel;
     }

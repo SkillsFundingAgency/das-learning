@@ -30,7 +30,7 @@ public class Episode
     public string TrainingCode { get; set; }
     public string TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
-    public DateTime? LastDayOfLearning { get; set; }
+    public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }
     public List<LearningSupport> LearningSupport { get; set; }
     public List<EpisodeBreakInLearning> EpisodeBreaksInLearning { get; set; }

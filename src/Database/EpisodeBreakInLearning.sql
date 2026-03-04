@@ -10,5 +10,5 @@ GO
 
 ALTER TABLE dbo.EpisodeBreakInLearning
 ADD CONSTRAINT FK_EpisodeBreakInLearning_Episode 
-    FOREIGN KEY (EpisodeKey) REFERENCES dbo.Episode ([Key]);
+    FOREIGN KEY (EpisodeKey) REFERENCES dbo.ApprenticeshipEpisode ([Key]);
 GO

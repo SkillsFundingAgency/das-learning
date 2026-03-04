@@ -4,15 +4,15 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
-using SFA.DAS.Learning.DataTransferObjects;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.TestHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Episode = SFA.DAS.Learning.DataAccess.Entities.Learning.Episode;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using EpisodePrice = SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodePrice;
+using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.Repositories.ApprenticeshipQueryRepository;
 
@@ -53,7 +53,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         //Arrange
         SetUpApprenticeshipQueryRepository();
 
-        var apprenticeshipKey = _fixture.Create<Guid>();
+        var learningKey = _fixture.Create<Guid>();
         var episode1Key = _fixture.Create<Guid>();
         var episode2Key = _fixture.Create<Guid>();
 
@@ -71,14 +71,19 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice4 = CreateEpisodePrice(episode2Key, startDate.AddYears(1), endDate);
         var episode2 = CreateEpisode(episode2Key, ukprn, trainingCode, episodePrice3, episodePrice4);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
-                .With(x => x.Key, apprenticeshipKey)
-                .With(x => x.Episodes, new List<Episode>() { episode1, episode2 })
-                .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
-                .With(x => x.Uln, _fixture.Create<long>().ToString())
-                .Create();
+        var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+            .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
+            .With(x => x.Uln, _fixture.Create<long>().ToString())
+            .Create();
 
-        await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
+        var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
+            .With(x => x.Key, learningKey)
+            .With(x => x.LearnerKey, learner.Key)
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode1, episode2 })
+            .Create();
+
+        await _dbContext.AddRangeAsync(new[] { learner });
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipLearningRecord });
         await _dbContext.SaveChangesAsync();
 
         // Act
@@ -87,7 +92,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         // Assert
         result.Should().NotBeNull();
         var apprenticeship = result.Data.SingleOrDefault();
-        AssertApprenticeship(apprenticeshipRecord, startDate, endDate, ageAtStartOfApprenticeship, apprenticeship);
+        AssertApprenticeship(apprenticeshipLearningRecord, learner, startDate, endDate, ageAtStartOfApprenticeship, apprenticeship);
 
         var resultEpisode1 = apprenticeship.Episodes.SingleOrDefault(x => x.Key == episode1Key);
         AssertEpisode(episode1, resultEpisode1);
@@ -107,7 +112,7 @@ public class WhenGettingApprenticeshipsWithEpisodes
         //Arrange
         SetUpApprenticeshipQueryRepository();
 
-        var apprenticeshipKey = _fixture.Create<Guid>();
+        var learningKey = _fixture.Create<Guid>();
         var episodeKey = _fixture.Create<Guid>();
 
         var ukprn = _fixture.Create<long>();
@@ -119,15 +124,20 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
-                .With(x => x.Key, apprenticeshipKey)
-                .With(x => x.Episodes, new List<Episode>() { episode })
-                .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
-                .With(x => x.Uln, _fixture.Create<long>().ToString())
+        var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
+                .With(x => x.Key, learningKey)
+                .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode })
                 .With(x => x.CompletionDate, completionDate)
                 .Create();
 
-        await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
+        var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+            .With(x => x.Key, apprenticeshipLearningRecord.LearnerKey)
+            .With(x => x.DateOfBirth, startDate.AddYears(-20).AddMonths(-6))
+            .With(x => x.Uln, _fixture.Create<long>().ToString())
+            .Create();
+
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipLearningRecord });
+        await _dbContext.AddRangeAsync(new[] { learner });
         await _dbContext.SaveChangesAsync();
 
         // Act
@@ -156,14 +166,19 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
-            .With(x => x.Episodes, new List<Episode> { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
+            .Create();
+
+        var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+            .With(x => x.Key, apprenticeshipLearningRecord.LearnerKey)
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
             .With(x => x.Uln, _fixture.Create<long>().ToString())
             .Create();
 
-        await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipLearningRecord });
+        await _dbContext.AddRangeAsync(new[] { learner });
         await _dbContext.SaveChangesAsync();
 
         // Act
@@ -190,16 +205,21 @@ public class WhenGettingApprenticeshipsWithEpisodes
 
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
-        episode.LastDayOfLearning = startDate; //withdrawn back to start
+        episode.WithdrawalDate = startDate; //withdrawn back to start
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
-            .With(x => x.Episodes, new List<Episode> { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
+            .Create();
+
+        var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+            .With(x => x.Key, apprenticeshipLearningRecord.LearnerKey)
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
             .With(x => x.Uln, _fixture.Create<long>().ToString())
             .Create();
 
-        await _dbContext.AddRangeAsync(new[] { apprenticeshipRecord });
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipLearningRecord });
+        await _dbContext.AddRangeAsync(new[] { learner });
         await _dbContext.SaveChangesAsync();
 
         // Act
@@ -226,14 +246,19 @@ public class WhenGettingApprenticeshipsWithEpisodes
         var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
         var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-        var apprenticeshipRecord = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+        var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, apprenticeshipKey)
-            .With(x => x.Episodes, new List<Episode> { episode })
+            .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
+            .Create();
+
+        var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+            .With(x => x.Key, apprenticeshipLearningRecord.LearnerKey)
             .With(x => x.DateOfBirth, startDate.AddYears(-20))
             .With(x => x.Uln, _fixture.Create<long>().ToString())
             .Create();
 
-        await _dbContext.AddAsync(apprenticeshipRecord);
+        await _dbContext.AddRangeAsync(new[] { apprenticeshipLearningRecord });
+        await _dbContext.AddRangeAsync(new[] { learner });
         await _dbContext.SaveChangesAsync();
 
         // Act
@@ -250,7 +275,8 @@ public class WhenGettingApprenticeshipsWithEpisodes
         SetUpApprenticeshipQueryRepository();
 
         var ukprn = _fixture.Create<long>();
-        var apprenticeships = new List<DataAccess.Entities.Learning.Learning>();
+        var learners = new List<DataAccess.Entities.Learning.Learner>();
+        var apprenticeships = new List<DataAccess.Entities.Learning.ApprenticeshipLearning>();
 
         // Create 5 apprenticeships
         for (int i = 1; i <= 5; i++)
@@ -264,16 +290,25 @@ public class WhenGettingApprenticeshipsWithEpisodes
             var episodePrice = CreateEpisodePrice(episodeKey, startDate, endDate);
             var episode = CreateEpisode(episodeKey, ukprn, trainingCode, episodePrice);
 
-            var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.Learning>()
+            var apprenticeshipLearningRecord = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
                 .With(x => x.Key, apprenticeshipKey)
-                .With(x => x.Episodes, new List<Episode> { episode })
+                .With(x => x.Episodes, new List<ApprenticeshipEpisode> { episode })
+                
+                .Create();
+
+            var learner = _fixture.Build<DataAccess.Entities.Learning.Learner>()
+                .With(x => x.Key, apprenticeshipLearningRecord.LearnerKey)
                 .With(x => x.DateOfBirth, startDate.AddYears(-20))
                 .With(x => x.Uln, i.ToString()) // Ensure Uln ordering
                 .Create();
 
-            apprenticeships.Add(apprenticeship);
+            learners.Add(learner);
+            apprenticeships.Add(apprenticeshipLearningRecord);
         }
 
+
+
+        await _dbContext.AddRangeAsync(learners);
         await _dbContext.AddRangeAsync(apprenticeships);
         await _dbContext.SaveChangesAsync();
 
@@ -294,17 +329,18 @@ public class WhenGettingApprenticeshipsWithEpisodes
         result.TotalPages.Should().Be((int)Math.Ceiling((double)apprenticeships.Count / pageSize));
 
         var expectedUlnsForPage = apprenticeships
-            .OrderBy(a => a.Uln)
+            .OrderBy(a => a.ApprovalsApprenticeshipId)
             .Skip(pageOffset)
             .Take(pageSize)
-            .Select(a => a.Uln)
+            .Select(a => learners.Single(x=> x.Key == a.LearnerKey).Uln)
             .ToList();
 
         result.Data.Select(a => a.Uln).Should().BeEquivalentTo(expectedUlnsForPage);
     }
 
     private void AssertApprenticeship(
-        DataAccess.Entities.Learning.Learning expected,
+        DataAccess.Entities.Learning.ApprenticeshipLearning expectedLearning,
+        DataAccess.Entities.Learning.Learner expectedlearner,
         DateTime startDate,
         DateTime endDate,
         int age,
@@ -313,21 +349,21 @@ public class WhenGettingApprenticeshipsWithEpisodes
         actual.Should().NotBeNull();
         actual.StartDate.Should().Be(startDate);
         actual.AgeAtStartOfApprenticeship.Should().Be(age);
-        actual.Key.Should().Be(expected.Key);
+        actual.Key.Should().Be(expectedLearning.Key);
         actual.PlannedEndDate.Should().Be(endDate);
-        actual.Uln.Should().Be(expected.Uln);
-        actual.Episodes.Count.Should().Be(expected.Episodes.Count);
+        actual.Uln.Should().Be(expectedlearner.Uln);
+        actual.Episodes.Count.Should().Be(expectedLearning.Episodes.Count);
     }
 
-    private void AssertEpisode(Episode expected, DataTransferObjects.Episode actual)
+    private void AssertEpisode(ApprenticeshipEpisode expected, Models.Dtos.Episode actual)
     {
         actual.Should().NotBeNull();
         actual.TrainingCode.Should().Be(expected.TrainingCode);
         actual.Prices.Count.Should().Be(expected.Prices.Count);
-        actual.LastDayOfLearning.Should().Be(expected.LastDayOfLearning);
+        actual.LastDayOfLearning.Should().Be(expected.WithdrawalDate);
     }
 
-    private bool AssertPrice(EpisodePrice expected, DataTransferObjects.EpisodePrice actual)
+    private bool AssertPrice(EpisodePrice expected, Models.Dtos.EpisodePrice actual)
     {
         return actual.EndDate == expected.EndDate
             && actual.EndPointAssessmentPrice == expected.EndPointAssessmentPrice
@@ -353,14 +389,14 @@ public class WhenGettingApprenticeshipsWithEpisodes
             .Create();
     }
 
-    private Episode CreateEpisode(Guid key, long ukprn, string trainingCode, params EpisodePrice[] prices)
+    private ApprenticeshipEpisode CreateEpisode(Guid key, long ukprn, string trainingCode, params EpisodePrice[] prices)
     {
-        return _fixture.Build<Episode>()
+        return _fixture.Build<ApprenticeshipEpisode>()
             .With(x => x.Key, key)
             .With(x => x.Prices, prices.ToList())
             .With(x => x.Ukprn, ukprn)
             .With(x => x.TrainingCode, trainingCode)
-            .With(x => x.LastDayOfLearning, new DateTime?())
+            .With(x => x.WithdrawalDate, new DateTime?())
             .With(x=> x.FundingPlatform, DAS.Learning.Enums.FundingPlatform.DAS)
             .Create();
     }
