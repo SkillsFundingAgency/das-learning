@@ -3,33 +3,26 @@ using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Repositories;
 
-public class LearningService : ILearningService
+public class LearningService(ILearningRepositoryProvider provider) : ILearningService
 {
-    private readonly ILearningRepositoryProvider _provider;
-
-    public LearningService(ILearningRepositoryProvider provider)
-    {
-        _provider = provider;
-    }
-
     public Task<LearningDomainModel?> GetUnapprovedLearning(
         string uln,
         LearningType type,
         long approvalsApprenticeshipId)
     {
-        var repo = _provider.GetRepository(type);
+        var repo = provider.GetRepository(type);
         return repo.GetUnapprovedLearning(uln, approvalsApprenticeshipId);
     }
 
-    public Task AddLearning(LearningDomainModel model, LearningType type)
+    public Task AddLearning(LearningDomainModel model)
     {
-        var repo = _provider.GetRepository(type);
+        var repo = provider.GetRepository(model);
         return repo.AddLearning(model);
     }
 
-    public Task UpdateLearning(LearningDomainModel model, LearningType type)
+    public Task UpdateLearning(LearningDomainModel model)
     {
-        var repo = _provider.GetRepository(type);
+        var repo = provider.GetRepository(model);
         return repo.UpdateLearning(model);
     }
 }

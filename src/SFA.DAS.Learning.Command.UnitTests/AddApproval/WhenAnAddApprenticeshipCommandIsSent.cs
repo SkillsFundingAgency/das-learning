@@ -1,20 +1,21 @@
 using AutoFixture;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NServiceBus;
 using NUnit.Framework;
+using NUnit.Framework.Internal.Execution;
 using SFA.DAS.Learning.Command.AddLearning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 using SFA.DAS.Learning.Types;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
-using SFA.DAS.Learning.Enums;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.UnitTests.AddApproval;
@@ -58,12 +59,12 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var command = _fixture.Create<AddLearningCommand>();
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln,  LearningType.Apprenticeship, false, command.ApprovalsApprenticeshipId))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln,  LearningType.Apprenticeship, command.ApprovalsApprenticeshipId))
             .ReturnsAsync(apprenticeship);
 
         await _commandHandler.Handle(command);
 
-        _learningService.Verify(x => x.AddLearning(It.IsAny<ApprenticeshipLearningDomainModel>(), It.IsAny<LearningType>()), Times.Never());
+        _learningService.Verify(x => x.AddLearning(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never());
     }
 	
     [Test]
@@ -80,8 +81,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
         
         await _commandHandler.Handle(command);
 
-        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Count == 1), It.IsAny<LearningType>()));
-        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1), It.IsAny<LearningType>()));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Count == 1)));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1)));
     }
 
     [Test]
@@ -100,7 +101,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         await _commandHandler.Handle(command);
 
-        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate), It.IsAny<LearningType>()));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
     }
 
     [Test]
@@ -159,14 +160,19 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         await _commandHandler.Handle(command);
 
         shortCourseLearning.LatestEpisode.IsApproved.Should().BeTrue();
-        _learningService.Verify(x => x.UpdateLearning(shortCourseLearning, LearningType.ApprenticeshipUnit));
-        _messageSession.Verify(x => x.Publish(It.Is<LearningApprovedEvent>(e => e.LearningKey == shortCourseLearning.Key), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+        _learningService.Verify(x => x.UpdateLearning(shortCourseLearning));
+
+        shortCourseLearning
+            .FlushEvents()
+            .OfType<Domain.Events.LearningApprovedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == shortCourseLearning.Key);
     }
 
     [Test]
@@ -176,12 +182,12 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
             .Create();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, false, It.IsAny<long>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
             .ReturnsAsync(() => null);
 
         await _commandHandler.Handle(command);
 
-        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>(), It.IsAny<LearningType>()), Times.Never);
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
     }
 
     private static bool DoApprenticeshipDetailsMatchDomainModel(

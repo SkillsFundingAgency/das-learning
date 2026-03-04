@@ -10,7 +10,7 @@ public interface ILearningService
         LearningType type,
         long approvalsApprenticeshipId);
 
-    Task AddLearning(LearningDomainModel model, LearningType type);
+    Task AddLearning(LearningDomainModel model);
 
-    Task UpdateLearning(LearningDomainModel model, LearningType type);
+    Task UpdateLearning(LearningDomainModel model);
 }

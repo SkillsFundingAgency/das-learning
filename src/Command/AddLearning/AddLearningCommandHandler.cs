@@ -46,7 +46,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             _logger.LogInformation($"Approving unapproved ShortCourse for ULN {command.Uln}");
 
             existingLearning.Approve();
-            await _learningService.UpdateLearning(existingLearning, LearningType.ApprenticeshipUnit);
+            await _learningService.UpdateLearning(existingLearning);
             return;
         }
 
@@ -89,7 +89,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         try
         {
-            await _learningService.AddLearning(learning, LearningType.Apprenticeship);
+            await _learningService.AddLearning(learning);
         }
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {

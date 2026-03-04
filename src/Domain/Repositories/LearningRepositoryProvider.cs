@@ -1,28 +1,27 @@
-﻿using SFA.DAS.Learning.Enums;
+﻿using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Enums;
 
+namespace SFA.DAS.Learning.Domain.Repositories;
 
-namespace SFA.DAS.Learning.Domain.Repositories
+public class LearningRepositoryProvider(
+    IApprenticeshipLearningRepository apprenticeships,
+    IShortCourseLearningRepository shortCourses)
+    : ILearningRepositoryProvider
 {
-    public class LearningRepositoryProvider : ILearningRepositoryProvider
-    {
-        private readonly IApprenticeshipLearningRepository _apprenticeships;
-        private readonly IShortCourseLearningRepository _shortCourses;
-
-        public LearningRepositoryProvider(
-            IApprenticeshipLearningRepository apprenticeships,
-            IShortCourseLearningRepository shortCourses)
+    public ILearningRepository GetRepository(LearningType type) =>
+        type switch
         {
-            _apprenticeships = apprenticeships;
-            _shortCourses = shortCourses;
-        }
+            LearningType.Apprenticeship => apprenticeships,
+            LearningType.FoundationApprenticeship => apprenticeships,
+            LearningType.ApprenticeshipUnit => shortCourses,
+            _ => throw new NotSupportedException($"Unsupported learning type: {type}")
+        };
 
-        public ILearningRepository GetRepository(LearningType type) =>
-            type switch
-            {
-                LearningType.Apprenticeship => _apprenticeships,
-                LearningType.FoundationApprenticeship => _apprenticeships,
-                LearningType.ApprenticeshipUnit => _shortCourses,
-                _ => throw new NotSupportedException($"Unsupported learning type: {type}")
-            };
-    }
+    public ILearningRepository GetRepository(LearningDomainModel model) =>
+        model switch
+        {
+            ApprenticeshipLearningDomainModel => apprenticeships,
+            ShortCourseLearningDomainModel => shortCourses,
+            _ => throw new NotSupportedException($"Unsupported domain model type: {model.GetType().Name}")
+        };
 }
