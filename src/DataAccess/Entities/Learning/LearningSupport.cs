@@ -1,8 +1,8 @@
 ﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
-[Table("dbo.LearningSupport")]
-[System.ComponentModel.DataAnnotations.Schema.Table("LearningSupport")]
-public class LearningSupport
+
+[System.ComponentModel.DataAnnotations.Schema.NotMapped]
+public abstract class LearningSupport
 {
     [Key]
     [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None)]
@@ -15,4 +15,18 @@ public class LearningSupport
     public DateTime StartDate { get; set; }
 
     public DateTime EndDate { get; set; }
+}
+
+[Table("dbo.ApprenticeshipLearningSupport")]
+[System.ComponentModel.DataAnnotations.Schema.Table("ApprenticeshipLearningSupport")]
+public class ApprenticeshipLearningSupport : LearningSupport
+{
+
+}
+
+[Table("dbo.ShortCourseLearningSupport")]
+[System.ComponentModel.DataAnnotations.Schema.Table("ShortCourseLearningSupport")]
+public class ShortCourseLearningSupport : LearningSupport
+{
+
 }

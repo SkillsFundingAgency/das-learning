@@ -6,11 +6,11 @@ namespace SFA.DAS.Learning.Command.UnitTests;
 
 internal static class TestHelper
 {
-    internal static void SetEpisode(LearningDomainModel learning, EpisodeDomainModel episode)
+    internal static void SetEpisode(ApprenticeshipLearningDomainModel learning, ApprenticeshipEpisodeDomainModel episode)
     {
         // Use reflection to set the private _episodes field so that there is only one
-        typeof(LearningDomainModel)
+        typeof(ApprenticeshipLearningDomainModel)
             .GetField("_episodes", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?.SetValue(learning, new List<EpisodeDomainModel> { episode });
+            ?.SetValue(learning, new List<ApprenticeshipEpisodeDomainModel> { episode });
     }
 }

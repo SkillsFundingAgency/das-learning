@@ -32,7 +32,7 @@ public class RemoveLearnerStepDefinitions
     public async Task ThenLastDayOfLearningForTheLearningIsSetToItsLearningStartDate()
     {
         var learning = await GetCurrentLearning();
-        learning.Episodes.First().LastDayOfLearning = learning.Episodes.Select(e=>e.Prices.Select(p=>p.StartDate)).Min()?.First();
+        learning.Episodes.First().WithdrawalDate = learning.Episodes.Select(e=>e.Prices.Select(p=>p.StartDate)).Min()?.First();
     }
 
     [Then(@"a LearningWithdrawnEvent is sent")]
@@ -57,7 +57,7 @@ public class RemoveLearnerStepDefinitions
 
     }
 
-    private async Task<DataAccess.Entities.Learning.Learning> GetCurrentLearning() 
+    private async Task<DataAccess.Entities.Learning.ApprenticeshipLearning> GetCurrentLearning() 
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         return dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);

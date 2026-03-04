@@ -12,7 +12,7 @@ GO
 
 ALTER TABLE [History].[LearningHistory]
 ADD CONSTRAINT FK_LearningHistory_Learning FOREIGN KEY ([LearningId])
-    REFERENCES [dbo].[Learning] ([Key])
+    REFERENCES [dbo].[ApprenticeshipLearning] ([Key])
 GO
 
 CREATE NONCLUSTERED INDEX [IX_LearningHistory_LearningId]

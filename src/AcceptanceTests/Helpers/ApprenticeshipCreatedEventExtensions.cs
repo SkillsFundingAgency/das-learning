@@ -1,4 +1,6 @@
 ﻿using SFA.DAS.Learning.InnerApi.Requests;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using SFA.DAS.Learning.InnerApi.Requests.Shared;
 
 namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
 
@@ -14,7 +16,7 @@ internal static class ApprenticeshipCreatedEventExtensions
             {
                 WithdrawalDate = null
             },
-            Learner = new LearnerUpdateDetails
+            Learner = new ApprenticeshipLearnerUpdateDetails
             {
                 FirstName = apprenticeshipCreatedEvent.FirstName,
                 LastName = apprenticeshipCreatedEvent.LastName,
@@ -23,7 +25,7 @@ internal static class ApprenticeshipCreatedEventExtensions
                 DateOfBirth = apprenticeshipCreatedEvent.DateOfBirth,
                 Care = new CareDetails()
             },
-            LearningSupport = new List<LearningSupportUpdatedDetails>(),
+            LearningSupport = new List<LearningSupportDetails>(),
             MathsAndEnglishCourses = new List<MathsAndEnglish>(),
             OnProgramme = new OnProgrammeDetails
             {

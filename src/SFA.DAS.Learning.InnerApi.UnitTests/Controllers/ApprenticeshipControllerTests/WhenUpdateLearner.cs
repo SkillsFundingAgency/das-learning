@@ -6,7 +6,7 @@ using Moq;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.InnerApi.Controllers;
-using SFA.DAS.Learning.InnerApi.Requests;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 
@@ -40,7 +40,7 @@ public class WhenUpdateLearner
     public async Task ThenReturnsListOfChanges()
     {
         // Arrange
-        var learnerKey = _fixture.Create<Guid>();
+        var learningKey = _fixture.Create<Guid>();
         var expectedResponse = _fixture.Create<UpdateLearnerResult>();
         var request = _fixture.Create<UpdateLearnerRequest>();
 
@@ -49,11 +49,31 @@ public class WhenUpdateLearner
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _sut.UpdateLearning(learnerKey, request);
+        var result = await _sut.UpdateLearning(learningKey, request);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
         okResult.Value.Should().Be(expectedResponse);
+    }
+
+    [Test]
+    public async Task ThenSetsLearningKeyOnUpdateContext()
+    {
+        // Arrange
+        var learningKey = _fixture.Create<Guid>();
+        var expectedResponse = _fixture.Create<UpdateLearnerResult>();
+        var request = _fixture.Create<UpdateLearnerRequest>();
+
+        _mockCommandDispatcher
+            .Setup(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(It.IsAny<UpdateLearnerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
+
+        // Act
+        var result = await _sut.UpdateLearning(learningKey, request);
+
+        // Assert
+        _mockCommandDispatcher
+            .Verify(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(It.Is<UpdateLearnerCommand>(c => c.UpdateModel.LearningKey == learningKey), It.IsAny<CancellationToken>()));
     }
 }

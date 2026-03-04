@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Types;
+using System.Data.Common;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
@@ -67,7 +68,11 @@ public class ApprovalCreatedStepDefinitions
         if (row.ContainsKey("PlannedStartDate") && !string.IsNullOrWhiteSpace(row["PlannedStartDate"]))
             plannedStartDate = TokenisableDateTime.FromString(row["PlannedStartDate"]).DateTime!.Value;
 
-        var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(actualStartDate,  endDate, trainingPrice, epaPrice, plannedStartDate);
+        string? uln = null;
+        if (row.ContainsKey("Uln") && !string.IsNullOrWhiteSpace(row["Uln"]))
+            uln = row["Uln"];
+
+        var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(actualStartDate,  endDate, trainingPrice, epaPrice, plannedStartDate, uln);
 
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
 
@@ -83,15 +88,17 @@ public class ApprovalCreatedStepDefinitions
 
         await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
 
-        var apprenticeship = dbConnection.GetAll<DataAccess.Entities.Learning.Learning>().Single(x => x.Uln == ApprovalCreatedEvent.Uln);
+        var learner = dbConnection.GetLearner(ApprovalCreatedEvent.Uln);
+        var apprenticeship = dbConnection.GetLearningByLearnerKey(learner.Key);
+
         apprenticeship.Should().NotBeNull();
-        apprenticeship.Uln.Should().Be(ApprovalCreatedEvent.Uln);
-        apprenticeship.FirstName.Should().Be(ApprovalCreatedEvent.FirstName);
-        apprenticeship.LastName.Should().Be(ApprovalCreatedEvent.LastName);
+        learner.Uln.Should().Be(ApprovalCreatedEvent.Uln);
+        learner.FirstName.Should().Be(ApprovalCreatedEvent.FirstName);
+        learner.LastName.Should().Be(ApprovalCreatedEvent.LastName);
         apprenticeship.Key.Should().NotBe(Guid.Empty);
         apprenticeship.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
        
-        var episode = (await dbConnection.GetAllAsync<Episode>()).Last(x => x.LearningKey == apprenticeship.Key);
+        var episode = (await dbConnection.GetAllAsync<ApprenticeshipEpisode>()).Last(x => x.LearningKey == apprenticeship.Key);
         episode.Should().NotBeNull();
         episode.Key.Should().NotBe(Guid.Empty);
         episode.Ukprn.Should().Be(ApprovalCreatedEvent.ProviderId);
@@ -121,8 +128,9 @@ public class ApprovalCreatedStepDefinitions
     private async Task<bool> ApprenticeshipRecordMatchesExpectation()
     {
         await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
-        var apprenticeship = (await dbConnection.GetAllAsync<DataAccess.Entities.Learning.Learning>()).SingleOrDefault(x => x.Uln == ApprovalCreatedEvent.Uln);
-
+        
+        var apprenticeship = dbConnection.GetLearning(ApprovalCreatedEvent.Uln);
+        
         return apprenticeship != null;
     }
 
@@ -133,7 +141,12 @@ public class ApprovalCreatedStepDefinitions
 
         var publishedEvent = _testContext.MessageSession.ReceivedEvents<LearningCreatedEvent>().Single(EventMatchesExpectation);
 
-        publishedEvent.Uln.Should().Be(Apprenticeship.Uln);
+        await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
+
+        var learner = dbConnection.GetLearner(ApprovalCreatedEvent.Uln);
+        var apprenticeship = dbConnection.GetLearningByLearnerKey(learner.Key);
+
+        publishedEvent.Uln.Should().Be(learner.Uln);
         publishedEvent.LearningKey.Should().Be(Apprenticeship.Key);
         int.Parse(publishedEvent.Episode.TrainingCode).Should().Be(int.Parse(LatestEpisode.TrainingCode));
         publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.StartDate.Should().BeSameDateAs(LatestEpisodePrice.StartDate);
@@ -145,8 +158,8 @@ public class ApprovalCreatedStepDefinitions
         publishedEvent.Episode.FundingType.ToString().Should().Be(LatestEpisode.FundingType.ToString());
         publishedEvent.Episode.LegalEntityName.Should().Be(LatestEpisode.LegalEntityName);
         publishedEvent.Episode.Ukprn.Should().Be(LatestEpisode.Ukprn);
-        publishedEvent.FirstName.Should().Be(Apprenticeship.FirstName);
-        publishedEvent.LastName.Should().Be(Apprenticeship.LastName);
+        publishedEvent.FirstName.Should().Be(learner.FirstName);
+        publishedEvent.LastName.Should().Be(learner.LastName);
         publishedEvent.Episode.FundingPlatform.ToString().Should().Be(LatestEpisode.FundingPlatform.ToString());
 
         _scenarioContext["publishedEvent"] = publishedEvent;
@@ -165,7 +178,7 @@ public class ApprovalCreatedStepDefinitions
     }
 
     public CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent ApprovalCreatedEvent => _scenarioContext.GetApprenticeshipCreatedEvent();
-    public DataAccess.Entities.Learning.Learning Apprenticeship => (DataAccess.Entities.Learning.Learning)_scenarioContext["Learning"];
-    public Episode LatestEpisode => (Episode)_scenarioContext["Episode"];
+    public DataAccess.Entities.Learning.ApprenticeshipLearning Apprenticeship => (DataAccess.Entities.Learning.ApprenticeshipLearning)_scenarioContext["Learning"];
+    public ApprenticeshipEpisode LatestEpisode => (ApprenticeshipEpisode)_scenarioContext["Episode"];
     public EpisodePrice LatestEpisodePrice => (EpisodePrice)_scenarioContext["EpisodePrice"];
 }
