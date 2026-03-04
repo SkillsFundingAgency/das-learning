@@ -10,6 +10,7 @@ using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 using SFA.DAS.Learning.Infrastructure.Services;
 using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.Learning.Command.ArchiveLearningHistory;
+using SFA.DAS.Learning.Domain.Services;
 
 namespace SFA.DAS.Learning.Command;
 

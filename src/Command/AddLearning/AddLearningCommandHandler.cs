@@ -6,6 +6,7 @@ using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;

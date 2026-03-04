@@ -9,6 +9,7 @@ using SFA.DAS.Learning.Command.AddLearning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;

@@ -92,6 +92,19 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 
         }
 
+        [Then(@"the Short Course is approved")]
+        public async Task ThenTheShortCourseIsApproved()
+        {
+            var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+
+            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+            var learner = dbConnection.GetLearnerByShortCourseKey(shortCourseLearningKey);
+            var shortCourseLearning = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
+
+            shortCourseLearning.Episodes.First().IsApproved.Should().BeTrue();
+        }
+
+
         private CreateDraftShortCourseRequest GetDefaultShortCourse()
         {
             return new CreateDraftShortCourseRequest
