@@ -1,7 +1,6 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -11,7 +10,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     private readonly DataAccess.Entities.Learning.ShortCourseEpisode _entity;
     private readonly List<ShortCourseMilestoneDomainModel> _milestones;
 
-    public Guid Key => _entity.Key;
+    public override Guid Key => _entity.Key;
     public Guid LearningKey => _entity.LearningKey;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;

@@ -173,7 +173,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .FlushEvents()
             .OfType<Domain.Events.LearningApprovedEvent>()
             .Should()
-            .ContainSingle(e => e.LearningKey == shortCourseLearning.Key);
+            .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
+                                && e.EpisodeKey == shortCourseLearning.LatestEpisode.Key);
     }
 
     [Test]

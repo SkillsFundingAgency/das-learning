@@ -85,11 +85,13 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
     public override void Approve()
     {
-        LatestEpisode.Approve();
+        var episode = LatestEpisode;
+        episode.Approve();
 
         AddEvent(new LearningApprovedEvent
         {
-            LearningKey = Key
+            LearningKey = Key,
+            EpisodeKey = episode.Key
         });
     }
 
@@ -101,8 +103,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             return latestEpisode;
         }
     }
-
-
     private ShortCourseLearningDomainModel(ShortCourseLearning entity): base(entity)
     {
         _entity = entity;
