@@ -5,5 +5,8 @@ namespace SFA.DAS.Learning.Domain.Repositories;
 public interface IShortCourseLearningRepository : ILearningRepository
 {
     Task Add(ShortCourseLearningDomainModel learning);
+    Task Update(ShortCourseLearningDomainModel learning);
     Task<ShortCourseLearningDomainModel> Get(Guid key);
+    Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey);
+    Task<PagedResult<Models.Dtos.Learning>> GetApprovedByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken);
 }

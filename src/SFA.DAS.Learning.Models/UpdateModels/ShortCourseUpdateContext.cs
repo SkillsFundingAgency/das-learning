@@ -4,7 +4,7 @@ using SFA.DAS.Learning.Models.UpdateModels.Shared;
 namespace SFA.DAS.Learning.Models.UpdateModels;
 
 #pragma warning disable CS8618 // Required properties must be set in the constructor
-public class CreateDraftShortCourseModel
+public class ShortCourseUpdateContext
 {
     public LearnerModel Learner { get; set; }
     public List<LearningSupportDetails> LearningSupport { get; set; }

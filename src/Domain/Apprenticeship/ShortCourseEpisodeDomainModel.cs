@@ -1,6 +1,8 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -78,6 +80,46 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public void Approve()
     {
         _entity.IsApproved = true;
+    }
+
+    public void Update(ShortCourseUpdateContext updateContext)
+    {
+        _entity.Ukprn = updateContext.OnProgramme.Ukprn;
+        _entity.EmployerAccountId = updateContext.OnProgramme.EmployerId;
+        _entity.TrainingCode = updateContext.OnProgramme.CourseCode;
+        _entity.StartDate = updateContext.OnProgramme.StartDate;
+        _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
+        _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
+
+        UpdateMilestones(updateContext.OnProgramme.Milestones);
+        UpdateLearningSupport(updateContext.LearningSupport);
+    }
+
+    private void UpdateMilestones(IEnumerable<Milestone> milestones)
+    {
+        _entity.Milestones.RemoveWhere(x=> !milestones.Any(m => m == x.Milestone));
+
+        var missingMilestones = milestones.Where(m => !_entity.Milestones.Any(em => em.Milestone == m));
+
+        foreach (var milestone in missingMilestones)
+        {
+            AddMilestone(milestone);
+        }
+
+        _milestones.Clear();
+        _milestones.AddRange(_entity.Milestones.Select(ShortCourseMilestoneDomainModel.Get));
+    }
+
+    private void UpdateLearningSupport(List<LearningSupportDetails> updatedlearningSupport)
+    {
+        _entity.LearningSupport.RemoveWhere(x => !updatedlearningSupport.Any(ls => ls.StartDate == x.StartDate && ls.EndDate == x.EndDate));
+
+        var missingLearningSupport = updatedlearningSupport.Where(ls => !_entity.LearningSupport.Any(els => els.StartDate == ls.StartDate && els.EndDate == ls.EndDate));
+
+        foreach (var learningSupport in missingLearningSupport)
+        {
+            AddLearningSupport(learningSupport.StartDate, learningSupport.EndDate);
+        }
     }
 
     private ShortCourseEpisodeDomainModel(ShortCourseEpisode entity)

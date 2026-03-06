@@ -37,6 +37,16 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         }
     }
 
+    public async Task Update(ShortCourseLearningDomainModel learning)
+    {
+        await DbContext.SaveChangesAsync();
+
+        foreach (dynamic domainEvent in learning.FlushEvents())
+        {
+            await _domainEventDispatcher.Send(domainEvent);
+        }
+    }
+
     public async Task<ShortCourseLearningDomainModel> Get(Guid key)
     {
         var shortCourseLearning = await DbContext.Set<ShortCourseLearning>()
@@ -74,17 +84,57 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         if (shortCourseLearning is { Episodes.Count: 0 }) return null; //learnings without an episode are treated as if not exists
 
         return _learningFactory.GetExisting(shortCourseLearning);
-
     }
 
-    public async Task Update(ShortCourseLearningDomainModel learning)
+    public async Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey)
     {
-        await DbContext.SaveChangesAsync();
+        var shortCourseLearning = await DbContext
+            .ShortCourseLearnings
+            .IncludeAllChildren()
+            .SingleOrDefaultAsync(x => x.LearnerKey == learnerKey);
 
-        foreach (dynamic domainEvent in learning.FlushEvents())
+        if (shortCourseLearning == null)
+            return null;
+
+        return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
+    public async Task<PagedResult<Models.Dtos.Learning>> GetApprovedByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
+    {
+        var baseQuery = DbContext.ShortCourseLearnings
+            .Include(x => x.Episodes)
+            .Where(x => x.Episodes.Any(e => e.Ukprn == ukPrn))
+            .Where(x => x.Episodes.Any(e => e.IsApproved))
+            .Where(x => x.Episodes.Any(e =>
+                e.StartDate <= dates.End &&
+                e.ExpectedEndDate >= dates.Start &&
+                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
+            .AsNoTracking();
+
+        var totalItems = await baseQuery.CountAsync(cancellationToken);
+        var totalPages = (int)Math.Ceiling((double)totalItems / limit);
+
+        var result = await baseQuery
+            .OrderBy(x => x.Key)
+            .Skip(offset)
+            .Take(limit)
+            .Join(
+                DbContext.LearnersDbSet.AsNoTracking(),
+                learning => learning.LearnerKey,
+                learner => learner.Key,
+                (learning, learner) => new Models.Dtos.Learning
+                {
+                    Uln = learner.Uln,
+                    Key = learning.Key
+                })
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<Models.Dtos.Learning>
         {
-            await _domainEventDispatcher.Send(domainEvent);
-        }
+            Data = result,
+            TotalItems = totalItems,
+            TotalPages = totalPages
+        };
     }
 
     public Task AddLearning(LearningDomainModel model)
@@ -102,5 +152,17 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
     async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId)
     {
         return await Get(uln, true);
+    }
+}
+
+internal static class ShortCourseDbContextExtensions
+{
+    public static IQueryable<ShortCourseLearning> IncludeAllChildren(this DbSet<ShortCourseLearning> dbSet)
+    {
+        return dbSet
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.LearningSupport)
+            .Include(x => x.Episodes)
+            .ThenInclude(x => x.Milestones);
     }
 }
