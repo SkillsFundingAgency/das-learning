@@ -8,8 +8,7 @@
     [EmailAddress] NVARCHAR(320) NULL,
     [HasEHCP] BIT NOT NULL DEFAULT 0,
     [IsCareLeaver] BIT NOT NULL DEFAULT 0,
-    [CareLeaverEmployerConsentGiven] BIT NOT NULL DEFAULT 0
+    [CareLeaverEmployerConsentGiven] BIT NOT NULL DEFAULT 0,
+    CONSTRAINT UQ_Learner_Uln UNIQUE (Uln)
     )
-    GO
-CREATE INDEX IX_Learner_Uln ON Learner (Uln)
     GO
