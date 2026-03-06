@@ -34,7 +34,8 @@ public class LearningApprovedEventHandlerTests
 
         _messageSession.Verify(x => x.Publish(
                 It.Is<Types.LearningApprovedEvent>(e =>
-                    e.LearningKey == domainEvent.LearningKey),
+                    e.LearningKey == domainEvent.LearningKey &&
+                    e.EpisodeKey == domainEvent.EpisodeKey),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
