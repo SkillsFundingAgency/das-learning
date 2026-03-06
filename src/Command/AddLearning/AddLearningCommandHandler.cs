@@ -38,9 +38,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
     public async Task Handle(AddLearningCommand command, CancellationToken cancellationToken = default)
     {
-        ApprenticeshipLearningDomainModel? existingLearning;
-
-        existingLearning = await _learningRepository.Get(command.Uln, command.ApprovalsApprenticeshipId);
+        var existingLearning = await _learningRepository.Get(command.Uln, command.ApprovalsApprenticeshipId);
         
         if (existingLearning != null)
         {
