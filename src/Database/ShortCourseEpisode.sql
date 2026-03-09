@@ -7,7 +7,7 @@
     [StartDate] DATETIME NOT NULL,
     [ExpectedEndDate] DATETIME NOT NULL,
     [WithdrawalDate] DATETIME NULL,
-    [TrainingCode] NCHAR(10) NOT NULL,
+    [TrainingCode] VARCHAR(8) NOT NULL,
     [IsApproved] BIT NOT NULL DEFAULT 0
 )
 GO

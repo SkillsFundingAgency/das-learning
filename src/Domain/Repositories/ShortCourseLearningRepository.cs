@@ -107,7 +107,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         };
     }
 
-    public async Task<PagedResult<Models.Dtos.ShortCourseEarning>> GetForEarnings(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
+    public async Task<PagedResult<Models.Dtos.ShortCourseForEarnings>> GetForEarnings(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
     {
         var baseQuery = DbContext.ShortCourseLearnings
             .Include(x => x.Episodes)
@@ -136,14 +136,14 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         var result = learnings.Select(l =>
         {
             learners.TryGetValue(l.LearnerKey, out var learner);
-            return new Models.Dtos.ShortCourseEarning
+            return new Models.Dtos.ShortCourseForEarnings
             {
                 LearningKey = l.Key,
                 Uln = learner?.Uln,
                 FirstName = learner?.FirstName,
                 LastName = learner?.LastName,
                 DateOfBirth = learner?.DateOfBirth ?? default,
-                Episodes = l.Episodes.Select(e => new Models.Dtos.ShortCourseEarningEpisode
+                Episodes = l.Episodes.Select(e => new Models.Dtos.ShortCourseForEarningEpisode
                 {
                     CourseCode = e.TrainingCode,
                     IsApproved = e.IsApproved
@@ -151,7 +151,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
             };
         }).ToList();
 
-        return new PagedResult<Models.Dtos.ShortCourseEarning>
+        return new PagedResult<Models.Dtos.ShortCourseForEarnings>
         {
             Data = result,
             TotalItems = totalItems,

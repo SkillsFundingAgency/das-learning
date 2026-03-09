@@ -7,6 +7,7 @@ using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
+using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 {
@@ -169,6 +170,30 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             shortCourseLearnings.Count().Should().Be(numberOfRecords);
         }
         
+        [When("SLD requests short courses for earnings for collection year (.*)")]
+        public async Task WhenSLDRequestsShortCoursesForEarningsForCollectionYear(int collectionYear)
+        {
+            var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
+            var response = await _testContext.TestInnerApi.Get<GetShortCoursesForEarningsResponse>($"/{ukprn}/{collectionYear}/shortCourses");
+            _scenarioContext.Set<GetShortCoursesForEarningsResponse>(response);
+        }
+
+        [Then(@"short courses for earnings are returned with the following details")]
+        public void ThenShortCoursesForEarningsAreReturnedWithTheFollowingDetails(Table table)
+        {
+            var response = _scenarioContext.Get<GetShortCoursesForEarningsResponse>();
+            response.Items.Count().Should().Be(table.RowCount);
+            foreach (var row in table.Rows)
+            {
+                var item = response.Items.Single(i => i.Learner.Uln == row["Uln"]);
+                item.Learner.FirstName.Should().Be(row["FirstName"]);
+                item.Learner.LastName.Should().Be(row["LastName"]);
+                var episode = item.Episodes.First();
+                episode.CourseCode.Should().Be(row["CourseCode"]);
+                episode.IsApproved.Should().Be(bool.Parse(row["IsApproved"]));
+            }
+        }
+
         [Then(@"short courses are returned for the following Ulns")]
         public void ThenShortCoursesAreReturnedForTheFollowingUlns(Table table)
         {
