@@ -44,7 +44,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         if (existingLearning != null && command.LearningType == LearningType.ApprenticeshipUnit)
         {
-            _logger.LogInformation($"Approving unapproved ShortCourse for ULN {command.Uln}");
+            _logger.LogInformation("Approving unapproved ShortCourse for ULN {Uln}", command.Uln);
 
             existingLearning.Approve();
             await _learningService.UpdateLearning(existingLearning);
@@ -53,7 +53,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         if (command.LearningType == LearningType.ApprenticeshipUnit)
         {
-            _logger.LogWarning($"Unable to approve ShortCourse for ULN {command.Uln} - no ShortCourse was found");
+            _logger.LogWarning("Unable to approve ShortCourse for ULN {Uln} - no ShortCourse was found", command.Uln);
             return;
         }
 
@@ -95,7 +95,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {
             //2627: violation of unique constraint. 2601: violation of unique index
-            _logger.LogWarning(
+            _logger.LogWarning(ex,
                 "Unique constraint violation for given Uln and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
                 command.ApprovalsApprenticeshipId);
             return;
@@ -126,7 +126,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {
             //2627: violation of unique constraint. 2601: violation of unique index
-            _logger.LogWarning(
+            _logger.LogWarning(ex,
                 "Unique constraint violation for given Uln {Uln}.", command.Uln);
             throw; //rethrowing will allow the command to be retried. Learner duplication will then be avoided, allowing the new learning to be recorded
         }
