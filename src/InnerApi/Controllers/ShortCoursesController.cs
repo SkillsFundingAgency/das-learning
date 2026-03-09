@@ -4,6 +4,7 @@ using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
+using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
@@ -49,6 +50,30 @@ public class ShortCoursesController : ControllerBase
 
         var request = new GetShortCoursesByAcademicYearRequest(ukprn, academicYear, page, pageSize);
         var response = await _queryDispatcher.Send<GetShortCoursesByAcademicYearRequest, GetShortCoursesByAcademicYearResponse>(request);
+
+        var pageLinks = _pagedLinkHeaderService.GetPageLinks(request, response);
+
+        Response?.Headers.Add(pageLinks);
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Get paginated short courses for a provider within a collection year, for earnings purposes.
+    /// </summary>
+    /// <param name="ukprn">Ukprn</param>
+    /// <param name="collectionYear">Collection year in yymm format (e.g. 2425)</param>
+    /// <param name="page">Page number</param>
+    /// <param name="pageSize">Number of items per page</param>
+    /// <returns>GetShortCoursesForEarningsResponse</returns>
+    [HttpGet("{ukprn:long}/{collectionYear:int}/shortCourses")]
+    [ProducesResponseType(typeof(GetShortCoursesForEarningsResponse), 200)]
+    public async Task<IActionResult> GetForEarnings(long ukprn, int collectionYear, [FromQuery] int page = 1, [FromQuery] int? pageSize = 20)
+    {
+        pageSize = pageSize.HasValue ? Math.Clamp(pageSize.Value, 1, 100) : pageSize;
+
+        var request = new GetShortCoursesForEarningsRequest(ukprn, collectionYear, page, pageSize);
+        var response = await _queryDispatcher.Send<GetShortCoursesForEarningsRequest, GetShortCoursesForEarningsResponse>(request);
 
         var pageLinks = _pagedLinkHeaderService.GetPageLinks(request, response);
 

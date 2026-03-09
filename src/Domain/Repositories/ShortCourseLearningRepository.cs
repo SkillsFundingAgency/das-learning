@@ -106,6 +106,58 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
             TotalPages = totalPages
         };
     }
+
+    public async Task<PagedResult<Models.Dtos.ShortCourseEarning>> GetForEarnings(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
+    {
+        var baseQuery = DbContext.ShortCourseLearnings
+            .Include(x => x.Episodes)
+            .Where(x => x.Episodes.Any(e => e.Ukprn == ukPrn))
+            .Where(x => x.Episodes.Any(e =>
+                e.StartDate <= dates.End &&
+                e.ExpectedEndDate >= dates.Start &&
+                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
+            .AsNoTracking();
+
+        var totalItems = await baseQuery.CountAsync(cancellationToken);
+        var totalPages = (int)Math.Ceiling((double)totalItems / limit);
+
+        var learnings = await baseQuery
+            .OrderBy(x => x.Key)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+
+        var learnerKeys = learnings.Select(x => x.LearnerKey).ToList();
+        var learners = await DbContext.LearnersDbSet
+            .Where(l => learnerKeys.Contains(l.Key))
+            .AsNoTracking()
+            .ToDictionaryAsync(l => l.Key, cancellationToken);
+
+        var result = learnings.Select(l =>
+        {
+            learners.TryGetValue(l.LearnerKey, out var learner);
+            return new Models.Dtos.ShortCourseEarning
+            {
+                LearningKey = l.Key,
+                Uln = learner?.Uln,
+                FirstName = learner?.FirstName,
+                LastName = learner?.LastName,
+                DateOfBirth = learner?.DateOfBirth ?? default,
+                Episodes = l.Episodes.Select(e => new Models.Dtos.ShortCourseEarningEpisode
+                {
+                    CourseCode = e.TrainingCode,
+                    IsApproved = e.IsApproved
+                }).ToList()
+            };
+        }).ToList();
+
+        return new PagedResult<Models.Dtos.ShortCourseEarning>
+        {
+            Data = result,
+            TotalItems = totalItems,
+            TotalPages = totalPages
+        };
+    }
 }
 
 internal static class ShortCourseDbContextExtensions
