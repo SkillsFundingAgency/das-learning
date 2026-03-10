@@ -17,7 +17,7 @@ internal static class SqlConnectionExtensions
     {
         var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.LearnerKey == learnerKey);
         learning.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipEpisode>().Where(x => x.LearningKey == learning.Key).ToList();
-        learning.MathsAndEnglishCourses = dbConnection.GetAll<DataAccess.Entities.Learning.EnglishAndMaths>().Where(x => x.LearningKey == learning.Key).ToList();
+        learning.EnglishAndMathsCourses = dbConnection.GetAll<DataAccess.Entities.Learning.EnglishAndMaths>().Where(x => x.LearningKey == learning.Key).ToList();
 
         foreach (var episode in learning.Episodes)
         {
@@ -26,9 +26,9 @@ internal static class SqlConnectionExtensions
             episode.BreaksInLearning = dbConnection.GetAll<DataAccess.Entities.Learning.EpisodeBreakInLearning>().Where(x => x.EpisodeKey == episode.Key).ToList();
         }
 
-        foreach (var mathsAndEnglish in learning.MathsAndEnglishCourses)
+        foreach (var englishAndMaths in learning.EnglishAndMathsCourses)
         {
-            mathsAndEnglish.BreaksInLearning = dbConnection.GetAll<DataAccess.Entities.Learning.EnglishAndMathsBreakInLearning>().Where(x => x.EnglishAndMathsKey == mathsAndEnglish.Key).ToList();
+            englishAndMaths.BreaksInLearning = dbConnection.GetAll<DataAccess.Entities.Learning.EnglishAndMathsBreakInLearning>().Where(x => x.EnglishAndMathsKey == englishAndMaths.Key).ToList();
         }
 
         return learning;

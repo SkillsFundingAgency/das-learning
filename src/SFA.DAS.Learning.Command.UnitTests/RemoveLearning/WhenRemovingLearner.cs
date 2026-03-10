@@ -91,7 +91,7 @@ public class WhenRemovingLearner
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
 
         updatedModel.Should().NotBeNull();
-        updatedModel!.MathsAndEnglishCourses.Should().BeEmpty();
+        updatedModel!.EnglishAndMathsCourses.Should().BeEmpty();
     }
 
     [Test]

@@ -69,7 +69,7 @@ public class LearnerUpdatedEventBuilder
                 }).ToList()
             }).ToList(),
 
-            MathsAndEnglishCourses = _learning.MathsAndEnglishCourses.Select(m => new MathsAndEnglish
+            EnglishAndMathsCourses = _learning.EnglishAndMathsCourses.Select(m => new MathsAndEnglish
             {
                 Key = m.Key,
                 StartDate = m.StartDate,

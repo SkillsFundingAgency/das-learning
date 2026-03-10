@@ -58,7 +58,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
              .HasKey(a => new { a.Key });
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
-            .HasMany(x => x.MathsAndEnglishCourses)
+            .HasMany(x => x.EnglishAndMathsCourses)
             .WithOne()
             .HasForeignKey(fk => fk.LearningKey);
 
@@ -118,7 +118,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
 
         modelBuilder.Entity<EnglishAndMaths>()
             .HasOne<ApprenticeshipLearning>()
-            .WithMany(al => al.MathsAndEnglishCourses)
+            .WithMany(al => al.EnglishAndMathsCourses)
             .HasForeignKey(e => e.LearningKey)
             .HasPrincipalKey(al => al.Key);
 

@@ -14,7 +14,7 @@ public class LearnerUpdatedEvent : IDomainEvent
     public DateTime? CompletionDate { get; set; }
     public List<Episode> Episodes { get; set; }
     public List<FreezeRequest> FreezeRequests { get; set; }
-    public List<MathsAndEnglish> MathsAndEnglishCourses { get; set; }
+    public List<MathsAndEnglish> EnglishAndMathsCourses { get; set; }
 }
 
 public class Episode

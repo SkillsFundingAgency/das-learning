@@ -17,7 +17,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
-    public IReadOnlyCollection<EnglishAndMathsDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.MathsAndEnglishCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
+    public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
     public DateTime StartDate
     {
         get
@@ -165,7 +165,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         latestEpisode.Withdraw(withdrawalDate);
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
-        _entity.MathsAndEnglishCourses.Clear();
+        _entity.EnglishAndMathsCourses.Clear();
     }
 
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
@@ -183,7 +183,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         bool hasWithdrawalChanges = false;
         bool hasBreaksInLearningChanges = false;
 
-        var existingCourses = MathsAndEnglishCourses;
+        var existingCourses = EnglishAndMathsCourses;
         var courseKeysToKeep = new List<Guid>();
 
         foreach (var incomingCourse in updateModel.MathsAndEnglishCourses)
@@ -201,19 +201,19 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             {
                 hasChanges = true;
                 var newCourse = new EnglishAndMathsDomainModel(incomingCourse, _entity.Key);
-                _entity.MathsAndEnglishCourses.Add(newCourse.GetEntity());
+                _entity.EnglishAndMathsCourses.Add(newCourse.GetEntity());
                 if (newCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
                 courseKeysToKeep.Add(newCourse.Key);
             }
         }
 
-        var coursesToRemove = _entity.MathsAndEnglishCourses
+        var coursesToRemove = _entity.EnglishAndMathsCourses
             .Where(existing => !courseKeysToKeep.Contains(existing.Key))
             .ToList();
 
         foreach (var removed in coursesToRemove)
         {
-            _entity.MathsAndEnglishCourses.Remove(removed);
+            _entity.EnglishAndMathsCourses.Remove(removed);
             hasChanges = true;
         }
 
