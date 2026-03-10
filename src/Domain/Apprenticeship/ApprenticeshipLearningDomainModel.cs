@@ -17,7 +17,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
-    public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList());
+    public IReadOnlyCollection<EnglishAndMathsDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.MathsAndEnglishCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
     public DateTime StartDate
     {
         get
@@ -200,7 +200,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             else
             {
                 hasChanges = true;
-                var newCourse = new MathsAndEnglishDomainModel(incomingCourse, _entity.Key);
+                var newCourse = new EnglishAndMathsDomainModel(incomingCourse, _entity.Key);
                 _entity.MathsAndEnglishCourses.Add(newCourse.GetEntity());
                 if (newCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
                 courseKeysToKeep.Add(newCourse.Key);

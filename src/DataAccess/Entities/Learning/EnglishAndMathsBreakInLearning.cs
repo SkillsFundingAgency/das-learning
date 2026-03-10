@@ -1,8 +1,8 @@
-﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
+namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
 [Table("dbo.EnglishAndMathsBreakInLearning")]
 [System.ComponentModel.DataAnnotations.Schema.Table("EnglishAndMathsBreakInLearning")]
-public class MathsAndEnglishBreakInLearning
+public class EnglishAndMathsBreakInLearning
 {
     [Key]
     [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None)]

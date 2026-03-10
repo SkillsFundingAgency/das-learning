@@ -178,7 +178,7 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         (var learnerEntity, var learningEntity) = CreateEntities();
 
-        learningEntity.MathsAndEnglishCourses = [new MathsAndEnglish { Course = course.Course, LearnAimRef = course.LearnAimRef }];
+        learningEntity.MathsAndEnglishCourses = [new EnglishAndMaths { Course = course.Course, LearnAimRef = course.LearnAimRef }];
 
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 

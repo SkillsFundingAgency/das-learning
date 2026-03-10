@@ -7,7 +7,7 @@ using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.Types;
 using Cost = SFA.DAS.Learning.InnerApi.Requests.Apprenticeships.Cost;
-using MathsAndEnglishBreakInLearning = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning;
+using EnglishAndMathsBreakInLearning = SFA.DAS.Learning.DataAccess.Entities.Learning.EnglishAndMathsBreakInLearning;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -181,7 +181,7 @@ public class UpdateLearnerStepDefinitions
 
             var breaksInLearning = GetBreakInLearningsFromTableRow(row);
 
-            var expectedMathsAndEnglish = new DataAccess.Entities.Learning.MathsAndEnglish
+            var expectedMathsAndEnglish = new DataAccess.Entities.Learning.EnglishAndMaths
             {
                 Course = row["Course"],
                 LearnAimRef = row["LearnAimRef"],
@@ -200,7 +200,7 @@ public class UpdateLearnerStepDefinitions
                     .Excluding(c => c.LearningKey)
                     .Excluding(c => c.Key)
                     .For(c=> c.BreaksInLearning).Exclude(x=>x.Key)
-                    .For(c => c.BreaksInLearning).Exclude(x => x.MathsAndEnglishKey)
+                    .For(c => c.BreaksInLearning).Exclude(x => x.EnglishAndMathsKey)
                     .Using<string>(ctx => ctx.Subject?.Trim().Should().Be(ctx.Expectation?.Trim()))
                     .WhenTypeIs<string>());
         }
@@ -433,13 +433,13 @@ public class UpdateLearnerStepDefinitions
         return careDetails;
     }
 
-    private List<MathsAndEnglishBreakInLearning> GetBreakInLearningsFromTableRow(TableRow row)
+    private List<EnglishAndMathsBreakInLearning> GetBreakInLearningsFromTableRow(TableRow row)
     {
-        var breaks = new List<MathsAndEnglishBreakInLearning>();
+        var breaks = new List<EnglishAndMathsBreakInLearning>();
 
         if (row.ContainsKey("BreakInLearningStart"))
         {
-            breaks.Add(new MathsAndEnglishBreakInLearning
+            breaks.Add(new EnglishAndMathsBreakInLearning
             {
                 StartDate = TokenisableDateTime.FromString(row["BreakInLearningStart"]).DateTime!.Value,
                 EndDate = TokenisableDateTime.FromString(row["BreakInLearningEnd"]).DateTime!.Value,

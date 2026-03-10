@@ -1,13 +1,13 @@
-﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Models.UpdateModels;
 using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class MathsAndEnglishDomainModel
+public class EnglishAndMathsDomainModel
 {
-    private readonly MathsAndEnglish _entity;
+    private readonly EnglishAndMaths _entity;
 
     public Guid Key => _entity.Key;
     public Guid LearningKey => _entity.LearningKey;
@@ -20,17 +20,17 @@ public class MathsAndEnglishDomainModel
     public DateTime? PauseDate => _entity.PauseDate;
     public int? PriorLearningPercentage => _entity.PriorLearningPercentage;
     public decimal Amount => _entity.Amount;
-    public IReadOnlyCollection<MathsAndEnglishBreakInLearningDomainModel> BreaksInLearning => new ReadOnlyCollection<MathsAndEnglishBreakInLearningDomainModel>(_entity.BreaksInLearning.Select(MathsAndEnglishBreakInLearningDomainModel.Get).ToList());
+    public IReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel> BreaksInLearning => new ReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel>(_entity.BreaksInLearning.Select(EnglishAndMathsBreakInLearningDomainModel.Get).ToList());
 
 
-    internal MathsAndEnglishDomainModel(MathsAndEnglish entity)
+    internal EnglishAndMathsDomainModel(EnglishAndMaths entity)
     {
         _entity = entity;
     }
 
-    public MathsAndEnglishDomainModel(MathsAndEnglishUpdateDetails incomingCourse, Guid learningKey)
+    public EnglishAndMathsDomainModel(MathsAndEnglishUpdateDetails incomingCourse, Guid learningKey)
     {
-        _entity = new MathsAndEnglish
+        _entity = new EnglishAndMaths
         {
             Key = Guid.NewGuid(),
             LearningKey = learningKey,
@@ -45,19 +45,19 @@ public class MathsAndEnglishDomainModel
             WithdrawalDate = incomingCourse.WithdrawalDate
         };
 
-        _entity.BreaksInLearning = incomingCourse.BreaksInLearning.Select(b => new DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning
+        _entity.BreaksInLearning = incomingCourse.BreaksInLearning.Select(b => new DataAccess.Entities.Learning.EnglishAndMathsBreakInLearning
         {
             Key = Guid.NewGuid(),
-            MathsAndEnglishKey = _entity.Key,
+            EnglishAndMathsKey = _entity.Key,
             StartDate = b.StartDate,
             EndDate = b.EndDate,
             PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
         }).ToList();
     }
 
-    public static MathsAndEnglishDomainModel Get(MathsAndEnglish entity)
+    public static EnglishAndMathsDomainModel Get(EnglishAndMaths entity)
     {
-        return new MathsAndEnglishDomainModel(entity);
+        return new EnglishAndMathsDomainModel(entity);
     }
 
     /// <summary>
@@ -81,12 +81,12 @@ public class MathsAndEnglishDomainModel
             {
                 hasBreaksInLearningChanged = true;
 
-                _entity.BreaksInLearning.Add(new MathsAndEnglishBreakInLearning
+                _entity.BreaksInLearning.Add(new EnglishAndMathsBreakInLearning
                 {
                     StartDate = newBreakInLearning.StartDate,
                     EndDate = newBreakInLearning.EndDate,
                     PriorPeriodExpectedEndDate = newBreakInLearning.PriorPeriodExpectedEndDate,
-                    MathsAndEnglishKey = Key,
+                    EnglishAndMathsKey = Key,
                     Key = Guid.NewGuid()
                 });
             }
@@ -95,13 +95,13 @@ public class MathsAndEnglishDomainModel
         return hasBreaksInLearningChanged || removedItems.Count > 0;
     }
 
-    internal MathsAndEnglish GetEntity()
+    internal EnglishAndMaths GetEntity()
     {
         return _entity;
     }
 
     /// <summary>
-    /// Updates general details of the Maths and English course. Returns true if there were changes, otherwise false.
+    /// Updates general details of the English and Maths course. Returns true if there were changes, otherwise false.
     /// </summary>
     /// <returns>True if the course was updated, otherwise false.</returns>
     internal bool Update(MathsAndEnglishUpdateDetails incomingCourse)
