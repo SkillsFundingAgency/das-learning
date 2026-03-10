@@ -1,7 +1,7 @@
 ﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
-[Table("dbo.MathsAndEnglish")]
-[System.ComponentModel.DataAnnotations.Schema.Table("MathsAndEnglish")]
+[Table("dbo.EnglishAndMaths")]
+[System.ComponentModel.DataAnnotations.Schema.Table("EnglishAndMaths")]
 public class MathsAndEnglish
 {
     public MathsAndEnglish()
