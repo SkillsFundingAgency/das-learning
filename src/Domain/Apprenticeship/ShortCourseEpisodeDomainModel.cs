@@ -20,6 +20,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
     public bool IsApproved => _entity.IsApproved;
+    public decimal Price => _entity.Price;
 
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
@@ -34,7 +35,8 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         bool isApproved,
         DateTime startDate,
         DateTime expectedEndDate,
-        DateTime? withdrawalDate)
+        DateTime? withdrawalDate,
+        decimal price = 0)
     {
         return new ShortCourseEpisodeDomainModel(new ShortCourseEpisode
         {
@@ -46,7 +48,8 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             IsApproved = isApproved,
             StartDate = startDate,
             ExpectedEndDate = expectedEndDate,
-            WithdrawalDate = withdrawalDate            
+            WithdrawalDate = withdrawalDate,
+            Price = price
         });
     }
 
@@ -84,7 +87,8 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         _entity.StartDate = updateContext.OnProgramme.StartDate;
         _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
         _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
-        
+        _entity.Price = updateContext.OnProgramme.Price;
+
         UpdateMilestones(updateContext.OnProgramme.Milestones);
         UpdateLearningSupport(updateContext.LearningSupport);
     }

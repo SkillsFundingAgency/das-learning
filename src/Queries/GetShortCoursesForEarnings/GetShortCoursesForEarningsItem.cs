@@ -19,4 +19,5 @@ public class GetShortCoursesForEarningsEpisode
 {
     public string CourseCode { get; set; }
     public bool IsApproved { get; set; }
+    public decimal Price { get; set; }
 }

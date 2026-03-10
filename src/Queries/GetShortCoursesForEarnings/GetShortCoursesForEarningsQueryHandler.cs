@@ -33,7 +33,8 @@ public class GetShortCoursesForEarningsQueryHandler(
                 Episodes = x.Episodes.Select(e => new GetShortCoursesForEarningsEpisode
                 {
                     CourseCode = e.CourseCode,
-                    IsApproved = e.IsApproved
+                    IsApproved = e.IsApproved,
+                    Price = e.Price
                 })
             }),
             PageSize = query.Limit,

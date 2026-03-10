@@ -146,7 +146,8 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
                 Episodes = l.Episodes.Select(e => new Models.Dtos.ShortCourseForEarningEpisode
                 {
                     CourseCode = e.TrainingCode,
-                    IsApproved = e.IsApproved
+                    IsApproved = e.IsApproved,
+                    Price = e.Price
                 }).ToList()
             };
         }).ToList();

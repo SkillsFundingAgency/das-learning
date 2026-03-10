@@ -87,6 +87,9 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 
             var learningKey = await CallCreateShortCourseEndpoint(request);
 
+            if (row.TryGetValue("Price", out var price) && decimal.TryParse(price, out var parsedPrice))
+                request.OnProgramme.Price = parsedPrice;
+
             if(row.TryGetValue("IsApproved", out var isApproved) && isApproved.ToLower() == "true")
                 await ApproveCourseInDb(learningKey);
         }
@@ -191,6 +194,8 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
                 var episode = item.Episodes.First();
                 episode.CourseCode.Should().Be(row["CourseCode"]);
                 episode.IsApproved.Should().Be(bool.Parse(row["IsApproved"]));
+                if (row.TryGetValue("Price", out var price))
+                    episode.Price.Should().Be(decimal.Parse(price));
             }
         }
 
@@ -221,7 +226,8 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
                     Milestones = new List<Milestone>
                     {
                         Milestone.ThirtyPercentLearningComplete
-                    }
+                    },
+                    Price = 1000
                 },
                 LearnerUpdateDetails = new ShortCourseLearnerUpdateDetails
                 {
