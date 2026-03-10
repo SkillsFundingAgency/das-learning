@@ -1,12 +1,10 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.ApplicationInsights;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.DataAccess;
@@ -15,6 +13,9 @@ using SFA.DAS.Learning.Functions.AppStart;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Infrastructure.Extensions;
 using SFA.DAS.Learning.MessageHandlers.Extensions;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 
 namespace SFA.DAS.Learning.Functions;
 
@@ -86,8 +87,10 @@ public class Startup
         services.AddLogging((options) =>
         {
             options.AddApplicationInsights();
+            options.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
+            options.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
             options.AddFilter("SFA.DAS", LogLevel.Information); // this is because all logging is filtered out by default
-            options.SetMinimumLevel(LogLevel.Information);
+            options.SetMinimumLevel(LogLevel.Trace);
         });
 
         services
