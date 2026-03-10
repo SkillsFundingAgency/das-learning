@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
-using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Queries.GetLearnings;
 
 namespace SFA.DAS.Learning.Queries;
@@ -23,9 +22,8 @@ public static class ServiceCollectionExtensions
                     .AsImplementedInterfaces()
                     .WithTransientLifetime();
             })
-            .AddScoped<ILearningQueryRepository, LearningQueryRepository>()
             .AddScoped<IQueryDispatcher, QueryDispatcher>();
-        
+
         return serviceCollection;
     }
 }

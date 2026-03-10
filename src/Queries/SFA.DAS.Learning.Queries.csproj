@@ -25,8 +25,4 @@
     <PackageReference Include="Microsoft.Identity.Client" Version="4.65.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="GetLearningsByAcademicYear\" />
-  </ItemGroup>
-
 </Project>

@@ -85,10 +85,10 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
                 request.LearningSupport.Add(learningSupport);
             }
 
-            var learningKey = await CallCreateShortCourseEndpoint(request);
-
             if (row.TryGetValue("Price", out var price) && decimal.TryParse(price, out var parsedPrice))
                 request.OnProgramme.Price = parsedPrice;
+
+            var learningKey = await CallCreateShortCourseEndpoint(request);
 
             if(row.TryGetValue("IsApproved", out var isApproved) && isApproved.ToLower() == "true")
                 await ApproveCourseInDb(learningKey);

@@ -1,22 +1,31 @@
-﻿using SFA.DAS.Learning.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using SFA.DAS.Learning.DataAccess;
+using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Queries.GetLearnings;
 
-public class GetLearningsQueryHandler : IQueryHandler<GetLearningsRequest, GetLearningsResponse>
+public class GetLearningsQueryHandler(LearningDataContext dbContext)
+    : IQueryHandler<GetLearningsRequest, GetLearningsResponse>
 {
-    private readonly ILearningQueryRepository _learningQueryRepository;
-
-    public GetLearningsQueryHandler(ILearningQueryRepository learningQueryRepository)
-    {
-        _learningQueryRepository = learningQueryRepository;
-    }
-
     public async Task<GetLearningsResponse> Handle(GetLearningsRequest query, CancellationToken cancellationToken = default)
     {
-        var apprenticeships = await _learningQueryRepository.GetAll(query.Ukprn, query.FundingPlatform);
+        var learnings = await dbContext.ApprenticeshipLearningDbSet
+            .Where(al => al.Episodes.Any(e =>
+                e.Ukprn == query.Ukprn &&
+                (!query.FundingPlatform.HasValue || e.FundingPlatform == query.FundingPlatform)))
+            .Join(
+                dbContext.LearnersDbSet,
+                al => al.LearnerKey,
+                learner => learner.Key,
+                (al, learner) => new Models.Dtos.Learning
+                {
+                    Uln = learner.Uln,
+                    FirstName = learner.FirstName,
+                    LastName = learner.LastName
+                })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
-        var response = new GetLearningsResponse(apprenticeships);
-
-        return await Task.FromResult(response);
+        return new GetLearningsResponse(learnings);
     }
 }

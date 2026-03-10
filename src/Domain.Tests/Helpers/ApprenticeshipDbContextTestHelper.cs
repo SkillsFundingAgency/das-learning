@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoFixture;
-using Microsoft.Extensions.Logging;
-using Moq;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers;
 
@@ -15,13 +12,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.Helpers;
 public static class ApprenticeshipDbContextTestHelper
 {
     private static readonly Fixture _fixture = new();
-
-    public static LearningQueryRepository SetUpApprenticeshipQueryRepository(this LearningDataContext dbContext)
-    {
-        dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
-        var logger = Mock.Of<ILogger<LearningQueryRepository>>();
-        return new LearningQueryRepository(new Lazy<LearningDataContext>(dbContext), logger);
-    }
 
     public static async Task<(DataAccess.Entities.Learning.ApprenticeshipLearning, DataAccess.Entities.Learning.Learner)> AddApprenticeship(
         this LearningDataContext dbContext, 
