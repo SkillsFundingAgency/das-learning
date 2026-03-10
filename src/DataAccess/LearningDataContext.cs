@@ -14,16 +14,16 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     public virtual DbSet<Entities.Learning.ApprenticeshipLearning> ApprenticeshipLearningDbSet { get; set; }
     public virtual DbSet<ApprenticeshipEpisode> Episodes { get; set; }
     public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
-    public virtual DbSet<EnglishAndMaths> MathsAndEnglish { get; set; }
+    public virtual DbSet<EnglishAndMaths> EnglishAndMaths { get; set; }
     public virtual DbSet<ApprenticeshipLearningSupport> ApprenticeshipLearningSupport { get; set; }
     public virtual DbSet<ShortCourseLearningSupport> ShortCourseLearningSupport { get; set; }
     public virtual DbSet<EpisodeBreakInLearning> EpisodeBreakInLearnings { get; set; }
-    public virtual DbSet<EnglishAndMathsBreakInLearning> MathsAndEnglishBreakInLearnings { get; set; }
+    public virtual DbSet<EnglishAndMathsBreakInLearning> EnglishAndMathsBreakInLearnings { get; set; }
 
     public virtual DbSet<LearningHistory> LearningHistories { get; set; }
-    public virtual DbSet<Entities.Learning.ShortCourseLearning> ShortCourseLearnings { get; set; }
-    public virtual DbSet<Entities.Learning.ShortCourseEpisode> ShortCourseEpisodes { get; set; }
-    public virtual DbSet<Entities.Learning.ShortCourseMilestone> ShortCourseMilestones { get; set; }
+    public virtual DbSet<ShortCourseLearning> ShortCourseLearnings { get; set; }
+    public virtual DbSet<ShortCourseEpisode> ShortCourseEpisodes { get; set; }
+    public virtual DbSet<ShortCourseMilestone> ShortCourseMilestones { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -73,7 +73,6 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
             .Property(a => a.LearnerKey)
             .IsRequired();
-
 
         // Episode
         modelBuilder.Entity<ApprenticeshipEpisode>()
