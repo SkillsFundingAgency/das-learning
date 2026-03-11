@@ -26,7 +26,7 @@ public class UpdateLearnerRequest
     /// <summary>
     /// Maths and English course details
     /// </summary>
-    public List<MathsAndEnglish> MathsAndEnglishCourses { get; set; }
+    public List<MathsAndEnglish> EnglishAndMathsCourses { get; set; }
 
     /// <summary>
     /// Learning support details
@@ -249,7 +249,7 @@ public static class UpdateLearnerRequestExtensions
                 CompletionDate = request.Learner.CompletionDate
                 
             },
-            MathsAndEnglishCourses = request.MathsAndEnglishCourses.SelectOrEmptyList(x =>
+            MathsAndEnglishCourses = request.EnglishAndMathsCourses.SelectOrEmptyList(x =>
                 new MathsAndEnglishUpdateDetails
                 {
                     Course = x.Course,

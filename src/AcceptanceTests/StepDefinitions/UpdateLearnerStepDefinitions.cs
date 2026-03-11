@@ -44,7 +44,7 @@ public class UpdateLearnerStepDefinitions
                     updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(valueString).DateTime;
                     break;
                 case "MathsAndEnglish":
-                    updateRequest.MathsAndEnglishCourses = GetMathsAndEnglishFromString(valueString);
+                    updateRequest.EnglishAndMathsCourses = GetMathsAndEnglishFromString(valueString);
                     break;
                 case "LearningSupport":
                     updateRequest.LearningSupport = GetLearningSupportFromString(valueString);
@@ -171,7 +171,7 @@ public class UpdateLearnerStepDefinitions
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
 
-        learning.MathsAndEnglishCourses.Should().HaveCount(table.Rows.Count, "the number of stored maths and english records should match the expected count");
+        learning.EnglishAndMathsCourses.Should().HaveCount(table.Rows.Count, "the number of stored maths and english records should match the expected count");
 
         foreach (var row in table.Rows)
         {
@@ -192,7 +192,7 @@ public class UpdateLearnerStepDefinitions
                 BreaksInLearning = breaksInLearning
             };
 
-            learning.MathsAndEnglishCourses
+            learning.EnglishAndMathsCourses
                 .Should().ContainEquivalentOf(expectedMathsAndEnglish, options => options
                     .Excluding(c => c.CompletionDate)
                     .Excluding(c => c.WithdrawalDate)
