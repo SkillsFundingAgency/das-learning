@@ -1,6 +1,6 @@
-﻿Feature: MathsAndEnglishBreaksInLearning
+﻿Feature: EnglishAndMathsBreaksInLearning
 
-Tests behaviour of Breaks In learning on Maths and English courses
+Tests behaviour of Breaks In learning on English and Maths courses
 
 
 Scenario: When break in learning does not change, no change is recorded
@@ -9,11 +9,11 @@ Scenario: When break in learning does not change, no change is recorded
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                                                                                                |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | BreakInLearningStart | BreakInLearningEnd | BreakInLearningPriorPeriodExpectedEndDate |
@@ -27,11 +27,11 @@ Scenario: A completed break in learning is recorded
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                                                                                                |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | BreakInLearningStart | BreakInLearningEnd | BreakInLearningPriorPeriodExpectedEndDate |
@@ -47,18 +47,18 @@ Scenario: Return from a break in learning
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                                                     |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-12-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-12-25 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                                                                                                                          |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | BreakInLearningStart | BreakInLearningEnd | BreakInLearningPriorPeriodExpectedEndDate |
 		| test   | maths       | currentAY-09-25 | nextAY-07-31   | 1000   | currentAY-12-25      | nextAY-03-25       | nextAY-07-31                              |
 	And the following changes are returned
 		| Change                                 |
-		| MathsAndEnglish                        | 
+		| EnglishAndMaths                        | 
 		| EnglishAndMathsBreaksInLearningUpdated |
 		# there are 2 changes returned because the pauseDate is removed and that is MathsAndEnglish change
 		# ultimately both trigger the same action in the outer
@@ -71,11 +71,11 @@ Scenario: Training provider corrects a previously recorded return from a break i
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                                                                                                |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-20 breakInLearningEnd:nextAY-03-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-20 breakInLearningEnd:nextAY-03-25 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                                                                                                |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-25 breakInLearningEnd:nextAY-03-25 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | BreakInLearningStart | BreakInLearningEnd | BreakInLearningPriorPeriodExpectedEndDate |
@@ -91,11 +91,11 @@ Scenario: Training provider removes a previously recorded return from a break in
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                                                                                                |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-20 breakInLearningEnd:nextAY-03-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 breakInLearningStart:currentAY-12-20 breakInLearningEnd:nextAY-03-25 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount |

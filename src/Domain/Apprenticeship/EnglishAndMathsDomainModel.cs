@@ -28,7 +28,7 @@ public class EnglishAndMathsDomainModel
         _entity = entity;
     }
 
-    public EnglishAndMathsDomainModel(MathsAndEnglishUpdateDetails incomingCourse, Guid learningKey)
+    public EnglishAndMathsDomainModel(EnglishAndMathsUpdateDetails incomingCourse, Guid learningKey)
     {
         _entity = new EnglishAndMaths
         {
@@ -104,7 +104,7 @@ public class EnglishAndMathsDomainModel
     /// Updates general details of the English and Maths course. Returns true if there were changes, otherwise false.
     /// </summary>
     /// <returns>True if the course was updated, otherwise false.</returns>
-    internal bool Update(MathsAndEnglishUpdateDetails incomingCourse)
+    internal bool Update(EnglishAndMathsUpdateDetails incomingCourse)
     {
         var hasChanged =
             _entity.Course.Trim() != incomingCourse.Course.Trim() ||
@@ -133,7 +133,7 @@ public class EnglishAndMathsDomainModel
     /// Updates the withdrawal date if it has changed. Returns true if updated, otherwise false.
     /// </summary>
     /// <returns>True if the course was updated, otherwise false.</returns>
-    internal bool UpdateWithdrawalDate(MathsAndEnglishUpdateDetails incomingCourse)
+    internal bool UpdateWithdrawalDate(EnglishAndMathsUpdateDetails incomingCourse)
     {
         if(_entity.WithdrawalDate == incomingCourse.WithdrawalDate)
             return false;

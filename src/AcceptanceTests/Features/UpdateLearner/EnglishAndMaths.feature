@@ -1,6 +1,6 @@
-﻿Feature: MathsAndEnglish
+﻿Feature: EnglishAndMaths
 
-Tests for MathsAndEnglish under UpdateLearner
+Tests for EnglishAndMaths under UpdateLearner
 
 Scenario: Maths and English details are added
 	Given There is an apprenticeship with the following details
@@ -8,14 +8,14 @@ Scenario: Maths and English details are added
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount |
 		| test   | maths       | currentAY-09-25 | nextAY-07-31   | 1000   |
 	And the following changes are returned
 		| Change          |
-		| MathsAndEnglish |
+		| EnglishAndMaths |
 	And the learning history is maintained
 
 Scenario: Maths and English details are added then removed
@@ -24,17 +24,17 @@ Scenario: Maths and English details are added then removed
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value |
-		| MathsAndEnglish |       |
+		| EnglishAndMaths |       |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | StartDate       | PlannedEndDate | Amount |
 	And the following changes are returned
 		| Change          |
-		| MathsAndEnglish |
+		| EnglishAndMaths |
 	And the learning history is maintained
 
 Scenario: Maths and English details are added then withdrawn back to the start
@@ -43,18 +43,18 @@ Scenario: Maths and English details are added then withdrawn back to the start
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                                         |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 withdrawalDate:currentAY-09-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 withdrawalDate:currentAY-09-25 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | WithdrawalDate  |
 		| test   | maths       | currentAY-09-25 | nextAY-07-31   | 1000   | currentAY-09-25 |
 	And the following changes are returned
 		| Change                    |
-		| MathsAndEnglishWithdrawal |
+		| EnglishAndMathsWithdrawal |
 	And the learning history is maintained
 
 Scenario: Maths and English pause date is set
@@ -63,18 +63,18 @@ Scenario: Maths and English pause date is set
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                                                     |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-12-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-12-25 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | PauseDate       |
 		| test   | maths       | currentAY-09-25 | nextAY-07-31   | 1000   | currentAY-12-25 |
 	And the following changes are returned
 		| Change          |
-		| MathsAndEnglish |
+		| EnglishAndMaths |
 	And the learning history is maintained
 
 Scenario: Maths and English pause date is moved later
@@ -83,18 +83,18 @@ Scenario: Maths and English pause date is moved later
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                                                     |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-06-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-06-25 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                                                     |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-12-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-12-25 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | PauseDate       |
 		| test   | maths       | currentAY-09-25 | nextAY-07-31   | 1000   | currentAY-12-25 |
 	And the following changes are returned
 		| Change          |
-		| MathsAndEnglish |
+		| EnglishAndMaths |
 	And the learning history is maintained
 
 Scenario: Maths and English pause date is removed
@@ -103,16 +103,16 @@ Scenario: Maths and English pause date is removed
 		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
 	And an update request has the following data
 		| Property        | Value                                                                                                                     |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-06-25 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 pauseDate:currentAY-06-25 |
 	And the update request is sent
 	And an update request has the following data
 		| Property        | Value                                                                                           |
-		| MathsAndEnglish | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
+		| EnglishAndMaths | course:test learnAimRef:maths startDate:currentAY-09-25 plannedEndDate:nextAY-07-31 amount:1000 |
 	When the update request is sent
 	Then the following maths and english details are stored
 		| Course | LearnAimRef | StartDate       | PlannedEndDate | Amount | PauseDate |
 		| test   | maths       | currentAY-09-25 | nextAY-07-31   | 1000   |           |
 	And the following changes are returned
 		| Change          |
-		| MathsAndEnglish |
+		| EnglishAndMaths |
 	And the learning history is maintained

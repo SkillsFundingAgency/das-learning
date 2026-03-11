@@ -26,7 +26,7 @@ public class UpdateLearnerRequest
     /// <summary>
     /// Maths and English course details
     /// </summary>
-    public List<MathsAndEnglish> EnglishAndMathsCourses { get; set; }
+    public List<EnglishAndMaths> EnglishAndMathsCourses { get; set; }
 
     /// <summary>
     /// Learning support details
@@ -122,9 +122,9 @@ public class Cost
 }
 
 /// <summary>
-/// Maths and English course details
+/// English and Maths course details
 /// </summary>
-public class MathsAndEnglish
+public class EnglishAndMaths
 {
     /// <summary>
     /// The standard code of the linked OnProg
@@ -249,8 +249,8 @@ public static class UpdateLearnerRequestExtensions
                 CompletionDate = request.Learner.CompletionDate
                 
             },
-            MathsAndEnglishCourses = request.EnglishAndMathsCourses.SelectOrEmptyList(x =>
-                new MathsAndEnglishUpdateDetails
+            EnglishAndMathsCourses = request.EnglishAndMathsCourses.SelectOrEmptyList(x =>
+                new EnglishAndMathsUpdateDetails
                 {
                     Course = x.Course,
                     LearnAimRef = x.LearnAimRef,

@@ -141,7 +141,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateLearningDetails(updateContext, changes);
 
-        UpdateMathsAndEnglishDetails(updateContext, changes);
+        UpdateEnglishAndMathsDetails(updateContext, changes);
 
         UpdateLearningSupport(updateContext, changes);
 
@@ -177,7 +177,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdateMathsAndEnglishDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdateEnglishAndMathsDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
     {
         bool hasChanges = false;
         bool hasWithdrawalChanges = false;
@@ -186,7 +186,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         var existingCourses = EnglishAndMathsCourses;
         var courseKeysToKeep = new List<Guid>();
 
-        foreach (var incomingCourse in updateModel.MathsAndEnglishCourses)
+        foreach (var incomingCourse in updateModel.EnglishAndMathsCourses)
         {
             var existingCourse = existingCourses.SingleOrDefault(x => x.LearnAimRef.Trim() == incomingCourse.LearnAimRef.Trim());
 
@@ -218,10 +218,10 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
 
         if (hasChanges)
-            changes.Add(LearningUpdateChanges.MathsAndEnglish);
+            changes.Add(LearningUpdateChanges.EnglishAndMaths);
 
         if (hasWithdrawalChanges)
-            changes.Add(LearningUpdateChanges.MathsAndEnglishWithdrawal);
+            changes.Add(LearningUpdateChanges.EnglishAndMathsWithdrawal);
 
         if (hasBreaksInLearningChanges)
             changes.Add(LearningUpdateChanges.EnglishAndMathsBreaksInLearningUpdated);

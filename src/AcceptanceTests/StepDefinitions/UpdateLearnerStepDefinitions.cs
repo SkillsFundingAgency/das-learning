@@ -43,8 +43,8 @@ public class UpdateLearnerStepDefinitions
                 case "WithdrawalDate":
                     updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(valueString).DateTime;
                     break;
-                case "MathsAndEnglish":
-                    updateRequest.EnglishAndMathsCourses = GetMathsAndEnglishFromString(valueString);
+                case "EnglishAndMaths":
+                    updateRequest.EnglishAndMathsCourses = GetEnglishAndMathsFromString(valueString);
                     break;
                 case "LearningSupport":
                     updateRequest.LearningSupport = GetLearningSupportFromString(valueString);
@@ -317,10 +317,10 @@ public class UpdateLearnerStepDefinitions
             $"Failed to find published {nameof(PersonalDetailsChangedEvent)} event");
     }
 
-    private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
+    private List<EnglishAndMaths> GetEnglishAndMathsFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
-        var courses = new List<MathsAndEnglish>();
+        var courses = new List<EnglishAndMaths>();
 
         if (parsedValues.Any())
         {
@@ -345,7 +345,7 @@ public class UpdateLearnerStepDefinitions
                 });
             }
 
-            courses.Add(new MathsAndEnglish
+            courses.Add(new EnglishAndMaths
             {
                 Course = parsedValues.GetValueOrDefault("course", "maths"),
                 LearnAimRef = parsedValues.GetValueOrDefault("learnAimRef", "maths"),

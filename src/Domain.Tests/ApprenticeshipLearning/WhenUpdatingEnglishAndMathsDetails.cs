@@ -12,7 +12,7 @@ using System.Linq;
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
 [TestFixture]
-public class WhenUpdatingMathsAndEnglishDetails
+public class WhenUpdatingEnglishAndMathsDetails
 {
     private Fixture _fixture;
 
@@ -31,23 +31,23 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        MathsAndEnglishUpdateDetails newCourse = null;
+        EnglishAndMathsUpdateDetails newCourse = null;
 
         if (changed)
         {
-            newCourse = _fixture.Create<MathsAndEnglishUpdateDetails>();
-            updateModel.MathsAndEnglishCourses.Add(newCourse);
+            newCourse = _fixture.Create<EnglishAndMathsUpdateDetails>();
+            updateModel.EnglishAndMathsCourses.Add(newCourse);
         }
 
         //Act
         var result = learning.Update(updateModel);
 
         //Assert
-        learningEntity.EnglishAndMathsCourses.Count.Should().Be(updateModel.MathsAndEnglishCourses.Count);
+        learningEntity.EnglishAndMathsCourses.Count.Should().Be(updateModel.EnglishAndMathsCourses.Count);
         if (changed)
         {
             learningEntity.EnglishAndMathsCourses.Should().Contain(x => x.Course == newCourse.Course);
-            result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+            result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
         }
     }
 
@@ -62,17 +62,17 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.FirstOrDefault();
+        var englishAndMathsUpdateModel = updateModel.EnglishAndMathsCourses.FirstOrDefault();
 
-        if (changed) mathsAndEnglishUpdateModel.CompletionDate = _fixture.Create<DateTime>();
+        if (changed) englishAndMathsUpdateModel.CompletionDate = _fixture.Create<DateTime>();
 
         //Act
         var result = learning.Update(updateModel);
 
         //Assert
-        learning.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).CompletionDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.CompletionDate?.Date);
-        learningEntity.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).CompletionDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.CompletionDate?.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+        learning.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == englishAndMathsUpdateModel.Course).CompletionDate.GetValueOrDefault().Date.Should().Be(englishAndMathsUpdateModel.CompletionDate?.Date);
+        learningEntity.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == englishAndMathsUpdateModel.Course).CompletionDate.GetValueOrDefault().Date.Should().Be(englishAndMathsUpdateModel.CompletionDate?.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
     }
 
     [TestCase(true)]
@@ -87,18 +87,18 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.FirstOrDefault();
-        mathsAndEnglishUpdateModel.WithdrawalDate = mathsAndEnglishUpdateModel.WithdrawalDate?.Date;
+        var englishAndMathsUpdateModel = updateModel.EnglishAndMathsCourses.FirstOrDefault();
+        englishAndMathsUpdateModel.WithdrawalDate = englishAndMathsUpdateModel.WithdrawalDate?.Date;
 
-        if (changed) mathsAndEnglishUpdateModel.WithdrawalDate = _fixture.Create<DateTime>();
+        if (changed) englishAndMathsUpdateModel.WithdrawalDate = _fixture.Create<DateTime>();
 
         //Act
         var result = learning.Update(updateModel);
 
         //Assert
-        learning.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
-        learningEntity.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == mathsAndEnglishUpdateModel.Course).WithdrawalDate.GetValueOrDefault().Date.Should().Be(mathsAndEnglishUpdateModel.WithdrawalDate?.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglishWithdrawal);
+        learning.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == englishAndMathsUpdateModel.Course).WithdrawalDate.GetValueOrDefault().Date.Should().Be(englishAndMathsUpdateModel.WithdrawalDate?.Date);
+        learningEntity.EnglishAndMathsCourses.FirstOrDefault(x => x.Course == englishAndMathsUpdateModel.Course).WithdrawalDate.GetValueOrDefault().Date.Should().Be(englishAndMathsUpdateModel.WithdrawalDate?.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsWithdrawal);
     }
 
     [TestCase(true)]
@@ -113,15 +113,15 @@ public class WhenUpdatingMathsAndEnglishDetails
 
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+        var englishAndMathsUpdateModel = updateModel.EnglishAndMathsCourses.First();
 
-        if (changed) mathsAndEnglishUpdateModel.StartDate = _fixture.Create<DateTime>().Date;
+        if (changed) englishAndMathsUpdateModel.StartDate = _fixture.Create<DateTime>().Date;
 
         var result = learning.Update(updateModel);
 
-        learning.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).StartDate.Should().Be(mathsAndEnglishUpdateModel.StartDate.Date);
-        learningEntity.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).StartDate.Should().Be(mathsAndEnglishUpdateModel.StartDate.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+        learning.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).StartDate.Should().Be(englishAndMathsUpdateModel.StartDate.Date);
+        learningEntity.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).StartDate.Should().Be(englishAndMathsUpdateModel.StartDate.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
     }
 
     [TestCase(true)]
@@ -135,15 +135,15 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+        var englishAndMathsUpdateModel = updateModel.EnglishAndMathsCourses.First();
 
-        if (changed) mathsAndEnglishUpdateModel.PlannedEndDate = _fixture.Create<DateTime>().Date;
+        if (changed) englishAndMathsUpdateModel.PlannedEndDate = _fixture.Create<DateTime>().Date;
 
         var result = learning.Update(updateModel);
 
-        learning.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PlannedEndDate.Should().Be(mathsAndEnglishUpdateModel.PlannedEndDate.Date);
-        learningEntity.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PlannedEndDate.Should().Be(mathsAndEnglishUpdateModel.PlannedEndDate.Date);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+        learning.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).PlannedEndDate.Should().Be(englishAndMathsUpdateModel.PlannedEndDate.Date);
+        learningEntity.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).PlannedEndDate.Should().Be(englishAndMathsUpdateModel.PlannedEndDate.Date);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
     }
 
     [TestCase(true)]
@@ -154,19 +154,19 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+        var englishAndMathsUpdateModel = updateModel.EnglishAndMathsCourses.First();
 
         if (changed)
         {
-            var newValue = (mathsAndEnglishUpdateModel.PriorLearningPercentage ?? 0) + 10;
-            mathsAndEnglishUpdateModel.PriorLearningPercentage = newValue;
+            var newValue = (englishAndMathsUpdateModel.PriorLearningPercentage ?? 0) + 10;
+            englishAndMathsUpdateModel.PriorLearningPercentage = newValue;
         }
 
         var result = learning.Update(updateModel);
 
-        learning.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PriorLearningPercentage.Should().Be(mathsAndEnglishUpdateModel.PriorLearningPercentage);
-        learningEntity.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).PriorLearningPercentage.Should().Be(mathsAndEnglishUpdateModel.PriorLearningPercentage);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+        learning.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).PriorLearningPercentage.Should().Be(englishAndMathsUpdateModel.PriorLearningPercentage);
+        learningEntity.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).PriorLearningPercentage.Should().Be(englishAndMathsUpdateModel.PriorLearningPercentage);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
     }
 
     [TestCase(true)]
@@ -174,7 +174,7 @@ public class WhenUpdatingMathsAndEnglishDetails
     public void ThenOldCoursesAreRemoved(bool changed)
     {
         //Arrange
-        var course = _fixture.Create<MathsAndEnglishUpdateDetails>();
+        var course = _fixture.Create<EnglishAndMathsUpdateDetails>();
 
         (var learnerEntity, var learningEntity) = CreateEntities();
 
@@ -186,7 +186,7 @@ public class WhenUpdatingMathsAndEnglishDetails
 
         if (changed)
         {
-            updateModel.MathsAndEnglishCourses.RemoveAll(_ => true);
+            updateModel.EnglishAndMathsCourses.RemoveAll(_ => true);
         }
 
         //Act
@@ -197,7 +197,7 @@ public class WhenUpdatingMathsAndEnglishDetails
         {
             learning.EnglishAndMathsCourses.Count.Should().Be(0);
             learningEntity.EnglishAndMathsCourses.Count.Should().Be(0);
-            result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+            result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
         }
         else
         {
@@ -214,19 +214,19 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        var mathsAndEnglishUpdateModel = updateModel.MathsAndEnglishCourses.First();
+        var englishAndMathsUpdateModel = updateModel.EnglishAndMathsCourses.First();
 
         if (changed)
         {
-            var newValue = mathsAndEnglishUpdateModel.Amount + 10;
-            mathsAndEnglishUpdateModel.Amount = newValue;
+            var newValue = englishAndMathsUpdateModel.Amount + 10;
+            englishAndMathsUpdateModel.Amount = newValue;
         }
 
         var result = learning.Update(updateModel);
 
-        learning.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).Amount.Should().Be(mathsAndEnglishUpdateModel.Amount);
-        learningEntity.EnglishAndMathsCourses.First(x => x.Course == mathsAndEnglishUpdateModel.Course).Amount.Should().Be(mathsAndEnglishUpdateModel.Amount);
-        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
+        learning.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).Amount.Should().Be(englishAndMathsUpdateModel.Amount);
+        learningEntity.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).Amount.Should().Be(englishAndMathsUpdateModel.Amount);
+        if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
     }
 
     [TestCase(true)]
@@ -238,25 +238,25 @@ public class WhenUpdatingMathsAndEnglishDetails
         (var learner, var learning) = CreateDomainObjects(learnerEntity, learningEntity);
 
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learningEntity, learnerEntity);
-        MathsAndEnglishUpdateDetails newCourse = null;
+        EnglishAndMathsUpdateDetails newCourse = null;
 
         if (changed)
         {
-            newCourse = _fixture.Create<MathsAndEnglishUpdateDetails>();
+            newCourse = _fixture.Create<EnglishAndMathsUpdateDetails>();
             newCourse.WithdrawalDate = _fixture.Create<DateTime>();
-            updateModel.MathsAndEnglishCourses.Add(newCourse);
+            updateModel.EnglishAndMathsCourses.Add(newCourse);
         }
 
         //Act
         var result = learning.Update(updateModel);
 
         //Assert
-        learningEntity.EnglishAndMathsCourses.Count.Should().Be(updateModel.MathsAndEnglishCourses.Count);
+        learningEntity.EnglishAndMathsCourses.Count.Should().Be(updateModel.EnglishAndMathsCourses.Count);
         if (changed)
         {
             learningEntity.EnglishAndMathsCourses.Should().Contain(x => x.Course == newCourse.Course);
-            result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglish);
-            result.Should().Contain(x => x == LearningUpdateChanges.MathsAndEnglishWithdrawal);
+            result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
+            result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMathsWithdrawal);
         }
     }
 
