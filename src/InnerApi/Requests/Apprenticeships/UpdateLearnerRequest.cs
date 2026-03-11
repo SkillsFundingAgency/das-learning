@@ -24,7 +24,7 @@ public class UpdateLearnerRequest
     public ApprenticeshipLearnerUpdateDetails Learner { get; set; }
 
     /// <summary>
-    /// Maths and English course details
+    /// English and M course details
     /// </summary>
     public List<EnglishAndMaths> EnglishAndMathsCourses { get; set; }
 
@@ -132,32 +132,32 @@ public class EnglishAndMaths
     public string Course { get; set; }
 
     /// <summary>
-    /// The maths/english course the learner is undertaking
+    /// The english/maths course the learner is undertaking
     /// </summary>
     public string LearnAimRef { get; set; }
 
     /// <summary>
-    /// Start date of the maths and english course
+    /// Start date of the english or maths course
     /// </summary>
     public DateTime StartDate { get; set; }
 
     /// <summary>
-    /// Planned end date of the maths and english course
+    /// Planned end date of the english or maths course
     /// </summary>
     public DateTime PlannedEndDate { get; set; }
 
     /// <summary>
-    /// Date the maths and english course completes, this will be null until completion is confirmed
+    /// Date the english or maths course completes, this will be null until completion is confirmed
     /// </summary>
     public DateTime? CompletionDate { get; set; }
 
     /// <summary>
-    /// Withdrawal date for the maths and english course, this will be null until a withdrawal is confirmed
+    /// Withdrawal date for the english or maths course, this will be null until a withdrawal is confirmed
     /// </summary>
     public DateTime? WithdrawalDate { get; set; }
 
     /// <summary>
-    /// Pause date for this maths and english course
+    /// Pause date for this english or maths course
     /// </summary>
     public DateTime? PauseDate { get; set; }
 
@@ -167,12 +167,12 @@ public class EnglishAndMaths
     public int? PriorLearningPercentage { get; set; }
 
     /// <summary>
-    /// Amount associated with the maths and english course
+    /// Amount associated with the english or maths course
     /// </summary>
     public decimal Amount { get; set; }
 
     /// <summary>
-    /// Breaks in learning for the maths and english course
+    /// Breaks in learning for the english or maths course
     /// </summary>
     public List<BreakInLearning> BreaksInLearning { get; set; }
 }
