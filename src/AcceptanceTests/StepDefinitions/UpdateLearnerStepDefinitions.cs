@@ -165,13 +165,13 @@ public class UpdateLearnerStepDefinitions
         learning.Episodes.Single().PauseDate.Should().Be(pauseDate.DateTime);
     }
 
-    [Then(@"the following maths and english details are stored")]
-    public async Task ThenTheFollowingMathsAndEnglishDetailsAreStored(Table table)
+    [Then(@"the following English and Maths details are stored")]
+    public async Task ThenTheFollowingEnglishAndMathsDetailsAreStored(Table table)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
 
-        learning.EnglishAndMathsCourses.Should().HaveCount(table.Rows.Count, "the number of stored maths and english records should match the expected count");
+        learning.EnglishAndMathsCourses.Should().HaveCount(table.Rows.Count, "the number of stored English and Maths records should match the expected count");
 
         foreach (var row in table.Rows)
         {
@@ -181,7 +181,7 @@ public class UpdateLearnerStepDefinitions
 
             var breaksInLearning = GetBreakInLearningsFromTableRow(row);
 
-            var expectedMathsAndEnglish = new DataAccess.Entities.Learning.EnglishAndMaths
+            var expectedEnglishAndMaths = new DataAccess.Entities.Learning.EnglishAndMaths
             {
                 Course = row["Course"],
                 LearnAimRef = row["LearnAimRef"],
@@ -193,7 +193,7 @@ public class UpdateLearnerStepDefinitions
             };
 
             learning.EnglishAndMathsCourses
-                .Should().ContainEquivalentOf(expectedMathsAndEnglish, options => options
+                .Should().ContainEquivalentOf(expectedEnglishAndMaths, options => options
                     .Excluding(c => c.CompletionDate)
                     .Excluding(c => c.WithdrawalDate)
                     .Excluding(c => c.PriorLearningPercentage)
