@@ -1,5 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace SFA.DAS.Learning.Enums;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ShortCourseUpdateChanges
 {
     WithdrawalDate = 0,

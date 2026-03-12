@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
 
