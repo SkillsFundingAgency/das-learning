@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -111,6 +112,6 @@ public class WhenAddingAnApprenticeship
         _dbContext =
             InMemoryDbContextCreator.SetUpInMemoryDbContext();
         _sut = new ApprenticeshipLearningRepository(new Lazy<LearningDataContext>(_dbContext),
-            _domainEventDispatcher.Object, _apprenticeshipFactory.Object);
+            _domainEventDispatcher.Object, _apprenticeshipFactory.Object, new Mock<IUnitOfWork>().Object);
     }
 }

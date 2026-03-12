@@ -10,6 +10,7 @@ using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 using SFA.DAS.Learning.Infrastructure.Services;
 using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.Learning.Command.ArchiveLearningHistory;
+using SFA.DAS.Learning.Domain;
 
 namespace SFA.DAS.Learning.Command;
 
@@ -60,6 +61,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddPersistenceServices(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
         serviceCollection.AddScoped<ILearnerRepository, LearnerRepository>();
         serviceCollection.AddScoped<IApprenticeshipLearningRepository, ApprenticeshipLearningRepository>();
         serviceCollection.AddScoped<IShortCourseLearningRepository, ShortCourseLearningRepository>();
@@ -78,7 +80,8 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddCommandHandlerDecorators(this IServiceCollection serviceCollection)
     {
         serviceCollection
-            .Decorate(typeof(ICommandHandler<>), typeof(CommandHandlerWithUnitOfWork<>));
+            .Decorate(typeof(ICommandHandler<>), typeof(CommandHandlerWithUnitOfWork<>))
+            .Decorate(typeof(ICommandHandler<,>), typeof(CommandHandlerWithUnitOfWork<,>));
 
         return serviceCollection;
     }

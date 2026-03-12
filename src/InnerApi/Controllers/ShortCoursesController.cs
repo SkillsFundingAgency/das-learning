@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
+using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
+using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
@@ -58,6 +60,30 @@ public class ShortCoursesController : ControllerBase
     }
 
     /// <summary>
+    /// Get paginated short courses for a provider within a collection year, for earnings purposes.
+    /// </summary>
+    /// <param name="ukprn">Ukprn</param>
+    /// <param name="collectionYear">Collection year in yymm format (e.g. 2425)</param>
+    /// <param name="page">Page number</param>
+    /// <param name="pageSize">Number of items per page</param>
+    /// <returns>GetShortCoursesForEarningsResponse</returns>
+    [HttpGet("{ukprn:long}/{collectionYear:int}/shortCourses")]
+    [ProducesResponseType(typeof(GetShortCoursesForEarningsResponse), 200)]
+    public async Task<IActionResult> GetForEarnings(long ukprn, int collectionYear, [FromQuery] int page = 1, [FromQuery] int? pageSize = 20)
+    {
+        pageSize = pageSize.HasValue ? Math.Clamp(pageSize.Value, 1, 100) : pageSize;
+
+        var request = new GetShortCoursesForEarningsRequest(ukprn, collectionYear, page, pageSize);
+        var response = await _queryDispatcher.Send<GetShortCoursesForEarningsRequest, GetShortCoursesForEarningsResponse>(request);
+
+        var pageLinks = _pagedLinkHeaderService.GetPageLinks(request, response);
+
+        Response?.Headers.Add(pageLinks);
+
+        return Ok(response);
+    }
+
+    /// <summary>
     /// Creates a new draft (unapproved) short course learner.
     /// </summary>
     /// <param name="request">The learner and short course details.</param>
@@ -86,5 +112,20 @@ public class ShortCoursesController : ControllerBase
         }
 
         throw new InvalidOperationException($"Unexpected result type {result.ResultType} when creating draft short course learning for ukprn {request.OnProgramme.Ukprn}");
+    }
+
+    /// <summary>
+    /// Updates an existing short course learner record.
+    /// </summary>
+    /// <param name="learningKey">The key of the short course learning record to update.</param>
+    /// <param name="request">The updated learner and short course details.</param>
+    /// <returns>The LearningKey and list of fields that changed.</returns>
+    [HttpPut("shortCourses/{learningKey}")]
+    [ProducesResponseType(typeof(UpdateShortCourseResult), 200)]
+    public async Task<IActionResult> UpdateShortCourse(Guid learningKey, [FromBody] CreateDraftShortCourseRequest request)
+    {
+        var command = new UpdateShortCourseCommand(learningKey, request.ToCreateModel());
+        var result = await _commandDispatcher.Send<UpdateShortCourseCommand, UpdateShortCourseResult>(command);
+        return new OkObjectResult(result);
     }
 }

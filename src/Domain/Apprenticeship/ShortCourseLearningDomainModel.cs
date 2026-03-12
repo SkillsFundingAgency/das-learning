@@ -43,7 +43,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         DateTime startDate,
         DateTime expectedEndDate,
         DateTime? withdrawalDate,
-        IEnumerable<Milestone> milestones)
+        IEnumerable<Milestone> milestones,
+        decimal price = 0)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
             _entity.Key,
@@ -53,7 +54,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             isApproved,
             startDate,
             expectedEndDate,
-            withdrawalDate
+            withdrawalDate,
+            price
         );
 
         foreach (var milestone in milestones)
@@ -67,11 +69,35 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return episode;
     }
 
-    public void Update(ShortCourseUpdateContext updateContext)
+    public ShortCourseUpdateChanges[] Update(ShortCourseUpdateContext updateContext)
     {
-        _entity.CompletionDate = updateContext.OnProgramme.CompletionDate;
+        var changes = new List<ShortCourseUpdateChanges>();
+        UpdateCompletionDate(updateContext.OnProgramme.CompletionDate, changes);
+        UpdateEpisode(updateContext, changes);
+        return changes.ToArray();
+    }
+
+    private void UpdateCompletionDate(DateTime? completionDate, List<ShortCourseUpdateChanges> changes)
+    {
+        if (_entity.CompletionDate != completionDate)
+            changes.Add(ShortCourseUpdateChanges.CompletionDate);
+        _entity.CompletionDate = completionDate;
+    }
+
+    private void UpdateEpisode(ShortCourseUpdateContext updateContext, List<ShortCourseUpdateChanges> changes)
+    {
         var episode = _episodes.Single();
+
+        var prevWithdrawalDate = episode.WithdrawalDate;
+        var prevMilestones = episode.Milestones.Select(m => m.Milestone).ToHashSet();
+
         episode.Update(updateContext);
+
+        if (episode.WithdrawalDate != prevWithdrawalDate)
+            changes.Add(ShortCourseUpdateChanges.WithdrawalDate);
+
+        if (!episode.Milestones.Select(m => m.Milestone).ToHashSet().SetEquals(prevMilestones))
+            changes.Add(ShortCourseUpdateChanges.Milestone);
     }
 
     private ShortCourseLearningDomainModel(ShortCourseLearning entity) : base(entity)

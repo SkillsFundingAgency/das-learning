@@ -3,7 +3,6 @@ using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 

@@ -1,41 +1,59 @@
-﻿using AutoFixture;
 using FluentAssertions;
-using Moq;
-using SFA.DAS.Learning.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using SFA.DAS.Learning.DataAccess;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Queries.GetLearningKeyByLearningId;
 
 namespace SFA.DAS.Learning.Queries.UnitTests;
 
 public class WhenGetLearningKeyById
 {
-    private Fixture _fixture;
-    private Mock<ILearningQueryRepository> _apprenticeshipQueryRepository;
+    private LearningDataContext _dbContext;
     private GetLearningKeyByLearningIdQueryHandler _sut;
 
     [SetUp]
     public void Setup()
     {
+        var options = new DbContextOptionsBuilder<LearningDataContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
 
-        _fixture = new Fixture();
-        _apprenticeshipQueryRepository = new Mock<ILearningQueryRepository>();
-        _sut = new GetLearningKeyByLearningIdQueryHandler(_apprenticeshipQueryRepository.Object);
+        _dbContext = new LearningDataContext(options);
+        _sut = new GetLearningKeyByLearningIdQueryHandler(_dbContext);
     }
+
+    [TearDown]
+    public void TearDown() => _dbContext.Dispose();
 
     [Test]
     public async Task ThenLearningKeyIsReturned()
     {
-        //Arrange
-        var query = _fixture.Create<GetLearningKeyByLearningIdRequest>();
-        var expectedResult = _fixture.Create<GetLearningKeyByLearningIdResponse>();
+        // Arrange
+        var learnerKey = Guid.NewGuid();
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), ApprovalsApprenticeshipId = 42 };
+        learning.LearnerKey = learnerKey;
+        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
+        await _dbContext.SaveChangesAsync();
 
-        _apprenticeshipQueryRepository
-            .Setup(x => x.GetKeyByLearningId(query.ApprenticeshipId))
-            .ReturnsAsync(expectedResult.LearningKey);
+        var query = new GetLearningKeyByLearningIdRequest { ApprenticeshipId = 42 };
 
-        //Act
-        var actualResult = await _sut.Handle(query);
+        // Act
+        var result = await _sut.Handle(query);
 
-        //Assert
-        actualResult.Should().BeEquivalentTo(expectedResult);
+        // Assert
+        result.LearningKey.Should().Be(learning.Key);
+    }
+
+    [Test]
+    public async Task ThenNullIsReturnedWhenNoMatchingLearning()
+    {
+        // Arrange
+        var query = new GetLearningKeyByLearningIdRequest { ApprenticeshipId = 999 };
+
+        // Act
+        var result = await _sut.Handle(query);
+
+        // Assert
+        result.LearningKey.Should().BeNull();
     }
 }
