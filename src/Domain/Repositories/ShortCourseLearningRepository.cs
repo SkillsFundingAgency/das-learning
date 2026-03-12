@@ -49,8 +49,8 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
 
     public async Task<ShortCourseLearningDomainModel> Get(Guid key)
     {
-        var shortCourseLearning = await DbContext.Set<ShortCourseLearning>()
-            .Include(x => x.Episodes)
+        var shortCourseLearning = await DbContext.ShortCourseLearnings
+            .IncludeAllChildren()
             .SingleAsync(x => x.Key == key);
 
         return _learningFactory.GetExisting(shortCourseLearning);
