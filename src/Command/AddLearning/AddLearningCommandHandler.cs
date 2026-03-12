@@ -2,7 +2,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Builders;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -67,8 +67,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TrainingCode,
             command.TrainingCourseVersion);
 
-        var eventBuilder = new LearnerUpdatedEventBuilder(learner,learning);
-        learning.AddUpdatedEvent(eventBuilder.CreateEvent());
+        learning.AddUpdatedEvent(LearnerUpdatedEvent.From(learner, learning));
 
         try
         {

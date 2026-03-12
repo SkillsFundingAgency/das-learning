@@ -14,14 +14,18 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
 
     private LearningDataContext DbContext => _lazyContext.Value;
 
+    private readonly IUnitOfWork _unitOfWork;
+
     public ShortCourseLearningRepository(
         Lazy<LearningDataContext> dbContext,
         IDomainEventDispatcher domainEventDispatcher,
-        IShortCourseLearningFactory learningFactory)
+        IShortCourseLearningFactory learningFactory,
+        IUnitOfWork unitOfWork)
     {
         _lazyContext = dbContext;
         _domainEventDispatcher = domainEventDispatcher;
         _learningFactory = learningFactory;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Add(ShortCourseLearningDomainModel learning)
@@ -37,14 +41,10 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         }
     }
 
-    public async Task Update(ShortCourseLearningDomainModel learning)
+    public Task Update(ShortCourseLearningDomainModel learning)
     {
-        await DbContext.SaveChangesAsync();
-
-        foreach (dynamic domainEvent in learning.FlushEvents())
-        {
-            await _domainEventDispatcher.Send(domainEvent);
-        }
+        _unitOfWork.Track(learning);
+        return Task.CompletedTask;
     }
 
     public async Task<ShortCourseLearningDomainModel> Get(Guid key)
