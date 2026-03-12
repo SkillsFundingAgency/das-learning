@@ -2,7 +2,7 @@
 
 public abstract class LearningDomainModel : AggregateRoot
 {
-    public abstract void Approve();
+    public abstract void Approve(long employerAccountId);
 }
 
 public abstract class LearningDomainModel<T> : LearningDomainModel where T : Learning.DataAccess.Entities.Learning.Learning

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NServiceBus;
 using NUnit.Framework;
-using NUnit.Framework.Internal.Execution;
 using SFA.DAS.Learning.Command.AddLearning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
@@ -175,6 +174,23 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .Should()
             .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
                                 && e.EpisodeKey == shortCourseLearning.LatestEpisode.Key);
+    }
+
+    [Test]
+    public async Task WhenAnUnapprovedShortCourseExistsThenTheEmployerAccountIdIsUpdated()
+    {
+        var command = _fixture.Build<AddLearningCommand>()
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .Create();
+
+        var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
+
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
+            .ReturnsAsync(shortCourseLearning);
+
+        await _commandHandler.Handle(command);
+
+        shortCourseLearning.LatestEpisode.EmployerAccountId.Should().Be(command.EmployerAccountId);
     }
 
     [Test]

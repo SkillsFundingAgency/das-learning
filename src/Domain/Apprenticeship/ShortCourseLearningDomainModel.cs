@@ -75,10 +75,10 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         episode.Update(updateContext);
     }
 
-    public override void Approve()
+    public override void Approve(long employerAccountId)
     {
         var episode = LatestEpisode;
-        episode.Approve();
+        episode.Approve(employerAccountId);
 
         AddEvent(new LearningApprovedEvent
         {

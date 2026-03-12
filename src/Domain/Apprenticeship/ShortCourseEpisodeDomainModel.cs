@@ -77,9 +77,10 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         });
     }
 
-    public void Approve()
+    public void Approve(long employerAccountId)
     {
         _entity.IsApproved = true;
+        _entity.EmployerAccountId = employerAccountId;
     }
 
     public void Update(ShortCourseUpdateContext updateContext)
