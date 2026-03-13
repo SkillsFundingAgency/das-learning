@@ -33,7 +33,8 @@ public static class ApprenticeshipCreatedEventMapper
                 : null,
             AccountLegalEntityId = e.AccountLegalEntityId,
             TrainingCourseVersion = e.TrainingCourseVersion,
-            PlannedStartDate = e.StartDate
+            PlannedStartDate = e.StartDate,
+            LearningType = (Enums.LearningType) e.LearningType
         };
     }
 

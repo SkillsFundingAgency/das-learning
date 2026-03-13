@@ -25,5 +25,6 @@ namespace SFA.DAS.Learning.Command.AddLearning
         public string ApprenticeshipHashedId { get; set; }
         public long AccountLegalEntityId { get; set; }
         public string TrainingCourseVersion { get; set; }
+        public LearningType LearningType { get; set; }
     }
 }

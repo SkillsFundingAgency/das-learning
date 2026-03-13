@@ -12,15 +12,16 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     private readonly DataAccess.Entities.Learning.ShortCourseEpisode _entity;
     private readonly List<ShortCourseMilestoneDomainModel> _milestones;
 
-    public Guid Key => _entity.Key;
+    public override Guid Key => _entity.Key;
     public Guid LearningKey => _entity.LearningKey;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
     public string TrainingCode => _entity.TrainingCode;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
+    public DateTime StartDate => _entity.StartDate;
     public bool IsApproved => _entity.IsApproved;
-
+    
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
 
@@ -76,6 +77,12 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         });
     }
 
+    public void Approve(long employerAccountId)
+    {
+        _entity.IsApproved = true;
+        _entity.EmployerAccountId = employerAccountId;
+    }
+
     public void Update(ShortCourseUpdateContext updateContext)
     {
         _entity.Ukprn = updateContext.OnProgramme.Ukprn;
@@ -84,7 +91,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         _entity.StartDate = updateContext.OnProgramme.StartDate;
         _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
         _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
-        
+
         UpdateMilestones(updateContext.OnProgramme.Milestones);
         UpdateLearningSupport(updateContext.LearningSupport);
     }

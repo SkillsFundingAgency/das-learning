@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using SFA.DAS.CommitmentsV2.Messages.Events;
 
 namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
 
@@ -25,6 +26,7 @@ internal class LearningDataSeeder
 
         var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
             .With(_ => _.ProviderId, Constants.UkPrn)
+            .With(x => x.LearningType, LearningType.Apprenticeship)
             .With(_ => _.TrainingCourseVersion, "1.0")
             .With(_ => _.IsOnFlexiPaymentPilot, true)
             .With(_ => _.Uln, ulnToUse)

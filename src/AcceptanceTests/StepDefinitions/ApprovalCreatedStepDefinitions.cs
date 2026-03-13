@@ -5,6 +5,7 @@ using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Types;
 using System.Data.Common;
+using SFA.DAS.CommitmentsV2.Messages.Events;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
@@ -45,6 +46,19 @@ public class ApprovalCreatedStepDefinitions
                     TrainingPrice = 6000
                 }
             })
+            .Create();
+
+        await _testContext.TestFunction!.PublishEvent(approvalCreatedEvent);
+
+        _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
+    }
+
+    [When(@"the Short Course has been approved by an employer")]
+    public async Task GivenTheShortCourseHasBeenApprovedByAnEmployer()
+    {
+        var approvalCreatedEvent = _fixture.Build<ApprenticeshipCreatedEvent>()
+            .With(_ => _.Uln, "123213")
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
             .Create();
 
         await _testContext.TestFunction!.PublishEvent(approvalCreatedEvent);

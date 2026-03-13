@@ -56,6 +56,36 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
+    public async Task<ShortCourseLearningDomainModel> Get(string uln, bool unapprovedOnly=false)
+    {
+        var learnerKey = await DbContext.LearnersDbSet
+            .Where(l => l.Uln == uln)
+            .Select(l => l.Key)
+            .SingleOrDefaultAsync();
+
+        if (learnerKey == Guid.Empty) return null;
+
+        var query = DbContext.Set<ShortCourseLearning>()
+            .Where(x => x.LearnerKey == learnerKey);
+
+        if (unapprovedOnly)
+        {
+            query = query
+                .Include(x => x.Episodes.Where(e => e.IsApproved == false));
+        }
+        else
+        {
+            query = query
+                .Include(x => x.Episodes);
+        }
+
+        var shortCourseLearning = await query.SingleOrDefaultAsync();
+
+        if (shortCourseLearning is { Episodes.Count: 0 }) return null; //learnings without an episode are treated as if not exists
+
+        return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
     public async Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey)
     {
         var shortCourseLearning = await DbContext
@@ -105,6 +135,23 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
             TotalItems = totalItems,
             TotalPages = totalPages
         };
+    }
+
+    public Task AddLearning(LearningDomainModel model)
+    {
+        if (model is not ShortCourseLearningDomainModel domainModel) throw new InvalidOperationException();
+        return Add(domainModel);
+    }
+
+    public Task UpdateLearning(LearningDomainModel model)
+    {
+        if (model is not ShortCourseLearningDomainModel domainModel) throw new InvalidOperationException();
+        return Update(domainModel);
+    }
+
+    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId)
+    {
+        return await Get(uln, true);
     }
 }
 

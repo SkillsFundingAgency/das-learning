@@ -168,6 +168,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         _entity.MathsAndEnglishCourses.Clear();
     }
 
+    public override void Approve(long employerAccountId)
+    {
+        throw new NotImplementedException("Learning approval is not yet implemented");
+    }
+
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
     {
         if (updateModel.Learning.CompletionDate?.Date != _entity.CompletionDate?.Date)

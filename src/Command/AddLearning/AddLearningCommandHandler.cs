@@ -6,6 +6,8 @@ using SFA.DAS.Learning.Domain.Builders;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Domain.Services;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -13,36 +15,51 @@ namespace SFA.DAS.Learning.Command.AddLearning;
 
 public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 {
+    private readonly ILearningService _learningService;
     private readonly ILearnerFactory _learnerFactory;
     private readonly IApprenticeshipLearningFactory _learningFactory;
     private readonly ILearnerRepository _learnerRepository;
-    private readonly IApprenticeshipLearningRepository _learningRepository;
     private readonly IMessageSession _messageSession;
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
     public AddLearningCommandHandler(
+        ILearningService learningService,
         ILearnerFactory learnerFactory,
         IApprenticeshipLearningFactory learningFactory,
         ILearnerRepository learnerRepository,
-        IApprenticeshipLearningRepository learningRepository,
         IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {
+        _learningService = learningService;
         _learnerFactory = learnerFactory;
         _learningFactory = learningFactory;
         _learnerRepository = learnerRepository;
-        _learningRepository = learningRepository;
         _messageSession = messageSession;
         _logger = logger;
     }
 
     public async Task Handle(AddLearningCommand command, CancellationToken cancellationToken = default)
     {
-        var existingLearning = await _learningRepository.Get(command.Uln, command.ApprovalsApprenticeshipId);
-        
+        var existingLearning = await _learningService.GetUnapprovedLearning(command.Uln, command.LearningType, command.ApprovalsApprenticeshipId);
+
+        if (existingLearning != null && command.LearningType == LearningType.ApprenticeshipUnit)
+        {
+            _logger.LogInformation("Approving unapproved ShortCourse for ULN {Uln}", command.Uln);
+
+            existingLearning.Approve(command.EmployerAccountId);
+            await _learningService.UpdateLearning(existingLearning);
+            return;
+        }
+
+        if (command.LearningType == LearningType.ApprenticeshipUnit)
+        {
+            _logger.LogWarning("Unable to approve ShortCourse for ULN {Uln} - no ShortCourse was found", command.Uln);
+            return;
+        }
+
         if (existingLearning != null)
         {
-            _logger.LogInformation("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
+            _logger.LogWarning("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
             return;
         }
 
@@ -73,12 +90,12 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         try
         {
-            await _learningRepository.Add(learning);
+            await _learningService.AddLearning(learning);
         }
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {
             //2627: violation of unique constraint. 2601: violation of unique index
-            _logger.LogWarning(
+            _logger.LogWarning(ex,
                 "Unique constraint violation for given Uln and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
                 command.ApprovalsApprenticeshipId);
             return;
@@ -109,7 +126,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
         {
             //2627: violation of unique constraint. 2601: violation of unique index
-            _logger.LogWarning(
+            _logger.LogWarning(ex,
                 "Unique constraint violation for given Uln {Uln}.", command.Uln);
             throw; //rethrowing will allow the command to be retried. Learner duplication will then be avoided, allowing the new learning to be recorded
         }
