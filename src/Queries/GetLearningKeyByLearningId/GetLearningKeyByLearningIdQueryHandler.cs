@@ -1,19 +1,17 @@
-﻿using SFA.DAS.Learning.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using SFA.DAS.Learning.DataAccess;
 
 namespace SFA.DAS.Learning.Queries.GetLearningKeyByLearningId;
 
-public class GetLearningKeyByLearningIdQueryHandler : IQueryHandler<GetLearningKeyByLearningIdRequest, GetLearningKeyByLearningIdResponse>
+public class GetLearningKeyByLearningIdQueryHandler(LearningDataContext dbContext)
+    : IQueryHandler<GetLearningKeyByLearningIdRequest, GetLearningKeyByLearningIdResponse>
 {
-    private readonly ILearningQueryRepository _learningQueryRepository;
-
-    public GetLearningKeyByLearningIdQueryHandler(ILearningQueryRepository learningQueryRepository)
-    {
-        _learningQueryRepository = learningQueryRepository;
-    }
-
     public async Task<GetLearningKeyByLearningIdResponse> Handle(GetLearningKeyByLearningIdRequest query, CancellationToken cancellationToken = default)
     {
-        var key = await _learningQueryRepository.GetKeyByLearningId(query.ApprenticeshipId);
-        return new GetLearningKeyByLearningIdResponse { LearningKey = key };
+        var learning = await dbContext.ApprenticeshipLearningDbSet
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.ApprovalsApprenticeshipId == query.ApprenticeshipId, cancellationToken);
+
+        return new GetLearningKeyByLearningIdResponse { LearningKey = learning?.Key };
     }
 }

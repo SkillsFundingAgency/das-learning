@@ -14,6 +14,7 @@ public class ShortCourseEpisode : Episode
     public DateTime StartDate { get; set; }
     public DateTime ExpectedEndDate { get; set; }
     public bool IsApproved { get; set; }
+    public decimal Price { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
     public List<ShortCourseLearningSupport> LearningSupport { get; set; }

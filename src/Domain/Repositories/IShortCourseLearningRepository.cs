@@ -8,5 +8,4 @@ public interface IShortCourseLearningRepository : ILearningRepository
     Task Update(ShortCourseLearningDomainModel learning);
     Task<ShortCourseLearningDomainModel> Get(Guid key);
     Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey);
-    Task<PagedResult<Models.Dtos.Learning>> GetApprovedByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken);
 }

@@ -44,7 +44,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         DateTime startDate,
         DateTime expectedEndDate,
         DateTime? withdrawalDate,
-        IEnumerable<Milestone> milestones)
+        IEnumerable<Milestone> milestones,
+        decimal price = 0)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
             _entity.Key,
@@ -54,7 +55,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             isApproved,
             startDate,
             expectedEndDate,
-            withdrawalDate
+            withdrawalDate,
+            price
         );
 
         foreach (var milestone in milestones)
