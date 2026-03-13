@@ -10,6 +10,7 @@ using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
 using SFA.DAS.Learning.Infrastructure.Services;
 using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.Learning.Command.ArchiveLearningHistory;
+using SFA.DAS.Learning.Domain.Services;
 
 namespace SFA.DAS.Learning.Command;
 
@@ -63,6 +64,8 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped<ILearnerRepository, LearnerRepository>();
         serviceCollection.AddScoped<IApprenticeshipLearningRepository, ApprenticeshipLearningRepository>();
         serviceCollection.AddScoped<IShortCourseLearningRepository, ShortCourseLearningRepository>();
+        serviceCollection.AddScoped<ILearningService, LearningService>();
+        serviceCollection.AddScoped<ILearningRepositoryProvider, LearningRepositoryProvider>();
         return serviceCollection;
     }
 

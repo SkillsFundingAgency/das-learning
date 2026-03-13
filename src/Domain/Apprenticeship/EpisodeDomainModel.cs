@@ -9,6 +9,7 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
 public abstract class EpisodeDomainModel
 {
+    public abstract Guid Key { get; }
 }
 
 public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
@@ -16,7 +17,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     private readonly DataAccess.Entities.Learning.ApprenticeshipEpisode _entity;
     private readonly List<EpisodePriceDomainModel> _episodePrices;
     private readonly List<EpisodeBreakInLearningDomainModel> _episodeBreaksInLearning;
-    public Guid Key => _entity.Key;
+    public override Guid Key => _entity.Key;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
     public FundingType FundingType => _entity.FundingType;

@@ -1,17 +1,18 @@
 using AutoFixture;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NServiceBus;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.AddLearning;
-using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Domain.Services;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 using SFA.DAS.Learning.Types;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,10 +24,10 @@ namespace SFA.DAS.Learning.Command.UnitTests.AddApproval;
 public class WhenAnAddApprenticeshipCommandIsSent
 {
     private AddLearningCommandHandler _commandHandler = null!;
+    private Mock<ILearningService> _learningService = null!;
     private Mock<ILearnerFactory> _learnerFactory = null!;
     private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
-    private Mock<IApprenticeshipLearningRepository> _apprenticeshipRepository = null!;
     private Mock<IMessageSession> _messageSession = null!;
     private Mock<ILogger<AddLearningCommandHandler>> _logger = null!;
     private Fixture _fixture = null!;
@@ -34,24 +35,22 @@ public class WhenAnAddApprenticeshipCommandIsSent
     [SetUp]
     public void SetUp()
     {
+        _learningService = new Mock<ILearningService>();
         _learnerFactory = new Mock<ILearnerFactory>();
         _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
         _learnerRepository = new Mock<ILearnerRepository>();
-        _apprenticeshipRepository = new Mock<IApprenticeshipLearningRepository>();
         _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<AddLearningCommandHandler>>();
         _commandHandler = new AddLearningCommandHandler(
+            _learningService.Object,
             _learnerFactory.Object,
             _apprenticeshipFactory.Object, 
             _learnerRepository.Object,
-            _apprenticeshipRepository.Object, 
             _messageSession.Object,
             _logger.Object);
 
         _fixture = new Fixture();
         _fixture.Customize(new ApprenticeshipCustomization());
-
-
     }
 
     [Test]
@@ -60,11 +59,12 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var command = _fixture.Create<AddLearningCommand>();
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-		_apprenticeshipRepository.Setup(x => x.Get(command.Uln, command.ApprovalsApprenticeshipId)).ReturnsAsync(apprenticeship);
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln,  LearningType.Apprenticeship, command.ApprovalsApprenticeshipId))
+            .ReturnsAsync(apprenticeship);
 
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never());
+        _learningService.Verify(x => x.AddLearning(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never());
     }
 	
     [Test]
@@ -81,8 +81,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
         
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Count == 1)));
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1)));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Count == 1)));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Count == 1)));
     }
 
     [Test]
@@ -101,7 +101,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         await _commandHandler.Handle(command);
 
-        _apprenticeshipRepository.Verify(x => x.Add(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
+        _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
     }
 
     [Test]
@@ -148,6 +148,64 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         // Assert
         _messageSession.Verify(x => x.Publish(It.IsAny<LearningCreatedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+
+    [Test]
+    public async Task WhenAnUnapprovedShortCourseExistsThenItIsApproved()
+    {
+        var command = _fixture.Build<AddLearningCommand>()
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .Create();
+
+        var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
+
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
+            .ReturnsAsync(shortCourseLearning);
+
+        await _commandHandler.Handle(command);
+
+        shortCourseLearning.LatestEpisode.IsApproved.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(shortCourseLearning));
+
+        shortCourseLearning
+            .FlushEvents()
+            .OfType<Domain.Events.LearningApprovedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
+                                && e.EpisodeKey == shortCourseLearning.LatestEpisode.Key);
+    }
+
+    [Test]
+    public async Task WhenAnUnapprovedShortCourseExistsThenTheEmployerAccountIdIsUpdated()
+    {
+        var command = _fixture.Build<AddLearningCommand>()
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .Create();
+
+        var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
+
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
+            .ReturnsAsync(shortCourseLearning);
+
+        await _commandHandler.Handle(command);
+
+        shortCourseLearning.LatestEpisode.EmployerAccountId.Should().Be(command.EmployerAccountId);
+    }
+
+    [Test]
+    public async Task WhenAnUnapprovedShortCourseDoesNotExistThenDoNothing()
+    {
+        var command = _fixture.Build<AddLearningCommand>()
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .Create();
+
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
+            .ReturnsAsync(() => null);
+
+        await _commandHandler.Handle(command);
+
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
     }
 
     private static bool DoApprenticeshipDetailsMatchDomainModel(

@@ -24,6 +24,11 @@ Scenario: Create Draft Short Course with learning support
 		| LearningSupport[0]                             |
 		| startDate:currentAY-09-25 endDate:nextAY-07-31 |
 
+Scenario: Approve Short Course
+	Given SLD has informed the system that a new short course has been created
+	When the Short Course has been approved by an employer
+	Then the Short Course is approved
+
 Scenario: Create Draft is called for a learner with an approved short course (Nothing should happen)
 	Given SLD call the create short course endpoint with the following information
 		| Uln   |
