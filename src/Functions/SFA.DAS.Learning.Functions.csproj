@@ -22,7 +22,7 @@
     <PackageReference Include="NServiceBus.AzureFunctions.Worker.ServiceBus" Version="5.2.2" />
     <PackageReference Include="NServiceBus.Extensions.Hosting" Version="3.0.1" />
     <PackageReference Include="NServiceBus.Transport.AzureStorageQueues" Version="13.0.2" />
-    <PackageReference Include="SFA.DAS.CommitmentsV2.Messages" Version="100.0.43" />
+    <PackageReference Include="SFA.DAS.CommitmentsV2.Types" Version="100.0.166" />
     <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="17.1.113" />
   </ItemGroup>
   <ItemGroup>
