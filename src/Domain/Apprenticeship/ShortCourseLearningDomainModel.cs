@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
 using System.Collections.ObjectModel;
@@ -98,6 +99,27 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
         if (!episode.Milestones.Select(m => m.Milestone).ToHashSet().SetEquals(prevMilestones))
             changes.Add(ShortCourseUpdateChanges.Milestone);
+    }
+
+    public override void Approve(long employerAccountId)
+    {
+        var episode = LatestEpisode;
+        episode.Approve(employerAccountId);
+
+        AddEvent(new LearningApprovedEvent
+        {
+            LearningKey = Key,
+            EpisodeKey = episode.Key
+        });
+    }
+
+    public ShortCourseEpisodeDomainModel LatestEpisode
+    {
+        get
+        {
+            var latestEpisode = _episodes.MaxBy(x => x.StartDate);
+            return latestEpisode;
+        }
     }
 
     private ShortCourseLearningDomainModel(ShortCourseLearning entity) : base(entity)

@@ -1,6 +1,11 @@
 ﻿namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public abstract class LearningDomainModel<T> : AggregateRoot where T : Learning.DataAccess.Entities.Learning.Learning
+public abstract class LearningDomainModel : AggregateRoot
+{
+    public abstract void Approve(long employerAccountId);
+}
+
+public abstract class LearningDomainModel<T> : LearningDomainModel where T : Learning.DataAccess.Entities.Learning.Learning
 {
     protected T _entity;
     public Guid LearnerKey => _entity.LearnerKey;

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(__NEW_LINE_b8877240cb3c17f6__ cd:*)",
+      "Bash(\\\\ git:*)",
+      "Bash(git mv:*)",
+      "Bash(ls src/Database/*.sql && ls src/DataAccess/Entities/Learning/*.cs | grep -i maths)",
+      "Bash(func --version 2>/dev/null || echo \"func not in PATH from bash\")",
+      "Bash(find /c/code/sfa/das-apprenticeships -type f -name \"*shortcourse*\" -o -name \"*ShortCourse*\" 2>/dev/null | head -30)",
+      "Bash(find /c/code/sfa/das-apprenticeships/src -name \"*.csproj\" -not -path \"*/obj/*\" | xargs sed -i 's/<TargetFramework>net8\\\\.0<\\\\/TargetFramework>/<TargetFramework>net10.0<\\\\/TargetFramework>/g')",
+      "Bash(dotnet package:*)",
+      "Bash(find /c/code/sfa/das-apprenticeships/src -name \"*.csproj\" -not -path \"*/obj/*\" | xargs -I{} dotnet build \"{}\" --no-dependencies 2>&1 | grep -E \"Build FAILED|Build succeeded|^.*: error \" | grep -v \"NU1\")",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

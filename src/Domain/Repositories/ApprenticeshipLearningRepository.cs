@@ -111,4 +111,22 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         _unitOfWork.Track(learning);
         return Task.CompletedTask;
     }
+
+    public Task AddLearning(LearningDomainModel model)
+    {
+        if (model is not ApprenticeshipLearningDomainModel domainModel) throw new InvalidOperationException();
+        return Add(domainModel);
+    }
+
+    public Task UpdateLearning(LearningDomainModel model)
+    {
+        if (model is not ApprenticeshipLearningDomainModel domainModel) throw new InvalidOperationException();
+        return Update(domainModel);
+    }
+
+    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId)
+    {
+        //Nb, currently all ApprenticeshipLearning is regarded as being "unapproved"
+        return await Get(uln, apprenticeshipId);
+    }
 }
