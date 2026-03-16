@@ -3,10 +3,11 @@ using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
+using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
-using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
+using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -102,7 +103,7 @@ public class ShortCoursesController : ControllerBase
         if(result.ResultType == CreateDraftShortCourseResultTypes.Success)
         {
             _logger.LogInformation("Successfully created draft short course learning with key {LearningKey} for ukprn {ukprn}", result.LearningKey, request.OnProgramme.Ukprn);
-            return new OkObjectResult(result.LearningKey);
+            return new OkObjectResult(new CreateShortCourseLearningResponse{ LearningKey = result.LearningKey!.Value, EpisodeKey = result.EpisodeKey!.Value });
         }
 
         if(result.ResultType == CreateDraftShortCourseResultTypes.ApprovedAlreadyExists)
