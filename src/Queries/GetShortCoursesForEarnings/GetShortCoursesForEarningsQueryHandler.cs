@@ -16,8 +16,8 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
             .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn))
             .Where(x => x.Episodes.Any(e =>
                 e.StartDate <= dates.End &&
-                e.ExpectedEndDate >= dates.Start &&
                 (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
+            .Where(x => !x.CompletionDate.HasValue || x.CompletionDate.Value >= dates.Start)
             .AsNoTracking();
 
         var totalItems = await baseQuery.CountAsync(cancellationToken);
