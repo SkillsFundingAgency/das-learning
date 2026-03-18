@@ -57,7 +57,8 @@ public class WhenGettingShortCourseEarnings
                     IsApproved = true,
                     Price = 1500m,
                     StartDate = new DateTime(2024, 8, 1),
-                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                    ExpectedEndDate = new DateTime(2025, 7, 31),
+                    LearnerRef = "LRN123"
                 }
             ]
         };
@@ -104,7 +105,8 @@ public class WhenGettingShortCourseEarnings
             IsApproved = false,
             Price = 750m,
             StartDate = new DateTime(2024, 8, 1),
-            ExpectedEndDate = new DateTime(2025, 7, 31)
+            ExpectedEndDate = new DateTime(2025, 7, 31),
+            LearnerRef = "LRN123"
         };
 
         var learning = new ShortCourseLearning { Key = Guid.NewGuid(), Episodes = [episode] };
@@ -146,6 +148,7 @@ public class WhenGettingShortCourseEarnings
                     Ukprn = ukPrn,
                     TrainingCode = "OLD001",
                     StartDate = new DateTime(2023, 1, 1),
+                    LearnerRef = "LRN123",
                     ExpectedEndDate = new DateTime(2023, 12, 31) // ends before academic year starts
                 }
             ]

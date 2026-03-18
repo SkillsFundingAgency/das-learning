@@ -79,6 +79,9 @@ public class OnProgramme
     public decimal Price { get; set; }
 }
 
+/// <summary>
+/// CreateDraftShortCourse request extensions
+/// </summary>
 public static class CreateDraftShortCourseRequestExtensions
 {
     /// <summary>
@@ -90,6 +93,7 @@ public static class CreateDraftShortCourseRequestExtensions
     {
         return new ShortCourseUpdateContext
         {
+            LearnerRef = request.LearnerUpdateDetails.LearnerRef,
             Learner = new LearnerModel
             {
                 FirstName = request.LearnerUpdateDetails.FirstName,

@@ -6,6 +6,7 @@ namespace SFA.DAS.Learning.Models.UpdateModels;
 #pragma warning disable CS8618 // Required properties must be set in the constructor
 public class ShortCourseUpdateContext
 {
+    public string LearnerRef { get; set; }
     public LearnerModel Learner { get; set; }
     public List<LearningSupportDetails> LearningSupport { get; set; }
     public OnProgramme OnProgramme { get; set; }

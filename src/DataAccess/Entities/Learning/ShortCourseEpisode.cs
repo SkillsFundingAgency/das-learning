@@ -1,5 +1,7 @@
 ﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
+#pragma warning disable CS8618
+
 [Table("dbo.ShortCourseEpisode")]
 [System.ComponentModel.DataAnnotations.Schema.Table("ShortCourseEpisode")]
 public class ShortCourseEpisode : Episode
@@ -15,7 +17,9 @@ public class ShortCourseEpisode : Episode
     public DateTime ExpectedEndDate { get; set; }
     public bool IsApproved { get; set; }
     public decimal Price { get; set; }
+    public string LearnerRef { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
     public List<ShortCourseLearningSupport> LearningSupport { get; set; }
 }
+#pragma warning restore CS8618

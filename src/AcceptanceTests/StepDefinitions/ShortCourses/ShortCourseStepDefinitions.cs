@@ -248,7 +248,8 @@ public class ShortCourseStepDefinitions
                 FirstName = "Frank",
                 LastName = "Frankinson",
                 DateOfBirth = new DateTime(2000, 1, 1),
-                Uln = 123213
+                Uln = 123213,
+                LearnerRef = "LR-123213"
             },
             LearningSupport = new List<LearningSupportDetails>()
         };

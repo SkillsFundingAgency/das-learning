@@ -39,6 +39,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     public ShortCourseEpisodeDomainModel AddEpisode(
         long ukprn,
         long employerAccountId,
+        string learnerRef,
         string trainingCode,
         bool isApproved,
         DateTime startDate,
@@ -51,6 +52,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             _entity.Key,
             ukprn,
             employerAccountId,
+            learnerRef,
             trainingCode,
             isApproved,
             startDate,
@@ -91,6 +93,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
         var prevWithdrawalDate = episode.WithdrawalDate;
         var prevMilestones = episode.Milestones.Select(m => m.Milestone).ToHashSet();
+        var prevLearnerRef = episode.LearnerRef;
 
         episode.Update(updateContext);
 
@@ -99,6 +102,9 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
         if (!episode.Milestones.Select(m => m.Milestone).ToHashSet().SetEquals(prevMilestones))
             changes.Add(ShortCourseUpdateChanges.Milestone);
+
+        if(!episode.LearnerRef.Equals(prevLearnerRef, StringComparison.OrdinalIgnoreCase))
+            changes.Add(ShortCourseUpdateChanges.LearnerRef);
     }
 
     public override void Approve(long employerAccountId)
