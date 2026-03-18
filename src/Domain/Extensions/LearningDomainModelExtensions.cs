@@ -62,7 +62,7 @@ public static class LearningDomainModelExtensions
     //            }).ToList()
     //        }).ToList(),
 
-    //        MathsAndEnglishCourses = learning.MathsAndEnglishCourses.Select(m => new MathsAndEnglish
+    //        EnglishAndMathsCourses = learning.EnglishAndMathsCourses.Select(m => new EnglishAndMaths
     //        {
     //            Key = m.Key,
     //            StartDate = m.StartDate,
