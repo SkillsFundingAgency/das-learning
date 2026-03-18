@@ -1,66 +1,88 @@
-using AutoFixture;
 using FluentAssertions;
-using Moq;
-using SFA.DAS.Learning.Domain;
-using SFA.DAS.Learning.Domain.Repositories;
-using SFA.DAS.Learning.Infrastructure.LearningOuterApiClient;
+using Microsoft.EntityFrameworkCore;
+using SFA.DAS.Learning.DataAccess;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 
 namespace SFA.DAS.Learning.Queries.UnitTests;
 
 public class WhenIGetApprenticeshipsByAcademicYear
 {
-    private Fixture _fixture;
-    private Mock<ILearningQueryRepository> _apprenticeshipQueryRepository;
-    private Mock<ILearningOuterApiClient> _apiClient;
+    private LearningDataContext _dbContext;
     private GetLearningsByAcademicYearQueryHandler _sut;
 
     [SetUp]
     public void Setup()
     {
-        _fixture = new Fixture();
-        _apprenticeshipQueryRepository = new Mock<ILearningQueryRepository>();
-        _apiClient = new Mock<ILearningOuterApiClient>();
-        _sut = new GetLearningsByAcademicYearQueryHandler(_apprenticeshipQueryRepository.Object);
+        var options = new DbContextOptionsBuilder<LearningDataContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        _dbContext = new LearningDataContext(options);
+        _sut = new GetLearningsByAcademicYearQueryHandler(_dbContext);
     }
+
+    [TearDown]
+    public void TearDown() => _dbContext.Dispose();
 
     [Test]
     public async Task ThenApprenticeshipsAreReturned()
     {
-        //Arrange
-        const int academicYear = 2526;
-        const int pageSize = 20;
-        const int pageNumber = 1;
+        // Arrange
+        const long ukPrn = 1000;
+        const int academicYear = 2425; // 2024-08-01 to 2025-07-31
 
-        var queryResult = _fixture.Create<PagedResult<Models.Dtos.Learning>>();
-        var expectedResult = new GetLearningsByAcademicYearResponse
-        {
-            Items = queryResult.Data.Select(x => new GetLearningsByDatesResponseItem
-            {
-                Uln = x.Uln,
-                Key = x.Key
-            }),
-            Page = pageNumber,
-            PageSize = pageSize,
-            TotalItems = queryResult.TotalItems
-        };
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1234567890", FirstName = "A", LastName = "B" });
 
-        var query = new GetLearningsByAcademicYearRequest(1000, academicYear, pageNumber, pageSize);
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), ApprovalsApprenticeshipId = 1 };
+        learning.LearnerKey = learnerKey;
+        var episode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", FundingType = FundingType.Levy, LegalEntityName = "Test" };
+        episode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2024, 9, 1), EndDate = new DateTime(2025, 6, 30), TotalPrice = 5000 });
+        learning.Episodes.Add(episode);
+        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
+        await _dbContext.SaveChangesAsync();
 
-        var dates = AcademicYearParser.ParseFrom(academicYear);
+        var query = new GetLearningsByAcademicYearRequest(ukPrn, academicYear, 1, 20);
 
-        _apprenticeshipQueryRepository
-            .Setup(x => x.GetByDates(query.UkPrn, dates, pageSize, 0, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(queryResult)
-            .Verifiable();
+        // Act
+        var result = await _sut.Handle(query);
 
-        //Act
-        var actualResult = await _sut.Handle(query);
+        // Assert
+        result.TotalItems.Should().Be(1);
+        result.Page.Should().Be(1);
+        result.PageSize.Should().Be(20);
+        result.Items.Should().HaveCount(1);
+        result.Items.Single().Uln.Should().Be("1234567890");
+        result.Items.Single().Key.Should().Be(learning.Key);
+    }
 
-        //Assert
-        actualResult.Should().BeEquivalentTo(expectedResult, x => x.ExcludingMissingMembers());
+    [Test]
+    public async Task ThenApprenticeshipsOutsideDateRangeAreExcluded()
+    {
+        // Arrange
+        const long ukPrn = 1000;
+        const int academicYear = 2425; // 2024-08-01 to 2025-07-31
 
-        _apprenticeshipQueryRepository.Verify();
-        _apiClient.Verify();
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "999", FirstName = "A", LastName = "B" });
+
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), ApprovalsApprenticeshipId = 1 };
+        learning.LearnerKey = learnerKey;
+        var episode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", FundingType = FundingType.Levy, LegalEntityName = "Test" };
+        episode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2022, 9, 1), EndDate = new DateTime(2023, 6, 30), TotalPrice = 5000 });
+        learning.Episodes.Add(episode);
+        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        var query = new GetLearningsByAcademicYearRequest(ukPrn, academicYear, 1, 20);
+
+        // Act
+        var result = await _sut.Handle(query);
+
+        // Assert
+        result.TotalItems.Should().Be(0);
+        result.Items.Should().BeEmpty();
     }
 }

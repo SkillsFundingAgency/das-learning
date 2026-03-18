@@ -80,7 +80,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             command.Model.OnProgramme.StartDate,
             command.Model.OnProgramme.ExpectedEndDate,
             command.Model.OnProgramme.WithdrawalDate,
-            command.Model.OnProgramme.Milestones);
+            command.Model.OnProgramme.Milestones,
+            command.Model.OnProgramme.Price);
 
         foreach (var learningSupport in command.Model.LearningSupport)
         {
