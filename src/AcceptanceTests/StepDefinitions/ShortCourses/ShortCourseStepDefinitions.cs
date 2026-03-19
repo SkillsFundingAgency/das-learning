@@ -55,6 +55,9 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             var request = GetDefaultShortCourse();
             request.OnProgramme.WithdrawalDate = null;
 
+            if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
+                request.OnProgramme.Ukprn = parsedUkprn;
+
             if (row.TryGetValue("FirstName", out var firstName))
                 request.LearnerUpdateDetails.FirstName = firstName;
 

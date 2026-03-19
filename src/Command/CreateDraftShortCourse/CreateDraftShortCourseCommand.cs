@@ -11,15 +11,3 @@ public class CreateDraftShortCourseCommand : ICommand
 
     public ShortCourseUpdateContext Model { get; }
 }
-
-public class CreateDraftShortCourseResult
-{
-    public Guid? LearningKey { get; set; }
-    public CreateDraftShortCourseResultTypes ResultType { get; set; }
-}
-
-public enum CreateDraftShortCourseResultTypes
-{
-    Success,
-    ApprovedAlreadyExists
-}

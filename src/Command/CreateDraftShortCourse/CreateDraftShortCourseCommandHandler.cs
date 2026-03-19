@@ -7,7 +7,7 @@ using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 
-public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftShortCourseCommand, CreateDraftShortCourseResult>
+public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>
 {
     private readonly ILearnerFactory _learnerFactory;
     private readonly ILearnerRepository _learnerRepository;
@@ -29,7 +29,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         _logger = logger;
     }
 
-    public async Task<CreateDraftShortCourseResult> Handle(CreateDraftShortCourseCommand command, CancellationToken cancellationToken = default)
+    public async Task<CreateDraftShortCourseCommandResult> Handle(CreateDraftShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Handling CreateDraftShortCourseCommand");
 
@@ -46,14 +46,14 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             TransferEvents(learner, learning);
             await _shortCourseLearningRepository.Add(learning);
 
-            return new CreateDraftShortCourseResult() { LearningKey = learning.Key, ResultType = CreateDraftShortCourseResultTypes.Success };
+            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key };
         }
 
-        //  Do nothing and return ApprovedAlreadyExists if an approved episode already exists
-        if (learning.Episodes.Any(x => x.IsApproved))
+        //  Ignore if we have an approved episode with another provider
+        if (learning.Episodes.Any(x => x.IsApproved && x.Ukprn != command.Model.OnProgramme.Ukprn))
         {
-            _logger.LogWarning("A approved short course learning already exists for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-            return new CreateDraftShortCourseResult() { ResultType = CreateDraftShortCourseResultTypes.ApprovedAlreadyExists };
+            _logger.LogWarning("An approved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
+            return new CreateDraftShortCourseCommandResult();
         }
 
         //  Update existing learning if no approved episode exists
@@ -62,8 +62,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
-        return new CreateDraftShortCourseResult() { LearningKey = learning.Key, ResultType = CreateDraftShortCourseResultTypes.Success };
-
+        return new CreateDraftShortCourseCommandResult() { LearningKey = learning.Key };
     }
 
     private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)

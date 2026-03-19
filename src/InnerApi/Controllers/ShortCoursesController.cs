@@ -96,20 +96,8 @@ public class ShortCoursesController : ControllerBase
         var command = new CreateDraftShortCourseCommand(request.ToCreateModel());
 
         var result =
-            await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseResult>(command);
+            await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(command);
 
-        if(result.ResultType == CreateDraftShortCourseResultTypes.Success)
-        {
-            _logger.LogInformation("Successfully created draft short course learning with key {LearningKey} for ukprn {ukprn}", result.LearningKey, request.OnProgramme.Ukprn);
-            return new OkObjectResult(result.LearningKey);
-        }
-
-        if(result.ResultType == CreateDraftShortCourseResultTypes.ApprovedAlreadyExists)
-        {
-            _logger.LogWarning("Cannot create draft short course learning for ukprn {ukprn} as an approved learning already exists for the learner", request.OnProgramme.Ukprn);
-            return new ConflictResult();
-        }
-
-        throw new InvalidOperationException($"Unexpected result type {result.ResultType} when creating draft short course learning for ukprn {request.OnProgramme.Ukprn}");
+        return Ok(result.LearningKey);
     }
 }
