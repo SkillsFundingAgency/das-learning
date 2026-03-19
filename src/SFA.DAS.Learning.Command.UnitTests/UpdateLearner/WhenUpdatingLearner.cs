@@ -8,7 +8,7 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SFA.DAS.Learning.Domain.Builders;
+
 
 namespace SFA.DAS.Learning.Command.UnitTests.UpdateLearner;
 
@@ -49,6 +49,7 @@ public class WhenUpdatingLearner
 
         // Assert
         result.Changes.Should().NotBeEmpty();
+        _learnerRepository.Verify(x => x.Update(learnerDomainModel), Times.Once);
         _learningRepository.Verify(x => x.Update(learningDomainModel), Times.Once);
 
         // Note this test works because the random generated domainModel will not match the random generated command.UpdateModel and at least

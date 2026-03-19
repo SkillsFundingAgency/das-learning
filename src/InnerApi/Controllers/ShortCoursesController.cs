@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
+using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
@@ -111,5 +112,20 @@ public class ShortCoursesController : ControllerBase
         }
 
         throw new InvalidOperationException($"Unexpected result type {result.ResultType} when creating draft short course learning for ukprn {request.OnProgramme.Ukprn}");
+    }
+
+    /// <summary>
+    /// Updates an existing short course learner record.
+    /// </summary>
+    /// <param name="learningKey">The key of the short course learning record to update.</param>
+    /// <param name="request">The updated learner and short course details.</param>
+    /// <returns>The LearningKey and list of fields that changed.</returns>
+    [HttpPut("shortCourses/{learningKey}")]
+    [ProducesResponseType(typeof(UpdateShortCourseResult), 200)]
+    public async Task<IActionResult> UpdateShortCourse(Guid learningKey, [FromBody] CreateDraftShortCourseRequest request)
+    {
+        var command = new UpdateShortCourseCommand(learningKey, request.ToCreateModel());
+        var result = await _commandDispatcher.Send<UpdateShortCourseCommand, UpdateShortCourseResult>(command);
+        return new OkObjectResult(result);
     }
 }

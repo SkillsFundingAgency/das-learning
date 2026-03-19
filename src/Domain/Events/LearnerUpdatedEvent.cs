@@ -1,9 +1,82 @@
-﻿using SFA.DAS.Learning.Enums;
+﻿using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Events;
 
 public class LearnerUpdatedEvent : IDomainEvent
 {
+    public static LearnerUpdatedEvent From(LearnerDomainModel learner, ApprenticeshipLearningDomainModel learning)
+    {
+        return new LearnerUpdatedEvent
+        {
+            Key = learning.Key,
+            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
+            Uln = learner.Uln,
+            FirstName = learner.FirstName,
+            LastName = learner.LastName,
+            EmailAddress = learner.EmailAddress,
+            DateOfBirth = learner.DateOfBirth,
+            CompletionDate = learning.CompletionDate,
+
+            Episodes = learning.Episodes.Select(e => new Episode
+            {
+                Key = e.Key,
+                Ukprn = e.Ukprn,
+                EmployerAccountId = e.EmployerAccountId,
+                FundingType = e.FundingType,
+                FundingPlatform = e.FundingPlatform,
+                FundingEmployerAccountId = e.FundingEmployerAccountId,
+                LegalEntityName = e.LegalEntityName,
+                AccountLegalEntityId = e.AccountLegalEntityId,
+                TrainingCode = e.TrainingCode,
+                TrainingCourseVersion = e.TrainingCourseVersion,
+                PaymentsFrozen = e.PaymentsFrozen,
+                WithdrawalDate = e.WithdrawalDate,
+                PauseDate = e.PauseDate,
+
+                LearningSupport = e.LearningSupport.Select(ls => new LearningSupport
+                {
+                    Key = ls.Key,
+                    LearningKey = ls.LearningKey,
+                    StartDate = ls.StartDate,
+                    EndDate = ls.EndDate
+                }).ToList(),
+
+                EpisodeBreaksInLearning = e.EpisodeBreaksInLearning.Select(b => new EpisodeBreakInLearning
+                {
+                    Key = b.Key,
+                    StartDate = b.StartDate,
+                    EndDate = b.EndDate,
+                    PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+                }).ToList(),
+
+                EpisodePrices = e.EpisodePrices.Select(p => new EpisodePrice
+                {
+                    Key = p.Key,
+                    StartDate = p.StartDate,
+                    EndDate = p.EndDate,
+                    TotalPrice = p.TotalPrice,
+                    TrainingPrice = p.TrainingPrice,
+                    EndPointAssessmentPrice = p.EndPointAssessmentPrice
+                }).ToList()
+            }).ToList(),
+
+            EnglishAndMathsCourses = learning.EnglishAndMathsCourses.Select(m => new EnglishAndMaths
+            {
+                Key = m.Key,
+                StartDate = m.StartDate,
+                PlannedEndDate = m.PlannedEndDate,
+                Course = m.Course,
+                WithdrawalDate = m.WithdrawalDate,
+                CompletionDate = m.CompletionDate,
+                PauseDate = m.PauseDate,
+                PriorLearningPercentage = m.PriorLearningPercentage,
+                Amount = m.Amount
+            }).ToList()
+        };
+    }
+
+
     public Guid Key { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }
     public string Uln { get; set; }

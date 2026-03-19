@@ -12,19 +12,30 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     private readonly IApprenticeshipLearningFactory _learningFactory;
     private LearningDataContext DbContext => _lazyContext.Value;
 
-    public ApprenticeshipLearningRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, IApprenticeshipLearningFactory learningFactory)
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ApprenticeshipLearningRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, IApprenticeshipLearningFactory learningFactory, IUnitOfWork unitOfWork)
     {
         _lazyContext = dbContext;
         _domainEventDispatcher = domainEventDispatcher;
         _learningFactory = learningFactory;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Add(ApprenticeshipLearningDomainModel learning)
     {
         var entity = learning.GetEntity();
         await DbContext.AddAsync(entity);
-        await DbContext.SaveChangesAsync();
-            
+        try
+        {
+            await DbContext.SaveChangesAsync();
+        }
+        catch
+        {
+            DbContext.Entry(entity).State = EntityState.Detached;
+            throw;
+        }
+
         foreach (dynamic domainEvent in learning.FlushEvents())
         {
             await _domainEventDispatcher.Send(domainEvent);
@@ -70,6 +81,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
             : _learningFactory.GetExisting(apprenticeship);
     }
 
+
     public async Task<ApprenticeshipLearningDomainModel?> GetByUln(string uln)
     {
         var learnerKey = await DbContext.LearnersDbSet
@@ -94,14 +106,10 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
             : _learningFactory.GetExisting(apprenticeship);
     }
 
-    public async Task Update(ApprenticeshipLearningDomainModel learning)
+    public Task Update(ApprenticeshipLearningDomainModel learning)
     {
-        await DbContext.SaveChangesAsync();
-  
-        foreach (dynamic domainEvent in learning.FlushEvents())
-        {
-            await _domainEventDispatcher.Send(domainEvent);
-        }
+        _unitOfWork.Track(learning);
+        return Task.CompletedTask;
     }
 
     public Task AddLearning(LearningDomainModel model)

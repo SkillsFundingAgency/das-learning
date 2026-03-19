@@ -12,11 +12,14 @@ public class LearnerRepository : ILearnerRepository
     private readonly ILearnerFactory _learnerFactory;
     private LearningDataContext DbContext => _lazyContext.Value;
 
-    public LearnerRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, ILearnerFactory learnerFactory)
+    private readonly IUnitOfWork _unitOfWork;
+
+    public LearnerRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, ILearnerFactory learnerFactory, IUnitOfWork unitOfWork)
     {
         _lazyContext = dbContext;
         _domainEventDispatcher = domainEventDispatcher;
         _learnerFactory = learnerFactory;
+        _unitOfWork = unitOfWork;
     }
 
 
@@ -63,13 +66,9 @@ public class LearnerRepository : ILearnerRepository
         return _learnerFactory.GetExisting(learner);
     }
 
-    public async Task Update(LearnerDomainModel learner)
+    public Task Update(LearnerDomainModel learner)
     {
-        await DbContext.SaveChangesAsync();
-
-        foreach (dynamic domainEvent in learner.FlushEvents())
-        {
-            await _domainEventDispatcher.Send(domainEvent);
-        }
+        _unitOfWork.Track(learner);
+        return Task.CompletedTask;
     }
 }
