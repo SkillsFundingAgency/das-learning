@@ -14,16 +14,16 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     public virtual DbSet<Entities.Learning.ApprenticeshipLearning> ApprenticeshipLearningDbSet { get; set; }
     public virtual DbSet<ApprenticeshipEpisode> Episodes { get; set; }
     public virtual DbSet<EpisodePrice> EpisodePrices { get; set; }
-    public virtual DbSet<MathsAndEnglish> MathsAndEnglish { get; set; }
+    public virtual DbSet<EnglishAndMaths> EnglishAndMaths { get; set; }
     public virtual DbSet<ApprenticeshipLearningSupport> ApprenticeshipLearningSupport { get; set; }
     public virtual DbSet<ShortCourseLearningSupport> ShortCourseLearningSupport { get; set; }
     public virtual DbSet<EpisodeBreakInLearning> EpisodeBreakInLearnings { get; set; }
-    public virtual DbSet<MathsAndEnglishBreakInLearning> MathsAndEnglishBreakInLearnings { get; set; }
+    public virtual DbSet<EnglishAndMathsBreakInLearning> EnglishAndMathsBreakInLearnings { get; set; }
 
     public virtual DbSet<LearningHistory> LearningHistories { get; set; }
-    public virtual DbSet<Entities.Learning.ShortCourseLearning> ShortCourseLearnings { get; set; }
-    public virtual DbSet<Entities.Learning.ShortCourseEpisode> ShortCourseEpisodes { get; set; }
-    public virtual DbSet<Entities.Learning.ShortCourseMilestone> ShortCourseMilestones { get; set; }
+    public virtual DbSet<ShortCourseLearning> ShortCourseLearnings { get; set; }
+    public virtual DbSet<ShortCourseEpisode> ShortCourseEpisodes { get; set; }
+    public virtual DbSet<ShortCourseMilestone> ShortCourseMilestones { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -58,7 +58,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
              .HasKey(a => new { a.Key });
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
-            .HasMany(x => x.MathsAndEnglishCourses)
+            .HasMany(x => x.EnglishAndMathsCourses)
             .WithOne()
             .HasForeignKey(fk => fk.LearningKey);
 
@@ -73,7 +73,6 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
             .Property(a => a.LearnerKey)
             .IsRequired();
-
 
         // Episode
         modelBuilder.Entity<ApprenticeshipEpisode>()
@@ -113,13 +112,13 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
                 .HasForeignKey(e => e.EpisodeKey)
                 .HasPrincipalKey(ae => ae.Key);
 
-        // MathsAndEnglish
-        modelBuilder.Entity<MathsAndEnglish>()
+        // EnglishAndMaths
+        modelBuilder.Entity<EnglishAndMaths>()
             .HasKey(x => x.Key);
 
-        modelBuilder.Entity<MathsAndEnglish>()
+        modelBuilder.Entity<EnglishAndMaths>()
             .HasOne<ApprenticeshipLearning>()
-            .WithMany(al => al.MathsAndEnglishCourses)
+            .WithMany(al => al.EnglishAndMathsCourses)
             .HasForeignKey(e => e.LearningKey)
             .HasPrincipalKey(al => al.Key);
 
@@ -154,12 +153,12 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasPrincipalKey(ae => ae.Key)
             .IsRequired();
 
-        // MathsAndEnglishBreakInLearning
-        modelBuilder.Entity<MathsAndEnglishBreakInLearning>()
+        // EnglishAndMathsBreakInLearning
+        modelBuilder.Entity<EnglishAndMathsBreakInLearning>()
             .HasKey(x => x.Key);
 
-        modelBuilder.Entity<MathsAndEnglishBreakInLearning>()
-            .Property(x => x.MathsAndEnglishKey)
+        modelBuilder.Entity<EnglishAndMathsBreakInLearning>()
+            .Property(x => x.EnglishAndMathsKey)
             .IsRequired();
 
         // LearningHistory

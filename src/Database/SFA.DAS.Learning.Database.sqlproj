@@ -63,11 +63,11 @@
     <Build Include="ApprenticeshipEpisode.sql" />
     <Build Include="EpisodePrice.sql" />
     <Build Include="ApprenticeshipLearning.sql" />
-    <Build Include="MathsAndEnglish.sql" />
+    <Build Include="EnglishAndMaths.sql" />
     <Build Include="ApprenticeshipLearningSupport.sql" />
     <Build Include="EpisodeBreakInLearning.sql" />
     <Build Include="LearningHistory.sql" />
-    <Build Include="MathsAndEnglishBreakInLearning.sql" />
+    <Build Include="EnglishAndMathsBreakInLearning.sql" />
     <Build Include="ShortCourseLearning.sql" />
     <Build Include="ShortCourseEpisode.sql" />
     <Build Include="ShortCourseMilestone.sql" />
