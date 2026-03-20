@@ -26,7 +26,7 @@ internal static class ApprenticeshipCreatedEventExtensions
                 Care = new CareDetails()
             },
             LearningSupport = new List<LearningSupportDetails>(),
-            MathsAndEnglishCourses = new List<MathsAndEnglish>(),
+            EnglishAndMathsCourses = new List<EnglishAndMaths>(),
             OnProgramme = new OnProgrammeDetails
             {
                 Costs = new List<Cost>

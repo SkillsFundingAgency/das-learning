@@ -22,7 +22,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public DateTime StartDate => _entity.StartDate;
     public bool IsApproved => _entity.IsApproved;
     public decimal Price => _entity.Price;
-
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
 

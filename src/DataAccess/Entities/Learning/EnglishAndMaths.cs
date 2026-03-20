@@ -1,12 +1,12 @@
-﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
+namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
-[Table("dbo.MathsAndEnglish")]
-[System.ComponentModel.DataAnnotations.Schema.Table("MathsAndEnglish")]
-public class MathsAndEnglish
+[Table("dbo.EnglishAndMaths")]
+[System.ComponentModel.DataAnnotations.Schema.Table("EnglishAndMaths")]
+public class EnglishAndMaths
 {
-    public MathsAndEnglish()
+    public EnglishAndMaths()
     {
-        BreaksInLearning = new List<MathsAndEnglishBreakInLearning>();
+        BreaksInLearning = new List<EnglishAndMathsBreakInLearning>();
     }
 
     [Key]
@@ -22,5 +22,5 @@ public class MathsAndEnglish
     public DateTime? PauseDate { get; set; }
     public int? PriorLearningPercentage { get; set; }
     public decimal Amount { get; set; }
-    public List<MathsAndEnglishBreakInLearning> BreaksInLearning { get; set; }
+    public List<EnglishAndMathsBreakInLearning> BreaksInLearning { get; set; }
 }
