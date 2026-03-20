@@ -45,7 +45,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     public async Task<ApprenticeshipLearningDomainModel> Get(Guid key)
     {
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
-            .Include(x => x.MathsAndEnglishCourses).ThenInclude(y => y.BreaksInLearning)
+            .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
@@ -69,7 +69,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.LearnerKey == learnerKey &&
                         x.ApprovalsApprenticeshipId == approvalsApprenticeshipId)
-            .Include(x => x.MathsAndEnglishCourses)
+            .Include(x => x.EnglishAndMathsCourses)
             .Include(x => x.Episodes)
                 .ThenInclude(e => e.Prices)
             .AsSplitQuery()
@@ -94,7 +94,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
 
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.LearnerKey == learnerKey)
-            .Include(x => x.MathsAndEnglishCourses)
+            .Include(x => x.EnglishAndMathsCourses)
             .Include(x => x.Episodes)
                 .ThenInclude(e => e.Prices)
             .AsSplitQuery()

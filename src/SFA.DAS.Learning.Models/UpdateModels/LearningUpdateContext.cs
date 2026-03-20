@@ -11,7 +11,7 @@ public class LearningUpdateContext
     public CareDetails Care { get; set; }
     public DeliveryDetails Delivery { get; set; }
     public LearningUpdateDetails Learning { get; set; }
-    public List<MathsAndEnglishUpdateDetails> MathsAndEnglishCourses { get; set; }
+    public List<EnglishAndMathsUpdateDetails> EnglishAndMathsCourses { get; set; }
     public List<LearningSupportDetails> LearningSupport { get; set; }
     public OnProgrammeDetails OnProgrammeDetails { get; set; }
 }
@@ -28,7 +28,7 @@ public class LearningUpdateDetails
     public DateTime? CompletionDate { get; set; }
 }
 
-public class MathsAndEnglishUpdateDetails
+public class EnglishAndMathsUpdateDetails
 {
     public string Course { get; set; }
     public string LearnAimRef { get; set; }

@@ -128,6 +128,88 @@ public class WhenGettingShortCourseEarnings
     }
 
     [Test]
+    public async Task ThenCompletedLearningWithCompletionDateBeforeAcademicYearIsExcluded()
+    {
+        // Arrange
+        const long ukPrn = 1000;
+        const int collectionYear = 2425; // 2024-08-01 to 2025-07-31
+
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "111", FirstName = "A", LastName = "B" });
+
+        var learning = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            CompletionDate = new DateTime(2024, 7, 31), // completed before this A/Y
+            Episodes =
+            [
+                new ShortCourseEpisode
+                {
+                    Key = Guid.NewGuid(),
+                    Ukprn = ukPrn,
+                    TrainingCode = "ABC001",
+                    StartDate = new DateTime(2023, 8, 1),
+                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                }
+            ]
+        };
+        learning.LearnerKey = learnerKey;
+
+        _dbContext.ShortCourseLearnings.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        var query = new GetShortCoursesForEarningsRequest(ukPrn, collectionYear, 1, 20);
+
+        // Act
+        var result = await _sut.Handle(query);
+
+        // Assert
+        result.TotalItems.Should().Be(0);
+        result.Items.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task ThenCompletedLearningWithCompletionDateWithinAcademicYearIsIncluded()
+    {
+        // Arrange
+        const long ukPrn = 1000;
+        const int collectionYear = 2425; // 2024-08-01 to 2025-07-31
+
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "222", FirstName = "A", LastName = "B" });
+
+        var learning = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            CompletionDate = new DateTime(2025, 3, 15), // completed within this A/Y
+            Episodes =
+            [
+                new ShortCourseEpisode
+                {
+                    Key = Guid.NewGuid(),
+                    Ukprn = ukPrn,
+                    TrainingCode = "ABC002",
+                    StartDate = new DateTime(2024, 8, 1),
+                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                }
+            ]
+        };
+        learning.LearnerKey = learnerKey;
+
+        _dbContext.ShortCourseLearnings.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        var query = new GetShortCoursesForEarningsRequest(ukPrn, collectionYear, 1, 20);
+
+        // Act
+        var result = await _sut.Handle(query);
+
+        // Assert
+        result.TotalItems.Should().Be(1);
+        result.Items.Single().LearningKey.Should().Be(learning.Key);
+    }
+
+    [Test]
     public async Task ThenLearningsOutsideDateRangeAreExcluded()
     {
         // Arrange
@@ -147,9 +229,9 @@ public class WhenGettingShortCourseEarnings
                     Key = Guid.NewGuid(),
                     Ukprn = ukPrn,
                     TrainingCode = "OLD001",
-                    StartDate = new DateTime(2023, 1, 1),
+                    StartDate = new DateTime(2025, 8, 1), // starts after academic year ends
                     LearnerRef = "LRN123",
-                    ExpectedEndDate = new DateTime(2023, 12, 31) // ends before academic year starts
+                    ExpectedEndDate = new DateTime(2026, 7, 31)
                 }
             ]
         };

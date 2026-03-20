@@ -17,7 +17,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
-    public IReadOnlyCollection<MathsAndEnglishDomainModel> MathsAndEnglishCourses => new ReadOnlyCollection<MathsAndEnglishDomainModel>(_entity.MathsAndEnglishCourses.Select(MathsAndEnglishDomainModel.Get).ToList());
+    public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
     public DateTime StartDate
     {
         get
@@ -141,7 +141,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateLearningDetails(updateContext, changes);
 
-        UpdateMathsAndEnglishDetails(updateContext, changes);
+        UpdateEnglishAndMathsDetails(updateContext, changes);
 
         UpdateLearningSupport(updateContext, changes);
 
@@ -165,7 +165,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         latestEpisode.Withdraw(withdrawalDate);
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
-        _entity.MathsAndEnglishCourses.Clear();
+        _entity.EnglishAndMathsCourses.Clear();
     }
 
     public override void Approve(long employerAccountId)
@@ -182,16 +182,16 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdateMathsAndEnglishDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdateEnglishAndMathsDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
     {
         bool hasChanges = false;
         bool hasWithdrawalChanges = false;
         bool hasBreaksInLearningChanges = false;
 
-        var existingCourses = MathsAndEnglishCourses;
+        var existingCourses = EnglishAndMathsCourses;
         var courseKeysToKeep = new List<Guid>();
 
-        foreach (var incomingCourse in updateModel.MathsAndEnglishCourses)
+        foreach (var incomingCourse in updateModel.EnglishAndMathsCourses)
         {
             var existingCourse = existingCourses.SingleOrDefault(x => x.LearnAimRef.Trim() == incomingCourse.LearnAimRef.Trim());
 
@@ -205,28 +205,28 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             else
             {
                 hasChanges = true;
-                var newCourse = new MathsAndEnglishDomainModel(incomingCourse, _entity.Key);
-                _entity.MathsAndEnglishCourses.Add(newCourse.GetEntity());
+                var newCourse = new EnglishAndMathsDomainModel(incomingCourse, _entity.Key);
+                _entity.EnglishAndMathsCourses.Add(newCourse.GetEntity());
                 if (newCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
                 courseKeysToKeep.Add(newCourse.Key);
             }
         }
 
-        var coursesToRemove = _entity.MathsAndEnglishCourses
+        var coursesToRemove = _entity.EnglishAndMathsCourses
             .Where(existing => !courseKeysToKeep.Contains(existing.Key))
             .ToList();
 
         foreach (var removed in coursesToRemove)
         {
-            _entity.MathsAndEnglishCourses.Remove(removed);
+            _entity.EnglishAndMathsCourses.Remove(removed);
             hasChanges = true;
         }
 
         if (hasChanges)
-            changes.Add(LearningUpdateChanges.MathsAndEnglish);
+            changes.Add(LearningUpdateChanges.EnglishAndMaths);
 
         if (hasWithdrawalChanges)
-            changes.Add(LearningUpdateChanges.MathsAndEnglishWithdrawal);
+            changes.Add(LearningUpdateChanges.EnglishAndMathsWithdrawal);
 
         if (hasBreaksInLearningChanges)
             changes.Add(LearningUpdateChanges.EnglishAndMathsBreaksInLearningUpdated);

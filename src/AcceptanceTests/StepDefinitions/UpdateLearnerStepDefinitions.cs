@@ -7,7 +7,7 @@ using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.Types;
 using Cost = SFA.DAS.Learning.InnerApi.Requests.Apprenticeships.Cost;
-using MathsAndEnglishBreakInLearning = SFA.DAS.Learning.DataAccess.Entities.Learning.MathsAndEnglishBreakInLearning;
+using EnglishAndMathsBreakInLearning = SFA.DAS.Learning.DataAccess.Entities.Learning.EnglishAndMathsBreakInLearning;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -43,8 +43,8 @@ public class UpdateLearnerStepDefinitions
                 case "WithdrawalDate":
                     updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(valueString).DateTime;
                     break;
-                case "MathsAndEnglish":
-                    updateRequest.MathsAndEnglishCourses = GetMathsAndEnglishFromString(valueString);
+                case "EnglishAndMaths":
+                    updateRequest.EnglishAndMathsCourses = GetEnglishAndMathsFromString(valueString);
                     break;
                 case "LearningSupport":
                     updateRequest.LearningSupport = GetLearningSupportFromString(valueString);
@@ -165,13 +165,13 @@ public class UpdateLearnerStepDefinitions
         learning.Episodes.Single().PauseDate.Should().Be(pauseDate.DateTime);
     }
 
-    [Then(@"the following maths and english details are stored")]
-    public async Task ThenTheFollowingMathsAndEnglishDetailsAreStored(Table table)
+    [Then(@"the following English and Maths details are stored")]
+    public async Task ThenTheFollowingEnglishAndMathsDetailsAreStored(Table table)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
 
-        learning.MathsAndEnglishCourses.Should().HaveCount(table.Rows.Count, "the number of stored maths and english records should match the expected count");
+        learning.EnglishAndMathsCourses.Should().HaveCount(table.Rows.Count, "the number of stored English and Maths records should match the expected count");
 
         foreach (var row in table.Rows)
         {
@@ -181,7 +181,7 @@ public class UpdateLearnerStepDefinitions
 
             var breaksInLearning = GetBreakInLearningsFromTableRow(row);
 
-            var expectedMathsAndEnglish = new DataAccess.Entities.Learning.MathsAndEnglish
+            var expectedEnglishAndMaths = new DataAccess.Entities.Learning.EnglishAndMaths
             {
                 Course = row["Course"],
                 LearnAimRef = row["LearnAimRef"],
@@ -192,15 +192,15 @@ public class UpdateLearnerStepDefinitions
                 BreaksInLearning = breaksInLearning
             };
 
-            learning.MathsAndEnglishCourses
-                .Should().ContainEquivalentOf(expectedMathsAndEnglish, options => options
+            learning.EnglishAndMathsCourses
+                .Should().ContainEquivalentOf(expectedEnglishAndMaths, options => options
                     .Excluding(c => c.CompletionDate)
                     .Excluding(c => c.WithdrawalDate)
                     .Excluding(c => c.PriorLearningPercentage)
                     .Excluding(c => c.LearningKey)
                     .Excluding(c => c.Key)
                     .For(c=> c.BreaksInLearning).Exclude(x=>x.Key)
-                    .For(c => c.BreaksInLearning).Exclude(x => x.MathsAndEnglishKey)
+                    .For(c => c.BreaksInLearning).Exclude(x => x.EnglishAndMathsKey)
                     .Using<string>(ctx => ctx.Subject?.Trim().Should().Be(ctx.Expectation?.Trim()))
                     .WhenTypeIs<string>());
         }
@@ -317,10 +317,10 @@ public class UpdateLearnerStepDefinitions
             $"Failed to find published {nameof(PersonalDetailsChangedEvent)} event");
     }
 
-    private List<MathsAndEnglish> GetMathsAndEnglishFromString(string valueString)
+    private List<EnglishAndMaths> GetEnglishAndMathsFromString(string valueString)
     {
         var parsedValues = KeyValueParser.Parse(valueString);
-        var courses = new List<MathsAndEnglish>();
+        var courses = new List<EnglishAndMaths>();
 
         if (parsedValues.Any())
         {
@@ -345,7 +345,7 @@ public class UpdateLearnerStepDefinitions
                 });
             }
 
-            courses.Add(new MathsAndEnglish
+            courses.Add(new EnglishAndMaths
             {
                 Course = parsedValues.GetValueOrDefault("course", "maths"),
                 LearnAimRef = parsedValues.GetValueOrDefault("learnAimRef", "maths"),
@@ -433,13 +433,13 @@ public class UpdateLearnerStepDefinitions
         return careDetails;
     }
 
-    private List<MathsAndEnglishBreakInLearning> GetBreakInLearningsFromTableRow(TableRow row)
+    private List<EnglishAndMathsBreakInLearning> GetBreakInLearningsFromTableRow(TableRow row)
     {
-        var breaks = new List<MathsAndEnglishBreakInLearning>();
+        var breaks = new List<EnglishAndMathsBreakInLearning>();
 
         if (row.ContainsKey("BreakInLearningStart"))
         {
-            breaks.Add(new MathsAndEnglishBreakInLearning
+            breaks.Add(new EnglishAndMathsBreakInLearning
             {
                 StartDate = TokenisableDateTime.FromString(row["BreakInLearningStart"]).DateTime!.Value,
                 EndDate = TokenisableDateTime.FromString(row["BreakInLearningEnd"]).DateTime!.Value,

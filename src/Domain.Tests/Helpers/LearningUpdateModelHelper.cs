@@ -34,7 +34,7 @@ public static class LearningUpdateModelHelper
             {
                 CompletionDate = learning.CompletionDate
             },
-            MathsAndEnglishCourses = learning.MathsAndEnglishCourses.Select(x => new MathsAndEnglishUpdateDetails
+            EnglishAndMathsCourses = learning.EnglishAndMathsCourses.Select(x => new EnglishAndMathsUpdateDetails
             {
                 Course = x.Course,
                 LearnAimRef = x.LearnAimRef,
