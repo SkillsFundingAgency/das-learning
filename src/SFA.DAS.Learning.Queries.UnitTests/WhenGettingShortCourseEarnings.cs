@@ -125,6 +125,7 @@ public class WhenGettingShortCourseEarnings
         resultEpisode.CourseCode.Should().Be(episode.TrainingCode);
         resultEpisode.IsApproved.Should().Be(episode.IsApproved);
         resultEpisode.Price.Should().Be(episode.Price);
+        resultEpisode.LearnerRef.Should().Be(episode.LearnerRef);
     }
 
     [Test]
@@ -149,7 +150,8 @@ public class WhenGettingShortCourseEarnings
                     Ukprn = ukPrn,
                     TrainingCode = "ABC001",
                     StartDate = new DateTime(2023, 8, 1),
-                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                    ExpectedEndDate = new DateTime(2025, 7, 31),
+                    LearnerRef = string.Empty
                 }
             ]
         };
@@ -190,7 +192,8 @@ public class WhenGettingShortCourseEarnings
                     Ukprn = ukPrn,
                     TrainingCode = "ABC002",
                     StartDate = new DateTime(2024, 8, 1),
-                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                    ExpectedEndDate = new DateTime(2025, 7, 31),
+                    LearnerRef = string.Empty
                 }
             ]
         };
