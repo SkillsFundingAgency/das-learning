@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.IO.Hashing;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -53,6 +54,13 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         if (learning.Episodes.Any(x => x.IsApproved && x.Ukprn != command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An approved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
+            return new CreateDraftShortCourseCommandResult();
+        }
+
+        //Ignore if provider posts a short course when they already have an approved short course
+        if (learning.Episodes.Any(x => x.IsApproved && x.Ukprn == command.Model.OnProgramme.Ukprn))
+        {
+            _logger.LogWarning("An approved short course episode already exists with this provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
             return new CreateDraftShortCourseCommandResult();
         }
 
