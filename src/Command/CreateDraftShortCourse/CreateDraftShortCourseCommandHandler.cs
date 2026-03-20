@@ -41,7 +41,6 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         //  Create if learning does not exist
         if(learning == null)
         {
-
             learning = CreateNewLearning(command, learner);
 
             TransferEvents(learner, learning);
@@ -64,7 +63,14 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             return new CreateDraftShortCourseCommandResult();
         }
 
-        //  Update existing learning if no approved episode exists
+        //Ignore if we already have an unapproved short course with another provider
+        if(learning.Episodes.Any(x => !x.IsApproved && x.Ukprn != command.Model.OnProgramme.Ukprn))
+        {
+            _logger.LogWarning("An unapproved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
+            return new CreateDraftShortCourseCommandResult();
+        }
+
+        //  Update existing learning if same provider
         learning.Update(command.Model);
 
         TransferEvents(learner, learning);
