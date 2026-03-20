@@ -1,5 +1,4 @@
-﻿using Dapper;
-using Dapper.Contrib.Extensions;
+﻿using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -19,6 +18,7 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
 
         private string ShortCourseLearningKey = "ShortCourseLearningKey";
         private string ShortCourseEndpointResponseCodeKey = "ShortCourseEndpointResponseCode";
+        private string UpdateShortCourseResultKey = "UpdateShortCourseResult";
 
         public ShortCourseStepDefinitions(ScenarioContext scenarioContext, TestContext testContext)
         {
@@ -271,6 +271,59 @@ namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses
             var shortCourse = shortCourses.SingleOrDefault();
 
             return shortCourse != null;
+        }
+
+        [When(@"SLD calls the update short course endpoint with the following information")]
+        public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithTheFollowingInformation(Table table)
+        {
+            var row = table.Rows[0];
+            var request = GetDefaultShortCourse();
+
+            if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
+                request.OnProgramme.WithdrawalDate = parsedWithdrawalDate;
+
+            if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
+                request.OnProgramme.CompletionDate = parsedCompletionDate;
+
+            if (row.TryGetValue("Milestone", out var milestone) && Enum.TryParse<Milestone>(milestone, out var parsedMilestone))
+                request.OnProgramme.Milestones = new List<Milestone> { parsedMilestone };
+
+            await CallUpdateShortCourseEndpoint(request);
+        }
+
+        [When(@"SLD calls the update short course endpoint with no changes")]
+        public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
+        {
+            await CallUpdateShortCourseEndpoint(GetDefaultShortCourse());
+        }
+
+        [Then(@"the update short course response includes changes")]
+        public void ThenTheUpdateShortCourseResponseIncludesChanges(Table table)
+        {
+            var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
+            var expectedChanges = table.Rows.Select(r => r["Change"]).ToList();
+
+            result.Changes.Should().BeEquivalentTo(expectedChanges);
+        }
+
+        [Then(@"the update short course response includes no changes")]
+        public void ThenTheUpdateShortCourseResponseIncludesNoChanges()
+        {
+            var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
+            result.Changes.Should().BeEmpty();
+        }
+
+        private async Task CallUpdateShortCourseEndpoint(CreateDraftShortCourseRequest request)
+        {
+            var learningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+            var result = await _testContext.TestInnerApi.Put<CreateDraftShortCourseRequest, UpdateShortCourseTestResult>($"/shortCourses/{learningKey}", request);
+            _scenarioContext[UpdateShortCourseResultKey] = result;
+        }
+
+        private class UpdateShortCourseTestResult
+        {
+            public Guid LearningKey { get; set; }
+            public string[] Changes { get; set; } = [];
         }
 
         private static List<LearningSupportDetails> GetLearningSupportDetails(TableRow row)
