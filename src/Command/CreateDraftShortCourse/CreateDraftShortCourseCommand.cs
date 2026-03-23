@@ -11,3 +11,9 @@ public class CreateDraftShortCourseCommand : ICommand
 
     public ShortCourseUpdateContext Model { get; }
 }
+
+public class CreateDraftShortCourseResult
+{
+    public Guid? LearningKey { get; set; }
+    public Guid? EpisodeKey { get; set; }
+}

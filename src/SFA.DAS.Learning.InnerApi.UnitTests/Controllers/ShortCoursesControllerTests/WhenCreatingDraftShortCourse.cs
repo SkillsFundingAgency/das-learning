@@ -7,6 +7,7 @@ using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Controllers;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
+using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 
@@ -44,7 +45,8 @@ public class WhenCreatingDraftShortCourse
         // Arrange
         var request = _fixture.Create<CreateDraftShortCourseRequest>();
         var expectedLearningKey = _fixture.Create<Guid>();
-        var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey };
+        var expectedEpisodeKey = _fixture.Create<Guid>();
+        var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey };
 
         _mockCommandDispatcher
             .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
@@ -58,7 +60,7 @@ public class WhenCreatingDraftShortCourse
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
-        okResult.Value.Should().Be(expectedLearningKey);
+        okResult.Value.Should().BeEquivalentTo(new CreateShortCourseLearningResponse { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey });
 
         _mockCommandDispatcher.Verify(x =>
             x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(

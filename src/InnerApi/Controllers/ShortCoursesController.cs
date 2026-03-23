@@ -3,10 +3,11 @@ using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
+using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
-using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
+using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -99,7 +100,10 @@ public class ShortCoursesController : ControllerBase
         var result =
             await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(command);
 
-        return Ok(result.LearningKey);
+        if (result.LearningKey == null)
+            return NoContent();
+
+        return new OkObjectResult(new CreateShortCourseLearningResponse { LearningKey = result.LearningKey.Value, EpisodeKey = result.EpisodeKey!.Value });
     }
 
     /// <summary>

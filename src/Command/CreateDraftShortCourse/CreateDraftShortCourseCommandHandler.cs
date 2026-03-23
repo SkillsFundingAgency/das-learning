@@ -46,7 +46,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             TransferEvents(learner, learning);
             await _shortCourseLearningRepository.Add(learning);
 
-            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key };
+            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisode.Key};
         }
 
         //  Ignore if we have an approved episode with another provider
@@ -76,7 +76,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
-        return new CreateDraftShortCourseCommandResult() { LearningKey = learning.Key };
+        return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisode.Key };
     }
 
     private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)

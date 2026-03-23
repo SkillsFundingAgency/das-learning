@@ -10,6 +10,7 @@ using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SFA.DAS.Learning.Command.UnitTests.CreateDraftShortCourse;
@@ -49,9 +50,12 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     {
         // Arrange
         var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learningEntity = _fixture.Create<ShortCourseLearning>();
+        learningEntity.Episodes = new List<ShortCourseEpisode>();
+
 
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
-        var domainModel = _fixture.Create<ShortCourseLearningDomainModel>();
+        var domainModel = ShortCourseLearningDomainModel.Get(learningEntity);
 
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(),It.IsAny<DateTime>(),It.IsAny<string>(),It.IsAny<string>(), It.IsAny<string?>())).Returns(learnerDomainModel);
         _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), command.Model.OnProgramme.CompletionDate)).Returns(domainModel);
