@@ -46,7 +46,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             TransferEvents(learner, learning);
             await _shortCourseLearningRepository.Add(learning);
 
-            return new CreateDraftShortCourseResult() { LearningKey = learning.Key, ResultType = CreateDraftShortCourseResultTypes.Success };
+            return new CreateDraftShortCourseResult() { LearningKey = learning.Key, EpisodeKey = learning.Episodes.Single().Key, ResultType = CreateDraftShortCourseResultTypes.Success };
         }
 
         //  Do nothing and return ApprovedAlreadyExists if an approved episode already exists
@@ -62,7 +62,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
-        return new CreateDraftShortCourseResult() { LearningKey = learning.Key, ResultType = CreateDraftShortCourseResultTypes.Success };
+        return new CreateDraftShortCourseResult() { LearningKey = learning.Key, EpisodeKey = learning.Episodes.Single().Key, ResultType = CreateDraftShortCourseResultTypes.Success };
 
     }
 
