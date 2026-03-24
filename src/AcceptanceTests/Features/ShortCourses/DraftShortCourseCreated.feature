@@ -29,15 +29,15 @@ Scenario: Approve Short Course
 	When the Short Course has been approved by an employer
 	Then the Short Course is approved
 
-Scenario: Create Draft is called for a learner with an approved short course (Nothing should happen)
+Scenario: Create Draft is called for a learner with an approved short course (should be ignored)
 	Given SLD call the create short course endpoint with the following information
-		| Uln   |
-		| 54321 |
+		| Uln   | Ukprn |
+		| 54321 |     1 |
 	And short course is approved
 	And SLD call the create short course endpoint with the following information
-		| Uln   |
-		| 54321 |
-	Then the response from the create short course endpoint is 409
+		| Uln   | Ukprn |
+		| 54321 |     2 |
+	Then the response from the create short course endpoint is 204
 	And for learner with Uln 54321 there is 1 short course record
 
 Scenario: Create Draft is called for a learner with an unapproved short course (unapproved record is updated)

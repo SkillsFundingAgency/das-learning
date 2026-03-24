@@ -46,10 +46,10 @@ public class WhenCreatingDraftShortCourse
         var request = _fixture.Create<CreateDraftShortCourseRequest>();
         var expectedLearningKey = _fixture.Create<Guid>();
         var expectedEpisodeKey = _fixture.Create<Guid>();
-        var commandResult = new CreateDraftShortCourseResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, ResultType = CreateDraftShortCourseResultTypes.Success };
+        var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey };
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseResult>(
+            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
                 It.IsAny<CreateDraftShortCourseCommand>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(commandResult);
@@ -63,34 +63,12 @@ public class WhenCreatingDraftShortCourse
         okResult.Value.Should().BeEquivalentTo(new CreateShortCourseLearningResponse { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey });
 
         _mockCommandDispatcher.Verify(x =>
-            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseResult>(
+            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
                 It.Is<CreateDraftShortCourseCommand>(c =>
                     c.Model.Learner.EmailAddress == request.LearnerUpdateDetails.EmailAddress &&
                     c.Model.OnProgramme.CourseCode == request.OnProgramme.CourseCode
                 ),
                 It.IsAny<CancellationToken>()),
             Times.Once);
-    }
-
-    [Test]
-    public async Task ThenReturnsConflictResultIfApprovedAlreadyExists()
-    {
-        // Arrange
-        var request = _fixture.Create<CreateDraftShortCourseRequest>();
-        var expectedLearningKey = _fixture.Create<Guid>();
-        var commandResult = new CreateDraftShortCourseResult { LearningKey = expectedLearningKey, ResultType = CreateDraftShortCourseResultTypes.ApprovedAlreadyExists };
-
-        _mockCommandDispatcher
-            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseResult>(
-                It.IsAny<CreateDraftShortCourseCommand>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(commandResult);
-
-        // Act
-        var result = await _sut.CreateDraftShortCourse(request);
-
-        // Assert
-        result.Should().BeOfType<ConflictResult>();
-
     }
 }
