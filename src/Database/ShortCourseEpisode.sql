@@ -10,7 +10,8 @@
     [TrainingCode] VARCHAR(8) NOT NULL,
     [IsApproved] BIT NOT NULL DEFAULT 0,
     [Price] MONEY NOT NULL DEFAULT 0,
-    [LearnerRef] VARCHAR(128) NOT NULL DEFAULT ''
+    [LearnerRef] VARCHAR(128) NOT NULL DEFAULT '',
+    [LearningType] TINYINT NOT NULL DEFAULT 0
 )
 GO
 

@@ -174,7 +174,31 @@ public class WhenUpdatingShortCourseEpisode
         episode.LearningSupport.Should().Contain(ls => ls.Key == originalLearningSupportKey);
     }
 
-    private static ShortCourseEpisodeDomainModel CreateEpisode()
+    [Test]
+    public void Update_Should_Update_LearningType_When_Not_Approved()
+    {
+        var episode = ShortCourseEpisodeDomainModel.New(
+            Guid.NewGuid(), 11111111, 123, "CODE", "LEARNER1",
+            isApproved: false,
+            DateTime.Today, DateTime.Today.AddMonths(3), null,
+            learningType: LearningType.Apprenticeship);
+
+        episode.Update(CreateUpdateContext(milestones: new List<Milestone>(), learningType: LearningType.ApprenticeshipUnit));
+
+        episode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
+    }
+
+    [Test]
+    public void Update_Should_Not_Change_LearningType_When_Approved()
+    {
+        var episode = CreateEpisode(learningType: LearningType.ApprenticeshipUnit);
+
+        episode.Update(CreateUpdateContext(milestones: new List<Milestone>()));
+
+        episode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
+    }
+
+    private static ShortCourseEpisodeDomainModel CreateEpisode(LearningType learningType = LearningType.Apprenticeship)
     {
         return ShortCourseEpisodeDomainModel.New(
             Guid.NewGuid(),
@@ -185,12 +209,14 @@ public class WhenUpdatingShortCourseEpisode
             true,
             DateTime.Today,
             DateTime.Today.AddMonths(3),
-            null);
+            null,
+            learningType: learningType);
     }
 
     private static ShortCourseUpdateContext CreateUpdateContext(
         List<Milestone> milestones,
-        List<LearningSupportDetails>? learningSupport = null)
+        List<LearningSupportDetails>? learningSupport = null,
+        LearningType learningType = LearningType.Apprenticeship)
     {
         return new ShortCourseUpdateContext
         {
@@ -202,7 +228,8 @@ public class WhenUpdatingShortCourseEpisode
                 StartDate = DateTime.Today,
                 ExpectedEndDate = DateTime.Today.AddMonths(3),
                 WithdrawalDate = null,
-                Milestones = milestones
+                Milestones = milestones,
+                LearningType = learningType
             },
             LearningSupport = learningSupport ?? new List<LearningSupportDetails>()
         };

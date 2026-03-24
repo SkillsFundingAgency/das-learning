@@ -77,6 +77,11 @@ public class OnProgramme
     /// Price of the short course
     /// </summary>
     public decimal Price { get; set; }
+
+    /// <summary>
+    /// Learning type of the short course
+    /// </summary>
+    public LearningType LearningType { get; set; }
 }
 
 /// <summary>
@@ -118,7 +123,8 @@ public static class CreateDraftShortCourseRequestExtensions
                 CompletionDate = request.OnProgramme.CompletionDate,
                 ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
                 Milestones = request.OnProgramme.Milestones ?? new List<Milestone>(),
-                Price = request.OnProgramme.Price
+                Price = request.OnProgramme.Price,
+                LearningType = request.OnProgramme.LearningType
             }
         };
     }

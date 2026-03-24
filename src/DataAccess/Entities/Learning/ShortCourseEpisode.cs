@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
+﻿using SFA.DAS.Learning.Enums;
+
+namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
 #pragma warning disable CS8618
 
@@ -18,6 +20,7 @@ public class ShortCourseEpisode : Episode
     public bool IsApproved { get; set; }
     public decimal Price { get; set; }
     public string LearnerRef { get; set; }
+    public LearningType LearningType { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
     public List<ShortCourseLearningSupport> LearningSupport { get; set; }
