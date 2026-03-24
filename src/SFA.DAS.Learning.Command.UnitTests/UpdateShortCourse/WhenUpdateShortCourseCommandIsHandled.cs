@@ -77,6 +77,21 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenLearnerRefChangeIsDetected()
+    {
+        var learningKey = Guid.NewGuid();
+        var learning = CreateDomainModel(learningKey);
+
+        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext(learnerRef:"LearnerRefChanged"));
+
+        var result = await _commandHandler.Handle(command);
+
+        result.Changes.Should().Contain(ShortCourseUpdateChanges.LearnerRef);
+    }
+
+    [Test]
     public async Task ThenNoChangesReturnedWhenNothingChanged()
     {
         var learningKey = Guid.NewGuid();
@@ -116,6 +131,7 @@ public class WhenUpdateShortCourseCommandIsHandled
             Ukprn = 12345678,
             EmployerAccountId = 1,
             TrainingCode = "TEST01",
+            LearnerRef = "LEARNER1",
             IsApproved = false,
             StartDate = DateTime.Today.AddMonths(-1),
             ExpectedEndDate = DateTime.Today.AddMonths(6),
@@ -139,10 +155,15 @@ public class WhenUpdateShortCourseCommandIsHandled
         return ShortCourseLearningDomainModel.Get(entity);
     }
 
-    private static ShortCourseUpdateContext CreateUpdateContext(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null)
+    private static ShortCourseUpdateContext CreateUpdateContext(
+        DateTime? withdrawalDate = null, 
+        List<Milestone>? milestones = null, 
+        DateTime? completionDate = null,
+        string learnerRef = "LEARNER1")
     {
         return new ShortCourseUpdateContext
         {
+            LearnerRef = learnerRef,
             Learner = new LearnerModel { Uln = "1234567890", FirstName = "Test", LastName = "User", DateOfBirth = DateTime.Today.AddYears(-20) },
             LearningSupport = new List<Models.UpdateModels.Shared.LearningSupportDetails>(),
             OnProgramme = new Models.UpdateModels.OnProgramme

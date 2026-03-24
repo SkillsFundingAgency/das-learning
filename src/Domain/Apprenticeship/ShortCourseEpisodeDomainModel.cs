@@ -14,6 +14,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
 
     public override Guid Key => _entity.Key;
     public Guid LearningKey => _entity.LearningKey;
+    public string LearnerRef => _entity.LearnerRef;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
     public string TrainingCode => _entity.TrainingCode;
@@ -32,6 +33,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         long ukprn,
         long employerAccountId,
         string trainingCode,
+        string learnerRef,
         bool isApproved,
         DateTime startDate,
         DateTime expectedEndDate,
@@ -45,6 +47,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
             TrainingCode = trainingCode,
+            LearnerRef = learnerRef,
             IsApproved = isApproved,
             StartDate = startDate,
             ExpectedEndDate = expectedEndDate,
@@ -94,6 +97,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
         _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
         _entity.Price = updateContext.OnProgramme.Price;
+        _entity.LearnerRef = updateContext.LearnerRef;
 
         UpdateMilestones(updateContext.OnProgramme.Milestones);
         UpdateLearningSupport(updateContext.LearningSupport);

@@ -7,5 +7,6 @@ public enum ShortCourseUpdateChanges
 {
     WithdrawalDate = 0,
     Milestone = 1,
-    CompletionDate = 2
+    CompletionDate = 2,
+    LearnerRef = 3
 }

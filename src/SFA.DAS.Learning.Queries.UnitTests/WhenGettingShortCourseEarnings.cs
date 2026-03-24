@@ -57,7 +57,8 @@ public class WhenGettingShortCourseEarnings
                     IsApproved = true,
                     Price = 1500m,
                     StartDate = new DateTime(2024, 8, 1),
-                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                    ExpectedEndDate = new DateTime(2025, 7, 31),
+                    LearnerRef = "LRN123"
                 }
             ]
         };
@@ -104,7 +105,8 @@ public class WhenGettingShortCourseEarnings
             IsApproved = false,
             Price = 750m,
             StartDate = new DateTime(2024, 8, 1),
-            ExpectedEndDate = new DateTime(2025, 7, 31)
+            ExpectedEndDate = new DateTime(2025, 7, 31),
+            LearnerRef = "LRN123"
         };
 
         var learning = new ShortCourseLearning { Key = Guid.NewGuid(), Episodes = [episode] };
@@ -123,6 +125,7 @@ public class WhenGettingShortCourseEarnings
         resultEpisode.CourseCode.Should().Be(episode.TrainingCode);
         resultEpisode.IsApproved.Should().Be(episode.IsApproved);
         resultEpisode.Price.Should().Be(episode.Price);
+        resultEpisode.LearnerRef.Should().Be(episode.LearnerRef);
     }
 
     [Test]
@@ -147,7 +150,8 @@ public class WhenGettingShortCourseEarnings
                     Ukprn = ukPrn,
                     TrainingCode = "ABC001",
                     StartDate = new DateTime(2023, 8, 1),
-                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                    ExpectedEndDate = new DateTime(2025, 7, 31),
+                    LearnerRef = string.Empty
                 }
             ]
         };
@@ -188,7 +192,8 @@ public class WhenGettingShortCourseEarnings
                     Ukprn = ukPrn,
                     TrainingCode = "ABC002",
                     StartDate = new DateTime(2024, 8, 1),
-                    ExpectedEndDate = new DateTime(2025, 7, 31)
+                    ExpectedEndDate = new DateTime(2025, 7, 31),
+                    LearnerRef = string.Empty
                 }
             ]
         };
@@ -228,6 +233,7 @@ public class WhenGettingShortCourseEarnings
                     Ukprn = ukPrn,
                     TrainingCode = "OLD001",
                     StartDate = new DateTime(2025, 8, 1), // starts after academic year ends
+                    LearnerRef = "LRN123",
                     ExpectedEndDate = new DateTime(2026, 7, 31)
                 }
             ]

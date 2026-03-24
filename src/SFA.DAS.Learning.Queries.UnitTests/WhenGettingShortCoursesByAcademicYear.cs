@@ -147,7 +147,8 @@ public class WhenGettingShortCoursesByAcademicYear
             StartDate = startDate,
             ExpectedEndDate = expectedEndDate,
             WithdrawalDate = withdrawalDate,
-            Price = 1000m
+            Price = 1000m,
+            LearnerRef = "LRN123"
         });
         _dbContext.ShortCourseLearnings.Add(learning);
 

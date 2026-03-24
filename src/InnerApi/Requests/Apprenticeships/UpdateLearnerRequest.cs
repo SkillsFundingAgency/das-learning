@@ -71,7 +71,10 @@ public class ApprenticeshipLearnerUpdateDetails : LearnerUpdateDetails
 /// </summary>
 public class ShortCourseLearnerUpdateDetails : LearnerUpdateDetails
 {
+    /// <summary> Uln</summary>
     public long Uln { get; set; }
+    /// <summary> Learner Reference </summary>
+    public string LearnerRef { get; set; }
 }
 
 /// <summary>
