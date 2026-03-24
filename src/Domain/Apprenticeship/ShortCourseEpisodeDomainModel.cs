@@ -93,17 +93,19 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
 
     public void Update(ShortCourseUpdateContext updateContext)
     {
-        _entity.Ukprn = updateContext.OnProgramme.Ukprn;
-        _entity.EmployerAccountId = updateContext.OnProgramme.EmployerId;
-        _entity.TrainingCode = updateContext.OnProgramme.CourseCode;
-        _entity.StartDate = updateContext.OnProgramme.StartDate;
-        _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
-        _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
-        _entity.Price = updateContext.OnProgramme.Price;
-        _entity.LearnerRef = updateContext.LearnerRef;
-
         if (!_entity.IsApproved)
+        {
+            _entity.Ukprn = updateContext.OnProgramme.Ukprn;
+            _entity.EmployerAccountId = updateContext.OnProgramme.EmployerId;
+            _entity.TrainingCode = updateContext.OnProgramme.CourseCode;
+            _entity.StartDate = updateContext.OnProgramme.StartDate;
+            _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
+            _entity.Price = updateContext.OnProgramme.Price;
             _entity.LearningType = updateContext.OnProgramme.LearningType;
+        }
+
+        _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
+        _entity.LearnerRef = updateContext.LearnerRef;
 
         UpdateMilestones(updateContext.OnProgramme.Milestones);
         UpdateLearningSupport(updateContext.LearningSupport);

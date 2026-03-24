@@ -14,24 +14,22 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 public class WhenUpdatingShortCourseEpisode
 {
     [Test]
-    public void Update_Should_Update_OnProgramme_Fields()
+    public void Update_Should_Update_All_Fields_When_Not_Approved()
     {
-        // Arrange
-        var learningKey = Guid.NewGuid();
-
         var episode = ShortCourseEpisodeDomainModel.New(
-            learningKey,
+            Guid.NewGuid(),
             ukprn: 11111111,
             employerAccountId: 123,
             trainingCode: "OLD",
             learnerRef: "LEARNER1",
-            isApproved: true,
+            isApproved: false,
             startDate: new DateTime(2024, 1, 1),
             expectedEndDate: new DateTime(2024, 6, 1),
             withdrawalDate: null);
 
         var updateContext = new ShortCourseUpdateContext
         {
+            LearnerRef = "LEARNER2",
             OnProgramme = new OnProgramme
             {
                 Ukprn = 99999999,
@@ -40,20 +38,73 @@ public class WhenUpdatingShortCourseEpisode
                 StartDate = new DateTime(2025, 1, 1),
                 ExpectedEndDate = new DateTime(2025, 12, 1),
                 WithdrawalDate = new DateTime(2025, 6, 1),
+                Price = 2000,
+                LearningType = LearningType.ApprenticeshipUnit,
                 Milestones = new List<Milestone>()
             },
             LearningSupport = new List<LearningSupportDetails>()
         };
 
-        // Act
         episode.Update(updateContext);
 
-        // Assert
         episode.Ukprn.Should().Be(99999999);
         episode.EmployerAccountId.Should().Be(456);
         episode.TrainingCode.Should().Be("NEW");
+        episode.StartDate.Should().Be(new DateTime(2025, 1, 1));
         episode.ExpectedEndDate.Should().Be(new DateTime(2025, 12, 1));
         episode.WithdrawalDate.Should().Be(new DateTime(2025, 6, 1));
+        episode.Price.Should().Be(2000);
+        episode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
+        episode.LearnerRef.Should().Be("LEARNER2");
+    }
+
+    [Test]
+    public void Update_Should_Only_Update_Permitted_Fields_When_Approved()
+    {
+        var episode = ShortCourseEpisodeDomainModel.New(
+            Guid.NewGuid(),
+            ukprn: 11111111,
+            employerAccountId: 123,
+            trainingCode: "OLD",
+            learnerRef: "LEARNER1",
+            isApproved: true,
+            startDate: new DateTime(2024, 1, 1),
+            expectedEndDate: new DateTime(2024, 6, 1),
+            withdrawalDate: null,
+            price: 1000,
+            learningType: LearningType.Apprenticeship);
+
+        var updateContext = new ShortCourseUpdateContext
+        {
+            LearnerRef = "LEARNER2",
+            OnProgramme = new OnProgramme
+            {
+                Ukprn = 99999999,
+                EmployerId = 456,
+                CourseCode = "NEW",
+                StartDate = new DateTime(2025, 1, 1),
+                ExpectedEndDate = new DateTime(2025, 12, 1),
+                WithdrawalDate = new DateTime(2025, 6, 1),
+                Price = 2000,
+                LearningType = LearningType.ApprenticeshipUnit,
+                Milestones = new List<Milestone>()
+            },
+            LearningSupport = new List<LearningSupportDetails>()
+        };
+
+        episode.Update(updateContext);
+
+        // Restricted — unchanged
+        episode.Ukprn.Should().Be(11111111);
+        episode.EmployerAccountId.Should().Be(123);
+        episode.TrainingCode.Should().Be("OLD");
+        episode.StartDate.Should().Be(new DateTime(2024, 1, 1));
+        episode.ExpectedEndDate.Should().Be(new DateTime(2024, 6, 1));
+        episode.Price.Should().Be(1000);
+        episode.LearningType.Should().Be(LearningType.Apprenticeship);
+        // Permitted — updated
+        episode.WithdrawalDate.Should().Be(new DateTime(2025, 6, 1));
+        episode.LearnerRef.Should().Be("LEARNER2");
     }
 
     [Test]
@@ -174,31 +225,7 @@ public class WhenUpdatingShortCourseEpisode
         episode.LearningSupport.Should().Contain(ls => ls.Key == originalLearningSupportKey);
     }
 
-    [Test]
-    public void Update_Should_Update_LearningType_When_Not_Approved()
-    {
-        var episode = ShortCourseEpisodeDomainModel.New(
-            Guid.NewGuid(), 11111111, 123, "CODE", "LEARNER1",
-            isApproved: false,
-            DateTime.Today, DateTime.Today.AddMonths(3), null,
-            learningType: LearningType.Apprenticeship);
-
-        episode.Update(CreateUpdateContext(milestones: new List<Milestone>(), learningType: LearningType.ApprenticeshipUnit));
-
-        episode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
-    }
-
-    [Test]
-    public void Update_Should_Not_Change_LearningType_When_Approved()
-    {
-        var episode = CreateEpisode(learningType: LearningType.ApprenticeshipUnit);
-
-        episode.Update(CreateUpdateContext(milestones: new List<Milestone>()));
-
-        episode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
-    }
-
-    private static ShortCourseEpisodeDomainModel CreateEpisode(LearningType learningType = LearningType.Apprenticeship)
+private static ShortCourseEpisodeDomainModel CreateEpisode(LearningType learningType = LearningType.Apprenticeship)
     {
         return ShortCourseEpisodeDomainModel.New(
             Guid.NewGuid(),
