@@ -67,4 +67,92 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == domainModel)));
         result.LearningKey.Should().Be(domainModel.Key);
     }
+
+    [Test]
+    public async Task ThenShortCircuitsIfApprovedEpisodeExistsWithAnotherProvider()
+    {
+        // Arrange
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = _fixture.Create<LearnerDomainModel>();
+
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn + 1);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.LearningKey.Should().BeNull();
+        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ThenShortCircuitsIfApprovedEpisodeExistsWithSameProvider()
+    {
+        // Arrange
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = _fixture.Create<LearnerDomainModel>();
+
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.LearningKey.Should().BeNull();
+        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ThenShortCircuitsIfUnapprovedEpisodeExistsWithAnotherProvider()
+    {
+        // Arrange
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = _fixture.Create<LearnerDomainModel>();
+
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn + 1);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.LearningKey.Should().BeNull();
+        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn)
+    {
+        var learningKey = Guid.NewGuid();
+        var entity = new ShortCourseLearning
+        {
+            Key = learningKey,
+            LearnerKey = Guid.NewGuid(),
+            Episodes = new List<ShortCourseEpisode>
+            {
+                new ShortCourseEpisode
+                {
+                    Key = Guid.NewGuid(),
+                    LearningKey = learningKey,
+                    Ukprn = ukprn,
+                    EmployerAccountId = _fixture.Create<long>(),
+                    TrainingCode = _fixture.Create<string>(),
+                    IsApproved = isApproved,
+                    StartDate = _fixture.Create<DateTime>(),
+                    ExpectedEndDate = _fixture.Create<DateTime>()
+                }
+            }
+        };
+        return ShortCourseLearningDomainModel.Get(entity);
+    }
 }

@@ -16,11 +16,4 @@ public class CreateDraftShortCourseResult
 {
     public Guid? LearningKey { get; set; }
     public Guid? EpisodeKey { get; set; }
-    public CreateDraftShortCourseResultTypes ResultType { get; set; }
-}
-
-public enum CreateDraftShortCourseResultTypes
-{
-    Success,
-    ApprovedAlreadyExists
 }

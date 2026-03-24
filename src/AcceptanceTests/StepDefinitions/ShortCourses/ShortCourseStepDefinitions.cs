@@ -1,4 +1,4 @@
-﻿using Dapper.Contrib.Extensions;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
@@ -55,6 +55,9 @@ public class ShortCourseStepDefinitions
     {
         var request = GetDefaultShortCourse();
         request.OnProgramme.WithdrawalDate = null;
+
+        if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
+            request.OnProgramme.Ukprn = parsedUkprn;
 
         if (row.TryGetValue("FirstName", out var firstName))
             request.LearnerUpdateDetails.FirstName = firstName;
@@ -173,7 +176,7 @@ public class ShortCourseStepDefinitions
 
         shortCourseLearnings.Count().Should().Be(numberOfRecords);
     }
-    
+
     [When("SLD requests short courses for earnings for collection year (.*)")]
     public async Task WhenSLDRequestsShortCoursesForEarningsForCollectionYear(int collectionYear)
     {
@@ -257,7 +260,7 @@ public class ShortCourseStepDefinitions
     private async Task<Guid> CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
         (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateShortCourseLearningResponse?>($"/shortCourses", request);
-        
+
         var learningKey = responseBody?.LearningKey ?? Guid.Empty;
 
         _scenarioContext[ShortCourseLearningKey] = learningKey;
