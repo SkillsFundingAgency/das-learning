@@ -8,6 +8,7 @@ using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,6 +67,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         // Assert
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == domainModel)));
         result.LearningKey.Should().Be(domainModel.Key);
+        domainModel.LatestEpisode.LearningType.Should().Be(command.Model.OnProgramme.LearningType);
     }
 
     [Test]
@@ -131,7 +133,27 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
-    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn)
+    [Test]
+    public async Task ThenLearningTypeIsUpdatedWhenUpdatingExistingLearning()
+    {
+        // Arrange
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn, learningType: LearningType.Apprenticeship);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        existingLearning.LatestEpisode.LearningType.Should().Be(command.Model.OnProgramme.LearningType);
+        _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
+    }
+
+    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship)
     {
         var learningKey = Guid.NewGuid();
         var entity = new ShortCourseLearning
@@ -147,9 +169,13 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                     Ukprn = ukprn,
                     EmployerAccountId = _fixture.Create<long>(),
                     TrainingCode = _fixture.Create<string>(),
+                    LearnerRef = _fixture.Create<string>(),
                     IsApproved = isApproved,
                     StartDate = _fixture.Create<DateTime>(),
-                    ExpectedEndDate = _fixture.Create<DateTime>()
+                    ExpectedEndDate = _fixture.Create<DateTime>(),
+                    LearningType = learningType,
+                    Milestones = new List<ShortCourseMilestone>(),
+                    LearningSupport = new List<ShortCourseLearningSupport>()
                 }
             }
         };

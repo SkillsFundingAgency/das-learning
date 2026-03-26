@@ -23,5 +23,6 @@ public class OnProgramme
     public DateTime ExpectedEndDate { get; init; }
     public List<Milestone> Milestones { get; set; }
     public decimal Price { get; init; }
+    public LearningType LearningType { get; init; }
 }
 #pragma warning restore CS8618

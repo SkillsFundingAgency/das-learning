@@ -46,7 +46,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         DateTime expectedEndDate,
         DateTime? withdrawalDate,
         IEnumerable<Milestone> milestones,
-        decimal price = 0)
+        decimal price = 0,
+        LearningType learningType = LearningType.Apprenticeship)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
             _entity.Key,
@@ -58,7 +59,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             startDate,
             expectedEndDate,
             withdrawalDate,
-            price
+            price,
+            learningType
         );
 
         foreach (var milestone in milestones)
@@ -103,7 +105,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         if (!episode.Milestones.Select(m => m.Milestone).ToHashSet().SetEquals(prevMilestones))
             changes.Add(ShortCourseUpdateChanges.Milestone);
 
-        if(!episode.LearnerRef.Equals(prevLearnerRef, StringComparison.OrdinalIgnoreCase))
+        if (!episode.LearnerRef.Equals(prevLearnerRef, StringComparison.OrdinalIgnoreCase))
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
     }
 

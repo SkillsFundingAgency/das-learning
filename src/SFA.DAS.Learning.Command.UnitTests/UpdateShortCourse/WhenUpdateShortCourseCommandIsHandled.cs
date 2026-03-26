@@ -109,6 +109,21 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenLearningTypeIsNotChangedByPut()
+    {
+        var learningKey = Guid.NewGuid();
+        var learning = CreateDomainModel(learningKey, isApproved: true, learningType: LearningType.ApprenticeshipUnit);
+
+        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext());
+
+        await _commandHandler.Handle(command);
+
+        learning.LatestEpisode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
+    }
+
+    [Test]
     public async Task ThenKeyNotFoundExceptionThrownWhenLearningNotFound()
     {
         var learningKey = Guid.NewGuid();
@@ -121,7 +136,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
-    private static ShortCourseLearningDomainModel CreateDomainModel(Guid learningKey, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null)
+    private static ShortCourseLearningDomainModel CreateDomainModel(Guid learningKey, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship)
     {
         var episodeKey = Guid.NewGuid();
         var episode = new ShortCourseEpisode
@@ -132,11 +147,12 @@ public class WhenUpdateShortCourseCommandIsHandled
             EmployerAccountId = 1,
             TrainingCode = "TEST01",
             LearnerRef = "LEARNER1",
-            IsApproved = false,
+            IsApproved = isApproved,
             StartDate = DateTime.Today.AddMonths(-1),
             ExpectedEndDate = DateTime.Today.AddMonths(6),
             WithdrawalDate = withdrawalDate,
             Price = 1000,
+            LearningType = learningType,
             Milestones = new List<ShortCourseMilestone>()
         };
 
