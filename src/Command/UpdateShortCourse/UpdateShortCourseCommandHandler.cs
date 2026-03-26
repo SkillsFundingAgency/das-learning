@@ -39,6 +39,7 @@ public class UpdateShortCourseCommandHandler(
             Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new UpdateShortCourseResultEpisode
             {
                 Ukprn = e.Ukprn,
+                EmployerAccountId = e.EmployerAccountId,
                 CourseCode = e.TrainingCode,
                 CourseType = CourseTypeConstants.ShortCourse,
                 LearningType = e.LearningType,

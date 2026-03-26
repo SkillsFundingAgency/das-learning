@@ -34,6 +34,7 @@ public class UpdateShortCourseResultLearner
 public class UpdateShortCourseResultEpisode
 {
     public long Ukprn { get; set; }
+    public long EmployerAccountId { get; set; }
     public string CourseCode { get; set; } = null!;
     public string CourseType { get; set; } = null!;
     public LearningType LearningType { get; set; }
