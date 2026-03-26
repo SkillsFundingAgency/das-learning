@@ -43,7 +43,7 @@ public class UpdateShortCourseCommandHandler(
                 EmployerAccountId = e.EmployerAccountId,
                 CourseCode = e.TrainingCode,
                 CourseType = CourseTypeConstants.ShortCourse,
-                LearningType = e.LearningType,
+                LearningType = e.LearningType.ToString(),
                 StartDate = e.StartDate,
                 AgeAtStart = learner.AgeOnDate(e.StartDate),
                 PlannedEndDate = e.ExpectedEndDate,

@@ -38,7 +38,7 @@ public class UpdateShortCourseResultEpisode
     public long EmployerAccountId { get; set; }
     public string CourseCode { get; set; } = null!;
     public string CourseType { get; set; } = null!;
-    public LearningType LearningType { get; set; }
+    public string LearningType { get; set; }
     public DateTime StartDate { get; set; }
     public int AgeAtStart { get; set; }
     public DateTime PlannedEndDate { get; set; }
