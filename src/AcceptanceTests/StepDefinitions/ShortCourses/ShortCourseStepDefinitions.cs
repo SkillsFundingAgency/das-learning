@@ -319,6 +319,13 @@ public class ShortCourseStepDefinitions
         result.Changes.Should().BeEmpty();
     }
 
+    [Then(@"the update short course response has a completion date of (.*)")]
+    public void ThenTheUpdateShortCourseResponseHasACompletionDateOf(DateTime completionDate)
+    {
+        var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
+        result.CompletionDate.Should().Be(completionDate);
+    }
+
     [Then(@"the update short course response includes the following learner details")]
     public void ThenTheUpdateShortCourseResponseIncludesTheFollowingLearnerDetails(Table table)
     {
@@ -361,6 +368,9 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("IsApproved", out var isApproved) && bool.TryParse(isApproved, out var parsedIsApproved))
             episode.IsApproved.Should().Be(parsedIsApproved);
 
+        if (row.TryGetValue("Price", out var price) && decimal.TryParse(price, out var parsedPrice))
+            episode.Price.Should().Be(parsedPrice);
+
         if (row.TryGetValue("AgeAtStart", out var ageAtStart) && int.TryParse(ageAtStart, out var parsedAgeAtStart))
             episode.AgeAtStart.Should().Be(parsedAgeAtStart);
     }
@@ -375,6 +385,7 @@ public class ShortCourseStepDefinitions
     private class UpdateShortCourseTestResult
     {
         public Guid LearningKey { get; set; }
+        public DateTime? CompletionDate { get; set; }
         public string[] Changes { get; set; } = [];
         public UpdateShortCourseTestResultLearner Learner { get; set; } = null!;
         public UpdateShortCourseTestResultEpisode[] Episodes { get; set; } = [];
@@ -394,6 +405,7 @@ public class ShortCourseStepDefinitions
         public string CourseCode { get; set; } = null!;
         public string CourseType { get; set; } = null!;
         public bool IsApproved { get; set; }
+        public decimal Price { get; set; }
         public int AgeAtStart { get; set; }
     }
 

@@ -28,6 +28,7 @@ public class UpdateShortCourseCommandHandler(
         return new UpdateShortCourseResult
         {
             LearningKey = learning.Key,
+            CompletionDate = learning.CompletionDate,
             Changes = changes,
             Learner = new UpdateShortCourseResultLearner
             {
@@ -48,6 +49,7 @@ public class UpdateShortCourseCommandHandler(
                 PlannedEndDate = e.ExpectedEndDate,
                 WithdrawalDate = e.WithdrawalDate,
                 IsApproved = e.IsApproved,
+                Price = e.Price,
                 LearnerRef = e.LearnerRef
             }).ToArray()
         };

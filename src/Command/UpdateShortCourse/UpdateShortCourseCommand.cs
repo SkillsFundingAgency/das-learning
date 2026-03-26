@@ -18,6 +18,7 @@ public class UpdateShortCourseCommand : ICommand
 public class UpdateShortCourseResult
 {
     public Guid LearningKey { get; set; }
+    public DateTime? CompletionDate { get; set; }
     public ShortCourseUpdateChanges[] Changes { get; set; } = [];
     public UpdateShortCourseResultLearner Learner { get; set; } = null!;
     public UpdateShortCourseResultEpisode[] Episodes { get; set; } = [];
@@ -43,5 +44,6 @@ public class UpdateShortCourseResultEpisode
     public DateTime PlannedEndDate { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public bool IsApproved { get; set; }
+    public decimal Price { get; set; }
     public string LearnerRef { get; set; } = null!;
 }
