@@ -25,15 +25,6 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     public virtual DbSet<ShortCourseEpisode> ShortCourseEpisodes { get; set; }
     public virtual DbSet<ShortCourseMilestone> ShortCourseMilestones { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder
-            .LogTo(Console.WriteLine)
-            .EnableSensitiveDataLogging();
-
-        base.OnConfiguring(optionsBuilder);
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Ignore<Entities.Learning.Learning>();
