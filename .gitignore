@@ -356,3 +356,7 @@ MigrationBackup/
 #specflow generated feature.cs files
 *.feature.cs
 /src/.idea/**
+
+# Claude Code
+.claude/settings.local.json
+CLAUDE.md
