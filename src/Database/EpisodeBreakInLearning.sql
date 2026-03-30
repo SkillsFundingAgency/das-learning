@@ -9,6 +9,10 @@
 GO
 
 ALTER TABLE dbo.EpisodeBreakInLearning
-ADD CONSTRAINT FK_EpisodeBreakInLearning_Episode 
+ADD CONSTRAINT FK_EpisodeBreakInLearning_Episode
     FOREIGN KEY (EpisodeKey) REFERENCES dbo.ApprenticeshipEpisode ([Key]);
+GO
+
+CREATE NONCLUSTERED INDEX IX_EpisodeBreakInLearning_EpisodeKey
+    ON [dbo].[EpisodeBreakInLearning] ([EpisodeKey]);
 GO

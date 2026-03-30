@@ -12,3 +12,7 @@ ALTER TABLE dbo.EnglishAndMathsBreakInLearning
 ADD CONSTRAINT FK_EnglishAndMathsBreakInLearning_EnglishAndMaths
     FOREIGN KEY (EnglishAndMathsKey) REFERENCES dbo.EnglishAndMaths ([Key]);
 GO
+
+CREATE NONCLUSTERED INDEX IX_EnglishAndMathsBreakInLearning_EnglishAndMathsKey
+    ON [dbo].[EnglishAndMathsBreakInLearning] ([EnglishAndMathsKey]);
+GO
