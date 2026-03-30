@@ -297,6 +297,24 @@ public class ShortCourseStepDefinitions
         await CallUpdateShortCourseEndpoint(request);
     }
 
+    [When(@"SLD calls the delete short course endpoint")]
+    public async Task WhenSLDCallsTheDeleteShortCourseEndpoint()
+    {
+        var learningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learningKey}");
+    }
+
+    [Then(@"the short course episode WithdrawalDate equals the StartDate")]
+    public async Task ThenTheShortCourseEpisodeWithdrawalDateEqualsTheStartDate()
+    {
+        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var shortCourse = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
+        var episode = shortCourse.Episodes.Single();
+        episode.WithdrawalDate.Should().Be(episode.StartDate);
+    }
+
     [When(@"SLD calls the update short course endpoint with no changes")]
     public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
     {
