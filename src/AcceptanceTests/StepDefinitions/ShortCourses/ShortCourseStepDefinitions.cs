@@ -92,6 +92,12 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("Price", out var price) && decimal.TryParse(price, out var parsedPrice))
             request.OnProgramme.Price = parsedPrice;
 
+        if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
+            request.OnProgramme.WithdrawalDate = parsedWithdrawalDate;
+
+        if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
+            request.OnProgramme.CompletionDate = parsedCompletionDate;
+
         var learningKey = await CallCreateShortCourseEndpoint(request);
 
         if(row.TryGetValue("IsApproved", out var isApproved) && isApproved.ToLower() == "true")
