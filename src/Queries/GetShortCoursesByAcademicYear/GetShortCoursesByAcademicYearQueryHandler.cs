@@ -17,8 +17,8 @@ public class GetShortCoursesByAcademicYearQueryHandler(LearningDataContext dbCon
             .Where(x => x.Episodes.Any(e => e.IsApproved))
             .Where(x => x.Episodes.Any(e =>
                 e.StartDate <= dates.End &&
-                e.ExpectedEndDate >= dates.Start &&
                 (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
+            .Where(x => !x.CompletionDate.HasValue || x.CompletionDate.Value >= dates.Start)
             .AsNoTracking();
 
         var totalItems = await baseQuery.CountAsync(cancellationToken);
