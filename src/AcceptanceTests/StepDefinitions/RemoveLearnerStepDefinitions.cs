@@ -35,25 +35,25 @@ public class RemoveLearnerStepDefinitions
         learning.Episodes.First().WithdrawalDate = learning.Episodes.Select(e=>e.Prices.Select(p=>p.StartDate)).Min()?.First();
     }
 
-    [Then(@"a LearningWithdrawnEvent is sent")]
-    public async Task ThenALearningWithdrawnEventIsSent()
+    [Then(@"an ApprenticeshipWithdrawnEvent is sent")]
+    public async Task ThenAApprenticeshipWithdrawnEventIsSent()
     {
         var learning = await GetCurrentLearning();
         await WaitHelper.WaitForIt(() => 
-            _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(
+            _testContext.MessageSession.ReceivedEvents<ApprenticeshipWithdrawnEvent>().Any(
                 x => x.LearningKey == learning.Key
-            ), $"Failed to find published {nameof(LearningWithdrawnEvent)} event");
+            ), $"Failed to find published {nameof(ApprenticeshipWithdrawnEvent)} event");
 
     }
 
-    [Then(@"a LearningWithdrawnEvent is not sent")]
-    public async Task ThenALearningWithdrawnEventIsNotSent()
+    [Then(@"an ApprenticeshipWithdrawnEvent is not sent")]
+    public async Task ThenAApprenticeshipWithdrawnEventIsNotSent()
     {
         var learning = await GetCurrentLearning();
         await WaitHelper.WaitForUnexpected(() =>
-            _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(
+            _testContext.MessageSession.ReceivedEvents<ApprenticeshipWithdrawnEvent>().Any(
                 x => x.LearningKey == learning.Key
-            ), $"{nameof(LearningWithdrawnEvent)} event should not be published");
+            ), $"{nameof(ApprenticeshipWithdrawnEvent)} event should not be published");
 
     }
 

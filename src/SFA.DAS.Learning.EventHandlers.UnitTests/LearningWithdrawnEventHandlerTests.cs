@@ -33,7 +33,7 @@ public class LearningWithdrawnEventHandlerTests
         await _handler.Handle(domainEvent, default);
 
         _messageSession.Verify(x => x.Publish(
-                It.Is<Types.LearningWithdrawnEvent>(msg =>
+                It.Is<Types.ApprenticeshipWithdrawnEvent>(msg =>
                     msg.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
                     msg.LearningKey == domainEvent.LearningKey &&
                     msg.LastDayOfLearning == domainEvent.LastDayOfLearning &&

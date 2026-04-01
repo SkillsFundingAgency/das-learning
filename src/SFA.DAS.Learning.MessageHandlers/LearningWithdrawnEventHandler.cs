@@ -8,9 +8,9 @@ namespace SFA.DAS.Learning.MessageHandlers
     {
         public async Task Handle(LearningWithdrawnEvent @event, CancellationToken cancellationToken = default(CancellationToken))
         {
-            logger.LogInformation($"Publishing LearningWithdrawnEvent for Learning {@event.LearningKey}, LastDayOfLearning {@event.LastDayOfLearning}");
+            logger.LogInformation($"Publishing ApprenticeshipWithdrawnEvent for Learning {@event.LearningKey}, LastDayOfLearning {@event.LastDayOfLearning}");
 
-            var message = new Types.LearningWithdrawnEvent
+            var message = new Types.ApprenticeshipWithdrawnEvent
             {
                 LearningKey = @event.LearningKey,
                 ApprovalsApprenticeshipId = @event.ApprovalsApprenticeshipId,

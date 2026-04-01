@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
-using LearningWithdrawnEvent = SFA.DAS.Learning.Types.LearningWithdrawnEvent;
+using ApprenticeshipWithdrawnEvent = SFA.DAS.Learning.Types.ApprenticeshipWithdrawnEvent;
 
 namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
 
@@ -61,7 +61,7 @@ public class WhenRemovingLearner
 
         // Assert
         _learningRepository.Verify(x => x.Update(domainModel), Times.Once);
-        _messageSession.Verify(x => x.Publish(It.IsAny<LearningWithdrawnEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
+        _messageSession.Verify(x => x.Publish(It.IsAny<ApprenticeshipWithdrawnEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -190,7 +190,7 @@ public class WhenRemovingLearner
 
         // Assert
         _messageSession.Verify(x => x.Publish(
-            It.Is<LearningWithdrawnEvent>(e =>
+            It.Is<ApprenticeshipWithdrawnEvent>(e =>
                 e.LearningKey == domainModel.Key &&
                 e.ApprovalsApprenticeshipId == domainModel.ApprovalsApprenticeshipId &&
                 e.Reason == WithdrawReason.WithdrawFromStart.ToString() &&

@@ -1,6 +1,6 @@
 ﻿namespace SFA.DAS.Learning.Types;
 
-public class LearningWithdrawnEvent
+public class ApprenticeshipWithdrawnEvent
 {
     public Guid LearningKey { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }

@@ -93,7 +93,7 @@ public class UpdateLearnerStepDefinitions
     public async Task WhenAnUpdateRequestIsSentWithTheSameData()
     {
         await Task.Delay(1000); // Ensure any previous events have been processed
-        _testContext.MessageSession.ClearEventsOfType<LearningWithdrawnEvent>();
+        _testContext.MessageSession.ClearEventsOfType<ApprenticeshipWithdrawnEvent>();
 
         await WhenTheUpdateRequestIsSent();
     }
