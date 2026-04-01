@@ -5,9 +5,11 @@ namespace SFA.DAS.Learning.Command.UpdateShortCourse;
 
 public class UpdateShortCourseCommandHandler(
     ILogger<UpdateShortCourseCommandHandler> logger,
-    IShortCourseLearningRepository repository)
+    IShortCourseLearningRepository repository,
+    ILearnerRepository learnerRepository)
     : ICommandHandler<UpdateShortCourseCommand, UpdateShortCourseResult>
 {
+
     public async Task<UpdateShortCourseResult> Handle(UpdateShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Handling UpdateShortCourseCommand for LearningKey {LearningKey}", command.LearningKey);
@@ -21,6 +23,35 @@ public class UpdateShortCourseCommandHandler(
 
         await repository.Update(learning);
 
-        return new UpdateShortCourseResult { LearningKey = learning.Key, Changes = changes };
+        var learner = await learnerRepository.Get(learning.LearnerKey);
+
+        return new UpdateShortCourseResult
+        {
+            LearningKey = learning.Key,
+            CompletionDate = learning.CompletionDate,
+            Changes = changes,
+            Learner = new UpdateShortCourseResultLearner
+            {
+                Uln = learner.Uln,
+                FirstName = learner.FirstName,
+                LastName = learner.LastName,
+                DateOfBirth = learner.DateOfBirth
+            },
+            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new UpdateShortCourseResultEpisode
+            {
+                Ukprn = e.Ukprn,
+                EmployerAccountId = e.EmployerAccountId,
+                CourseCode = e.TrainingCode,
+                CourseType = CourseTypeConstants.ShortCourse,
+                LearningType = e.LearningType.ToString(),
+                StartDate = e.StartDate,
+                AgeAtStart = learner.AgeOnDate(e.StartDate),
+                PlannedEndDate = e.ExpectedEndDate,
+                WithdrawalDate = e.WithdrawalDate,
+                IsApproved = e.IsApproved,
+                Price = e.Price,
+                LearnerRef = e.LearnerRef
+            }).ToArray()
+        };
     }
 }

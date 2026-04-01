@@ -50,11 +50,11 @@ public class LearnerRepository : ILearnerRepository
     public async Task<LearnerDomainModel> GetByLearningKey(Guid learningKey)
     {
         var learning = await DbContext.ApprenticeshipLearningDbSet.SingleAsync(x => x.Key == learningKey);
-        var learner = await DbContext.LearnersDbSet.SingleAsync(x => x.Key == learning.LearnerKey); 
+        var learner = await DbContext.LearnersDbSet.SingleAsync(x => x.Key == learning.LearnerKey);
         return _learnerFactory.GetExisting(learner);
     }
 
-    public async Task<LearnerDomainModel?> GetByUln(string uln)
+public async Task<LearnerDomainModel?> GetByUln(string uln)
     {
         var learner = await DbContext.LearnersDbSet.FirstOrDefaultAsync(x => x.Uln == uln);
 
