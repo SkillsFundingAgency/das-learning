@@ -82,10 +82,10 @@ internal static class SqlConnectionExtensions
         return shortCourses.ToList();
     }
     
-    internal static void SetAllEpisodesForShortCourseToApproved(this SqlConnection dbConnection, Guid shortCourseLearningKey)
+    internal static void SetAllEpisodesForShortCourseToApproved(this SqlConnection dbConnection, Guid shortCourseLearningKey, byte employerType = 0)
     {
         dbConnection.Execute(
-            "UPDATE dbo.ShortCourseEpisode SET IsApproved = 1 WHERE LearningKey = @shortCourseLearningKey",
-            new { shortCourseLearningKey });
+            "UPDATE dbo.ShortCourseEpisode SET IsApproved = 1, EmployerType = @employerType WHERE LearningKey = @shortCourseLearningKey",
+            new { shortCourseLearningKey, employerType });
     }
 }

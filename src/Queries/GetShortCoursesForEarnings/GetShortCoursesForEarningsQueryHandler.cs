@@ -54,8 +54,7 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
                         CourseCode = e.TrainingCode,
                         IsApproved = e.IsApproved,
                         Price = e.Price,
-                        LearnerRef = e.LearnerRef,
-                        EmployerType = e.EmployerType
+                        LearnerRef = e.LearnerRef
                     })
                 };
             }),
