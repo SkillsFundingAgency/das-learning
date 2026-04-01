@@ -50,7 +50,8 @@ public class UpdateShortCourseCommandHandler(
                 WithdrawalDate = e.WithdrawalDate,
                 IsApproved = e.IsApproved,
                 Price = e.Price,
-                LearnerRef = e.LearnerRef
+                LearnerRef = e.LearnerRef,
+                EmployerType = e.EmployerType
             }).ToArray()
         };
     }
