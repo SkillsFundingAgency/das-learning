@@ -112,12 +112,12 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     }
 
     public override void Approve(long employerAccountId)
-        => Approve(employerAccountId, EmployerType.NonLevy);
+        => Approve(employerAccountId, EmployerType.NonLevy, 0);
 
-    public void Approve(long employerAccountId, EmployerType employerType)
+    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId)
     {
         var episode = LatestEpisode;
-        episode.Approve(employerAccountId, employerType);
+        episode.Approve(employerAccountId, employerType, approvalsApprenticeshipId);
 
         AddEvent(new LearningApprovedEvent
         {
