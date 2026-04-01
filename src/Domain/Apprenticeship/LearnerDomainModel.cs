@@ -41,6 +41,14 @@ public class LearnerDomainModel : AggregateRoot
         return new LearnerDomainModel(entity);
     }
 
+    public int AgeOnDate(DateTime date)
+    {
+        var age = date.Year - DateOfBirth.Year;
+        if (DateOfBirth.AddYears(age) > date)
+            age--;
+        return age;
+    }
+
     private LearnerDomainModel(Learning.DataAccess.Entities.Learning.Learner entity)
     {
         _entity = entity;

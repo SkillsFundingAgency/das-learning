@@ -92,6 +92,12 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("Price", out var price) && decimal.TryParse(price, out var parsedPrice))
             request.OnProgramme.Price = parsedPrice;
 
+        if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
+            request.OnProgramme.WithdrawalDate = parsedWithdrawalDate;
+
+        if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
+            request.OnProgramme.CompletionDate = parsedCompletionDate;
+
         var learningKey = await CallCreateShortCourseEndpoint(request);
 
         if(row.TryGetValue("IsApproved", out var isApproved) && isApproved.ToLower() == "true")
@@ -337,6 +343,62 @@ public class ShortCourseStepDefinitions
         result.Changes.Should().BeEmpty();
     }
 
+    [Then(@"the update short course response has a completion date of (.*)")]
+    public void ThenTheUpdateShortCourseResponseHasACompletionDateOf(DateTime completionDate)
+    {
+        var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
+        result.CompletionDate.Should().Be(completionDate);
+    }
+
+    [Then(@"the update short course response includes the following learner details")]
+    public void ThenTheUpdateShortCourseResponseIncludesTheFollowingLearnerDetails(Table table)
+    {
+        var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
+        var row = table.Rows[0];
+
+        result.Learner.Should().NotBeNull();
+
+        if (row.TryGetValue("Uln", out var uln))
+            result.Learner.Uln.Should().Be(uln);
+
+        if (row.TryGetValue("FirstName", out var firstName))
+            result.Learner.FirstName.Should().Be(firstName);
+
+        if (row.TryGetValue("LastName", out var lastName))
+            result.Learner.LastName.Should().Be(lastName);
+    }
+
+    [Then(@"the update short course response includes the following episode details")]
+    public void ThenTheUpdateShortCourseResponseIncludesTheFollowingEpisodeDetails(Table table)
+    {
+        var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
+        var row = table.Rows[0];
+
+        result.Episodes.Should().NotBeEmpty();
+        var episode = result.Episodes.First();
+
+        if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
+            episode.Ukprn.Should().Be(parsedUkprn);
+
+        if (row.TryGetValue("EmployerAccountId", out var employerAccountId) && long.TryParse(employerAccountId, out var parsedEmployerAccountId))
+            episode.EmployerAccountId.Should().Be(parsedEmployerAccountId);
+
+        if (row.TryGetValue("CourseCode", out var courseCode))
+            episode.CourseCode.Should().Be(courseCode);
+
+        if (row.TryGetValue("CourseType", out var courseType))
+            episode.CourseType.Should().Be(courseType);
+
+        if (row.TryGetValue("IsApproved", out var isApproved) && bool.TryParse(isApproved, out var parsedIsApproved))
+            episode.IsApproved.Should().Be(parsedIsApproved);
+
+        if (row.TryGetValue("Price", out var price) && decimal.TryParse(price, out var parsedPrice))
+            episode.Price.Should().Be(parsedPrice);
+
+        if (row.TryGetValue("AgeAtStart", out var ageAtStart) && int.TryParse(ageAtStart, out var parsedAgeAtStart))
+            episode.AgeAtStart.Should().Be(parsedAgeAtStart);
+    }
+
     private async Task CallUpdateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
         var learningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
@@ -347,7 +409,28 @@ public class ShortCourseStepDefinitions
     private class UpdateShortCourseTestResult
     {
         public Guid LearningKey { get; set; }
+        public DateTime? CompletionDate { get; set; }
         public string[] Changes { get; set; } = [];
+        public UpdateShortCourseTestResultLearner Learner { get; set; } = null!;
+        public UpdateShortCourseTestResultEpisode[] Episodes { get; set; } = [];
+    }
+
+    private class UpdateShortCourseTestResultLearner
+    {
+        public string Uln { get; set; } = null!;
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+    }
+
+    private class UpdateShortCourseTestResultEpisode
+    {
+        public long Ukprn { get; set; }
+        public long EmployerAccountId { get; set; }
+        public string CourseCode { get; set; } = null!;
+        public string CourseType { get; set; } = null!;
+        public bool IsApproved { get; set; }
+        public decimal Price { get; set; }
+        public int AgeAtStart { get; set; }
     }
 
     private static List<LearningSupportDetails> GetLearningSupportDetails(TableRow row)

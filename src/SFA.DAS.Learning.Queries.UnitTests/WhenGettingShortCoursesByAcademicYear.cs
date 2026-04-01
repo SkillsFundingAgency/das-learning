@@ -32,14 +32,11 @@ public class WhenGettingShortCoursesByAcademicYear
     [Test]
     public async Task ThenApprovedCoursesInDateRangeAreReturned()
     {
-        // Arrange
         var (learning, learner) = await SeedShortCourse(isApproved: true, startDate: new DateTime(2024, 8, 1), expectedEndDate: new DateTime(2025, 7, 31));
         var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
 
-        // Act
         var result = await _sut.Handle(query);
 
-        // Assert
         result.TotalItems.Should().Be(1);
         result.Items.Should().HaveCount(1);
         var item = result.Items.Single();
@@ -48,31 +45,97 @@ public class WhenGettingShortCoursesByAcademicYear
     }
 
     [Test]
-    public async Task ThenUnapprovedCoursesAreExcluded()
+    public async Task ThenCourseWithdrawnInCurrentAcademicYearIsIncluded()
     {
-        // Arrange
-        await SeedShortCourse(isApproved: false, startDate: new DateTime(2024, 8, 1), expectedEndDate: new DateTime(2025, 7, 31));
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2024, 9, 1), expectedEndDate: new DateTime(2025, 3, 1), withdrawalDate: new DateTime(2025, 3, 1));
         var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
 
-        // Act
         var result = await _sut.Handle(query);
 
-        // Assert
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task ThenContinuingCourseFromPreviousYearIsIncluded()
+    {
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2024, 6, 30));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task ThenCourseWithdrawnBeforeAcademicYearStartIsExcluded()
+    {
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2024, 6, 30), withdrawalDate: new DateTime(2024, 6, 1));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
         result.TotalItems.Should().Be(0);
         result.Items.Should().BeEmpty();
     }
 
     [Test]
-    public async Task ThenCoursesEndingBeforeAcademicYearStartAreExcluded()
+    public async Task ThenCourseWithdrawnInPreviousYearIsExcludedEvenIfPlannedEndIsInCurrentYear()
     {
-        // Arrange — ends before 2024-08-01
-        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2024, 7, 31));
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2025, 3, 1), withdrawalDate: new DateTime(2024, 6, 1));
         var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
 
-        // Act
         var result = await _sut.Handle(query);
 
-        // Assert
+        result.TotalItems.Should().Be(0);
+        result.Items.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task ThenCourseWithdrawnInCurrentYearIsIncludedEvenIfPlannedEndWasInPreviousYear()
+    {
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2024, 6, 30), withdrawalDate: new DateTime(2025, 1, 1));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task ThenCourseWithdrawnInCurrentYearIsIncluded()
+    {
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2025, 3, 1), withdrawalDate: new DateTime(2025, 1, 1));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task ThenContinuingCourseWithPlannedEndInCurrentYearIsIncluded()
+    {
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2024, 1, 1), expectedEndDate: new DateTime(2024, 12, 1));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task ThenUnapprovedCoursesAreExcluded()
+    {
+        await SeedShortCourse(isApproved: false, startDate: new DateTime(2024, 8, 1), expectedEndDate: new DateTime(2025, 7, 31));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
         result.TotalItems.Should().Be(0);
         result.Items.Should().BeEmpty();
     }
@@ -80,46 +143,49 @@ public class WhenGettingShortCoursesByAcademicYear
     [Test]
     public async Task ThenCoursesStartingAfterAcademicYearEndAreExcluded()
     {
-        // Arrange — starts after 2025-07-31
         await SeedShortCourse(isApproved: true, startDate: new DateTime(2025, 8, 1), expectedEndDate: new DateTime(2026, 6, 30));
         var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
 
-        // Act
         var result = await _sut.Handle(query);
 
-        // Assert
         result.TotalItems.Should().Be(0);
         result.Items.Should().BeEmpty();
     }
 
     [Test]
-    public async Task ThenCoursesWithdrawnBeforeAcademicYearStartAreExcluded()
+    public async Task ThenCourseCompletedBeforeAcademicYearIsExcluded()
     {
-        // Arrange — withdrawn before academic year begins
-        await SeedShortCourse(isApproved: true, startDate: new DateTime(2024, 1, 1), expectedEndDate: new DateTime(2025, 1, 1), withdrawalDate: new DateTime(2024, 7, 31));
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2024, 6, 30), completionDate: new DateTime(2024, 6, 30));
         var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
 
-        // Act
         var result = await _sut.Handle(query);
 
-        // Assert
         result.TotalItems.Should().Be(0);
         result.Items.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task ThenCourseCompletedInCurrentAcademicYearIsIncluded()
+    {
+        await SeedShortCourse(isApproved: true, startDate: new DateTime(2023, 9, 1), expectedEndDate: new DateTime(2024, 6, 30), completionDate: new DateTime(2025, 1, 1));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
     }
 
     [Test]
     public async Task ThenPaginationIsApplied()
     {
-        // Arrange — 3 matching courses, page size 2
         for (var i = 0; i < 3; i++)
             await SeedShortCourse(isApproved: true, startDate: new DateTime(2024, 8, 1), expectedEndDate: new DateTime(2025, 7, 31));
 
         var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 2);
 
-        // Act
         var result = await _sut.Handle(query);
 
-        // Assert
         result.TotalItems.Should().Be(3);
         result.Items.Should().HaveCount(2);
         result.PageSize.Should().Be(2);
@@ -130,13 +196,14 @@ public class WhenGettingShortCoursesByAcademicYear
         bool isApproved,
         DateTime startDate,
         DateTime expectedEndDate,
-        DateTime? withdrawalDate = null)
+        DateTime? withdrawalDate = null,
+        DateTime? completionDate = null)
     {
         var learnerKey = Guid.NewGuid();
         var learner = new Learner { Key = learnerKey, Uln = Guid.NewGuid().ToString()[..10], FirstName = "A", LastName = "B" };
         _dbContext.LearnersDbSet.Add(learner);
 
-        var learning = new ShortCourseLearning { Key = Guid.NewGuid() };
+        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), CompletionDate = completionDate };
         learning.LearnerKey = learnerKey;
         learning.Episodes.Add(new ShortCourseEpisode
         {

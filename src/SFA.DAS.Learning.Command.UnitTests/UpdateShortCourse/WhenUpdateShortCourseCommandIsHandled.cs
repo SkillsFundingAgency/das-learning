@@ -20,14 +20,28 @@ public class WhenUpdateShortCourseCommandIsHandled
 {
     private UpdateShortCourseCommandHandler _commandHandler = null!;
     private Mock<IShortCourseLearningRepository> _repository = null!;
+    private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<ILogger<UpdateShortCourseCommandHandler>> _logger = null!;
 
     [SetUp]
     public void SetUp()
     {
         _repository = new Mock<IShortCourseLearningRepository>();
+        _learnerRepository = new Mock<ILearnerRepository>();
         _logger = new Mock<ILogger<UpdateShortCourseCommandHandler>>();
-        _commandHandler = new UpdateShortCourseCommandHandler(_logger.Object, _repository.Object);
+
+        _learnerRepository
+            .Setup(r => r.Get(It.IsAny<Guid>()))
+            .ReturnsAsync(LearnerDomainModel.Get(new Learner
+            {
+                Key = Guid.NewGuid(),
+                Uln = "1234567890",
+                FirstName = "Test",
+                LastName = "User",
+                DateOfBirth = DateTime.Today.AddYears(-20)
+            }));
+
+        _commandHandler = new UpdateShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object);
     }
 
     [Test]
