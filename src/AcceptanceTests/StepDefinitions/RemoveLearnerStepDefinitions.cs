@@ -21,7 +21,7 @@ public class RemoveLearnerStepDefinitions
     [Given(@"SLD have previously informed us that the learner is to be removed")]
     public async Task WhenSLDInformUsThatALearnerIsToBeRemoved()
     {
-        var learning = await GetCurrentLearning();
+        var learning = await GetCurrentApprenticeshipLearning();
         var ukprn = learning.Episodes.First().Ukprn;
         var learningKey = learning.Key;
         await _testContext.TestInnerApi.Delete($"/{ukprn}/{learningKey}");
@@ -31,33 +31,40 @@ public class RemoveLearnerStepDefinitions
     [Then(@"“last day of learning” for the Learning is set to its “Learning Start Date”")]
     public async Task ThenLastDayOfLearningForTheLearningIsSetToItsLearningStartDate()
     {
-        var learning = await GetCurrentLearning();
+        var learning = await GetCurrentApprenticeshipLearning();
         learning.Episodes.First().WithdrawalDate = learning.Episodes.Select(e=>e.Prices.Select(p=>p.StartDate)).Min()?.First();
     }
 
     [Then(@"an ApprenticeshipWithdrawnEvent is sent")]
     public async Task ThenAApprenticeshipWithdrawnEventIsSent()
     {
-        var learning = await GetCurrentLearning();
-        await WaitHelper.WaitForIt(() => 
+        var learningKey = await GetLearningKey();
+        await WaitHelper.WaitForIt(() =>
             _testContext.MessageSession.ReceivedEvents<ApprenticeshipWithdrawnEvent>().Any(
-                x => x.LearningKey == learning.Key
+                x => x.LearningKey == learningKey
             ), $"Failed to find published {nameof(ApprenticeshipWithdrawnEvent)} event");
-
     }
 
     [Then(@"an ApprenticeshipWithdrawnEvent is not sent")]
     public async Task ThenAApprenticeshipWithdrawnEventIsNotSent()
     {
-        var learning = await GetCurrentLearning();
+        var learningKey = await GetLearningKey();
         await WaitHelper.WaitForUnexpected(() =>
             _testContext.MessageSession.ReceivedEvents<ApprenticeshipWithdrawnEvent>().Any(
-                x => x.LearningKey == learning.Key
+                x => x.LearningKey == learningKey
             ), $"{nameof(ApprenticeshipWithdrawnEvent)} event should not be published");
-
     }
 
-    private async Task<DataAccess.Entities.Learning.ApprenticeshipLearning> GetCurrentLearning() 
+    private async Task<Guid> GetLearningKey()
+    {
+        if (_scenarioContext.TryGetValue("ShortCourseLearningKey", out var shortCourseKey))
+            return new Guid(shortCourseKey.ToString()!);
+
+        var learning = await GetCurrentApprenticeshipLearning();
+        return learning.Key;
+    }
+
+    private async Task<DataAccess.Entities.Learning.ApprenticeshipLearning> GetCurrentApprenticeshipLearning()
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         return dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
