@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
+using SFA.DAS.Learning.Command.DeleteShortCourse;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.InnerApi.Responses;
@@ -104,6 +105,20 @@ public class ShortCoursesController : ControllerBase
             return NoContent();
 
         return new OkObjectResult(new CreateShortCourseLearningResponse { LearningKey = result.LearningKey.Value, EpisodeKey = result.EpisodeKey!.Value });
+    }
+
+    /// <summary>
+    /// Deletes a short course learner record.
+    /// </summary>
+    /// <param name="learningKey">The key of the short course learning record to delete.</param>
+    /// <returns>No content.</returns>
+    [HttpDelete("{ukprn:long}/shortCourses/{learningKey}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> DeleteShortCourse(long ukprn, Guid learningKey)
+    {
+        var deleted = await _commandDispatcher.Send<DeleteShortCourseCommand, bool>(new DeleteShortCourseCommand(learningKey, ukprn));
+        return deleted ? NoContent() : Ok();
     }
 
     /// <summary>

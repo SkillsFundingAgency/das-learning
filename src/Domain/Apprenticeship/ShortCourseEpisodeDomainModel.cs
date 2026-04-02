@@ -95,6 +95,11 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         _entity.EmployerType = employerType;
     }
 
+    public void Delete()
+    {
+        _entity.WithdrawalDate = _entity.StartDate;
+    }
+
     public void Update(ShortCourseUpdateContext updateContext)
     {
         if (!_entity.IsApproved)
