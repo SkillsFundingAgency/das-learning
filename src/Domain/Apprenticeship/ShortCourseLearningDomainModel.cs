@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -102,7 +103,21 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         episode.Update(updateContext);
 
         if (episode.WithdrawalDate != prevWithdrawalDate)
+        {
             changes.Add(ShortCourseUpdateChanges.WithdrawalDate);
+
+            if (episode.IsApproved && episode.WithdrawalDate.HasValue)
+            {
+                AddEvent(new LearningWithdrawnEvent
+                {
+                    LearningKey = Key,
+                    ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
+                    Reason = WithdrawReason.WithdrawDuringLearning.ToString(),
+                    LastDayOfLearning = episode.WithdrawalDate.Value,
+                    EmployerAccountId = episode.EmployerAccountId
+                });
+            }
+        }
 
         if (!episode.Milestones.Select(m => m.Milestone).ToHashSet().SetEquals(prevMilestones))
             changes.Add(ShortCourseUpdateChanges.Milestone);
