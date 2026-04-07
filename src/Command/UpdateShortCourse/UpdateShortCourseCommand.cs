@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
 
@@ -38,7 +39,8 @@ public class UpdateShortCourseResultEpisode
     public long EmployerAccountId { get; set; }
     public string CourseCode { get; set; } = null!;
     public string CourseType { get; set; } = null!;
-    public string LearningType { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public LearningType LearningType { get; set; }
     public DateTime StartDate { get; set; }
     public int AgeAtStart { get; set; }
     public DateTime PlannedEndDate { get; set; }
@@ -46,4 +48,6 @@ public class UpdateShortCourseResultEpisode
     public bool IsApproved { get; set; }
     public decimal Price { get; set; }
     public string LearnerRef { get; set; } = null!;
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public EmployerType EmployerType { get; set; }
 }

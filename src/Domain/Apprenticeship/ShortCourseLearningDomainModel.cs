@@ -47,7 +47,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         DateTime? withdrawalDate,
         IEnumerable<Milestone> milestones,
         decimal price = 0,
-        LearningType learningType = LearningType.Apprenticeship)
+        LearningType learningType = LearningType.Apprenticeship,
+        EmployerType employerType = EmployerType.NonLevy)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
             _entity.Key,
@@ -60,7 +61,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             expectedEndDate,
             withdrawalDate,
             price,
-            learningType
+            learningType,
+            employerType
         );
 
         foreach (var milestone in milestones)
@@ -110,9 +112,12 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     }
 
     public override void Approve(long employerAccountId)
+        => Approve(employerAccountId, EmployerType.NonLevy);
+
+    public void Approve(long employerAccountId, EmployerType employerType)
     {
         var episode = LatestEpisode;
-        episode.Approve(employerAccountId);
+        episode.Approve(employerAccountId, employerType);
 
         AddEvent(new LearningApprovedEvent
         {

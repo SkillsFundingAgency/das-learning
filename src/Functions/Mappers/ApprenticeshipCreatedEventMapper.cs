@@ -34,8 +34,17 @@ public static class ApprenticeshipCreatedEventMapper
             AccountLegalEntityId = e.AccountLegalEntityId,
             TrainingCourseVersion = e.TrainingCourseVersion,
             PlannedStartDate = e.StartDate,
-            LearningType = (Enums.LearningType) e.LearningType
+            LearningType = (Enums.LearningType) e.LearningType,
+            EmployerType = GetEmployerType(e)
         };
+    }
+
+    private static EmployerType GetEmployerType(ApprenticeshipCreatedEvent e)
+    {
+        if (e.ApprenticeshipEmployerTypeOnApproval == ApprenticeshipEmployerType.Levy)
+            return EmployerType.Levy;
+
+        return EmployerType.NonLevy;
     }
 
     private static FundingType GetFundingType(ApprenticeshipCreatedEvent e)

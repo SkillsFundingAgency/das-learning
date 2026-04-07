@@ -1,5 +1,6 @@
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
+using SFA.DAS.CommitmentsV2.Types;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
@@ -101,13 +102,18 @@ public class ShortCourseStepDefinitions
         var learningKey = await CallCreateShortCourseEndpoint(request);
 
         if(row.TryGetValue("IsApproved", out var isApproved) && isApproved.ToLower() == "true")
-            await ApproveCourseInDb(learningKey);
+        {
+            byte employerType = 0;
+            if (row.TryGetValue("EmployerType", out var employerTypeStr) && Enum.TryParse<EmployerType>(employerTypeStr, out var parsedEmployerType))
+                employerType = (byte)parsedEmployerType;
+            await ApproveCourseInDb(learningKey, employerType);
+        }
     }
 
-    private async Task ApproveCourseInDb(Guid learningKey) //todo we may wish to replace or update this when the approve short course process is in place (FLP-1415)
+    private async Task ApproveCourseInDb(Guid learningKey, byte employerType = 0)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        dbConnection.SetAllEpisodesForShortCourseToApproved(learningKey);
+        dbConnection.SetAllEpisodesForShortCourseToApproved(learningKey, employerType);
     }
 
     [Given(@"short course is approved")]
@@ -224,12 +230,23 @@ public class ShortCourseStepDefinitions
     public async Task ThenTheShortCourseIsApproved()
     {
         var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var approvalEvent = _scenarioContext.GetApprenticeshipCreatedEvent();
 
-        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var learner = dbConnection.GetLearnerByShortCourseKey(shortCourseLearningKey);
-        var shortCourseLearning = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
+        await WaitHelper.WaitForIt(async () =>
+        {
+            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+            var shortCourseLearning = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
+            return shortCourseLearning.Episodes.First().IsApproved;
+        }, "Short course was not approved in time");
 
-        shortCourseLearning.Episodes.First().IsApproved.Should().BeTrue();
+        await using var conn = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = conn.GetShortCourseLearning(shortCourseLearningKey);
+        var episode = learning.Episodes.First();
+
+        episode.IsApproved.Should().BeTrue();
+        episode.EmployerType.Should().Be(approvalEvent.ApprenticeshipEmployerTypeOnApproval == CommitmentsV2.Types.ApprenticeshipEmployerType.Levy
+            ? EmployerType.Levy
+            : EmployerType.NonLevy);
     }
 
 
