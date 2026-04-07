@@ -2,7 +2,6 @@ using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -41,7 +40,6 @@ public class WhenUpdatingShortCourseWithdrawalDate
         @event.ApprovalsApprenticeshipId.Should().Be(learning.LatestEpisode.ApprovalsApprenticeshipId);
         @event.EmployerAccountId.Should().Be(learning.LatestEpisode.EmployerAccountId);
         @event.LastDayOfLearning.Should().Be(withdrawalDate);
-        @event.Reason.Should().Be(WithdrawReason.WithdrawDuringLearning.ToString());
     }
 
     [Test]
@@ -53,8 +51,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
 
         learning.Update(updateContext);
 
-        var @event = learning.FlushEvents().OfType<LearningWithdrawnEvent>().Single();
-        @event.Reason.Should().Be(WithdrawReason.WithdrawDuringLearning.ToString());
+        learning.FlushEvents().OfType<LearningWithdrawnEvent>().Should().ContainSingle();
     }
 
     [Test]

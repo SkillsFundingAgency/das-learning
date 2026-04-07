@@ -1,5 +1,4 @@
 ﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -112,7 +111,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
                 {
                     LearningKey = Key,
                     ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
-                    Reason = WithdrawReason.WithdrawDuringLearning.ToString(),
                     LastDayOfLearning = episode.WithdrawalDate.Value,
                     EmployerAccountId = episode.EmployerAccountId
                 });
