@@ -50,4 +50,5 @@ public class UpdateShortCourseResultEpisode
     public string LearnerRef { get; set; } = null!;
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public EmployerType EmployerType { get; set; }
+    public long ApprovalsApprenticeshipId { get; set; }
 }

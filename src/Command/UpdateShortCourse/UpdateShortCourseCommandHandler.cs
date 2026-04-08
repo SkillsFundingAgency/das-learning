@@ -51,7 +51,8 @@ public class UpdateShortCourseCommandHandler(
                 IsApproved = e.IsApproved,
                 Price = e.Price,
                 LearnerRef = e.LearnerRef,
-                EmployerType = e.EmployerType
+                EmployerType = e.EmployerType,
+                ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
             }).ToArray()
         };
     }
