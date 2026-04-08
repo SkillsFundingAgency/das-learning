@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Command.UpdateShortCourse;
 
@@ -30,14 +31,14 @@ public class UpdateShortCourseCommandHandler(
             LearningKey = learning.Key,
             CompletionDate = learning.CompletionDate,
             Changes = changes,
-            Learner = new UpdateShortCourseResultLearner
+            Learner = new ShortCourseLearner
             {
                 Uln = learner.Uln,
                 FirstName = learner.FirstName,
                 LastName = learner.LastName,
                 DateOfBirth = learner.DateOfBirth
             },
-            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new UpdateShortCourseResultEpisode
+            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new ShortCourseEpisode
             {
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId,

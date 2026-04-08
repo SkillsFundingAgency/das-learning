@@ -19,6 +19,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 {
     private DeleteShortCourseCommandHandler _commandHandler = null!;
     private Mock<IShortCourseLearningRepository> _repository = null!;
+    private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<ILogger<DeleteShortCourseCommandHandler>> _logger = null!;
 
     private const long Ukprn = 12345678;
@@ -28,7 +29,10 @@ public class WhenDeleteShortCourseCommandIsHandled
     {
         _repository = new Mock<IShortCourseLearningRepository>();
         _logger = new Mock<ILogger<DeleteShortCourseCommandHandler>>();
-        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object);
+        _learnerRepository = new Mock<ILearnerRepository>();
+
+        _learnerRepository.Setup(r => r.Get(It.IsAny<Guid>())).ReturnsAsync(CreateLearnerDomainModel());
+        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object);
     }
 
     [Test]
@@ -65,7 +69,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 
         var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
 
-        result.Should().BeTrue();
+        result.Should().NotBeNull();
     }
 
     [Test]
@@ -77,7 +81,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 
         var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, ukprn: 99999999));
 
-        result.Should().BeFalse();
+        result.Should().BeNull();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
@@ -90,7 +94,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 
         var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
 
-        result.Should().BeFalse();
+        result.Should().BeNull();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
@@ -140,5 +144,17 @@ public class WhenDeleteShortCourseCommandIsHandled
         };
 
         return ShortCourseLearningDomainModel.Get(entity);
+    }
+
+    private static LearnerDomainModel CreateLearnerDomainModel()
+    {
+        return LearnerDomainModel.Get(new Learner
+        {
+            Key = Guid.NewGuid(),
+            Uln = "1234567890",
+            FirstName = "John",
+            LastName = "Smith",
+            DateOfBirth = new DateTime(1990, 1, 1)
+        });
     }
 }
