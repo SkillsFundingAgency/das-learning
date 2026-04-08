@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Models.Dtos;
 
@@ -7,7 +8,8 @@ namespace SFA.DAS.Learning.Command.UpdateShortCourse;
 public class UpdateShortCourseCommandHandler(
     ILogger<UpdateShortCourseCommandHandler> logger,
     IShortCourseLearningRepository repository,
-    ILearnerRepository learnerRepository)
+    ILearnerRepository learnerRepository,
+    IShortCourseLearningDomainModelMapper mapper)
     : ICommandHandler<UpdateShortCourseCommand, UpdateShortCourseResult>
 {
 
@@ -26,34 +28,8 @@ public class UpdateShortCourseCommandHandler(
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
-        return new UpdateShortCourseResult
-        {
-            LearningKey = learning.Key,
-            CompletionDate = learning.CompletionDate,
-            Changes = changes,
-            Learner = new ShortCourseLearner
-            {
-                Uln = learner.Uln,
-                FirstName = learner.FirstName,
-                LastName = learner.LastName,
-                DateOfBirth = learner.DateOfBirth
-            },
-            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new ShortCourseEpisode
-            {
-                Ukprn = e.Ukprn,
-                EmployerAccountId = e.EmployerAccountId,
-                CourseCode = e.TrainingCode,
-                CourseType = CourseTypeConstants.ShortCourse,
-                LearningType = e.LearningType,
-                StartDate = e.StartDate,
-                AgeAtStart = learner.AgeOnDate(e.StartDate),
-                PlannedEndDate = e.ExpectedEndDate,
-                WithdrawalDate = e.WithdrawalDate,
-                IsApproved = e.IsApproved,
-                Price = e.Price,
-                LearnerRef = e.LearnerRef,
-                EmployerType = e.EmployerType
-            }).ToArray()
-        };
+        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, command.Model.OnProgramme.Ukprn);
+        result.Changes = changes;
+        return result;
     }
 }

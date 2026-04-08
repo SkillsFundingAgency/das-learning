@@ -1,8 +1,10 @@
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.DeleteShortCourse;
+using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -17,9 +19,11 @@ namespace SFA.DAS.Learning.Command.UnitTests.DeleteShortCourse;
 [TestFixture]
 public class WhenDeleteShortCourseCommandIsHandled
 {
+    private Fixture _fixture = new Fixture();
     private DeleteShortCourseCommandHandler _commandHandler = null!;
     private Mock<IShortCourseLearningRepository> _repository = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
+    private Mock<IShortCourseLearningDomainModelMapper> _mapper = null!;
     private Mock<ILogger<DeleteShortCourseCommandHandler>> _logger = null!;
 
     private const long Ukprn = 12345678;
@@ -30,9 +34,16 @@ public class WhenDeleteShortCourseCommandIsHandled
         _repository = new Mock<IShortCourseLearningRepository>();
         _logger = new Mock<ILogger<DeleteShortCourseCommandHandler>>();
         _learnerRepository = new Mock<ILearnerRepository>();
+        _mapper = new Mock<IShortCourseLearningDomainModelMapper>();
 
         _learnerRepository.Setup(r => r.Get(It.IsAny<Guid>())).ReturnsAsync(CreateLearnerDomainModel());
-        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object);
+
+        _mapper.Setup(x => x.Map<DeleteShortCourseResult>(
+            It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
+            )
+            .Returns(_fixture.Create<DeleteShortCourseResult>());
+
+        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object);
     }
 
     [Test]

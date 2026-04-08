@@ -1,14 +1,16 @@
 using Microsoft.Extensions.Logging;
+using SFA.DAS.Learning.Command.Mappers;
+using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.Domain.Repositories;
-using ShortCourseLearnerDto = SFA.DAS.Learning.Models.Dtos.ShortCourseLearner;
-using ShortCourseEpisodeDto = SFA.DAS.Learning.Models.Dtos.ShortCourseEpisode;
+using System.Threading.Channels;
 
 namespace SFA.DAS.Learning.Command.DeleteShortCourse;
 
 public class DeleteShortCourseCommandHandler(
     ILogger<DeleteShortCourseCommandHandler> logger,
     IShortCourseLearningRepository repository,
-    ILearnerRepository learnerRepository)
+    ILearnerRepository learnerRepository,
+    IShortCourseLearningDomainModelMapper mapper)
     : ICommandHandler<DeleteShortCourseCommand, DeleteShortCourseResult?>
 {
     public async Task<DeleteShortCourseResult?> Handle(DeleteShortCourseCommand command, CancellationToken cancellationToken = default)
@@ -32,32 +34,7 @@ public class DeleteShortCourseCommandHandler(
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
-        return new DeleteShortCourseResult
-        {
-            LearningKey = learning.Key,
-            CompletionDate = learning.CompletionDate,
-            Learner = new ShortCourseLearnerDto
-            {
-                Uln = learner.Uln,
-                FirstName = learner.FirstName,
-                LastName = learner.LastName,
-                DateOfBirth = learner.DateOfBirth
-            },
-            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Ukprn).Select(e => new ShortCourseEpisodeDto
-            {
-                Ukprn = e.Ukprn,
-                EmployerAccountId = e.EmployerAccountId,
-                CourseCode = e.TrainingCode,
-                CourseType = CourseTypeConstants.ShortCourse,
-                LearningType = e.LearningType.ToString(),
-                StartDate = e.StartDate,
-                AgeAtStart = learner.AgeOnDate(e.StartDate),
-                PlannedEndDate = e.ExpectedEndDate,
-                WithdrawalDate = e.WithdrawalDate,
-                IsApproved = e.IsApproved,
-                Price = e.Price,
-                LearnerRef = e.LearnerRef
-            }).ToArray()
-        };
+        var result = mapper.Map<DeleteShortCourseResult>(learning, learner!, command.Ukprn);
+        return result;
     }
 }
