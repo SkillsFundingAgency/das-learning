@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
-using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.Domain.Repositories;
-using System.Threading.Channels;
 
 namespace SFA.DAS.Learning.Command.DeleteShortCourse;
 
