@@ -1,20 +1,21 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.MessageHandlers
 {
-    public class LearningWithdrawnEventHandler(IMessageSession messageSession, ILogger<LearningWithdrawnEventHandler> logger) : IDomainEventHandler<LearningWithdrawnEvent>
+    public class LearningDeletedEventHandler(IMessageSession messageSession, ILogger<LearningDeletedEventHandler> logger) : IDomainEventHandler<LearningDeletedEvent>
     {
-        public async Task Handle(LearningWithdrawnEvent @event, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task Handle(LearningDeletedEvent @event, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation($"Publishing ApprenticeshipWithdrawnEvent for Learning {@event.LearningKey}, LastDayOfLearning {@event.LastDayOfLearning}");
+            logger.LogInformation("Publishing ApprenticeshipWithdrawnEvent for deleted Learning {LearningKey}", @event.LearningKey);
 
             var message = new Types.ApprenticeshipWithdrawnEvent
             {
                 LearningKey = @event.LearningKey,
                 ApprovalsApprenticeshipId = @event.ApprovalsApprenticeshipId,
-                Reason = @event.Reason,
+                Reason = WithdrawReason.WithdrawFromStart.ToString(),
                 LastDayOfLearning = @event.LastDayOfLearning,
                 EmployerAccountId = @event.EmployerAccountId
             };

@@ -320,7 +320,7 @@ public class ShortCourseStepDefinitions
         await CallUpdateShortCourseEndpoint(request);
     }
 
-    [When(@"SLD calls the delete short course endpoint")]
+    [When(@"SLD delete the short course")]
     public async Task WhenSLDCallsTheDeleteShortCourseEndpoint()
     {
         var learningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);

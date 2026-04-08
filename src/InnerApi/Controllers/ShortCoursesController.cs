@@ -110,6 +110,7 @@ public class ShortCoursesController : ControllerBase
     /// <summary>
     /// Deletes a short course learner record.
     /// </summary>
+    /// <param name="ukprn">The ukprn of the provider in context</param>
     /// <param name="learningKey">The key of the short course learning record to delete.</param>
     /// <returns>No content.</returns>
     [HttpDelete("{ukprn:long}/shortCourses/{learningKey}")]
@@ -117,8 +118,8 @@ public class ShortCoursesController : ControllerBase
     [ProducesResponseType(200)]
     public async Task<IActionResult> DeleteShortCourse(long ukprn, Guid learningKey)
     {
-        var deleted = await _commandDispatcher.Send<DeleteShortCourseCommand, bool>(new DeleteShortCourseCommand(learningKey, ukprn));
-        return deleted ? NoContent() : Ok();
+        var result = await _commandDispatcher.Send<DeleteShortCourseCommand, DeleteShortCourseResult>(new DeleteShortCourseCommand(learningKey, ukprn));
+        return result.WasDeleted ? NoContent() : Ok();
     }
 
     /// <summary>

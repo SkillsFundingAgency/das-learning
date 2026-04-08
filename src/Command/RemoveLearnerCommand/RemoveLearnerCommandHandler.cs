@@ -54,7 +54,7 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand,
     private async Task SendEvent(ApprenticeshipLearningDomainModel learning, DateTime lastDayOfLearning)
     {
         _logger.LogInformation("Publishing ApprenticeshipWithdrawnEvent for {learningKey}", learning.Key);
-        var message = new LearningWithdrawnEvent
+        var message = new ApprenticeshipWithdrawnEvent
         {
             LearningKey = learning.Key,
             ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,

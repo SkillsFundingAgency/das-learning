@@ -111,13 +111,33 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
     }
 
-    public override void Approve(long employerAccountId)
-        => Approve(employerAccountId, EmployerType.NonLevy);
+    public bool Delete(long ukprn)
+    {
+        var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
 
-    public void Approve(long employerAccountId, EmployerType employerType)
+        if (episode == null || !episode.IsApproved)
+            return false;
+
+        episode.Delete();
+
+        AddEvent(new LearningDeletedEvent
+        {
+            LearningKey = Key,
+            ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
+            LastDayOfLearning = episode.StartDate,
+            EmployerAccountId = episode.EmployerAccountId
+        });
+
+        return true;
+    }
+
+    public override void Approve(long employerAccountId)
+        => Approve(employerAccountId, EmployerType.NonLevy, 0);
+
+    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId)
     {
         var episode = LatestEpisode;
-        episode.Approve(employerAccountId, employerType);
+        episode.Approve(employerAccountId, employerType, approvalsApprenticeshipId);
 
         AddEvent(new LearningApprovedEvent
         {

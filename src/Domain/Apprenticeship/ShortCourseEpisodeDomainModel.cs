@@ -21,6 +21,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
     public DateTime StartDate => _entity.StartDate;
+    public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public bool IsApproved => _entity.IsApproved;
     public decimal Price => _entity.Price;
     public LearningType LearningType => _entity.LearningType;
@@ -88,11 +89,12 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         });
     }
 
-    public void Approve(long employerAccountId, EmployerType employerType)
+    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId)
     {
         _entity.IsApproved = true;
         _entity.EmployerAccountId = employerAccountId;
         _entity.EmployerType = employerType;
+        _entity.ApprovalsApprenticeshipId = approvalsApprenticeshipId;
     }
 
     public void Delete()

@@ -7,9 +7,9 @@ namespace SFA.DAS.Learning.Command.DeleteShortCourse;
 public class DeleteShortCourseCommandHandler(
     ILogger<DeleteShortCourseCommandHandler> logger,
     IShortCourseLearningRepository repository)
-    : ICommandHandler<DeleteShortCourseCommand, bool>
+    : ICommandHandler<DeleteShortCourseCommand, DeleteShortCourseResult>
 {
-    public async Task<bool> Handle(DeleteShortCourseCommand command, CancellationToken cancellationToken = default)
+    public async Task<DeleteShortCourseResult> Handle(DeleteShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Handling DeleteShortCourseCommand for LearningKey {LearningKey}", command.LearningKey);
 
@@ -18,17 +18,15 @@ public class DeleteShortCourseCommandHandler(
         if (learning == null)
             throw new KeyNotFoundException($"Short course learning with key {command.LearningKey} not found.");
 
-        var episode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn);
+        var deleted = learning.Delete(command.Ukprn);
 
-        if (episode == null || !episode.IsApproved)
+        if (!deleted)
         {
             logger.LogInformation("Short course {LearningKey} is not approved; delete request ignored.", command.LearningKey);
-            return false;
+            return new DeleteShortCourseResult { WasDeleted = false };
         }
 
-        episode.Delete();
-
         await repository.Update(learning);
-        return true;
+        return new DeleteShortCourseResult { WasDeleted = true };
     }
 }
