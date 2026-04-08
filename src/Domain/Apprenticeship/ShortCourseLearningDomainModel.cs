@@ -47,7 +47,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         DateTime? withdrawalDate,
         IEnumerable<Milestone> milestones,
         decimal price = 0,
-        LearningType learningType = LearningType.Apprenticeship)
+        LearningType learningType = LearningType.Apprenticeship,
+        EmployerType employerType = EmployerType.NonLevy)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
             _entity.Key,
@@ -60,7 +61,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             expectedEndDate,
             withdrawalDate,
             price,
-            learningType
+            learningType,
+            employerType
         );
 
         foreach (var milestone in milestones)
@@ -109,10 +111,33 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
     }
 
+    public bool Delete(long ukprn)
+    {
+        var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
+
+        if (episode == null || !episode.IsApproved)
+            return false;
+
+        episode.Delete();
+
+        AddEvent(new LearningDeletedEvent
+        {
+            LearningKey = Key,
+            ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
+            LastDayOfLearning = episode.StartDate,
+            EmployerAccountId = episode.EmployerAccountId
+        });
+
+        return true;
+    }
+
     public override void Approve(long employerAccountId)
+        => Approve(employerAccountId, EmployerType.NonLevy, 0);
+
+    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId)
     {
         var episode = LatestEpisode;
-        episode.Approve(employerAccountId);
+        episode.Approve(employerAccountId, employerType, approvalsApprenticeshipId);
 
         AddEvent(new LearningApprovedEvent
         {

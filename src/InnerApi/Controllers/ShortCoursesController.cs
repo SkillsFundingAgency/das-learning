@@ -110,6 +110,7 @@ public class ShortCoursesController : ControllerBase
     /// <summary>
     /// Deletes a short course learner record.
     /// </summary>
+    /// <param name="ukprn">The ukprn of the provider in context</param>
     /// <param name="learningKey">The key of the short course learning record to delete.</param>
     /// <returns>No content.</returns>
     [HttpDelete("{ukprn:long}/shortCourses/{learningKey}")]

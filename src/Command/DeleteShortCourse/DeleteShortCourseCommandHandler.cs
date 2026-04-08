@@ -20,15 +20,13 @@ public class DeleteShortCourseCommandHandler(
         if (learning == null)
             throw new KeyNotFoundException($"Short course learning with key {command.LearningKey} not found.");
 
-        var episode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn);
+        var deleted = learning.Delete(command.Ukprn);
 
-        if (episode == null || !episode.IsApproved)
+        if (!deleted)
         {
             logger.LogInformation("Short course {LearningKey} is not approved; delete request ignored.", command.LearningKey);
             return null;
         }
-
-        episode.Delete();
 
         await repository.Update(learning);
 

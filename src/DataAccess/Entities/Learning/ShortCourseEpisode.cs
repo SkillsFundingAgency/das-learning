@@ -17,10 +17,12 @@ public class ShortCourseEpisode : Episode
     public DateTime? WithdrawalDate { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime ExpectedEndDate { get; set; }
+    public long ApprovalsApprenticeshipId { get; set; }
     public bool IsApproved { get; set; }
     public decimal Price { get; set; }
     public string LearnerRef { get; set; }
     public LearningType LearningType { get; set; }
+    public EmployerType EmployerType { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
     public List<ShortCourseLearningSupport> LearningSupport { get; set; }

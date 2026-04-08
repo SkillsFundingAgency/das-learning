@@ -8,10 +8,12 @@
     [ExpectedEndDate] DATETIME NOT NULL,
     [WithdrawalDate] DATETIME NULL,
     [TrainingCode] VARCHAR(8) NOT NULL,
+    [ApprovalsApprenticeshipId] BIGINT NOT NULL DEFAULT 0,
     [IsApproved] BIT NOT NULL DEFAULT 0,
     [Price] MONEY NOT NULL DEFAULT 0,
     [LearnerRef] VARCHAR(128) NOT NULL DEFAULT '',
-    [LearningType] TINYINT NOT NULL DEFAULT 0
+    [LearningType] TINYINT NOT NULL DEFAULT 0,
+    [EmployerType] TINYINT NOT NULL DEFAULT 0
 )
 GO
 

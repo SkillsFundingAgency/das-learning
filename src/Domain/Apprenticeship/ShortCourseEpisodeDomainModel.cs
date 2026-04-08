@@ -21,9 +21,11 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
     public DateTime StartDate => _entity.StartDate;
+    public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public bool IsApproved => _entity.IsApproved;
     public decimal Price => _entity.Price;
     public LearningType LearningType => _entity.LearningType;
+    public EmployerType EmployerType => _entity.EmployerType;
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
 
@@ -40,7 +42,8 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         DateTime expectedEndDate,
         DateTime? withdrawalDate,
         decimal price = 0,
-        LearningType learningType = LearningType.Apprenticeship)
+        LearningType learningType = LearningType.Apprenticeship,
+        EmployerType employerType = EmployerType.NonLevy)
     {
         return new ShortCourseEpisodeDomainModel(new ShortCourseEpisode
         {
@@ -55,7 +58,8 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             ExpectedEndDate = expectedEndDate,
             WithdrawalDate = withdrawalDate,
             Price = price,
-            LearningType = learningType
+            LearningType = learningType,
+            EmployerType = employerType
         });
     }
 
@@ -85,10 +89,12 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         });
     }
 
-    public void Approve(long employerAccountId)
+    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId)
     {
         _entity.IsApproved = true;
         _entity.EmployerAccountId = employerAccountId;
+        _entity.EmployerType = employerType;
+        _entity.ApprovalsApprenticeshipId = approvalsApprenticeshipId;
     }
 
     public void Delete()

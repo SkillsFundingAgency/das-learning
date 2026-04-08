@@ -1,16 +1,17 @@
-﻿using AutoFixture;
+using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.MessageHandlers.UnitTests;
 
-public class LearningWithdrawnEventHandlerTests
+public class LearningDeletedEventHandlerTests
 {
     private IFixture _fixture;
     private Mock<IMessageSession> _messageSession;
-    private ILogger<LearningWithdrawnEventHandler> _logger;
-    private LearningWithdrawnEventHandler _handler;
+    private ILogger<LearningDeletedEventHandler> _logger;
+    private LearningDeletedEventHandler _handler;
 
     [SetUp]
     public void SetUp()
@@ -18,27 +19,28 @@ public class LearningWithdrawnEventHandlerTests
         _fixture = new Fixture();
 
         _messageSession = new Mock<IMessageSession>();
-        _logger = Mock.Of<ILogger<LearningWithdrawnEventHandler>>();
+        _logger = Mock.Of<ILogger<LearningDeletedEventHandler>>();
 
-        _handler = new LearningWithdrawnEventHandler(_messageSession.Object, _logger);
+        _handler = new LearningDeletedEventHandler(_messageSession.Object, _logger);
     }
 
     [Test]
-    public async Task Handle_PublishesLearningWithdrawnEventMessage()
+    public async Task Handle_PublishesApprenticeshipWithdrawnEventWithCorrectFields()
     {
         // Arrange
-        var domainEvent = _fixture.Create<LearningWithdrawnEvent>();
+        var domainEvent = _fixture.Create<LearningDeletedEvent>();
 
         // Act
         await _handler.Handle(domainEvent, default);
 
+        // Assert
         _messageSession.Verify(x => x.Publish(
                 It.Is<Types.ApprenticeshipWithdrawnEvent>(msg =>
-                    msg.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
                     msg.LearningKey == domainEvent.LearningKey &&
+                    msg.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
                     msg.LastDayOfLearning == domainEvent.LastDayOfLearning &&
                     msg.EmployerAccountId == domainEvent.EmployerAccountId &&
-                    msg.Reason == domainEvent.Reason
+                    msg.Reason == WithdrawReason.WithdrawFromStart.ToString()
                 ),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
