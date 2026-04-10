@@ -4,6 +4,7 @@ using NUnit.Framework;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Models.Dtos;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
+using System.Text.Json;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -30,7 +31,17 @@ public class GetFm36LearnersStepDefinitions
         var trainingPrice = 6000m;
         var epaPrice = 500m;
 
+        // We create a learner that will definitely be included in the response. This is needed because if no learners are returned we get a 404
+        await _learningDataSeeder.CreateLearner(startDate.DateTime!.Value.AddYears(-5), plannedEndDate.DateTime!.Value.AddYears(5), trainingPrice, epaPrice);
+
         var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(startDate.DateTime!.Value, plannedEndDate.DateTime!.Value, trainingPrice, epaPrice);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true
+        };
+
+        Console.WriteLine(JsonSerializer.Serialize(approvalCreatedEvent, options));
 
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
 
@@ -74,13 +85,14 @@ public class GetFm36LearnersStepDefinitions
     {
         var response = _scenarioContext.Get<List<LearningWithEpisodes>>(GetFm36LearnersResponse);
 
+        // We assert on 2 records as we have added a control record to ensure a 404 is not returned from the endpoint
         if (expectedResult == "Included")
         {
-            Assert.IsTrue(response.Count() == 1, "Expected a learner to be included in the response.");
+            Assert.IsTrue(response.Count() == 2, "Expected learner was not included in response");
         }
         else
         {
-            Assert.IsFalse(response.Count() == 1, "Expected no learners to be included in the response.");
+            Assert.IsFalse(response.Count() == 2, "Learner was included in response but should have been excluded");
         }
     }
     
