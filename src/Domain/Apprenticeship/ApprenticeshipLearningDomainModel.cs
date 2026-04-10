@@ -102,6 +102,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         string? trainingCourseVersion)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
+            _entity.ApprovalsApprenticeshipId,
             ukprn,
             employerAccountId,
             fundingType,
@@ -261,7 +262,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
             var @event = new EndDateChangedEvent
             {
-                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 LearningKey = Key,
                 PlannedEndDate = EndDate.Value
             };
@@ -284,7 +285,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             var @event = new LearningWithdrawnEvent
             {
                 LearningKey = Key,
-                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 Reason = latestEpisode.IsWithdrawnBackToStart
                     ? WithdrawReason.WithdrawFromStart.ToString()
                     : WithdrawReason.WithdrawDuringLearning.ToString(),
@@ -304,7 +305,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             var @event = new WithdrawalRevertedEvent
             {
                 LearningKey = Key,
-                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId
+                ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId
             };
 
             AddEvent(@event);

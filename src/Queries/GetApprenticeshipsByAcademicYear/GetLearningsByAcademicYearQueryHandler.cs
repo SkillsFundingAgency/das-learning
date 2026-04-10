@@ -25,7 +25,7 @@ public class GetLearningsByAcademicYearQueryHandler(LearningDataContext dbContex
         var totalItems = await baseQuery.CountAsync(cancellationToken);
 
         var items = await baseQuery
-            .OrderBy(x => x.ApprovalsApprenticeshipId)
+            .OrderBy(x => x.Episodes.Min(e => e.ApprovalsApprenticeshipId))
             .Skip(query.Offset)
             .Take(query.Limit)
             .Join(

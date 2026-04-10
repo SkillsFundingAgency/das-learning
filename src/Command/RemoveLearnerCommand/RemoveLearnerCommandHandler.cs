@@ -57,7 +57,7 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand,
         var message = new ApprenticeshipWithdrawnEvent
         {
             LearningKey = learning.Key,
-            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
             Reason = WithdrawReason.WithdrawFromStart.ToString(),
             LastDayOfLearning = lastDayOfLearning,
             EmployerAccountId = learning.LatestEpisode.EmployerAccountId

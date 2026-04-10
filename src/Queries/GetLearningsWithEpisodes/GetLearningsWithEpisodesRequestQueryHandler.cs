@@ -32,7 +32,7 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
                         episode.Prices.Any(price => price.EndDate >= activeOnDate.StartOfCurrentAcademicYear()) &&
                         episode.Prices.Any(price => price.StartDate <= activeOnDate) &&
                         !(episode.WithdrawalDate.HasValue && episode.WithdrawalDate.Value == episode.Prices.Min(p => p.StartDate))))
-                .OrderBy(x => x.ApprovalsApprenticeshipId)
+                .OrderBy(x => x.Episodes.Min(e => e.ApprovalsApprenticeshipId))
                 .AsNoTracking();
 
             var totalItems = await baseQuery.CountAsync(cancellationToken);
