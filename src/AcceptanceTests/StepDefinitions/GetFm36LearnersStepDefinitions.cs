@@ -3,7 +3,6 @@ using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Models.Dtos;
-using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 using System.Text.Json;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
@@ -80,7 +79,7 @@ public class GetFm36LearnersStepDefinitions
         _scenarioContext.Set(response, GetFm36LearnersResponse);
     }
 
-    [Then(@"the learner should be (.*)")]
+    [Then(@"the fm36 learner should be (.*)")]
     public void VerifyResponse(string expectedResult)
     {
         var response = _scenarioContext.Get<List<LearningWithEpisodes>>(GetFm36LearnersResponse);
