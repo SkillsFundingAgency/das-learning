@@ -286,9 +286,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             {
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
-                Reason = latestEpisode.IsWithdrawnBackToStart
-                    ? WithdrawReason.WithdrawFromStart.ToString()
-                    : WithdrawReason.WithdrawDuringLearning.ToString(),
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
                 EmployerAccountId = LatestEpisode.EmployerAccountId
             };
