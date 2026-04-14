@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.MessageHandlers
@@ -14,7 +15,7 @@ namespace SFA.DAS.Learning.MessageHandlers
             {
                 LearningKey = @event.LearningKey,
                 ApprovalsApprenticeshipId = @event.ApprovalsApprenticeshipId,
-                Reason = @event.Reason,
+                Reason = WithdrawReason.WithdrawDuringLearning.ToString(),
                 LastDayOfLearning = @event.LastDayOfLearning,
                 EmployerAccountId = @event.EmployerAccountId
             };

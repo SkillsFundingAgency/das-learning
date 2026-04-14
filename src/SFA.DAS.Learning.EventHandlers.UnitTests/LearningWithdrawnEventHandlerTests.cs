@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.MessageHandlers.UnitTests;
@@ -38,7 +39,7 @@ public class LearningWithdrawnEventHandlerTests
                     msg.LearningKey == domainEvent.LearningKey &&
                     msg.LastDayOfLearning == domainEvent.LastDayOfLearning &&
                     msg.EmployerAccountId == domainEvent.EmployerAccountId &&
-                    msg.Reason == domainEvent.Reason
+                    msg.Reason == WithdrawReason.WithdrawDuringLearning.ToString()
                 ),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
