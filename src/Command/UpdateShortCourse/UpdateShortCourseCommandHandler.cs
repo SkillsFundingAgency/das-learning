@@ -28,6 +28,7 @@ public class UpdateShortCourseCommandHandler(
         return new UpdateShortCourseResult
         {
             LearningKey = learning.Key,
+            LearnerKey = learning.LearnerKey,
             CompletionDate = learning.CompletionDate,
             Changes = changes,
             Learner = new UpdateShortCourseResultLearner

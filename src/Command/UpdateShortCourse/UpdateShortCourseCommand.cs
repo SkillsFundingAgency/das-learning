@@ -19,6 +19,7 @@ public class UpdateShortCourseCommand : ICommand
 public class UpdateShortCourseResult
 {
     public Guid LearningKey { get; set; }
+    public Guid LearnerKey { get; set; }
     public DateTime? CompletionDate { get; set; }
     public ShortCourseUpdateChanges[] Changes { get; set; } = [];
     public UpdateShortCourseResultLearner Learner { get; set; } = null!;
