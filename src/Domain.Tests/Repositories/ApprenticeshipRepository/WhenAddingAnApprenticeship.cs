@@ -69,6 +69,7 @@ public class WhenAddingAnApprenticeship
             .With(x => x.PaymentsFrozen, false)
             .With(x => x.WithdrawalDate, (DateTime?)null)
             .With(x => x.PauseDate, (DateTime?)null)
+            .With(x => x.ApprovalsApprenticeshipId, apprenticeship.ApprovalsApprenticeshipId)
             .Create());
 
         apprenticeship.AddEpisode(
@@ -89,7 +90,7 @@ public class WhenAddingAnApprenticeship
 
         // Act
         await _sut.Add(apprenticeship);
-        
+
         // Assert
         _dbContext.Episodes.Count().Should().Be(1);
         var storedEpisode = _dbContext.Episodes.Single();
