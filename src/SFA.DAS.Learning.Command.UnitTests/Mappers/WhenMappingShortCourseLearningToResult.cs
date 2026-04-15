@@ -36,6 +36,7 @@ public class WhenMappingShortCourseLearningToResult
         // Assert
         result.Should().BeOfType<DeleteShortCourseResult>();
         result.LearningKey.Should().Be(learning.Key);
+        result.LearnerKey.Should().Be(learning.LearnerKey);
         result.CompletionDate.Should().Be(learning.CompletionDate);
 
         result.Learner.Should().BeEquivalentTo(new
@@ -116,6 +117,7 @@ public class WhenMappingShortCourseLearningToResult
         var entity = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
+            LearnerKey = Guid.NewGuid(),
             CompletionDate = new DateTime(2024, 1, 1),
             Episodes = new List<ShortCourseEpisode>
             {

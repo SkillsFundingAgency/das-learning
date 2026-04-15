@@ -31,36 +31,5 @@ public class UpdateShortCourseCommandHandler(
         var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, command.Model.OnProgramme.Ukprn);
         result.Changes = changes;
         return result;
-        return new UpdateShortCourseResult
-        {
-            LearningKey = learning.Key,
-            LearnerKey = learning.LearnerKey,
-            CompletionDate = learning.CompletionDate,
-            Changes = changes,
-            Learner = new UpdateShortCourseResultLearner
-            {
-                Uln = learner.Uln,
-                FirstName = learner.FirstName,
-                LastName = learner.LastName,
-                DateOfBirth = learner.DateOfBirth
-            },
-            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new UpdateShortCourseResultEpisode
-            {
-                Ukprn = e.Ukprn,
-                EmployerAccountId = e.EmployerAccountId,
-                CourseCode = e.TrainingCode,
-                CourseType = CourseTypeConstants.ShortCourse,
-                LearningType = e.LearningType,
-                StartDate = e.StartDate,
-                AgeAtStart = learner.AgeOnDate(e.StartDate),
-                PlannedEndDate = e.ExpectedEndDate,
-                WithdrawalDate = e.WithdrawalDate,
-                IsApproved = e.IsApproved,
-                Price = e.Price,
-                LearnerRef = e.LearnerRef,
-                EmployerType = e.EmployerType,
-                ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
-            }).ToArray()
-        };
     }
 }

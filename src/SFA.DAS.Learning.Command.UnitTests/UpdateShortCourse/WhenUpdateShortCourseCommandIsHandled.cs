@@ -70,20 +70,6 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenLearnerKeyIsReturnedInResult()
-    {
-        var learningKey = Guid.NewGuid();
-        var learnerKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey, learnerKey: learnerKey);
-
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
-
-        var result = await _commandHandler.Handle(new UpdateShortCourseCommand(learningKey, CreateUpdateContext()));
-
-        result.LearnerKey.Should().Be(learnerKey);
-    }
-
-    [Test]
     public async Task ThenCompletionDateChangeIsDetected()
     {
         var learningKey = Guid.NewGuid();

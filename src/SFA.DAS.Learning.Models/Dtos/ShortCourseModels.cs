@@ -7,6 +7,7 @@ namespace SFA.DAS.Learning.Models.Dtos;
 public abstract class ShortCourseLearningDto
 {
     public Guid LearningKey { get; set; }
+    public Guid LearnerKey { get; set; }
     public DateTime? CompletionDate { get; set; }
     public ShortCourseLearnerDto Learner { get; set; }
     public ShortCourseEpisodeDto[] Episodes { get; set; } = [];
@@ -37,6 +38,7 @@ public class ShortCourseEpisodeDto
     public string LearnerRef { get; set; } = null!;
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public EmployerType EmployerType { get; set; }
+    public long ApprovalsApprenticeshipId { get; set; }
 }
 
 #pragma warning restore CS8618

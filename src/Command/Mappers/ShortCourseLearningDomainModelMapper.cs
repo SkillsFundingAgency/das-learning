@@ -16,6 +16,7 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
         return new T
         {
             LearningKey = learning.Key,
+            LearnerKey = learning.LearnerKey,
             CompletionDate = learning.CompletionDate,
             Learner = new ShortCourseLearnerDto
             {
@@ -38,7 +39,8 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
                 IsApproved = e.IsApproved,
                 Price = e.Price,
                 LearnerRef = e.LearnerRef,
-                EmployerType = e.EmployerType
+                EmployerType = e.EmployerType,
+                ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId
             }).ToArray()
         };
     }
