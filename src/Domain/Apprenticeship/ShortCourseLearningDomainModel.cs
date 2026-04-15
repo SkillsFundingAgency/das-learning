@@ -102,7 +102,20 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         episode.Update(updateContext);
 
         if (episode.WithdrawalDate != prevWithdrawalDate)
+        {
             changes.Add(ShortCourseUpdateChanges.WithdrawalDate);
+
+            if (episode.IsApproved && episode.WithdrawalDate.HasValue)
+            {
+                AddEvent(new LearningWithdrawnEvent
+                {
+                    LearningKey = Key,
+                    ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
+                    LastDayOfLearning = episode.WithdrawalDate.Value,
+                    EmployerAccountId = episode.EmployerAccountId
+                });
+            }
+        }
 
         if (!episode.Milestones.Select(m => m.Milestone).ToHashSet().SetEquals(prevMilestones))
             changes.Add(ShortCourseUpdateChanges.Milestone);

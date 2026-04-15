@@ -70,6 +70,20 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenLearnerKeyIsReturnedInResult()
+    {
+        var learningKey = Guid.NewGuid();
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(learningKey, learnerKey: learnerKey);
+
+        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+
+        var result = await _commandHandler.Handle(new UpdateShortCourseCommand(learningKey, CreateUpdateContext()));
+
+        result.LearnerKey.Should().Be(learnerKey);
+    }
+
+    [Test]
     public async Task ThenCompletionDateChangeIsDetected()
     {
         var learningKey = Guid.NewGuid();
@@ -159,7 +173,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
-    private static ShortCourseLearningDomainModel CreateDomainModel(Guid learningKey, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship)
+    private static ShortCourseLearningDomainModel CreateDomainModel(Guid learningKey, Guid? learnerKey = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship)
     {
         var episodeKey = Guid.NewGuid();
         var episode = new ShortCourseEpisode
@@ -187,6 +201,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         var entity = new ShortCourseLearning
         {
             Key = learningKey,
+            LearnerKey = learnerKey ?? Guid.NewGuid(),
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };
