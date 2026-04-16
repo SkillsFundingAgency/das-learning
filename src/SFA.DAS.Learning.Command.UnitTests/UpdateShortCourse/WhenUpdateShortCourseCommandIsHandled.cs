@@ -1,7 +1,9 @@
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
@@ -18,10 +20,12 @@ namespace SFA.DAS.Learning.Command.UnitTests.UpdateShortCourse;
 [TestFixture]
 public class WhenUpdateShortCourseCommandIsHandled
 {
+    private Fixture _fixture = new Fixture();
     private UpdateShortCourseCommandHandler _commandHandler = null!;
     private Mock<IShortCourseLearningRepository> _repository = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<ILogger<UpdateShortCourseCommandHandler>> _logger = null!;
+    private Mock<IShortCourseLearningDomainModelMapper> _mapper = null!;
 
     [SetUp]
     public void SetUp()
@@ -29,6 +33,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository = new Mock<IShortCourseLearningRepository>();
         _learnerRepository = new Mock<ILearnerRepository>();
         _logger = new Mock<ILogger<UpdateShortCourseCommandHandler>>();
+        _mapper = new Mock<IShortCourseLearningDomainModelMapper>();
 
         _learnerRepository
             .Setup(r => r.Get(It.IsAny<Guid>()))
@@ -41,7 +46,12 @@ public class WhenUpdateShortCourseCommandIsHandled
                 DateOfBirth = DateTime.Today.AddYears(-20)
             }));
 
-        _commandHandler = new UpdateShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object);
+        _mapper.Setup(x => x.Map<UpdateShortCourseResult>(
+            It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
+            )
+            .Returns(_fixture.Create<UpdateShortCourseResult>());
+
+        _commandHandler = new UpdateShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object);
     }
 
     [Test]
@@ -57,21 +67,6 @@ public class WhenUpdateShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         result.Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
-        result.LearningKey.Should().Be(learningKey);
-    }
-
-    [Test]
-    public async Task ThenLearnerKeyIsReturnedInResult()
-    {
-        var learningKey = Guid.NewGuid();
-        var learnerKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey, learnerKey: learnerKey);
-
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
-
-        var result = await _commandHandler.Handle(new UpdateShortCourseCommand(learningKey, CreateUpdateContext()));
-
-        result.LearnerKey.Should().Be(learnerKey);
     }
 
     [Test]

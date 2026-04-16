@@ -1,8 +1,10 @@
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.DeleteShortCourse;
+using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -17,8 +19,11 @@ namespace SFA.DAS.Learning.Command.UnitTests.DeleteShortCourse;
 [TestFixture]
 public class WhenDeleteShortCourseCommandIsHandled
 {
+    private Fixture _fixture = new Fixture();
     private DeleteShortCourseCommandHandler _commandHandler = null!;
     private Mock<IShortCourseLearningRepository> _repository = null!;
+    private Mock<ILearnerRepository> _learnerRepository = null!;
+    private Mock<IShortCourseLearningDomainModelMapper> _mapper = null!;
     private Mock<ILogger<DeleteShortCourseCommandHandler>> _logger = null!;
 
     private const long Ukprn = 12345678;
@@ -28,7 +33,17 @@ public class WhenDeleteShortCourseCommandIsHandled
     {
         _repository = new Mock<IShortCourseLearningRepository>();
         _logger = new Mock<ILogger<DeleteShortCourseCommandHandler>>();
-        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object);
+        _learnerRepository = new Mock<ILearnerRepository>();
+        _mapper = new Mock<IShortCourseLearningDomainModelMapper>();
+
+        _learnerRepository.Setup(r => r.Get(It.IsAny<Guid>())).ReturnsAsync(CreateLearnerDomainModel());
+
+        _mapper.Setup(x => x.Map<DeleteShortCourseResult>(
+            It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
+            )
+            .Returns(_fixture.Create<DeleteShortCourseResult>());
+
+        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object);
     }
 
     [Test]
@@ -65,7 +80,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 
         var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
 
-        result.WasDeleted.Should().BeTrue();
+        result.Should().NotBeNull();
     }
 
     [Test]
@@ -77,7 +92,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 
         var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, ukprn: 99999999));
 
-        result.WasDeleted.Should().BeFalse();
+        result.Should().BeNull();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
@@ -90,7 +105,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 
         var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
 
-        result.WasDeleted.Should().BeFalse();
+        result.Should().BeNull();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
@@ -178,5 +193,17 @@ public class WhenDeleteShortCourseCommandIsHandled
         };
 
         return ShortCourseLearningDomainModel.Get(entity);
+    }
+
+    private static LearnerDomainModel CreateLearnerDomainModel()
+    {
+        return LearnerDomainModel.Get(new Learner
+        {
+            Key = Guid.NewGuid(),
+            Uln = "1234567890",
+            FirstName = "John",
+            LastName = "Smith",
+            DateOfBirth = new DateTime(1990, 1, 1)
+        });
     }
 }
