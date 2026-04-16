@@ -119,7 +119,7 @@ public class ShortCoursesController : ControllerBase
     public async Task<IActionResult> DeleteShortCourse(long ukprn, Guid learningKey)
     {
         var result = await _commandDispatcher.Send<DeleteShortCourseCommand, DeleteShortCourseResult>(new DeleteShortCourseCommand(learningKey, ukprn));
-        return result.WasDeleted ? NoContent() : Ok();
+        return result.WasDeleted ? Ok(result) : NoContent();
     }
 
     /// <summary>

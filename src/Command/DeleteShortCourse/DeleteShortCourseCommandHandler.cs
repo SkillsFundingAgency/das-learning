@@ -6,7 +6,8 @@ namespace SFA.DAS.Learning.Command.DeleteShortCourse;
 
 public class DeleteShortCourseCommandHandler(
     ILogger<DeleteShortCourseCommandHandler> logger,
-    IShortCourseLearningRepository repository)
+    IShortCourseLearningRepository repository,
+    ILearnerRepository learnerRepository)
     : ICommandHandler<DeleteShortCourseCommand, DeleteShortCourseResult>
 {
     public async Task<DeleteShortCourseResult> Handle(DeleteShortCourseCommand command, CancellationToken cancellationToken = default)
@@ -27,6 +28,39 @@ public class DeleteShortCourseCommandHandler(
         }
 
         await repository.Update(learning);
-        return new DeleteShortCourseResult { WasDeleted = true };
+
+        var learner = await learnerRepository.Get(learning.LearnerKey);
+
+        return new DeleteShortCourseResult
+        {
+            WasDeleted = true,
+            LearningKey = learning.Key,
+            LearnerKey = learning.LearnerKey,
+            CompletionDate = learning.CompletionDate,
+            Learner = new ShortCourseLearningResultLearner
+            {
+                Uln = learner!.Uln,
+                FirstName = learner.FirstName,
+                LastName = learner.LastName,
+                DateOfBirth = learner.DateOfBirth
+            },
+            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Ukprn).Select(e => new ShortCourseLearningResultEpisode
+            {
+                Ukprn = e.Ukprn,
+                EmployerAccountId = e.EmployerAccountId,
+                CourseCode = e.TrainingCode,
+                CourseType = CourseTypeConstants.ShortCourse,
+                LearningType = e.LearningType,
+                StartDate = e.StartDate,
+                AgeAtStart = learner.AgeOnDate(e.StartDate),
+                PlannedEndDate = e.ExpectedEndDate,
+                WithdrawalDate = e.WithdrawalDate,
+                IsApproved = e.IsApproved,
+                Price = e.Price,
+                LearnerRef = e.LearnerRef,
+                EmployerType = e.EmployerType,
+                ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
+            }).ToArray()
+        };
     }
 }

@@ -19,6 +19,7 @@ public class WhenDeleteShortCourseCommandIsHandled
 {
     private DeleteShortCourseCommandHandler _commandHandler = null!;
     private Mock<IShortCourseLearningRepository> _repository = null!;
+    private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<ILogger<DeleteShortCourseCommandHandler>> _logger = null!;
 
     private const long Ukprn = 12345678;
@@ -27,8 +28,20 @@ public class WhenDeleteShortCourseCommandIsHandled
     public void SetUp()
     {
         _repository = new Mock<IShortCourseLearningRepository>();
+        _learnerRepository = new Mock<ILearnerRepository>();
         _logger = new Mock<ILogger<DeleteShortCourseCommandHandler>>();
-        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object);
+
+        _learnerRepository.Setup(r => r.Get(It.IsAny<Guid>()))
+            .ReturnsAsync(LearnerDomainModel.Get(new Learner
+            {
+                Key = Guid.NewGuid(),
+                Uln = "1234567890",
+                FirstName = "Test",
+                LastName = "Learner",
+                DateOfBirth = new DateTime(2000, 1, 1)
+            }));
+
+        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object);
     }
 
     [Test]

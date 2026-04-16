@@ -31,14 +31,14 @@ public class UpdateShortCourseCommandHandler(
             LearnerKey = learning.LearnerKey,
             CompletionDate = learning.CompletionDate,
             Changes = changes,
-            Learner = new UpdateShortCourseResultLearner
+            Learner = new ShortCourseLearningResultLearner
             {
                 Uln = learner.Uln,
                 FirstName = learner.FirstName,
                 LastName = learner.LastName,
                 DateOfBirth = learner.DateOfBirth
             },
-            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new UpdateShortCourseResultEpisode
+            Episodes = learning.Episodes.Where(e => e.Ukprn == command.Model.OnProgramme.Ukprn).Select(e => new ShortCourseLearningResultEpisode
             {
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId,

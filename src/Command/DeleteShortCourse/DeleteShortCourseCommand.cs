@@ -1,6 +1,6 @@
 namespace SFA.DAS.Learning.Command.DeleteShortCourse;
 
-public class DeleteShortCourseResult
+public class DeleteShortCourseResult : ShortCourseLearningResult
 {
     public bool WasDeleted { get; set; }
 }
