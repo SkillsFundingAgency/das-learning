@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Command\SFA.DAS.Learning.Command.csproj" />
     <ProjectReference Include="..\Domain\SFA.DAS.Learning.Domain.csproj" />
   </ItemGroup>

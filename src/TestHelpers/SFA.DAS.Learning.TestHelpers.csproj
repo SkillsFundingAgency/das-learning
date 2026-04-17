@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="160.6161.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="Polly" Version="7.2.3" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>
