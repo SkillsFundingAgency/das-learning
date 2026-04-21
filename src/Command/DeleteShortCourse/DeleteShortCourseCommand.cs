@@ -1,8 +1,10 @@
+using SFA.DAS.Learning.Models.Dtos;
+
 namespace SFA.DAS.Learning.Command.DeleteShortCourse;
 
-public class DeleteShortCourseResult
+public class DeleteShortCourseResult : ShortCourseLearningDto
 {
-    public bool WasDeleted { get; set; }
+
 }
 
 public class DeleteShortCourseCommand : ICommand

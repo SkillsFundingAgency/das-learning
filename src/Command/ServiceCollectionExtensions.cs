@@ -12,6 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.Learning.Command.ArchiveLearningHistory;
 using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Services;
+using SFA.DAS.Learning.Command.Mappers;
 
 namespace SFA.DAS.Learning.Command;
 
@@ -28,6 +29,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IShortCourseLearningFactory, ShortCourseLearningFactory>()
             .AddScoped<ILearningHistoryRepository, LearningHistoryRepository>()
             .AddSingleton<ISystemClockService, SystemClockService>()
+            .AddScoped<IShortCourseLearningDomainModelMapper, ShortCourseLearningDomainModelMapper>()
             .AddEncodingServices(configuration)
             .AddPersistenceServices();
 

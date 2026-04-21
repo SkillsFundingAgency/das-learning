@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using SFA.DAS.Learning.Enums;
+
 namespace SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
 public class GetShortCoursesForEarningsItem
@@ -21,4 +24,6 @@ public class GetShortCoursesForEarningsEpisode
     public bool IsApproved { get; set; }
     public decimal Price { get; set; }
     public string LearnerRef { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public EmployerType EmployerType { get; set; }
 }
