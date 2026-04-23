@@ -40,7 +40,8 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
                 Price = e.Price,
                 LearnerRef = e.LearnerRef,
                 EmployerType = e.EmployerType,
-                ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId
+                ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
+                TransferSenderId = e.TransferSenderId
             }).ToArray()
         };
     }

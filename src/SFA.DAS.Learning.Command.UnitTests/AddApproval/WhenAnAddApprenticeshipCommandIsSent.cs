@@ -228,6 +228,23 @@ public class WhenAnAddApprenticeshipCommandIsSent
     }
 
     [Test]
+    public async Task WhenAnUnapprovedShortCourseExistsThenTheTransferSenderIdIsStored()
+    {
+        var command = _fixture.Build<AddLearningCommand>()
+            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .Create();
+
+        var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
+
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
+            .ReturnsAsync(shortCourseLearning);
+
+        await _commandHandler.Handle(command);
+
+        shortCourseLearning.LatestEpisode.TransferSenderId.Should().Be(command.TransferSenderId);
+    }
+
+    [Test]
     public async Task WhenAnUnapprovedShortCourseDoesNotExistThenDoNothing()
     {
         var command = _fixture.Build<AddLearningCommand>()

@@ -95,7 +95,8 @@ public class WhenMappingShortCourseLearningToResult
             source.IsApproved,
             source.Price,
             source.LearnerRef,
-            source.EmployerType
+            source.EmployerType,
+            source.TransferSenderId
         });
     }
 
@@ -133,7 +134,8 @@ public class WhenMappingShortCourseLearningToResult
                     IsApproved = true,
                     Price = 1500,
                     LearnerRef = "Ref1",
-                    EmployerType = Enums.EmployerType.Levy
+                    EmployerType = Enums.EmployerType.Levy,
+                    TransferSenderId = 456L
                 }
             }
         };
