@@ -41,7 +41,7 @@ namespace SFA.DAS.Learning.Functions.UnitTests
                         c.EndPointAssessmentPrice == @event.PriceEpisodes[0].EndPointAssessmentPrice &&
                         c.ApprovalsApprenticeshipId == @event.ApprenticeshipId &&
                         c.EmployerAccountId == @event.AccountId &&
-                        c.FundingEmployerAccountId == @event.TransferSenderId &&
+                        c.TransferSenderId == @event.TransferSenderId &&
                         c.FundingType == FundingType.Transfer &&
                         c.LegalEntityName == @event.LegalEntityName &&
                         c.PlannedEndDate == @event.EndDate &&
