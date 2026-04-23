@@ -13,7 +13,8 @@
     [Price] MONEY NOT NULL DEFAULT 0,
     [LearnerRef] VARCHAR(128) NOT NULL DEFAULT '',
     [LearningType] TINYINT NOT NULL DEFAULT 0,
-    [EmployerType] TINYINT NOT NULL DEFAULT 0
+    [EmployerType] TINYINT NOT NULL DEFAULT 0,
+    [TransferSenderId] BIGINT NULL
 )
 GO
 
