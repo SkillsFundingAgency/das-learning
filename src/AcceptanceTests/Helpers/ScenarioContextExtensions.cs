@@ -57,7 +57,7 @@ internal static class ScenarioContextExtensions
             return nextUln;
         }
 
-        context.Set<long>(10001, "NextUln");
+        context.Set<long>(10002, "NextUln");
         return 10001;
     }
 }

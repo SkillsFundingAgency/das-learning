@@ -77,7 +77,8 @@ public class TestInnerApi : IDisposable
     internal async Task<T> Get<T>(string route)
     {
         var response = await _httpClient.GetAsync(route);
-        return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync())!;
+        var responseAsString = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<T>(responseAsString)!;
     }
 
     public async Task Patch<T>(string route, T body)
