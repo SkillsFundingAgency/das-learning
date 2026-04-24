@@ -102,7 +102,20 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         episode.Update(updateContext);
 
         if (episode.WithdrawalDate != prevWithdrawalDate)
+        {
             changes.Add(ShortCourseUpdateChanges.WithdrawalDate);
+
+            if (episode.IsApproved && episode.WithdrawalDate.HasValue)
+            {
+                AddEvent(new LearningWithdrawnEvent
+                {
+                    LearningKey = Key,
+                    ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
+                    LastDayOfLearning = episode.WithdrawalDate.Value,
+                    EmployerAccountId = episode.EmployerAccountId
+                });
+            }
+        }
 
         if (!episode.Milestones.Select(m => m.Milestone).ToHashSet().SetEquals(prevMilestones))
             changes.Add(ShortCourseUpdateChanges.Milestone);
@@ -134,10 +147,10 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     public override void Approve(long employerAccountId)
         => Approve(employerAccountId, EmployerType.NonLevy, 0);
 
-    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId)
+    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId, long? transferSenderId = null)
     {
         var episode = LatestEpisode;
-        episode.Approve(employerAccountId, employerType, approvalsApprenticeshipId);
+        episode.Approve(employerAccountId, employerType, approvalsApprenticeshipId, transferSenderId);
 
         AddEvent(new LearningApprovedEvent
         {

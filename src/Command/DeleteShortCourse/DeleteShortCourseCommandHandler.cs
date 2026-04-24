@@ -1,15 +1,17 @@
 using Microsoft.Extensions.Logging;
+using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Repositories;
-using System.Linq;
 
 namespace SFA.DAS.Learning.Command.DeleteShortCourse;
 
 public class DeleteShortCourseCommandHandler(
     ILogger<DeleteShortCourseCommandHandler> logger,
-    IShortCourseLearningRepository repository)
-    : ICommandHandler<DeleteShortCourseCommand, DeleteShortCourseResult>
+    IShortCourseLearningRepository repository,
+    ILearnerRepository learnerRepository,
+    IShortCourseLearningDomainModelMapper mapper)
+    : ICommandHandler<DeleteShortCourseCommand, DeleteShortCourseResult?>
 {
-    public async Task<DeleteShortCourseResult> Handle(DeleteShortCourseCommand command, CancellationToken cancellationToken = default)
+    public async Task<DeleteShortCourseResult?> Handle(DeleteShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Handling DeleteShortCourseCommand for LearningKey {LearningKey}", command.LearningKey);
 
@@ -23,10 +25,14 @@ public class DeleteShortCourseCommandHandler(
         if (!deleted)
         {
             logger.LogInformation("Short course {LearningKey} is not approved; delete request ignored.", command.LearningKey);
-            return new DeleteShortCourseResult { WasDeleted = false };
+            return null;
         }
 
         await repository.Update(learning);
-        return new DeleteShortCourseResult { WasDeleted = true };
+
+        var learner = await learnerRepository.Get(learning.LearnerKey);
+
+        var result = mapper.Map<DeleteShortCourseResult>(learning, learner!, command.Ukprn);
+        return result;
     }
 }

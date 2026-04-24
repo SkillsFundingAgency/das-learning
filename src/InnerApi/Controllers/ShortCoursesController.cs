@@ -118,8 +118,8 @@ public class ShortCoursesController : ControllerBase
     [ProducesResponseType(200)]
     public async Task<IActionResult> DeleteShortCourse(long ukprn, Guid learningKey)
     {
-        var result = await _commandDispatcher.Send<DeleteShortCourseCommand, DeleteShortCourseResult>(new DeleteShortCourseCommand(learningKey, ukprn));
-        return result.WasDeleted ? NoContent() : Ok();
+        var shortCourseResult = await _commandDispatcher.Send<DeleteShortCourseCommand, DeleteShortCourseResult?>(new DeleteShortCourseCommand(learningKey, ukprn));
+        return shortCourseResult == null ? NoContent() : Ok(shortCourseResult);
     }
 
     /// <summary>

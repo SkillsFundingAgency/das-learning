@@ -18,7 +18,7 @@ public static class ApprenticeshipCreatedEventMapper
             EndPointAssessmentPrice = e.PriceEpisodes[0].EndPointAssessmentPrice,
             ApprovalsApprenticeshipId = e.ApprenticeshipId,
             EmployerAccountId = e.AccountId,
-            FundingEmployerAccountId = e.TransferSenderId,
+            TransferSenderId = e.TransferSenderId,
             FundingType = GetFundingType(e),
             LegalEntityName = e.LegalEntityName,
             PlannedEndDate = e.EndDate,

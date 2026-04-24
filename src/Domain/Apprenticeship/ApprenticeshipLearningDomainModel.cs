@@ -95,7 +95,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         decimal? endpointAssessmentPrice,
         FundingType fundingType,
         FundingPlatform? fundingPlatform,
-        long? fundingEmployerAccountId,
+        long? transferSenderId,
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
@@ -106,7 +106,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             employerAccountId,
             fundingType,
             fundingPlatform,
-            fundingEmployerAccountId,
+            transferSenderId,
             legalEntityName,
             accountLegalEntityId,
             trainingCode,
@@ -285,11 +285,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             {
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
-                Reason = latestEpisode.IsWithdrawnBackToStart
-                    ? WithdrawReason.WithdrawFromStart.ToString()
-                    : WithdrawReason.WithdrawDuringLearning.ToString(),
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
-                EmployerAccountId = LatestEpisode.EmployerAccountId
+                EmployerAccountId = latestEpisode.EmployerAccountId
             };
 
             AddEvent(@event);
