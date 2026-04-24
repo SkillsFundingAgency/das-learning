@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Learning.DataAccess;
+using SFA.DAS.Learning.DataAccess.Extensions;
 using SFA.DAS.Learning.Domain;
 
 namespace SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
@@ -13,13 +14,7 @@ public class GetLearningsByAcademicYearQueryHandler(LearningDataContext dbContex
 
         var baseQuery = dbContext.ApprenticeshipLearningDbSet
             .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn))
-            .Where(x => x.Episodes.Any(e =>
-                e.Prices.Any(p =>
-                    p.StartDate <= dates.End &&
-                    p.EndDate >= dates.Start &&
-                    (!e.WithdrawalDate.HasValue ||
-                        (e.WithdrawalDate.Value >= dates.Start &&
-                         e.WithdrawalDate != p.StartDate)))))
+            .IsActiveInYear(dates.Start, dates.End)
             .AsNoTracking();
 
         var totalItems = await baseQuery.CountAsync(cancellationToken);
