@@ -39,6 +39,7 @@ public class ShortCourseEpisodeDto
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public EmployerType EmployerType { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }
+    public long? TransferSenderId { get; set; }
 }
 
 #pragma warning restore CS8618
