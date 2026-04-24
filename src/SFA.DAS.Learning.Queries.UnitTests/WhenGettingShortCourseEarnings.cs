@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
 namespace SFA.DAS.Learning.Queries.UnitTests;
@@ -106,7 +107,8 @@ public class WhenGettingShortCourseEarnings
             Price = 750m,
             StartDate = new DateTime(2024, 8, 1),
             ExpectedEndDate = new DateTime(2025, 7, 31),
-            LearnerRef = "LRN123"
+            LearnerRef = "LRN123",
+            EmployerType = EmployerType.Levy
         };
 
         var learning = new ShortCourseLearning { Key = Guid.NewGuid(), Episodes = [episode] };
@@ -126,6 +128,7 @@ public class WhenGettingShortCourseEarnings
         resultEpisode.IsApproved.Should().Be(episode.IsApproved);
         resultEpisode.Price.Should().Be(episode.Price);
         resultEpisode.LearnerRef.Should().Be(episode.LearnerRef);
+        resultEpisode.EmployerType.Should().Be(episode.EmployerType);
     }
 
     [Test]

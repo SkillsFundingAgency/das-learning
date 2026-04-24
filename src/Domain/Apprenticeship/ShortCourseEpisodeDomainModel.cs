@@ -26,6 +26,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public decimal Price => _entity.Price;
     public LearningType LearningType => _entity.LearningType;
     public EmployerType EmployerType => _entity.EmployerType;
+    public long? TransferSenderId => _entity.TransferSenderId;
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
 
@@ -89,12 +90,13 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         });
     }
 
-    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId)
+    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId, long? transferSenderId = null)
     {
         _entity.IsApproved = true;
         _entity.EmployerAccountId = employerAccountId;
         _entity.EmployerType = employerType;
         _entity.ApprovalsApprenticeshipId = approvalsApprenticeshipId;
+        _entity.TransferSenderId = transferSenderId;
     }
 
     public void Delete()

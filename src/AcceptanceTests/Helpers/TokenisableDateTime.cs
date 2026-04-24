@@ -115,3 +115,35 @@ public static class TokenisableYearConstants
     public const string NextMonthFirstDay = "nextMonthFirstDay";
     public const string LastDayOfCurrentMonth = "lastDayOfCurrentMonth";
 }
+
+public static class TokenisableDateTimeExtensions
+{
+    public static string? AcademicYear(this TokenisableDateTime tokenisableDateTime)
+    {
+        if (tokenisableDateTime?.DateTime == null)
+            return null;
+
+        var date = tokenisableDateTime.DateTime.Value;
+
+        var startYear = date.Month >= 8 ? date.Year : date.Year - 1;
+        var endYear = startYear + 1;
+
+        startYear -= 2000;
+        endYear -= 2000;
+
+        return $"{startYear}{endYear}";
+    }
+
+    public static int? CollectionPeriod(this TokenisableDateTime tokenisableDateTime)
+    {
+        if (tokenisableDateTime?.DateTime == null)
+            return null;
+
+        var month = tokenisableDateTime.DateTime.Value.Month;
+
+        // Aug = 1, Sep = 2, ..., Jul = 12
+        return month >= 8
+            ? month - 7
+            : month + 5;
+    }
+}

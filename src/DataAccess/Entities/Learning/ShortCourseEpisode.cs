@@ -23,6 +23,7 @@ public class ShortCourseEpisode : Episode
     public string LearnerRef { get; set; }
     public LearningType LearningType { get; set; }
     public EmployerType EmployerType { get; set; }
+    public long? TransferSenderId { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
     public List<ShortCourseLearningSupport> LearningSupport { get; set; }
