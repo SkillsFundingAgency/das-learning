@@ -78,7 +78,7 @@ public class LearnerUpdatedEventBuilder
                 WithdrawalDate = m.WithdrawalDate,
                 CompletionDate = m.CompletionDate,
                 PauseDate = m.PauseDate,
-                PriorLearningPercentage = m.PriorLearningPercentage,
+                CombinedFundingAdjustmentPercentage = m.CombinedFundingAdjustmentPercentage,
                 Amount = m.Amount
             }).ToList()
         };

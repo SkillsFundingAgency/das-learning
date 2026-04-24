@@ -3,6 +3,8 @@ using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Domain.Events;
 
+#pragma warning disable CS8618 // Required properties must be set in the constructor
+
 public class LearnerUpdatedEvent : IDomainEvent
 {
     public static LearnerUpdatedEvent From(LearnerDomainModel learner, ApprenticeshipLearningDomainModel learning)
@@ -70,7 +72,7 @@ public class LearnerUpdatedEvent : IDomainEvent
                 WithdrawalDate = m.WithdrawalDate,
                 CompletionDate = m.CompletionDate,
                 PauseDate = m.PauseDate,
-                PriorLearningPercentage = m.PriorLearningPercentage,
+                CombinedFundingAdjustmentPercentage = m.CombinedFundingAdjustmentPercentage,
                 Amount = m.Amount
             }).ToList()
         };
@@ -156,6 +158,7 @@ public class EnglishAndMaths
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? CompletionDate { get; set; }
     public DateTime? PauseDate { get; set; }
-    public int? PriorLearningPercentage { get; set; }
+    public int? CombinedFundingAdjustmentPercentage { get; set; }
     public decimal Amount { get; set; }
 }
+#pragma warning restore CS8618 // Required properties must be set in the constructor
