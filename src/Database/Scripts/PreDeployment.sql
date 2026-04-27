@@ -9,8 +9,6 @@ IF OBJECT_ID('[Domain].[EnglishAndMaths]', 'U') IS NULL
 
 IF COL_LENGTH('[Domain].[EnglishAndMaths]', 'PriorLearningPercentage') IS NOT NULL
 BEGIN
-    EXEC('UPDATE [Domain].[EnglishAndMaths]
-          SET [PriorLearningPercentage] = NULL
-          WHERE [PriorLearningPercentage] IS NOT NULL');
+    EXEC('UPDATE [Domain].[EnglishAndMaths] SET [PriorLearningPercentage] = NULL WHERE [PriorLearningPercentage] IS NOT NULL');
 END
 
