@@ -44,6 +44,7 @@ public class EnglishAndMathsUpdateDetails
 
 public class OnProgrammeDetails
 {
+    public DateTime? AchievementDate { get; set; }
     public DateTime ExpectedEndDate { get; set; }
     public List<Cost> Costs { get; set; }
     public DateTime? PauseDate { get; set; }

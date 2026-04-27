@@ -104,6 +104,7 @@ public class WhenUpdatingLearningSupport
     {
         var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         learningEntity.CompletionDate = learningEntity.CompletionDate?.Date;
+        learningEntity.AchievementDate = null;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = learningEntity.Key;
