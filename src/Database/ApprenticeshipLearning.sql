@@ -4,6 +4,7 @@
     [LearnerKey] UNIQUEIDENTIFIER NOT NULL,
     [ApprovalsApprenticeshipId] BIGINT NOT NULL,
     [CompletionDate] DATETIME NULL,
+    [AchievementDate] DATETIME NULL,
     CONSTRAINT UQ_ApprenticeshipLearning_ApprovalsApprenticeshipId UNIQUE (ApprovalsApprenticeshipId)
 )
     GO
