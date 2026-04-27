@@ -141,7 +141,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         {
             LearningKey = learning.Key,
             Uln = learner.Uln,
-            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
             DateOfBirth = learner.DateOfBirth,
             FirstName = learner.FirstName,
             LastName = learner.LastName,

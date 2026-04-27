@@ -13,6 +13,7 @@ public class ApprenticeshipEpisode : Episode
         BreaksInLearning = new List<EpisodeBreakInLearning>();
     }
 
+    public long ApprovalsApprenticeshipId { get; set; }
     public FundingType FundingType { get; set; }
     public FundingPlatform? FundingPlatform { get; set; }
     public long? FundingEmployerAccountId { get; set; }

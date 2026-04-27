@@ -32,6 +32,7 @@ public class WhenAnEpisodeIsAdded
             .With(x => x.PaymentsFrozen, false)
             .With(x => x.WithdrawalDate, (DateTime?)null)
             .With(x => x.PauseDate, (DateTime?)null)
+            .With(x => x.ApprovalsApprenticeshipId, apprenticeship.ApprovalsApprenticeshipId)
             .Create());
 
         //Act

@@ -69,7 +69,7 @@ public class WhenUpdatingWithdrawalDate
         domainModel.Episodes.First().WithdrawalDate.Should().Be(null);
         domainModel.FlushEvents().Should().ContainEquivalentOf(new WithdrawalRevertedEvent
         {
-            ApprovalsApprenticeshipId = domainModel.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = domainModel.LatestEpisode.ApprovalsApprenticeshipId,
             LearningKey = domainModel.Key
         });
     }

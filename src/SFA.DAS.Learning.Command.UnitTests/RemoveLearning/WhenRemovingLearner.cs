@@ -192,7 +192,7 @@ public class WhenRemovingLearner
         _messageSession.Verify(x => x.Publish(
             It.Is<ApprenticeshipWithdrawnEvent>(e =>
                 e.LearningKey == domainModel.Key &&
-                e.ApprovalsApprenticeshipId == domainModel.ApprovalsApprenticeshipId &&
+                e.ApprovalsApprenticeshipId == domainModel.LatestEpisode.ApprovalsApprenticeshipId &&
                 e.Reason == WithdrawReason.WithdrawFromStart.ToString() &&
                 e.LastDayOfLearning == latestEpisode.WithdrawalDate &&
                 e.EmployerAccountId == latestEpisode.EmployerAccountId), 
