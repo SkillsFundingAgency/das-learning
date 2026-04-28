@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using SFA.DAS.Learning.DataAccess.Extensions;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -15,7 +15,7 @@ public static class LearningUpdateModelHelper
         return new LearningUpdateContext
         {
             LearningKey = learning.Key,
-            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = learning.GetEpisode().ApprovalsApprenticeshipId,
             Learner = new LearnerModel
             {
                 Uln = learner.Uln,

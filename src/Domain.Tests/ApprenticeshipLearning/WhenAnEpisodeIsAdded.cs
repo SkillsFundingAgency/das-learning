@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using AutoFixture;
 using FluentAssertions;
@@ -32,11 +32,11 @@ public class WhenAnEpisodeIsAdded
             .With(x => x.PaymentsFrozen, false)
             .With(x => x.WithdrawalDate, (DateTime?)null)
             .With(x => x.PauseDate, (DateTime?)null)
-            .With(x => x.ApprovalsApprenticeshipId, apprenticeship.ApprovalsApprenticeshipId)
             .Create());
 
         //Act
         apprenticeship.AddEpisode(
+            episode.ApprovalsApprenticeshipId,
             episode.Ukprn,
             episode.EmployerAccountId,
             episodePrice.StartDate,

@@ -110,7 +110,6 @@ public class ApprovalCreatedStepDefinitions
         learner.FirstName.Should().Be(ApprovalCreatedEvent.FirstName);
         learner.LastName.Should().Be(ApprovalCreatedEvent.LastName);
         apprenticeship.Key.Should().NotBe(Guid.Empty);
-        apprenticeship.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
        
         var episode = (await dbConnection.GetAllAsync<ApprenticeshipEpisode>()).Last(x => x.LearningKey == apprenticeship.Key);
         episode.Should().NotBeNull();
@@ -121,6 +120,7 @@ public class ApprovalCreatedStepDefinitions
         episode.LegalEntityName.Should().Be(ApprovalCreatedEvent.LegalEntityName);
         episode.FundingPlatform.Should().Be(ApprovalCreatedEvent.IsOnFlexiPaymentPilot.HasValue ? (ApprovalCreatedEvent.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null);
         int.Parse(episode.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
+        episode.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
 
         var episodePrice = (await dbConnection.GetAllAsync<EpisodePrice>()).Last(x => x.EpisodeKey == episode.Key);
         episodePrice.Should().NotBeNull();
@@ -166,7 +166,7 @@ public class ApprovalCreatedStepDefinitions
         publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.StartDate.Should().BeSameDateAs(LatestEpisodePrice.StartDate);
         publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.EndDate.Should().BeSameDateAs(LatestEpisodePrice.EndDate);
         publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.TotalPrice.Should().Be(LatestEpisodePrice.TotalPrice);
-        publishedEvent.ApprovalsApprenticeshipId.Should().Be(Apprenticeship.ApprovalsApprenticeshipId);
+        publishedEvent.ApprovalsApprenticeshipId.Should().Be(LatestEpisode.ApprovalsApprenticeshipId);
         publishedEvent.Episode.EmployerAccountId.Should().Be(LatestEpisode.EmployerAccountId);
         publishedEvent.Episode.FundingEmployerAccountId.Should().Be(LatestEpisode.FundingEmployerAccountId);
         publishedEvent.Episode.FundingType.ToString().Should().Be(LatestEpisode.FundingType.ToString());
