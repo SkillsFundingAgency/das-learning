@@ -196,7 +196,7 @@ public class UpdateLearnerStepDefinitions
                 .Should().ContainEquivalentOf(expectedEnglishAndMaths, options => options
                     .Excluding(c => c.CompletionDate)
                     .Excluding(c => c.WithdrawalDate)
-                    .Excluding(c => c.PriorLearningPercentage)
+                    .Excluding(c => c.CombinedFundingAdjustmentPercentage)
                     .Excluding(c => c.LearningKey)
                     .Excluding(c => c.Key)
                     .For(c=> c.BreaksInLearning).Exclude(x=>x.Key)

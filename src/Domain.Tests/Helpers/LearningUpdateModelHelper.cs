@@ -43,7 +43,7 @@ public static class LearningUpdateModelHelper
                 CompletionDate = x.CompletionDate,
                 WithdrawalDate = x.WithdrawalDate,
                 PauseDate = x.PauseDate,
-                PriorLearningPercentage = x.PriorLearningPercentage,
+                CombinedFundingAdjustmentPercentage = x.CombinedFundingAdjustmentPercentage,
                 Amount = x.Amount,
                 BreaksInLearning = x.BreaksInLearning.Select(b => new BreakInLearningUpdateDetails
                 {

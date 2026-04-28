@@ -39,6 +39,7 @@ public class LearningDomainModelBuilder
 
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
+        entity.AchievementDate = null;
         entity.EnglishAndMathsCourses.Clear();
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();

@@ -14,7 +14,6 @@ IF OBJECT_ID(N'[dbo].[OutboxData]', N'U') IS NOT NULL
     END
 GO
 
-
 IF OBJECT_ID(N'[dbo].[Approval]', N'U') IS NOT NULL
     BEGIN
         DROP TABLE [dbo].[Approval];
@@ -56,4 +55,13 @@ IF OBJECT_ID(N'[dbo].[MathsAndEnglish]', N'U') IS NOT NULL
         DROP TABLE [dbo].[MathsAndEnglish];
     END
 GO
+
+-- FLP-1289 (delete this script after 1289 deployed to prod)
+IF OBJECT_ID('[Domain].[EnglishAndMaths]', 'U') IS NULL
+    RETURN;
+
+IF COL_LENGTH('[Domain].[EnglishAndMaths]', 'PriorLearningPercentage') IS NOT NULL
+BEGIN
+    EXEC('UPDATE [Domain].[EnglishAndMaths] SET [PriorLearningPercentage] = NULL WHERE [PriorLearningPercentage] IS NOT NULL');
+END
 

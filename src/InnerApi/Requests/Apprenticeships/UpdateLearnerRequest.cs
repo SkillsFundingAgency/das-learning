@@ -88,6 +88,11 @@ public class OnProgrammeDetails
     public List<Cost> Costs { get; set; }
 
     /// <summary>
+    /// Achievement date for the OnProgramme delivery
+    /// </summary>
+    public DateTime? AchievementDate { get; set; }
+
+    /// <summary>
     /// Planned end date for the OnProgramme delivery
     /// </summary>
     public DateTime ExpectedEndDate { get; set; }
@@ -165,9 +170,9 @@ public class EnglishAndMaths
     public DateTime? PauseDate { get; set; }
 
     /// <summary>
-    /// Percentage of prior learning recognised for the course, if applicable
+    /// Combination of PriorLearningAdjustment and OtherFundingAdjustment
     /// </summary>
-    public int? PriorLearningPercentage { get; set; }
+    public int? CombinedFundingAdjustmentPercentage { get; set; }
 
     /// <summary>
     /// Amount associated with the english or maths course
@@ -262,7 +267,7 @@ public static class UpdateLearnerRequestExtensions
                     CompletionDate = x.CompletionDate,
                     WithdrawalDate = x.WithdrawalDate,
                     PauseDate = x.PauseDate,
-                    PriorLearningPercentage = x.PriorLearningPercentage,
+                    CombinedFundingAdjustmentPercentage = x.CombinedFundingAdjustmentPercentage,
                     Amount = x.Amount,
                     BreaksInLearning = x.BreaksInLearning.SelectOrEmptyList(b => 
                         new BreakInLearningUpdateDetails
@@ -279,6 +284,7 @@ public static class UpdateLearnerRequestExtensions
                 }),
             OnProgrammeDetails = new Models.UpdateModels.OnProgrammeDetails
             {
+                AchievementDate = request.OnProgramme.AchievementDate,
                 ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
                 Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Models.UpdateModels.Cost
                 {

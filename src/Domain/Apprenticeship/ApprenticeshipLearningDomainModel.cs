@@ -16,6 +16,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public Guid Key => _entity.Key;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public DateTime? CompletionDate => _entity.CompletionDate;
+    public DateTime? AchievementDate => _entity.AchievementDate;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
     public DateTime StartDate
@@ -155,6 +156,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         UpdatePauseDate(updateContext, changes);
 
         UpdateBreaksInLearning(updateContext, changes);
+
+        UpdateAchievementDate(updateContext, changes);
 
         return changes.ToArray();
     }
@@ -334,6 +337,14 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         {
             changes.Add(LearningUpdateChanges.BreaksInLearningUpdated);
         }
+    }
+
+    private void UpdateAchievementDate(LearningUpdateContext updateContext, List<LearningUpdateChanges> changes)
+    {
+        if(updateContext.OnProgrammeDetails.AchievementDate == AchievementDate) return;
+
+        _entity.AchievementDate = updateContext.OnProgrammeDetails.AchievementDate;
+        changes.Add(LearningUpdateChanges.AchievementDateChanged); 
     }
 
 }
