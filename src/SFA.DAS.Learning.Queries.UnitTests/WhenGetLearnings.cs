@@ -35,9 +35,9 @@ public class WhenGetLearnings
         var learnerKey = Guid.NewGuid();
         _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1111111111", FirstName = "Jane", LastName = "Doe" });
 
-        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), ApprovalsApprenticeshipId = 1 };
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
         learning.LearnerKey = learnerKey;
-        learning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", FundingType = FundingType.Levy, LegalEntityName = "Test" });
+        learning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", FundingType = FundingType.Levy, LegalEntityName = "Test", ApprovalsApprenticeshipId = 1 });
         _dbContext.ApprenticeshipLearningDbSet.Add(learning);
         await _dbContext.SaveChangesAsync();
 
@@ -66,13 +66,13 @@ public class WhenGetLearnings
             new Learner { Key = learnerKey1, Uln = "111", FirstName = "A", LastName = "B" },
             new Learner { Key = learnerKey2, Uln = "222", FirstName = "C", LastName = "D" });
 
-        var dasLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), ApprovalsApprenticeshipId = 1 };
+        var dasLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
         dasLearning.LearnerKey = learnerKey1;
-        dasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A1", FundingType = FundingType.Levy, FundingPlatform = FundingPlatform.DAS, LegalEntityName = "Test" });
+        dasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A1", FundingType = FundingType.Levy, FundingPlatform = FundingPlatform.DAS, LegalEntityName = "Test", ApprovalsApprenticeshipId = 1 });
 
-        var nonDasLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), ApprovalsApprenticeshipId = 2 };
+        var nonDasLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
         nonDasLearning.LearnerKey = learnerKey2;
-        nonDasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A2", FundingType = FundingType.Levy, FundingPlatform = FundingPlatform.SLD, LegalEntityName = "Test" });
+        nonDasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A2", FundingType = FundingType.Levy, FundingPlatform = FundingPlatform.SLD, LegalEntityName = "Test", ApprovalsApprenticeshipId = 2 });
 
         _dbContext.ApprenticeshipLearningDbSet.AddRange(dasLearning, nonDasLearning);
         await _dbContext.SaveChangesAsync();

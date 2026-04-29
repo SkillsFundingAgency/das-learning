@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -69,10 +69,10 @@ public class WhenAddingAnApprenticeship
             .With(x => x.PaymentsFrozen, false)
             .With(x => x.WithdrawalDate, (DateTime?)null)
             .With(x => x.PauseDate, (DateTime?)null)
-            .With(x => x.ApprovalsApprenticeshipId, apprenticeship.ApprovalsApprenticeshipId)
             .Create());
 
         apprenticeship.AddEpisode(
+            episode.ApprovalsApprenticeshipId,
             episode.Ukprn,
             episode.EmployerAccountId,
             episodePrice.StartDate,

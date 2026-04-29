@@ -37,7 +37,7 @@ public class LearningServiceTests
 
         var apprenticeshipLearningFactory = new ApprenticeshipLearningFactory();
 
-        var expected = apprenticeshipLearningFactory.CreateNew(1, Guid.NewGuid());
+        var expected = apprenticeshipLearningFactory.CreateNew(Guid.NewGuid());
 
         _repo
             .Setup(r => r.GetUnapprovedLearning(uln, approvalsId))
@@ -60,7 +60,7 @@ public class LearningServiceTests
     {
         // Arrange
         var apprenticeshipLearningFactory = new ApprenticeshipLearningFactory();
-        var model = apprenticeshipLearningFactory.CreateNew(1, Guid.NewGuid());
+        var model = apprenticeshipLearningFactory.CreateNew(Guid.NewGuid());
 
         _provider
             .Setup(p => p.GetRepository(model))
@@ -79,7 +79,7 @@ public class LearningServiceTests
     {
         // Arrange
         var apprenticeshipLearningFactory = new ApprenticeshipLearningFactory();
-        var model = apprenticeshipLearningFactory.CreateNew(1, Guid.NewGuid());
+        var model = apprenticeshipLearningFactory.CreateNew(Guid.NewGuid());
 
         _provider
             .Setup(p => p.GetRepository(model))
