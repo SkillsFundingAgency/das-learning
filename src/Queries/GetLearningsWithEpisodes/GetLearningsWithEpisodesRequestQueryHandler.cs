@@ -30,7 +30,7 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
                 .ThenInclude(x => x.Prices)
                 .Where(x => x.Episodes.Any(e => e.Ukprn == query.Ukprn && e.FundingPlatform == FundingPlatform.DAS))
                 .IsActiveInYear(activeOnDate.StartOfCurrentAcademicYear(), activeOnDate.EndOfCurrentAcademicYear())
-                .OrderBy(x => x.ApprovalsApprenticeshipId)
+                .OrderBy(x => x.LearnerKey)
                 .AsNoTracking();
 
             var totalItems = await baseQuery.CountAsync(cancellationToken);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoFixture;
@@ -45,11 +45,11 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.Prices, new List<EpisodePrice> { episodePrice })
             .With(x => x.WithdrawalDate, withdrawalDate)
             .With(x => x.BreaksInLearning, new List<EpisodeBreakInLearning>{ episodeBreakInLearning })
+            .With(x => x.ApprovalsApprenticeshipId, approvalsApprenticeshipId ?? _fixture.Create<long>())
             .Create();
 
         var apprenticeship = _fixture.Build<DataAccess.Entities.Learning.ApprenticeshipLearning>()
             .With(x => x.Key, learningKey)
-            .With(x => x.ApprovalsApprenticeshipId, approvalsApprenticeshipId ?? _fixture.Create<long>())
             .With(x => x.Episodes, new List<ApprenticeshipEpisode>() { episode })
             .Create();
 
