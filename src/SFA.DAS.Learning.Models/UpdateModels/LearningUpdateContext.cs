@@ -37,7 +37,7 @@ public class EnglishAndMathsUpdateDetails
     public DateTime? CompletionDate { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }
-    public int? PriorLearningPercentage { get; set; }
+    public int? CombinedFundingAdjustmentPercentage { get; set; }
     public decimal Amount { get; set; }
     public List<BreakInLearningUpdateDetails> BreaksInLearning { get; set; }
 }

@@ -165,9 +165,9 @@ public class EnglishAndMaths
     public DateTime? PauseDate { get; set; }
 
     /// <summary>
-    /// Percentage of prior learning recognised for the course, if applicable
+    /// Combination of PriorLearningAdjustment and OtherFundingAdjustment
     /// </summary>
-    public int? PriorLearningPercentage { get; set; }
+    public int? CombinedFundingAdjustmentPercentage { get; set; }
 
     /// <summary>
     /// Amount associated with the english or maths course
@@ -262,7 +262,7 @@ public static class UpdateLearnerRequestExtensions
                     CompletionDate = x.CompletionDate,
                     WithdrawalDate = x.WithdrawalDate,
                     PauseDate = x.PauseDate,
-                    PriorLearningPercentage = x.PriorLearningPercentage,
+                    CombinedFundingAdjustmentPercentage = x.CombinedFundingAdjustmentPercentage,
                     Amount = x.Amount,
                     BreaksInLearning = x.BreaksInLearning.SelectOrEmptyList(b => 
                         new BreakInLearningUpdateDetails

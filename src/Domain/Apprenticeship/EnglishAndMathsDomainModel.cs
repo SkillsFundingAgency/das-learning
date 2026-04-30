@@ -18,7 +18,7 @@ public class EnglishAndMathsDomainModel
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public DateTime? PauseDate => _entity.PauseDate;
-    public int? PriorLearningPercentage => _entity.PriorLearningPercentage;
+    public int? CombinedFundingAdjustmentPercentage => _entity.CombinedFundingAdjustmentPercentage;
     public decimal Amount => _entity.Amount;
     public IReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel> BreaksInLearning => new ReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel>(_entity.BreaksInLearning.Select(EnglishAndMathsBreakInLearningDomainModel.Get).ToList());
 
@@ -41,7 +41,7 @@ public class EnglishAndMathsDomainModel
             CompletionDate = incomingCourse.CompletionDate,
             PauseDate = incomingCourse.PauseDate,
             Amount = incomingCourse.Amount,
-            PriorLearningPercentage = incomingCourse.PriorLearningPercentage,
+            CombinedFundingAdjustmentPercentage = incomingCourse.CombinedFundingAdjustmentPercentage,
             WithdrawalDate = incomingCourse.WithdrawalDate
         };
 
@@ -113,7 +113,7 @@ public class EnglishAndMathsDomainModel
             _entity.CompletionDate != incomingCourse.CompletionDate ||
             _entity.PauseDate != incomingCourse.PauseDate ||
             _entity.Amount != incomingCourse.Amount ||
-            _entity.PriorLearningPercentage != incomingCourse.PriorLearningPercentage;
+            _entity.CombinedFundingAdjustmentPercentage != incomingCourse.CombinedFundingAdjustmentPercentage;
 
         if (!hasChanged)
             return false;
@@ -124,7 +124,7 @@ public class EnglishAndMathsDomainModel
         _entity.CompletionDate = incomingCourse.CompletionDate;
         _entity.PauseDate = incomingCourse.PauseDate;
         _entity.Amount = incomingCourse.Amount;
-        _entity.PriorLearningPercentage = incomingCourse.PriorLearningPercentage;
+        _entity.CombinedFundingAdjustmentPercentage = incomingCourse.CombinedFundingAdjustmentPercentage;
 
         return true;
     }
