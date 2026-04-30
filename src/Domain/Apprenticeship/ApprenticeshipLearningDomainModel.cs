@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Domain.Enums;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
@@ -14,7 +14,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     private readonly List<ApprenticeshipEpisodeDomainModel> _episodes;
 
     public Guid Key => _entity.Key;
-    public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
@@ -64,12 +63,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     public int AgeAtStartOfLearning(LearnerModel learnerModel) => learnerModel.DateOfBirth.CalculateAgeAtDate(StartDate);
 
-    internal static ApprenticeshipLearningDomainModel New(long approvalsApprenticeshipId, Guid learnerKey)
+    internal static ApprenticeshipLearningDomainModel New(Guid learnerKey)
     {
         return new ApprenticeshipLearningDomainModel(new ApprenticeshipLearningEntity
         {
             Key = Guid.NewGuid(),
-            ApprovalsApprenticeshipId = approvalsApprenticeshipId,
             LearnerKey = learnerKey
         });
     }
@@ -86,6 +84,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     }
 
     public void AddEpisode(
+        long approvalsApprenticeshipId,
         long ukprn,
         long employerAccountId,
         DateTime startDate,
@@ -102,6 +101,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         string? trainingCourseVersion)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
+            approvalsApprenticeshipId,
             ukprn,
             employerAccountId,
             fundingType,
@@ -261,7 +261,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
             var @event = new EndDateChangedEvent
             {
-                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 LearningKey = Key,
                 PlannedEndDate = EndDate.Value
             };
@@ -284,9 +284,9 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             var @event = new LearningWithdrawnEvent
             {
                 LearningKey = Key,
-                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId,
+                ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
-                EmployerAccountId = latestEpisode.EmployerAccountId
+                EmployerAccountId = LatestEpisode.EmployerAccountId
             };
 
             AddEvent(@event);
@@ -301,7 +301,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             var @event = new WithdrawalRevertedEvent
             {
                 LearningKey = Key,
-                ApprovalsApprenticeshipId = ApprovalsApprenticeshipId
+                ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId
             };
 
             AddEvent(@event);

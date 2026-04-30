@@ -8,7 +8,7 @@ Scenario: Correct learners returned when actual end date is derived from Withdra
 	And a withdrawn date of <WithdrawnDate> is set
 	And the update request is sent
 	When the GetLearningsForFm36 endpoint is called for currentAY-10-15
-	Then the learner should be <Result>
+	Then the fm36 learner should be <Result>
 	Examples: 
 	| StartDate        | EndDate          | WithdrawnDate    | Result   |
 	| currentAY-09-25  | currentAY-07-31  | null             | Included |
@@ -27,7 +27,7 @@ Scenario: Correct learners returned when actual end date is derived from Complet
 	And a completion date of <CompletionDate> is set
 	And the update request is sent
 	When the GetLearningsForFm36 endpoint is called for currentAY-10-15
-	Then the learner should be <Result>
+	Then the fm36 learner should be <Result>
 	Examples: 
 	| StartDate        | EndDate          | CompletionDate   | Result   |
 	| currentAY-09-25  | currentAY-07-31  | null             | Included |

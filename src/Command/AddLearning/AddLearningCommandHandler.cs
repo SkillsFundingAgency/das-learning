@@ -67,9 +67,10 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
-        var learning = _learningFactory.CreateNew(command.ApprovalsApprenticeshipId, learner.Key);
+        var learning = _learningFactory.CreateNew(learner.Key);
 
         learning.AddEpisode(
+            command.ApprovalsApprenticeshipId,
             command.UKPRN,
             command.EmployerAccountId,
             command.ActualStartDate ?? command.PlannedStartDate,
@@ -136,12 +137,12 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         _logger.LogInformation(
             "Sending LearningCreatedEvent for ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
-            learning.ApprovalsApprenticeshipId);
+            learning.LatestEpisode.ApprovalsApprenticeshipId);
         var learningCreatedEvent = new LearningCreatedEvent
         {
             LearningKey = learning.Key,
             Uln = learner.Uln,
-            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
             DateOfBirth = learner.DateOfBirth,
             FirstName = learner.FirstName,
             LastName = learner.LastName,

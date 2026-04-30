@@ -12,7 +12,7 @@ public class LearnerUpdatedEvent : IDomainEvent
         return new LearnerUpdatedEvent
         {
             Key = learning.Key,
-            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
             Uln = learner.Uln,
             FirstName = learner.FirstName,
             LastName = learner.LastName,

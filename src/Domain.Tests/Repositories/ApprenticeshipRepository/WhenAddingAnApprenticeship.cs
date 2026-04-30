@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -72,6 +72,7 @@ public class WhenAddingAnApprenticeship
             .Create());
 
         apprenticeship.AddEpisode(
+            episode.ApprovalsApprenticeshipId,
             episode.Ukprn,
             episode.EmployerAccountId,
             episodePrice.StartDate,
@@ -89,7 +90,7 @@ public class WhenAddingAnApprenticeship
 
         // Act
         await _sut.Add(apprenticeship);
-        
+
         // Assert
         _dbContext.Episodes.Count().Should().Be(1);
         var storedEpisode = _dbContext.Episodes.Single();
