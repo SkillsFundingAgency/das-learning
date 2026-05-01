@@ -158,14 +158,14 @@ public class WhenUpdatingEnglishAndMathsDetails
 
         if (changed)
         {
-            var newValue = (englishAndMathsUpdateModel.PriorLearningPercentage ?? 0) + 10;
-            englishAndMathsUpdateModel.PriorLearningPercentage = newValue;
+            var newValue = (englishAndMathsUpdateModel.CombinedFundingAdjustmentPercentage ?? 0) + 10;
+            englishAndMathsUpdateModel.CombinedFundingAdjustmentPercentage = newValue;
         }
 
         var result = learning.Update(updateModel);
 
-        learning.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).PriorLearningPercentage.Should().Be(englishAndMathsUpdateModel.PriorLearningPercentage);
-        learningEntity.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).PriorLearningPercentage.Should().Be(englishAndMathsUpdateModel.PriorLearningPercentage);
+        learning.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).CombinedFundingAdjustmentPercentage.Should().Be(englishAndMathsUpdateModel.CombinedFundingAdjustmentPercentage);
+        learningEntity.EnglishAndMathsCourses.First(x => x.Course == englishAndMathsUpdateModel.Course).CombinedFundingAdjustmentPercentage.Should().Be(englishAndMathsUpdateModel.CombinedFundingAdjustmentPercentage);
         if (changed) result.Should().Contain(x => x == LearningUpdateChanges.EnglishAndMaths);
     }
 
