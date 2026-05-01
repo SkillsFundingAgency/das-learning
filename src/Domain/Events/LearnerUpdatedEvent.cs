@@ -158,7 +158,7 @@ public class EnglishAndMaths
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? CompletionDate { get; set; }
     public DateTime? PauseDate { get; set; }
-    public int? CombinedFundingAdjustmentPercentage { get; set; }
+    public decimal? CombinedFundingAdjustmentPercentage { get; set; }
     public decimal Amount { get; set; }
 }
 #pragma warning restore CS8618 // Required properties must be set in the constructor
