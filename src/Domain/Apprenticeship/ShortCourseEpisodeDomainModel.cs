@@ -105,6 +105,11 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         _entity.IsRemoved = true;
     }
 
+    public void Reinstate()
+    {
+        _entity.IsRemoved = false;
+    }
+
     public void Update(ShortCourseUpdateContext updateContext)
     {
         if (!_entity.IsApproved)

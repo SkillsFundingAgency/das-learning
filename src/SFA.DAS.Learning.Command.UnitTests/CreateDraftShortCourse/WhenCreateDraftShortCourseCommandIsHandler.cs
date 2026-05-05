@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -153,7 +153,33 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
 
-    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship)
+    [Test]
+    public async Task ThenReinstatesEpisodeIfPreviouslyRemoved()
+    {
+        // Arrange
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn, isRemoved: true);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        existingLearning.LatestEpisode.IsRemoved.Should().BeFalse();
+        
+        var reinstatedEvent = existingLearning.FlushEvents().OfType<Domain.Events.LearningReinstatedEvent>().SingleOrDefault();
+        reinstatedEvent.Should().NotBeNull();
+        reinstatedEvent!.LearningKey.Should().Be(existingLearning.Key);
+        reinstatedEvent.ApprenticeshipId.Should().Be(existingLearning.LatestEpisode.ApprovalsApprenticeshipId);
+
+        _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
+    }
+
+    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship, bool isRemoved = false)
     {
         var learningKey = Guid.NewGuid();
         var entity = new ShortCourseLearning
@@ -171,6 +197,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                     TrainingCode = _fixture.Create<string>(),
                     LearnerRef = _fixture.Create<string>(),
                     IsApproved = isApproved,
+                    IsRemoved = isRemoved,
                     StartDate = _fixture.Create<DateTime>(),
                     ExpectedEndDate = _fixture.Create<DateTime>(),
                     LearningType = learningType,

@@ -142,6 +142,24 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return true;
     }
 
+    public bool Reinstate(long ukprn)
+    {
+        var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
+
+        if (episode == null || !episode.IsApproved || !episode.IsRemoved)
+            return false;
+
+        episode.Reinstate();
+
+        AddEvent(new LearningReinstatedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = episode.ApprovalsApprenticeshipId
+        });
+
+        return true;
+    }
+
     public override void Approve(long employerAccountId)
         => Approve(employerAccountId, EmployerType.NonLevy, 0);
 

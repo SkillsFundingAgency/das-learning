@@ -1,4 +1,4 @@
-﻿using System.IO.Hashing;
+using System.IO.Hashing;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
@@ -50,28 +50,34 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
 
         //  Ignore if we have an approved episode with another provider
-        if (learning.Episodes.Any(x => x.IsApproved && x.Ukprn != command.Model.OnProgramme.Ukprn))
+        if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn != command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An approved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
             return new CreateDraftShortCourseCommandResult();
         }
 
         //Ignore if provider posts a short course when they already have an approved short course
-        if (learning.Episodes.Any(x => x.IsApproved && x.Ukprn == command.Model.OnProgramme.Ukprn))
+        if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn == command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An approved short course episode already exists with this provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
             return new CreateDraftShortCourseCommandResult();
         }
 
         //Ignore if we already have an unapproved short course with another provider
-        if(learning.Episodes.Any(x => !x.IsApproved && x.Ukprn != command.Model.OnProgramme.Ukprn))
+        if(learning.Episodes.Any(x => !x.IsApproved && !x.IsRemoved && x.Ukprn != command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An unapproved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
             return new CreateDraftShortCourseCommandResult();
         }
 
-        //  Update existing learning if same provider
+        //Update existing learning if same provider
         learning.Update(command.Model);
+
+        //Reinstate learner if provider's episode has previously been removed
+        if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
+        {
+            learning.Reinstate(command.Model.OnProgramme.Ukprn);
+        }
 
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
