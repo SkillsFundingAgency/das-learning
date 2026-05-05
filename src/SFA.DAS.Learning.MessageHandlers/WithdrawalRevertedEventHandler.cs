@@ -10,7 +10,7 @@ namespace SFA.DAS.Learning.MessageHandlers
         {
             logger.LogInformation($"Sending WithdrawalRevertedEvent for Learning {@event.LearningKey}");
 
-            var message = new Types.WithdrawalRevertedEvent
+            var message = new Types.LearningWithdrawalRevertedEvent
             {
                 LearningKey = @event.LearningKey,
                 ApprovalsApprenticeshipId = @event.ApprovalsApprenticeshipId

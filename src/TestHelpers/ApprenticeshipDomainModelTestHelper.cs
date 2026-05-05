@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Types;
@@ -40,6 +40,7 @@ public static class ApprenticeshipDomainModelTestHelper
         var ukprnValue = ukprn ?? _fixture.Create<long>();
 
         learning.AddEpisode(
+            _fixture.Create<long>(),
             ukprnValue,
             _fixture.Create<long>(),
             start,

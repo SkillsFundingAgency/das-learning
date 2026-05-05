@@ -18,7 +18,7 @@ public class EnglishAndMathsDomainModel
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public DateTime? PauseDate => _entity.PauseDate;
-    public int? CombinedFundingAdjustmentPercentage => _entity.CombinedFundingAdjustmentPercentage;
+    public decimal? CombinedFundingAdjustmentPercentage => _entity.CombinedFundingAdjustmentPercentage;
     public decimal Amount => _entity.Amount;
     public IReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel> BreaksInLearning => new ReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel>(_entity.BreaksInLearning.Select(EnglishAndMathsBreakInLearningDomainModel.Get).ToList());
 

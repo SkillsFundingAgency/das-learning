@@ -172,7 +172,7 @@ public class EnglishAndMaths
     /// <summary>
     /// Combination of PriorLearningAdjustment and OtherFundingAdjustment
     /// </summary>
-    public int? CombinedFundingAdjustmentPercentage { get; set; }
+    public decimal? CombinedFundingAdjustmentPercentage { get; set; }
 
     /// <summary>
     /// Amount associated with the english or maths course

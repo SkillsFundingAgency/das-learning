@@ -6,14 +6,13 @@ using NServiceBus;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.RemoveLearnerCommand;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
-using ApprenticeshipWithdrawnEvent = SFA.DAS.Learning.Types.ApprenticeshipWithdrawnEvent;
+using LearningRemovedEvent = SFA.DAS.Learning.Types.LearningRemovedEvent;
 
 namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
 
@@ -61,7 +60,7 @@ public class WhenRemovingLearner
 
         // Assert
         _learningRepository.Verify(x => x.Update(domainModel), Times.Once);
-        _messageSession.Verify(x => x.Publish(It.IsAny<ApprenticeshipWithdrawnEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
+        _messageSession.Verify(x => x.Publish(It.IsAny<LearningRemovedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -190,12 +189,9 @@ public class WhenRemovingLearner
 
         // Assert
         _messageSession.Verify(x => x.Publish(
-            It.Is<ApprenticeshipWithdrawnEvent>(e =>
+            It.Is<LearningRemovedEvent>(e =>
                 e.LearningKey == domainModel.Key &&
-                e.ApprovalsApprenticeshipId == domainModel.LatestEpisode.ApprovalsApprenticeshipId &&
-                e.Reason == WithdrawReason.WithdrawFromStart.ToString() &&
-                e.LastDayOfLearning == latestEpisode.WithdrawalDate &&
-                e.EmployerAccountId == latestEpisode.EmployerAccountId), 
+                e.ApprenticeshipId == domainModel.LatestEpisode.ApprovalsApprenticeshipId),
             It.IsAny<PublishOptions>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }

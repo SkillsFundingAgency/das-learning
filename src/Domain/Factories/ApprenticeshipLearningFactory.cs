@@ -1,19 +1,19 @@
-﻿using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 
 namespace SFA.DAS.Learning.Domain.Factories;
 
 public interface IApprenticeshipLearningFactory
 {
-    ApprenticeshipLearningDomainModel CreateNew(long approvalsApprenticeshipId, Guid learnerKey);
+    ApprenticeshipLearningDomainModel CreateNew(Guid learnerKey);
 
     ApprenticeshipLearningDomainModel GetExisting(DataAccess.Entities.Learning.ApprenticeshipLearning model);
 }
 
 public class ApprenticeshipLearningFactory : IApprenticeshipLearningFactory
 {
-    public ApprenticeshipLearningDomainModel CreateNew(long approvalsApprenticeshipId, Guid learnerKey)
+    public ApprenticeshipLearningDomainModel CreateNew(Guid learnerKey)
     {
-        return ApprenticeshipLearningDomainModel.New(approvalsApprenticeshipId, learnerKey);
+        return ApprenticeshipLearningDomainModel.New(learnerKey);
     }
 
     public ApprenticeshipLearningDomainModel GetExisting(Learning.DataAccess.Entities.Learning.ApprenticeshipLearning entity)

@@ -1,7 +1,6 @@
 using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.MessageHandlers.UnitTests;
@@ -25,7 +24,7 @@ public class LearningDeletedEventHandlerTests
     }
 
     [Test]
-    public async Task Handle_PublishesApprenticeshipWithdrawnEventWithCorrectFields()
+    public async Task Handle_PublishesLearningRemovedEventWithCorrectFields()
     {
         // Arrange
         var domainEvent = _fixture.Create<LearningDeletedEvent>();
@@ -35,12 +34,9 @@ public class LearningDeletedEventHandlerTests
 
         // Assert
         _messageSession.Verify(x => x.Publish(
-                It.Is<Types.ApprenticeshipWithdrawnEvent>(msg =>
+                It.Is<Types.LearningRemovedEvent>(msg =>
                     msg.LearningKey == domainEvent.LearningKey &&
-                    msg.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
-                    msg.LastDayOfLearning == domainEvent.LastDayOfLearning &&
-                    msg.EmployerAccountId == domainEvent.EmployerAccountId &&
-                    msg.Reason == WithdrawReason.WithdrawFromStart.ToString()
+                    msg.ApprenticeshipId == domainEvent.ApprovalsApprenticeshipId
                 ),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);

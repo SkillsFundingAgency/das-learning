@@ -100,7 +100,7 @@ public class WhenGetApprenticeshipsWithEpisodes
 
     private static ApprenticeshipLearning BuildActiveApprenticeship(long ukPrn, Guid learnerKey, int approvalsId)
     {
-        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), ApprovalsApprenticeshipId = approvalsId };
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
         learning.LearnerKey = learnerKey;
 
         var episode = new ApprenticeshipEpisode
@@ -110,7 +110,8 @@ public class WhenGetApprenticeshipsWithEpisodes
             TrainingCode = "ST0001",
             FundingType = FundingType.Levy,
             FundingPlatform = FundingPlatform.DAS,
-            LegalEntityName = "Test Employer"
+            LegalEntityName = "Test Employer",
+            ApprovalsApprenticeshipId = approvalsId
         };
         // Price active during academic year 2020/21 (period 1 = Aug 31, 2020)
         episode.Prices.Add(new EpisodePrice

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain;
-using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.MessageHandlers
@@ -9,15 +8,12 @@ namespace SFA.DAS.Learning.MessageHandlers
     {
         public async Task Handle(LearningDeletedEvent @event, CancellationToken cancellationToken = default)
         {
-            logger.LogInformation("Publishing ApprenticeshipWithdrawnEvent for deleted Learning {LearningKey}", @event.LearningKey);
+            logger.LogInformation("Publishing LearningRemovedEvent for deleted Learning {LearningKey}", @event.LearningKey);
 
-            var message = new Types.ApprenticeshipWithdrawnEvent
+            var message = new Types.LearningRemovedEvent
             {
                 LearningKey = @event.LearningKey,
-                ApprovalsApprenticeshipId = @event.ApprovalsApprenticeshipId,
-                Reason = WithdrawReason.WithdrawFromStart.ToString(),
-                LastDayOfLearning = @event.LastDayOfLearning,
-                EmployerAccountId = @event.EmployerAccountId
+                ApprenticeshipId = @event.ApprovalsApprenticeshipId
             };
 
             await messageSession.Publish(message, cancellationToken);
