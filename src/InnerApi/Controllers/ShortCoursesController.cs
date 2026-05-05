@@ -104,7 +104,7 @@ public class ShortCoursesController : ControllerBase
         if (result.LearningKey == null)
             return NoContent();
 
-        return new OkObjectResult(new CreateShortCourseLearningResponse { LearningKey = result.LearningKey.Value, EpisodeKey = result.EpisodeKey!.Value });
+        return new OkObjectResult(new CreateShortCourseLearningResponse { LearningKey = result.LearningKey.Value, EpisodeKey = result.EpisodeKey!.Value, IsReinstated = result.IsReinstated });
     }
 
     /// <summary>

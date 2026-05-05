@@ -290,6 +290,7 @@ public class ShortCourseStepDefinitions
 
         _scenarioContext[ShortCourseLearningKey] = learningKey;
         _scenarioContext[ShortCourseEndpointResponseCodeKey] = (int)statusCode;
+        _scenarioContext.Set(responseBody);
 
         return learningKey;
     }
@@ -329,6 +330,12 @@ public class ShortCourseStepDefinitions
         await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learningKey}");
     }
 
+    [When(@"SLD calls the update short course endpoint with no changes")]
+    public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
+    {
+        await CallUpdateShortCourseEndpoint(GetDefaultShortCourse());
+    }
+
     [Then(@"the short course episode IsRemoved is set to (True|False)")]
     public async Task ThenTheShortCourseEpisodeIsRemovedIsSetTo(bool isRemoved)
     {
@@ -339,10 +346,11 @@ public class ShortCourseStepDefinitions
         episode.IsRemoved.Should().Be(isRemoved);
     }
 
-    [When(@"SLD calls the update short course endpoint with no changes")]
-    public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
+    [Then(@"the create short course response indicates it was reinstated")]
+    public void ThenTheCreateShortCourseResponseIndicatesItWasReinstated()
     {
-        await CallUpdateShortCourseEndpoint(GetDefaultShortCourse());
+        var response = _scenarioContext.Get<CreateShortCourseLearningResponse>();
+        response.IsReinstated.Should().BeTrue();
     }
 
     [Then(@"the update short course response includes changes")]

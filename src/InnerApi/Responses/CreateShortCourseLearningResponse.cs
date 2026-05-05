@@ -16,5 +16,10 @@ public class CreateShortCourseLearningResponse
     /// so we can return the key for that single episode here. 
     /// </summary>
     public Guid EpisodeKey { get; set; }
+
+    /// <summary>
+    /// Indicates if the learning was reinstated (i.e. it was previously removed)
+    /// </summary>
+    public bool IsReinstated { get; set; }
 }
 #pragma warning restore CS8618

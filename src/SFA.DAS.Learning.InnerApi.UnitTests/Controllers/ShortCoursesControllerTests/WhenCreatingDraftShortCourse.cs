@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -46,7 +46,8 @@ public class WhenCreatingDraftShortCourse
         var request = _fixture.Create<CreateDraftShortCourseRequest>();
         var expectedLearningKey = _fixture.Create<Guid>();
         var expectedEpisodeKey = _fixture.Create<Guid>();
-        var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey };
+        var isReinstated = _fixture.Create<bool>();
+        var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated };
 
         _mockCommandDispatcher
             .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
@@ -60,7 +61,7 @@ public class WhenCreatingDraftShortCourse
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
-        okResult.Value.Should().BeEquivalentTo(new CreateShortCourseLearningResponse { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey });
+        okResult.Value.Should().BeEquivalentTo(new CreateShortCourseLearningResponse { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated });
 
         _mockCommandDispatcher.Verify(x =>
             x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(

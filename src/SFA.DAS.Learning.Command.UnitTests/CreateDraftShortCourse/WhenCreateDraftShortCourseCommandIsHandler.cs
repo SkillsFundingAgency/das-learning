@@ -166,9 +166,10 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
 
         // Act
-        await _commandHandler.Handle(command);
+        var result = await _commandHandler.Handle(command);
 
         // Assert
+        result.IsReinstated.Should().BeTrue();
         existingLearning.LatestEpisode.IsRemoved.Should().BeFalse();
         
         var reinstatedEvent = existingLearning.FlushEvents().OfType<Domain.Events.LearningReinstatedEvent>().SingleOrDefault();

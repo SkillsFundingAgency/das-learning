@@ -23,4 +23,5 @@ Scenario: Reinstate removed short course sets IsRemoved to False and publishes L
 		| StartDate  | IsApproved |
 		| 2024-08-01 | True       |
 	Then the short course episode IsRemoved is set to False
+	And the create short course response indicates it was reinstated
 	And an LearningReinstatedEvent is sent
