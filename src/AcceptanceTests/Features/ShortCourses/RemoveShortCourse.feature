@@ -1,15 +1,15 @@
-Feature: DeleteShortCourse
+Feature: RemoveShortCourse
 
-Scenario: Delete short course sets WithdrawalDate to StartDate
+Scenario: Remove short course sets IsRemoved to True
 	Given SLD call the create short course endpoint with the following information
 		| StartDate  | IsApproved |
 		| 2024-08-01 | True       |
-	When SLD delete the short course
-	Then the short course episode WithdrawalDate equals the StartDate
+	When SLD remove the short course
+	Then the short course episode IsRemoved equals True
 
-Scenario: Delete approved short course publishes LearningRemovedEvent
+Scenario: Remove approved short course publishes LearningRemovedEvent
 	Given SLD call the create short course endpoint with the following information
 		| StartDate  | IsApproved |
 		| 2024-08-01 | True       |
-	When SLD delete the short course
+	When SLD remove the short course
 	Then an LearningRemovedEvent is sent

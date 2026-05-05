@@ -1,16 +1,15 @@
 using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SFA.DAS.Learning.Domain.Events;
 
 namespace SFA.DAS.Learning.MessageHandlers.UnitTests;
 
-public class LearningDeletedEventHandlerTests
+public class LearningRemovedEventHandlerTests
 {
     private IFixture _fixture;
     private Mock<IMessageSession> _messageSession;
-    private ILogger<LearningDeletedEventHandler> _logger;
-    private LearningDeletedEventHandler _handler;
+    private ILogger<LearningRemovedEventHandler> _logger;
+    private LearningRemovedEventHandler _handler;
 
     [SetUp]
     public void SetUp()
@@ -18,16 +17,16 @@ public class LearningDeletedEventHandlerTests
         _fixture = new Fixture();
 
         _messageSession = new Mock<IMessageSession>();
-        _logger = Mock.Of<ILogger<LearningDeletedEventHandler>>();
+        _logger = Mock.Of<ILogger<LearningRemovedEventHandler>>();
 
-        _handler = new LearningDeletedEventHandler(_messageSession.Object, _logger);
+        _handler = new LearningRemovedEventHandler(_messageSession.Object, _logger);
     }
 
     [Test]
     public async Task Handle_PublishesLearningRemovedEventWithCorrectFields()
     {
         // Arrange
-        var domainEvent = _fixture.Create<LearningDeletedEvent>();
+        var domainEvent = _fixture.Create<Domain.Events.LearningRemovedEvent>();
 
         // Act
         await _handler.Handle(domainEvent, default);
@@ -36,7 +35,7 @@ public class LearningDeletedEventHandlerTests
         _messageSession.Verify(x => x.Publish(
                 It.Is<Types.LearningRemovedEvent>(msg =>
                     msg.LearningKey == domainEvent.LearningKey &&
-                    msg.ApprenticeshipId == domainEvent.ApprovalsApprenticeshipId
+                    msg.ApprenticeshipId == domainEvent.ApprenticeshipId
                 ),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);

@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -23,6 +23,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public DateTime StartDate => _entity.StartDate;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public bool IsApproved => _entity.IsApproved;
+    public bool IsRemoved => _entity.IsRemoved;
     public decimal Price => _entity.Price;
     public LearningType LearningType => _entity.LearningType;
     public EmployerType EmployerType => _entity.EmployerType;
@@ -99,9 +100,9 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         _entity.TransferSenderId = transferSenderId;
     }
 
-    public void Delete()
+    public void Remove()
     {
-        _entity.WithdrawalDate = _entity.StartDate;
+        _entity.IsRemoved = true;
     }
 
     public void Update(ShortCourseUpdateContext updateContext)

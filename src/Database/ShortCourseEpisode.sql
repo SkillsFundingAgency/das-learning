@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[ShortCourseEpisode]
+CREATE TABLE [dbo].[ShortCourseEpisode]
 (
     [Key] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
     [LearningKey] UNIQUEIDENTIFIER NOT NULL,
@@ -14,7 +14,8 @@
     [LearnerRef] VARCHAR(128) NOT NULL DEFAULT '',
     [LearningType] TINYINT NOT NULL DEFAULT 0,
     [EmployerType] TINYINT NOT NULL DEFAULT 0,
-    [TransferSenderId] BIGINT NULL
+    [TransferSenderId] BIGINT NULL,
+    [IsRemoved] BIT NOT NULL DEFAULT 0
 )
 GO
 

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
-using SFA.DAS.Learning.Command.DeleteShortCourse;
+using SFA.DAS.Learning.Command.RemoveShortCourse;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.InnerApi.Responses;
@@ -108,17 +108,17 @@ public class ShortCoursesController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes a short course learner record.
+    /// Removes a short course learner record.
     /// </summary>
     /// <param name="ukprn">The ukprn of the provider in context</param>
-    /// <param name="learningKey">The key of the short course learning record to delete.</param>
+    /// <param name="learningKey">The key of the short course learning record to remove.</param>
     /// <returns>No content.</returns>
     [HttpDelete("{ukprn:long}/shortCourses/{learningKey}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> DeleteShortCourse(long ukprn, Guid learningKey)
+    public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learningKey)
     {
-        var shortCourseResult = await _commandDispatcher.Send<DeleteShortCourseCommand, DeleteShortCourseResult?>(new DeleteShortCourseCommand(learningKey, ukprn));
+        var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learningKey, ukprn));
         return shortCourseResult == null ? NoContent() : Ok(shortCourseResult);
     }
 
