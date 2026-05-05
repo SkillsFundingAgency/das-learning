@@ -1,4 +1,4 @@
-﻿using Dapper.Contrib.Extensions;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Types;
@@ -43,6 +43,16 @@ public class RemoveLearnerStepDefinitions
             _testContext.MessageSession.ReceivedEvents<LearningRemovedEvent>().Any(
                 x => x.LearningKey == learningKey
             ), $"Failed to find published {nameof(LearningRemovedEvent)} event");
+    }
+
+    [Then(@"an LearningReinstatedEvent is sent")]
+    public async Task ThenALearningReinstatedEventIsSent()
+    {
+        var learningKey = await GetLearningKey();
+        await WaitHelper.WaitForIt(() =>
+            _testContext.MessageSession.ReceivedEvents<LearningReinstatedEvent>().Any(
+                x => x.LearningKey == learningKey
+            ), $"Failed to find published {nameof(LearningReinstatedEvent)} event");
     }
 
     [Then(@"an LearningRemovedEvent is not sent")]

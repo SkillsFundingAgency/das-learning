@@ -45,6 +45,7 @@ public class ShortCourseStepDefinitions
     }
 
     [Given(@"SLD call the create short course endpoint with the following information")]
+    [When(@"SLD call the create short course endpoint with the following information")]
     public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated(Table table)
     {
         var row = table.Rows[0];
@@ -328,14 +329,14 @@ public class ShortCourseStepDefinitions
         await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learningKey}");
     }
 
-    [Then(@"the short course episode IsRemoved equals True")]
-    public async Task ThenTheShortCourseEpisodeIsRemovedEqualsTrue()
+    [Then(@"the short course episode IsRemoved is set to (True|False)")]
+    public async Task ThenTheShortCourseEpisodeIsRemovedIsSetTo(bool isRemoved)
     {
         var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var shortCourse = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
         var episode = shortCourse.Episodes.Single();
-        episode.IsRemoved.Should().BeTrue();
+        episode.IsRemoved.Should().Be(isRemoved);
     }
 
     [When(@"SLD calls the update short course endpoint with no changes")]
