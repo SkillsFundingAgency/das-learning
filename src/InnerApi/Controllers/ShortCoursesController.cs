@@ -4,7 +4,6 @@ using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.Command.RemoveShortCourse;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
-using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
@@ -104,16 +103,7 @@ public class ShortCoursesController : ControllerBase
         if (result.LearningKey == null)
             return NoContent();
 
-        return new OkObjectResult(new CreateShortCourseLearningResponse
-        {
-            LearningKey = result.LearningKey.Value,
-            EpisodeKey = result.EpisodeKey!.Value,
-            IsReinstated = result.IsReinstated,
-            LearnerKey = result.LearnerKey,
-            CompletionDate = result.CompletionDate,
-            Learner = result.Learner,
-            Episodes = result.Episodes
-        });
+        return new OkObjectResult(result);
     }
 
     /// <summary>

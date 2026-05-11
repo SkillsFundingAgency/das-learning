@@ -5,8 +5,8 @@ using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
+using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
-using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
@@ -284,7 +284,7 @@ public class ShortCourseStepDefinitions
 
     private async Task<Guid> CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
-        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateShortCourseLearningResponse?>($"/shortCourses", request);
+        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>($"/shortCourses", request);
 
         var learningKey = responseBody?.LearningKey ?? Guid.Empty;
 
@@ -349,7 +349,7 @@ public class ShortCourseStepDefinitions
     [Then(@"the create short course response indicates it was reinstated")]
     public void ThenTheCreateShortCourseResponseIndicatesItWasReinstated()
     {
-        var response = _scenarioContext.Get<CreateShortCourseLearningResponse>();
+        var response = _scenarioContext.Get<CreateDraftShortCourseCommandResult>();
         response.IsReinstated.Should().BeTrue();
     }
 
