@@ -322,6 +322,7 @@ public class ShortCourseStepDefinitions
         await CallUpdateShortCourseEndpoint(request);
     }
 
+    [Given(@"SLD remove the short course")]
     [When(@"SLD remove the short course")]
     public async Task WhenSLDCallsTheRemoveShortCourseEndpoint()
     {
