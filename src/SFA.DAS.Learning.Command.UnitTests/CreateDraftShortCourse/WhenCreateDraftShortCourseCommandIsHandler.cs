@@ -4,11 +4,14 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
+using SFA.DAS.Learning.Command.Mappers;
+using SFA.DAS.Learning.Command.RemoveShortCourse;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +27,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<IShortCourseLearningFactory> _learningFactory = null!;
     private Mock<IShortCourseLearningRepository> _learningRepository = null!;
+    private Mock<IShortCourseLearningDomainModelMapper> _mapper = null!;
     private Mock<ILogger<CreateDraftShortCourseCommandHandler>> _logger = null!;
     private Fixture _fixture = null!;
 
@@ -34,13 +38,21 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerRepository = new Mock<ILearnerRepository>();
         _learningFactory = new Mock<IShortCourseLearningFactory>();
         _learningRepository = new Mock<IShortCourseLearningRepository>();
+        _mapper = new Mock<IShortCourseLearningDomainModelMapper>();
         _logger = new Mock<ILogger<CreateDraftShortCourseCommandHandler>>();
+
+        _mapper.Setup(x => x.Map<RemoveShortCourseResult>(
+                It.IsAny<ShortCourseLearningDomainModel>(),
+                It.IsAny<LearnerDomainModel>(),
+                It.IsAny<long>()))
+            .Returns(new RemoveShortCourseResult());
 
         _commandHandler = new CreateDraftShortCourseCommandHandler(
             _learnerFactory.Object,
             _learnerRepository.Object,
             _learningRepository.Object,
             _learningFactory.Object,
+            _mapper.Object,
             _logger.Object);
 
         _fixture = new Fixture();
@@ -165,13 +177,26 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn, isRemoved: true);
         _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
 
+        var mappedLearner = new ShortCourseLearnerDto { Uln = "1234567890", FirstName = "Jane", LastName = "Smith" };
+        var mappedEpisodes = new[] { new ShortCourseEpisodeDto { CourseCode = "SC-001" } };
+        _mapper.Setup(x => x.Map<RemoveShortCourseResult>(existingLearning, learner, command.Model.OnProgramme.Ukprn))
+            .Returns(new RemoveShortCourseResult
+            {
+                LearnerKey = learner.Key,
+                Learner = mappedLearner,
+                Episodes = mappedEpisodes
+            });
+
         // Act
         var result = await _commandHandler.Handle(command);
 
         // Assert
         result.IsReinstated.Should().BeTrue();
+        result.LearnerKey.Should().Be(learner.Key);
+        result.Learner.Should().Be(mappedLearner);
+        result.Episodes.Should().BeEquivalentTo(mappedEpisodes);
         existingLearning.LatestEpisode.IsRemoved.Should().BeFalse();
-        
+
         var reinstatedEvent = existingLearning.FlushEvents().OfType<Domain.Events.LearningReinstatedEvent>().SingleOrDefault();
         reinstatedEvent.Should().NotBeNull();
         reinstatedEvent!.LearningKey.Should().Be(existingLearning.Key);

@@ -1,5 +1,5 @@
-using System.IO.Hashing;
 using Microsoft.Extensions.Logging;
+using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -14,6 +14,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
     private readonly ILearnerRepository _learnerRepository;
     private readonly IShortCourseLearningRepository _shortCourseLearningRepository;
     private readonly IShortCourseLearningFactory _shortCourseLearningFactory;
+    private readonly IShortCourseLearningDomainModelMapper _mapper;
     private readonly ILogger<CreateDraftShortCourseCommandHandler> _logger;
 
     public CreateDraftShortCourseCommandHandler(
@@ -21,12 +22,14 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         ILearnerRepository learnerRepository,
         IShortCourseLearningRepository shortCourseLearningRepository,
         IShortCourseLearningFactory shortCourseLearningFactory,
+        IShortCourseLearningDomainModelMapper mapper,
         ILogger<CreateDraftShortCourseCommandHandler> logger)
     {
         _learnerFactory = learnerFactory;
         _learnerRepository = learnerRepository;
         _shortCourseLearningRepository = shortCourseLearningRepository;
         _shortCourseLearningFactory = shortCourseLearningFactory;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -74,17 +77,25 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         learning.Update(command.Model);
 
         //Reinstate learner if provider's episode has previously been removed
-        var isReinstated = false;
         if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
         {
             learning.Reinstate(command.Model.OnProgramme.Ukprn);
-            isReinstated = true;
         }
 
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
-        return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisode.Key, IsReinstated = isReinstated };
+        var mapped = _mapper.Map<RemoveShortCourse.RemoveShortCourseResult>(learning, learner, command.Model.OnProgramme.Ukprn);
+        return new CreateDraftShortCourseCommandResult
+        {
+            LearningKey = learning.Key,
+            EpisodeKey = learning.LatestEpisode.Key,
+            IsReinstated = true,
+            LearnerKey = mapped.LearnerKey,
+            CompletionDate = mapped.CompletionDate,
+            Learner = mapped.Learner,
+            Episodes = mapped.Episodes
+        };
     }
 
     private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)
