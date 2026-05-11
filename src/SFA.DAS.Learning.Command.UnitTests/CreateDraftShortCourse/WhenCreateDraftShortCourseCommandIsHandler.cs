@@ -5,7 +5,6 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.Command.Mappers;
-using SFA.DAS.Learning.Command.RemoveShortCourse;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
@@ -41,11 +40,11 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _mapper = new Mock<IShortCourseLearningDomainModelMapper>();
         _logger = new Mock<ILogger<CreateDraftShortCourseCommandHandler>>();
 
-        _mapper.Setup(x => x.Map<RemoveShortCourseResult>(
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(
                 It.IsAny<ShortCourseLearningDomainModel>(),
                 It.IsAny<LearnerDomainModel>(),
                 It.IsAny<long>()))
-            .Returns(new RemoveShortCourseResult());
+            .Returns(new CreateDraftShortCourseCommandResult());
 
         _commandHandler = new CreateDraftShortCourseCommandHandler(
             _learnerFactory.Object,
@@ -98,7 +97,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.LearningKey.Should().BeNull();
+        result.Should().BeNull();
         _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
         _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
@@ -119,7 +118,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.LearningKey.Should().BeNull();
+        result.Should().BeNull();
         _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
         _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
@@ -140,7 +139,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.LearningKey.Should().BeNull();
+        result.Should().BeNull();
         _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
         _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
@@ -179,8 +178,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
 
         var mappedLearner = new ShortCourseLearnerDto { Uln = "1234567890", FirstName = "Jane", LastName = "Smith" };
         var mappedEpisodes = new[] { new ShortCourseEpisodeDto { CourseCode = "SC-001" } };
-        _mapper.Setup(x => x.Map<RemoveShortCourseResult>(existingLearning, learner, command.Model.OnProgramme.Ukprn))
-            .Returns(new RemoveShortCourseResult
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(existingLearning, learner, command.Model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseCommandResult
             {
                 LearnerKey = learner.Key,
                 Learner = mappedLearner,

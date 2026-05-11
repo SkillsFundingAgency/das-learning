@@ -8,7 +8,7 @@ using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
 namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 
-public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>
+public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>
 {
     private readonly ILearnerFactory _learnerFactory;
     private readonly ILearnerRepository _learnerRepository;
@@ -33,7 +33,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         _logger = logger;
     }
 
-    public async Task<CreateDraftShortCourseCommandResult> Handle(CreateDraftShortCourseCommand command, CancellationToken cancellationToken = default)
+    public async Task<CreateDraftShortCourseCommandResult?> Handle(CreateDraftShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Handling CreateDraftShortCourseCommand");
 
@@ -56,21 +56,21 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn != command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An approved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-            return new CreateDraftShortCourseCommandResult();
+            return null;
         }
 
         //Ignore if provider posts a short course when they already have an approved short course
         if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn == command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An approved short course episode already exists with this provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-            return new CreateDraftShortCourseCommandResult();
+            return null;
         }
 
         //Ignore if we already have an unapproved short course with another provider
         if(learning.Episodes.Any(x => !x.IsApproved && !x.IsRemoved && x.Ukprn != command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An unapproved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-            return new CreateDraftShortCourseCommandResult();
+            return null;
         }
 
         //Update existing learning if same provider
@@ -85,17 +85,10 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
-        var mapped = _mapper.Map<RemoveShortCourse.RemoveShortCourseResult>(learning, learner, command.Model.OnProgramme.Ukprn);
-        return new CreateDraftShortCourseCommandResult
-        {
-            LearningKey = learning.Key,
-            EpisodeKey = learning.LatestEpisode.Key,
-            IsReinstated = true,
-            LearnerKey = mapped.LearnerKey,
-            CompletionDate = mapped.CompletionDate,
-            Learner = mapped.Learner,
-            Episodes = mapped.Episodes
-        };
+        var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
+        result.EpisodeKey = learning.LatestEpisode.Key;
+        result.IsReinstated = true;
+        return result;
     }
 
     private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)

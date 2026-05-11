@@ -98,9 +98,9 @@ public class ShortCoursesController : ControllerBase
         var command = new CreateDraftShortCourseCommand(request.ToCreateModel());
 
         var result =
-            await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(command);
+            await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(command);
 
-        if (result.LearningKey == null)
+        if (result == null)
             return NoContent();
 
         return new OkObjectResult(result);

@@ -49,7 +49,7 @@ public class WhenCreatingDraftShortCourse
         var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated };
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
+            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(
                 It.IsAny<CreateDraftShortCourseCommand>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(commandResult);
@@ -63,7 +63,7 @@ public class WhenCreatingDraftShortCourse
         okResult.Value.Should().BeEquivalentTo(new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated });
 
         _mockCommandDispatcher.Verify(x =>
-            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
+            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(
                 It.Is<CreateDraftShortCourseCommand>(c =>
                     c.Model.Learner.EmailAddress == request.LearnerUpdateDetails.EmailAddress &&
                     c.Model.OnProgramme.CourseCode == request.OnProgramme.CourseCode
