@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using SFA.DAS.Learning.Command.DeleteShortCourse;
+using SFA.DAS.Learning.Command.RemoveShortCourse;
 using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
@@ -14,17 +14,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SFA.DAS.Learning.Command.UnitTests.DeleteShortCourse;
+namespace SFA.DAS.Learning.Command.UnitTests.RemoveShortCourse;
 
 [TestFixture]
-public class WhenDeleteShortCourseCommandIsHandled
+public class WhenRemoveShortCourseCommandIsHandled
 {
     private Fixture _fixture = new Fixture();
-    private DeleteShortCourseCommandHandler _commandHandler = null!;
+    private RemoveShortCourseCommandHandler _commandHandler = null!;
     private Mock<IShortCourseLearningRepository> _repository = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<IShortCourseLearningDomainModelMapper> _mapper = null!;
-    private Mock<ILogger<DeleteShortCourseCommandHandler>> _logger = null!;
+    private Mock<ILogger<RemoveShortCourseCommandHandler>> _logger = null!;
 
     private const long Ukprn = 12345678;
 
@@ -32,31 +32,31 @@ public class WhenDeleteShortCourseCommandIsHandled
     public void SetUp()
     {
         _repository = new Mock<IShortCourseLearningRepository>();
-        _logger = new Mock<ILogger<DeleteShortCourseCommandHandler>>();
+        _logger = new Mock<ILogger<RemoveShortCourseCommandHandler>>();
         _learnerRepository = new Mock<ILearnerRepository>();
         _mapper = new Mock<IShortCourseLearningDomainModelMapper>();
 
         _learnerRepository.Setup(r => r.Get(It.IsAny<Guid>())).ReturnsAsync(CreateLearnerDomainModel());
 
-        _mapper.Setup(x => x.Map<DeleteShortCourseResult>(
+        _mapper.Setup(x => x.Map<RemoveShortCourseResult>(
             It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
             )
-            .Returns(_fixture.Create<DeleteShortCourseResult>());
+            .Returns(_fixture.Create<RemoveShortCourseResult>());
 
-        _commandHandler = new DeleteShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object);
+        _commandHandler = new RemoveShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object);
     }
 
     [Test]
-    public async Task ThenWithdrawalDateIsSetToStartDate()
+    public async Task ThenIsRemovedIsSetToTrue()
     {
         var startDate = new DateTime(2024, 8, 1);
         var learningKey = Guid.NewGuid();
         var learning = CreateDomainModel(learningKey, startDate: startDate);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
+        await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
-        learning.Episodes.Single().WithdrawalDate.Should().Be(startDate);
+        learning.Episodes.Single().IsRemoved.Should().BeTrue();
     }
 
     [Test]
@@ -66,7 +66,7 @@ public class WhenDeleteShortCourseCommandIsHandled
         var learning = CreateDomainModel(learningKey);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
+        await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
         _repository.Verify(r => r.Update(learning), Times.Once);
     }
@@ -78,7 +78,7 @@ public class WhenDeleteShortCourseCommandIsHandled
         var learning = CreateDomainModel(learningKey, isApproved: true);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
+        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
         result.Should().NotBeNull();
     }
@@ -90,7 +90,7 @@ public class WhenDeleteShortCourseCommandIsHandled
         var learning = CreateDomainModel(learningKey, isApproved: true);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, ukprn: 99999999));
+        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, ukprn: 99999999));
 
         result.Should().BeNull();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
@@ -103,14 +103,14 @@ public class WhenDeleteShortCourseCommandIsHandled
         var learning = CreateDomainModel(learningKey, isApproved: false);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        var result = await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
+        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
         result.Should().BeNull();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
     [Test]
-    public async Task ThenALearningDeletedEventIsRaisedWhenApprovedAndDeleted()
+    public async Task ThenALearningRemovedEventIsRaisedWhenApprovedAndDeleted()
     {
         var learningKey = Guid.NewGuid();
         var approvalsApprenticeshipId = 42L;
@@ -119,28 +119,26 @@ public class WhenDeleteShortCourseCommandIsHandled
         var learning = CreateDomainModel(learningKey, startDate: startDate, approvalsApprenticeshipId: approvalsApprenticeshipId, employerAccountId: employerAccountId, isApproved: true);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
+        await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
         learning.FlushEvents()
-            .OfType<Domain.Events.LearningDeletedEvent>()
+            .OfType<Domain.Events.LearningRemovedEvent>()
             .Should().ContainSingle(e =>
                 e.LearningKey == learningKey &&
-                e.ApprovalsApprenticeshipId == approvalsApprenticeshipId &&
-                e.EmployerAccountId == employerAccountId &&
-                e.LastDayOfLearning == startDate);
+                e.ApprenticeshipId == approvalsApprenticeshipId);
     }
 
     [Test]
-    public async Task ThenNoLearningDeletedEventIsRaisedWhenNotApproved()
+    public async Task ThenNoLearningRemovedEventIsRaisedWhenNotApproved()
     {
         var learningKey = Guid.NewGuid();
         var learning = CreateDomainModel(learningKey, isApproved: false);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
+        await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
         learning.FlushEvents()
-            .OfType<Domain.Events.LearningDeletedEvent>()
+            .OfType<Domain.Events.LearningRemovedEvent>()
             .Should().BeEmpty();
     }
 
@@ -150,7 +148,7 @@ public class WhenDeleteShortCourseCommandIsHandled
         var learningKey = Guid.NewGuid();
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync((ShortCourseLearningDomainModel)null!);
 
-        var act = async () => await _commandHandler.Handle(new DeleteShortCourseCommand(learningKey, Ukprn));
+        var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }

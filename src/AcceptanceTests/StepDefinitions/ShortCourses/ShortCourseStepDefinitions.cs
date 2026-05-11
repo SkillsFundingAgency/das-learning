@@ -5,8 +5,8 @@ using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
+using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
-using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
@@ -45,6 +45,7 @@ public class ShortCourseStepDefinitions
     }
 
     [Given(@"SLD call the create short course endpoint with the following information")]
+    [When(@"SLD call the create short course endpoint with the following information")]
     public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated(Table table)
     {
         var row = table.Rows[0];
@@ -283,12 +284,13 @@ public class ShortCourseStepDefinitions
 
     private async Task<Guid> CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
-        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateShortCourseLearningResponse?>($"/shortCourses", request);
+        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>($"/shortCourses", request);
 
         var learningKey = responseBody?.LearningKey ?? Guid.Empty;
 
         _scenarioContext[ShortCourseLearningKey] = learningKey;
         _scenarioContext[ShortCourseEndpointResponseCodeKey] = (int)statusCode;
+        _scenarioContext.Set(responseBody);
 
         return learningKey;
     }
@@ -320,28 +322,36 @@ public class ShortCourseStepDefinitions
         await CallUpdateShortCourseEndpoint(request);
     }
 
-    [When(@"SLD delete the short course")]
-    public async Task WhenSLDCallsTheDeleteShortCourseEndpoint()
+    [Given(@"SLD remove the short course")]
+    [When(@"SLD remove the short course")]
+    public async Task WhenSLDCallsTheRemoveShortCourseEndpoint()
     {
         var learningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
         var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
         await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learningKey}");
     }
 
-    [Then(@"the short course episode WithdrawalDate equals the StartDate")]
-    public async Task ThenTheShortCourseEpisodeWithdrawalDateEqualsTheStartDate()
+    [When(@"SLD calls the update short course endpoint with no changes")]
+    public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
+    {
+        await CallUpdateShortCourseEndpoint(GetDefaultShortCourse());
+    }
+
+    [Then(@"the short course episode IsRemoved is set to (True|False)")]
+    public async Task ThenTheShortCourseEpisodeIsRemovedIsSetTo(bool isRemoved)
     {
         var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var shortCourse = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
         var episode = shortCourse.Episodes.Single();
-        episode.WithdrawalDate.Should().Be(episode.StartDate);
+        episode.IsRemoved.Should().Be(isRemoved);
     }
 
-    [When(@"SLD calls the update short course endpoint with no changes")]
-    public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
+    [Then(@"the create short course response indicates it was reinstated")]
+    public void ThenTheCreateShortCourseResponseIndicatesItWasReinstated()
     {
-        await CallUpdateShortCourseEndpoint(GetDefaultShortCourse());
+        var response = _scenarioContext.Get<CreateDraftShortCourseCommandResult>();
+        response.IsReinstated.Should().BeTrue();
     }
 
     [Then(@"the update short course response includes changes")]
