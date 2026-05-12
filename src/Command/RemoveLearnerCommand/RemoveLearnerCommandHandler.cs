@@ -29,16 +29,12 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand>
         var learning = await _learningRepository.Get(command.LearnerKey);
         if (learning == null)
         {
-            _logger.LogWarning("No learning found for learner key {LearnerKey}", command.LearnerKey);
             throw new KeyNotFoundException($"Learning with key {command.LearnerKey} not found.");
         }
 
         learning.RemoveLearner();
 
-        _logger.LogInformation("Updating repository to remove from start learner with key {LearnerKey}", command.LearnerKey);
         await _learningRepository.Update(learning);
-
-        _logger.LogInformation("Successfully updated repository after removing learner from start with key {LearnerKey}", command.LearnerKey);
 
         await SendEvent(learning);
     }
