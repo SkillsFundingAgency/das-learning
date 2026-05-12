@@ -48,7 +48,7 @@ public class WhenRemovingLearner
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
+        var latestEpisode = _fixture.CreateEpisodeDomainModel();
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
@@ -68,7 +68,7 @@ public class WhenRemovingLearner
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
         updatedModel.Should().NotBeNull();
         updatedModel!.LatestEpisode.IsRemoved.Should().BeTrue();
-        _messageSession.Verify(x => x.Publish(It.IsAny<LearningRemovedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
+        _messageSession.Verify(x => x.Publish(It.IsAny<LearningRemovedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]

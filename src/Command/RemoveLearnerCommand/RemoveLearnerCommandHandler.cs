@@ -40,12 +40,7 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand>
 
         _logger.LogInformation("Successfully updated repository after removing learner from start with key {LearnerKey}", command.LearnerKey);
 
-        //todo: why are we only sending a LearningRemovedEvent for DAS? It does not appear to be consumed in Earnings, so only Approvals
-        //would be likely to care. Unsure why being on the DAS calc matters?
-        if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
-        {
-            await SendEvent(learning);
-        }
+        await SendEvent(learning);
     }
 
     private async Task SendEvent(ApprenticeshipLearningDomainModel learning)
