@@ -139,6 +139,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     {
         var changes = new List<LearningUpdateChanges>();
 
+        ReinstateIfRemoved(changes);
+
         UpdateLearningDetails(updateContext, changes);
 
         UpdateEnglishAndMathsDetails(updateContext, changes);
@@ -171,6 +173,23 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             LearningKey = Key,
             ApprenticeshipId = latestEpisode.ApprovalsApprenticeshipId
         });
+    }
+
+    private void ReinstateIfRemoved(List<LearningUpdateChanges> changes)
+    {
+        var latestEpisode = LatestEpisode;
+        if (!latestEpisode.IsRemoved)
+            return;
+
+        latestEpisode.Reinstate();
+
+        AddEvent(new LearningReinstatedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = latestEpisode.ApprovalsApprenticeshipId
+        });
+
+        changes.Add(LearningUpdateChanges.Reinstated);
     }
 
     public override void Approve(long employerAccountId)

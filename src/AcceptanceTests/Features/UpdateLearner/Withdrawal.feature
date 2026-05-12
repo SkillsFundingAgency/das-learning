@@ -43,8 +43,9 @@ Scenario: Apprentice Withdrawn following previous removal
 	Then the “last day of learning” for the Learning is set to currentAY-11-25
 	And an LearningWithdrawnEvent is sent
 	And the following changes are returned
-		| Change          |
-		| Withdrawal      |
+		| Change     |
+		| Withdrawal |
+		| Reinstated |
 	And the learning history is maintained
 
 Scenario: Apprentice Reverse Withdrawal
