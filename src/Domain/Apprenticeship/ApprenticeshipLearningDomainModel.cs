@@ -161,8 +161,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public void RemoveLearner()
     {
         var latestEpisode = LatestEpisode;
-        var withdrawalDate = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
-        latestEpisode.Withdraw(withdrawalDate);
+        latestEpisode.Remove();
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.EnglishAndMathsCourses.Clear();

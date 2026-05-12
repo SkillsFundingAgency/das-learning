@@ -6,7 +6,7 @@ using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.RemoveLearnerCommand;
 
-public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand, RemoveLearnerResult>
+public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand>
 {
     private readonly IApprenticeshipLearningRepository _learningRepository;
     private readonly IMessageSession _messageSession;
@@ -22,7 +22,7 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand,
         _logger = logger;
     }
 
-    public async Task<RemoveLearnerResult> Handle(RemoveLearnerCommand command, CancellationToken cancellationToken = default)
+    public async Task Handle(RemoveLearnerCommand command, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Handling RemoveLearnerCommandHandler for Learning {learningKey}", command.LearnerKey);
 
@@ -40,14 +40,12 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand,
 
         _logger.LogInformation("Successfully updated repository after removing learner from start with key {LearnerKey}", command.LearnerKey);
 
-        var lastDayOfLearning = learning.LatestEpisode.WithdrawalDate!.Value;
-
+        //todo: why are we only sending a LearningRemovedEvent for DAS? It does not appear to be consumed in Earnings, so only Approvals
+        //would be likely to care. Unsure why being on the DAS calc matters?
         if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
         {
             await SendEvent(learning);
         }
-
-        return new RemoveLearnerResult { LastDayOfLearning = lastDayOfLearning };
     }
 
     private async Task SendEvent(ApprenticeshipLearningDomainModel learning)

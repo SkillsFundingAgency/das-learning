@@ -55,11 +55,19 @@ public class WhenRemovingLearner
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
                            .ReturnsAsync(domainModel);
 
+        ApprenticeshipLearningDomainModel? updatedModel = null;
+
+        _learningRepository
+            .Setup(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(m => updatedModel = m);
+
         // Act
         await _commandHandler.Handle(command);
 
         // Assert
-        _learningRepository.Verify(x => x.Update(domainModel), Times.Once);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
+        updatedModel.Should().NotBeNull();
+        updatedModel!.LatestEpisode.IsRemoved.Should().BeTrue();
         _messageSession.Verify(x => x.Publish(It.IsAny<LearningRemovedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -176,7 +184,6 @@ public class WhenRemovingLearner
         var latestEpisode = _fixture.CreateEpisodeDomainModel(x =>
         {
             x.FundingPlatform = FundingPlatform.DAS;
-            x.WithdrawalDate = DateTime.Today;
         });
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
@@ -197,7 +204,7 @@ public class WhenRemovingLearner
     }
 
     [Test]
-    public async Task ThenTheLastDayOfLearningIsReturned()
+    public async Task ThenTheLastDayOfLearningIsNull()
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
@@ -214,6 +221,6 @@ public class WhenRemovingLearner
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.LastDayOfLearning.Should().Be(latestEpisode.WithdrawalDate);
+        result.LastDayOfLearning.Should().BeNull();
     }
 }
