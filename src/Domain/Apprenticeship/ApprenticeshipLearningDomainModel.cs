@@ -165,6 +165,12 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.EnglishAndMathsCourses.Clear();
+
+        AddEvent(new LearningRemovedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = latestEpisode.ApprovalsApprenticeshipId
+        });
     }
 
     public override void Approve(long employerAccountId)
