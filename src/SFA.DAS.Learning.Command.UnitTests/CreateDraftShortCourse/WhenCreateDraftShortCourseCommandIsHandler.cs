@@ -157,10 +157,11 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
 
         // Act
-        await _commandHandler.Handle(command);
+        var result = await _commandHandler.Handle(command);
 
         // Assert
         existingLearning.LatestEpisode.LearningType.Should().Be(command.Model.OnProgramme.LearningType);
+        result.IsReinstated.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
 

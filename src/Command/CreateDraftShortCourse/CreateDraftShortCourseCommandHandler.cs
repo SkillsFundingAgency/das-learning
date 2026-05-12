@@ -77,9 +77,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         learning.Update(command.Model);
 
         //Reinstate learner if provider's episode has previously been removed
+        var isReinstated = false;
         if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
         {
             learning.Reinstate(command.Model.OnProgramme.Ukprn);
+            isReinstated = true;
         }
 
         TransferEvents(learner, learning);
@@ -87,7 +89,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
         result.EpisodeKey = learning.LatestEpisode.Key;
-        result.IsReinstated = true;
+        result.IsReinstated = isReinstated;
         return result;
     }
 
