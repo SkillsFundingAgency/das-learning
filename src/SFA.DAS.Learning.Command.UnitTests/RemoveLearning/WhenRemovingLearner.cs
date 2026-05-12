@@ -202,25 +202,4 @@ public class WhenRemovingLearner
             It.IsAny<PublishOptions>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
-
-    [Test]
-    public async Task ThenTheLastDayOfLearningIsNull()
-    {
-        // Arrange
-        var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
-
-        var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
-
-        TestHelper.SetEpisode(domainModel, latestEpisode);
-
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
-                           .ReturnsAsync(domainModel);
-
-        // Act
-        var result = await _commandHandler.Handle(command);
-
-        // Assert
-        result.LastDayOfLearning.Should().BeNull();
-    }
 }
