@@ -3,6 +3,7 @@ using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
@@ -74,15 +75,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
 
         //Update existing learning if same provider
-        learning.Update(command.Model);
-
-        //Reinstate learner if provider's episode has previously been removed
-        var isReinstated = false;
-        if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
-        {
-            learning.Reinstate(command.Model.OnProgramme.Ukprn);
-            isReinstated = true;
-        }
+        var changes = learning.Update(command.Model);
+        var isReinstated = changes.Contains(ShortCourseUpdateChanges.Reinstated);
 
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);

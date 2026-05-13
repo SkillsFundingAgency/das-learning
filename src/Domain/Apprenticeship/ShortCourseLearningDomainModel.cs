@@ -79,9 +79,27 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     public ShortCourseUpdateChanges[] Update(ShortCourseUpdateContext updateContext)
     {
         var changes = new List<ShortCourseUpdateChanges>();
+        var episode = _episodes.Single(e => e.Ukprn == updateContext.OnProgramme.Ukprn);
+        ReinstateIfRemoved(episode, changes);
         UpdateCompletionDate(updateContext.OnProgramme.CompletionDate, changes);
-        UpdateEpisode(updateContext, changes);
+        UpdateEpisode(episode, updateContext, changes);
         return changes.ToArray();
+    }
+
+    private void ReinstateIfRemoved(ShortCourseEpisodeDomainModel episode, List<ShortCourseUpdateChanges> changes)
+    {
+        if (!episode.IsApproved || !episode.IsRemoved)
+            return;
+
+        episode.Reinstate();
+
+        AddEvent(new LearningReinstatedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = episode.ApprovalsApprenticeshipId
+        });
+
+        changes.Add(ShortCourseUpdateChanges.Reinstated);
     }
 
     private void UpdateCompletionDate(DateTime? completionDate, List<ShortCourseUpdateChanges> changes)
@@ -91,10 +109,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         _entity.CompletionDate = completionDate;
     }
 
-    private void UpdateEpisode(ShortCourseUpdateContext updateContext, List<ShortCourseUpdateChanges> changes)
+    private void UpdateEpisode(ShortCourseEpisodeDomainModel episode, ShortCourseUpdateContext updateContext, List<ShortCourseUpdateChanges> changes)
     {
-        var episode = _episodes.Single();
-
         var prevWithdrawalDate = episode.WithdrawalDate;
         var prevMilestones = episode.Milestones.Select(m => m.Milestone).ToHashSet();
         var prevLearnerRef = episode.LearnerRef;
@@ -134,24 +150,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         episode.Remove();
 
         AddEvent(new LearningRemovedEvent
-        {
-            LearningKey = Key,
-            ApprenticeshipId = episode.ApprovalsApprenticeshipId
-        });
-
-        return true;
-    }
-
-    public bool Reinstate(long ukprn)
-    {
-        var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
-
-        if (episode == null || !episode.IsApproved || !episode.IsRemoved)
-            return false;
-
-        episode.Reinstate();
-
-        AddEvent(new LearningReinstatedEvent
         {
             LearningKey = Key,
             ApprenticeshipId = episode.ApprovalsApprenticeshipId
