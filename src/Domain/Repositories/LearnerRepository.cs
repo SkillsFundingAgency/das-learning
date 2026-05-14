@@ -8,16 +8,14 @@ namespace SFA.DAS.Learning.Domain.Repositories;
 public class LearnerRepository : ILearnerRepository
 {
     private readonly Lazy<LearningDataContext> _lazyContext;
-    private IDomainEventDispatcher _domainEventDispatcher;
     private readonly ILearnerFactory _learnerFactory;
     private LearningDataContext DbContext => _lazyContext.Value;
 
     private readonly IUnitOfWork _unitOfWork;
 
-    public LearnerRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, ILearnerFactory learnerFactory, IUnitOfWork unitOfWork)
+    public LearnerRepository(Lazy<LearningDataContext> dbContext, ILearnerFactory learnerFactory, IUnitOfWork unitOfWork)
     {
         _lazyContext = dbContext;
-        _domainEventDispatcher = domainEventDispatcher;
         _learnerFactory = learnerFactory;
         _unitOfWork = unitOfWork;
     }
@@ -27,12 +25,7 @@ public class LearnerRepository : ILearnerRepository
     {
         var entity = learner.GetEntity();
         await DbContext.AddAsync(entity);
-        await DbContext.SaveChangesAsync();
-
-        foreach (dynamic domainEvent in learner.FlushEvents())
-        {
-            await _domainEventDispatcher.Send(domainEvent);
-        }
+        _unitOfWork.Track(learner);
     }
 
     public async Task<LearnerDomainModel?> Get(Guid learnerKey)
