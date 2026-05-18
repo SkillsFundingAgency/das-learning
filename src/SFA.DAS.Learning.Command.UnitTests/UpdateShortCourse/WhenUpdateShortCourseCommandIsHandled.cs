@@ -143,7 +143,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         await _commandHandler.Handle(command);
 
-        learning.LatestEpisode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
+        learning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).LearningType.Should().Be(LearningType.ApprenticeshipUnit);
     }
 
     [Test]

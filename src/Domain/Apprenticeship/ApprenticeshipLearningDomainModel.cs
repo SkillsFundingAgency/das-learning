@@ -168,7 +168,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         _entity.EnglishAndMathsCourses.Clear();
     }
 
-    public override void Approve(long employerAccountId)
+    public override void Approve(long ukprn, long employerAccountId)
     {
         throw new NotImplementedException("Learning approval is not yet implemented");
     }

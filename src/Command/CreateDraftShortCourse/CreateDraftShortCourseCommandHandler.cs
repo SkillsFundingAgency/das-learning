@@ -49,7 +49,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             TransferEvents(learner, learning);
             await _shortCourseLearningRepository.Add(learning);
 
-            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisode.Key};
+            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).Key };
         }
 
         // Ignore if provider posts a short course when they already have an approved short course

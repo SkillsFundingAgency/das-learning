@@ -160,12 +160,12 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return true;
     }
 
-    public override void Approve(long employerAccountId)
-        => Approve(employerAccountId, EmployerType.NonLevy, 0);
+    public override void Approve(long ukprn, long employerAccountId)
+        => Approve(ukprn, employerAccountId, EmployerType.NonLevy, 0);
 
-    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId, long? transferSenderId = null)
+    public void Approve(long ukprn, long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId, long? transferSenderId = null)
     {
-        var episode = LatestEpisode;
+        var episode = LatestEpisodeForProvider(ukprn);
         episode.Approve(employerAccountId, employerType, approvalsApprenticeshipId, transferSenderId);
 
         AddEvent(new LearningApprovedEvent
@@ -175,13 +175,10 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         });
     }
 
-    public ShortCourseEpisodeDomainModel LatestEpisode
+    public ShortCourseEpisodeDomainModel LatestEpisodeForProvider(long ukprn)
     {
-        get
-        {
-            var latestEpisode = _episodes.MaxBy(x => x.StartDate);
-            return latestEpisode;
-        }
+        var latestEpisode = _episodes.Where(x => x.Ukprn == ukprn).MaxBy(x => x.StartDate);
+        return latestEpisode;
     }
 
     private ShortCourseLearningDomainModel(ShortCourseLearning entity) : base(entity)

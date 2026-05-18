@@ -78,7 +78,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         // Assert
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == domainModel)));
         result.LearningKey.Should().Be(domainModel.Key);
-        domainModel.LatestEpisode.LearningType.Should().Be(command.Model.OnProgramme.LearningType);
+        domainModel.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).LearningType.Should().Be(command.Model.OnProgramme.LearningType);
     }
 
     [Test]
@@ -162,7 +162,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        existingLearning.LatestEpisode.LearningType.Should().Be(command.Model.OnProgramme.LearningType);
+        existingLearning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).LearningType.Should().Be(command.Model.OnProgramme.LearningType);
         result.IsReinstated.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
@@ -197,12 +197,12 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         result.LearnerKey.Should().Be(learner.Key);
         result.Learner.Should().Be(mappedLearner);
         result.Episodes.Should().BeEquivalentTo(mappedEpisodes);
-        existingLearning.LatestEpisode.IsRemoved.Should().BeFalse();
+        existingLearning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).IsRemoved.Should().BeFalse();
 
         var reinstatedEvent = existingLearning.FlushEvents().OfType<Domain.Events.LearningReinstatedEvent>().SingleOrDefault();
         reinstatedEvent.Should().NotBeNull();
         reinstatedEvent!.LearningKey.Should().Be(existingLearning.Key);
-        reinstatedEvent.ApprenticeshipId.Should().Be(existingLearning.LatestEpisode.ApprovalsApprenticeshipId);
+        reinstatedEvent.ApprenticeshipId.Should().Be(existingLearning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).ApprovalsApprenticeshipId);
 
         _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
@@ -237,3 +237,5 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         return ShortCourseLearningDomainModel.Get(entity);
     }
 }
+
+
