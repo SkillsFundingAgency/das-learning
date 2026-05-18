@@ -82,7 +82,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenShortCircuitsIfApprovedEpisodeExistsWithAnotherProvider()
+    public async Task ThenCreatesNewEpisodeIfApprovedEpisodeExistsWithAnotherProvider()
     {
         // Arrange
         var command = _fixture.Create<CreateDraftShortCourseCommand>();
@@ -97,9 +97,10 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.Should().BeNull();
-        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
-        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        result.Should().NotBeNull();
+        existingLearning.Episodes.Should().HaveCount(2);
+        existingLearning.Episodes.Should().Contain(x => x.Ukprn == command.Model.OnProgramme.Ukprn);
+        _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
 
     [Test]
@@ -124,7 +125,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenShortCircuitsIfUnapprovedEpisodeExistsWithAnotherProvider()
+    public async Task ThenCreatesNewEpisodeIfUnapprovedEpisodeExistsWithAnotherProvider()
     {
         // Arrange
         var command = _fixture.Create<CreateDraftShortCourseCommand>();
@@ -139,9 +140,10 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.Should().BeNull();
-        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
-        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        result.Should().NotBeNull();
+        existingLearning.Episodes.Should().HaveCount(2);
+        existingLearning.Episodes.Should().Contain(x => x.Ukprn == command.Model.OnProgramme.Ukprn);
+        _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
 
     [Test]

@@ -52,43 +52,54 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisode.Key};
         }
 
-        //  Ignore if we have an approved episode with another provider
-        if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn != command.Model.OnProgramme.Ukprn))
-        {
-            _logger.LogWarning("An approved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-            return null;
-        }
-
-        //Ignore if provider posts a short course when they already have an approved short course
+        // Ignore if provider posts a short course when they already have an approved short course
         if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn == command.Model.OnProgramme.Ukprn))
         {
             _logger.LogWarning("An approved short course episode already exists with this provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
             return null;
         }
 
-        //Ignore if we already have an unapproved short course with another provider
-        if(learning.Episodes.Any(x => !x.IsApproved && !x.IsRemoved && x.Ukprn != command.Model.OnProgramme.Ukprn))
-        {
-            _logger.LogWarning("An unapproved short course episode already exists with another provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-            return null;
-        }
-
-        //Update existing learning if same provider
-        learning.Update(command.Model);
-
-        //Reinstate learner if provider's episode has previously been removed
         var isReinstated = false;
-        if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
+
+        // If no episode exists for this provider, add a new one
+        if (!learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn))
         {
-            learning.Reinstate(command.Model.OnProgramme.Ukprn);
-            isReinstated = true;
+            var episode = learning.AddEpisode(
+                command.Model.OnProgramme.Ukprn,
+                command.Model.OnProgramme.EmployerId,
+                command.Model.OnProgramme.CourseCode,
+                command.Model.LearnerRef,
+                false,
+                command.Model.OnProgramme.StartDate,
+                command.Model.OnProgramme.ExpectedEndDate,
+                command.Model.OnProgramme.WithdrawalDate,
+                command.Model.OnProgramme.Milestones,
+                command.Model.OnProgramme.Price,
+                command.Model.OnProgramme.LearningType);
+
+            foreach (var learningSupport in command.Model.LearningSupport)
+            {
+                episode.AddLearningSupport(learningSupport.StartDate, learningSupport.EndDate);
+            }
+        }
+        else
+        {
+            // Update existing learning if same provider
+            learning.Update(command.Model);
+
+            // Reinstate learner if provider's episode has previously been removed
+            if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
+            {
+                learning.Reinstate(command.Model.OnProgramme.Ukprn);
+                isReinstated = true;
+            }
         }
 
         TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
         var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
-        result.EpisodeKey = learning.LatestEpisode.Key;
+        result.EpisodeKey = learning.Episodes.Single(x => x.Ukprn == command.Model.OnProgramme.Ukprn).Key;
         result.IsReinstated = isReinstated;
         return result;
     }

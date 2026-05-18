@@ -93,7 +93,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
     private void UpdateEpisode(ShortCourseUpdateContext updateContext, List<ShortCourseUpdateChanges> changes)
     {
-        var episode = _episodes.Single();
+        var episode = _episodes.Single(e => e.Ukprn == updateContext.OnProgramme.Ukprn);
 
         var prevWithdrawalDate = episode.WithdrawalDate;
         var prevMilestones = episode.Milestones.Select(m => m.Milestone).ToHashSet();

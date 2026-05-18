@@ -180,14 +180,20 @@ public class ShortCourseStepDefinitions
         expectedStatusCode.Should().Be(statusCode);
     }
 
-    [Then(@"for learner with Uln (.*) there is (.*) short course record")]
-    public async Task ThenForLearnerWithUlnThereIsOnlyShortCourseRecord(string uln, int numberOfRecords)
+    [Then(@"for learner with Uln (.*) there is (.*) short course episode record")]
+    [Then(@"for learner with Uln (.*) there is (.*) short course episode records")]
+    public async Task ThenForLearnerWithUlnThereIsOnlyShortCourseEpisodeRecord(string uln, int numberOfRecords)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learner = dbConnection.GetLearner(uln);
         var shortCourseLearnings = dbConnection.GetShortCourseLearningsForLearner(learner.Key);
 
-        shortCourseLearnings.Count().Should().Be(numberOfRecords);
+        shortCourseLearnings.Count().Should().Be(1);
+
+        var learningKey = shortCourseLearnings.Single().Key;
+        var episodes = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseEpisode>().Where(x => x.LearningKey == learningKey).ToList();
+
+        episodes.Count().Should().Be(numberOfRecords);
     }
 
     [When("SLD requests short courses for earnings for collection year (.*)")]
