@@ -64,23 +64,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         // If no episode exists for this provider, add a new one
         if (!learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn))
         {
-            var episode = learning.AddEpisode(
-                command.Model.OnProgramme.Ukprn,
-                command.Model.OnProgramme.EmployerId,
-                command.Model.OnProgramme.CourseCode,
-                command.Model.LearnerRef,
-                false,
-                command.Model.OnProgramme.StartDate,
-                command.Model.OnProgramme.ExpectedEndDate,
-                command.Model.OnProgramme.WithdrawalDate,
-                command.Model.OnProgramme.Milestones,
-                command.Model.OnProgramme.Price,
-                command.Model.OnProgramme.LearningType);
-
-            foreach (var learningSupport in command.Model.LearningSupport)
-            {
-                episode.AddLearningSupport(learningSupport.StartDate, learningSupport.EndDate);
-            }
+            AddEpisode(learning, command);
         }
         else
         {
@@ -104,12 +88,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         return result;
     }
 
-    private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)
+    private void AddEpisode(ShortCourseLearningDomainModel learning, CreateDraftShortCourseCommand command)
     {
-        var learning = _shortCourseLearningFactory.CreateNew(
-            learner.Key,
-            command.Model.OnProgramme.CompletionDate);
-
         var episode = learning.AddEpisode(
             command.Model.OnProgramme.Ukprn,
             command.Model.OnProgramme.EmployerId,
@@ -127,6 +107,15 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         {
             episode.AddLearningSupport(learningSupport.StartDate, learningSupport.EndDate);
         }
+    }
+
+    private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)
+    {
+        var learning = _shortCourseLearningFactory.CreateNew(
+            learner.Key,
+            command.Model.OnProgramme.CompletionDate);
+
+        AddEpisode(learning, command);
 
         return learning;
     }
