@@ -21,6 +21,5 @@ public class UpdateShortCourseResult : ShortCourseLearningDto
 {
     public ShortCourseUpdateChanges[] Changes { get; set; } = [];
 
-    //todo populate
     public Guid UpdatedEpisodeKey { get; set; }
 }

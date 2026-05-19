@@ -4,7 +4,6 @@ namespace SFA.DAS.Learning.Command.RemoveShortCourse;
 
 public class RemoveShortCourseResult : ShortCourseLearningDto
 {
-    //todo populate
     public Guid RemovedEpisodeKey { get; set; }
 }
 

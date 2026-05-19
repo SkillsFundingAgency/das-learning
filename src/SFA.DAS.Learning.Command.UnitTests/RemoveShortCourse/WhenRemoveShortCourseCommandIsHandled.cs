@@ -84,6 +84,19 @@ public class WhenRemoveShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenRemovedEpisodeKeyIsPopulated()
+    {
+        var learningKey = Guid.NewGuid();
+        var learning = CreateDomainModel(learningKey, isApproved: true);
+        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+
+        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
+
+        result.Should().NotBeNull();
+        result!.RemovedEpisodeKey.Should().Be(learning.Episodes.Single().Key);
+    }
+
+    [Test]
     public async Task ThenWasDeletedIsFalseAndDoesNothingWhenUkprnDoesNotMatch()
     {
         var learningKey = Guid.NewGuid();

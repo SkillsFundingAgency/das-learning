@@ -20,9 +20,9 @@ public class RemoveShortCourseCommandHandler(
         if (learning == null)
             throw new KeyNotFoundException($"Short course learning with key {command.LearningKey} not found.");
 
-        var removed = learning.Remove(command.Ukprn);
+        var removedEpisodeKey = learning.Remove(command.Ukprn);
 
-        if (!removed)
+        if (removedEpisodeKey == null)
         {
             logger.LogInformation("Short course {LearningKey} is not approved; remove request ignored.", command.LearningKey);
             return null;
@@ -33,6 +33,7 @@ public class RemoveShortCourseCommandHandler(
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
         var result = mapper.Map<RemoveShortCourseResult>(learning, learner!, command.Ukprn);
+        result?.RemovedEpisodeKey = removedEpisodeKey.Value;
         return result;
     }
 }

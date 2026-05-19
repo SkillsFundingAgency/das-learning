@@ -76,12 +76,16 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return episode;
     }
 
-    public ShortCourseUpdateChanges[] Update(ShortCourseUpdateContext updateContext)
+    public ShortCourseDomainUpdateResult Update(ShortCourseUpdateContext updateContext)
     {
         var changes = new List<ShortCourseUpdateChanges>();
         UpdateCompletionDate(updateContext.OnProgramme.CompletionDate, changes);
-        UpdateEpisode(updateContext, changes);
-        return changes.ToArray();
+        var episodeKey = UpdateEpisode(updateContext, changes);
+        return new ShortCourseDomainUpdateResult
+        {
+            EpisodeKey = episodeKey,
+            Changes = changes.ToArray()
+        };
     }
 
     private void UpdateCompletionDate(DateTime? completionDate, List<ShortCourseUpdateChanges> changes)
@@ -91,7 +95,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         _entity.CompletionDate = completionDate;
     }
 
-    private void UpdateEpisode(ShortCourseUpdateContext updateContext, List<ShortCourseUpdateChanges> changes)
+    private Guid UpdateEpisode(ShortCourseUpdateContext updateContext, List<ShortCourseUpdateChanges> changes)
     {
         var episode = _episodes.Single(e => e.Ukprn == updateContext.OnProgramme.Ukprn);
 
@@ -122,14 +126,16 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
         if (!episode.LearnerRef.Equals(prevLearnerRef, StringComparison.OrdinalIgnoreCase))
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
+
+        return episode.Key;
     }
 
-    public bool Remove(long ukprn)
+    public Guid? Remove(long ukprn)
     {
         var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
 
         if (episode == null || !episode.IsApproved)
-            return false;
+            return null;
 
         episode.Remove();
 
@@ -139,7 +145,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             ApprenticeshipId = episode.ApprovalsApprenticeshipId
         });
 
-        return true;
+        return episode.Key;
     }
 
     public bool Reinstate(long ukprn)
