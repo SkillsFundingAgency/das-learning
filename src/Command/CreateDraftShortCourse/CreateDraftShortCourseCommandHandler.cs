@@ -1,8 +1,9 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
 
@@ -16,6 +17,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
     private readonly IShortCourseLearningFactory _shortCourseLearningFactory;
     private readonly IShortCourseLearningDomainModelMapper _mapper;
     private readonly ILogger<CreateDraftShortCourseCommandHandler> _logger;
+    private readonly FeatureFlags _featureFlags;
 
     public CreateDraftShortCourseCommandHandler(
         ILearnerFactory learnerFactory,
@@ -23,7 +25,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         IShortCourseLearningRepository shortCourseLearningRepository,
         IShortCourseLearningFactory shortCourseLearningFactory,
         IShortCourseLearningDomainModelMapper mapper,
-        ILogger<CreateDraftShortCourseCommandHandler> logger)
+        ILogger<CreateDraftShortCourseCommandHandler> logger,
+        FeatureFlags featureFlags)
     {
         _learnerFactory = learnerFactory;
         _learnerRepository = learnerRepository;
@@ -31,6 +34,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         _shortCourseLearningFactory = shortCourseLearningFactory;
         _mapper = mapper;
         _logger = logger;
+        _featureFlags = featureFlags;
     }
 
     public async Task<CreateDraftShortCourseCommandResult?> Handle(CreateDraftShortCourseCommand command, CancellationToken cancellationToken = default)
@@ -52,30 +56,62 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).Key };
         }
 
-        // Ignore if provider posts a short course when they already have an approved short course
-        if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn == command.Model.OnProgramme.Ukprn))
-        {
-            _logger.LogWarning("An approved short course episode already exists with this provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
-            return null;
-        }
-
         var isReinstated = false;
 
-        // If no episode exists for this provider, add a new one
-        if (!learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn))
+        if (!_featureFlags.ShortCourseChangeOfProvider)
         {
-            AddEpisode(learning, command);
+            if (learning.Episodes.Any(x => x.Ukprn != command.Model.OnProgramme.Ukprn))
+            {
+                _logger.LogWarning("An episode with a different provider already exists for learner with key {LearnerKey}. Cannot create draft when short course change of provider feature is disabled.", learner.Key);
+                return null;
+            }
+
+            if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved))
+            {
+                _logger.LogWarning("An approved short course episode already exists for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
+                return null;
+            }
+
+            if (!learning.Episodes.Any())
+            {
+                AddEpisode(learning, command);
+            }
+            else
+            {
+                learning.Update(command.Model);
+
+                if (learning.Episodes.Any(x => x.IsRemoved))
+                {
+                    learning.Reinstate(command.Model.OnProgramme.Ukprn);
+                    isReinstated = true;
+                }
+            }
         }
         else
         {
-            // Update existing learning if same provider
-            learning.Update(command.Model);
-
-            // Reinstate learner if provider's episode has previously been removed
-            if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
+            // Ignore if provider posts a short course when they already have an approved short course
+            if (learning.Episodes.Any(x => x.IsApproved && !x.IsRemoved && x.Ukprn == command.Model.OnProgramme.Ukprn))
             {
-                learning.Reinstate(command.Model.OnProgramme.Ukprn);
-                isReinstated = true;
+                _logger.LogWarning("An approved short course episode already exists with this provider for learner with key {LearnerKey}. Cannot create draft.", learner.Key);
+                return null;
+            }
+
+            // If no episode exists for this provider, add a new one
+            if (!learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn))
+            {
+                AddEpisode(learning, command);
+            }
+            else
+            {
+                // Update existing learning if same provider
+                learning.Update(command.Model);
+
+                // Reinstate learner if provider's episode has previously been removed
+                if (learning.Episodes.Any(x => x.Ukprn == command.Model.OnProgramme.Ukprn && x.IsRemoved))
+                {
+                    learning.Reinstate(command.Model.OnProgramme.Ukprn);
+                    isReinstated = true;
+                }
             }
         }
 
