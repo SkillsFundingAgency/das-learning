@@ -97,28 +97,28 @@ public class WhenRemoveShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenWasDeletedIsFalseAndDoesNothingWhenUkprnDoesNotMatch()
+    public async Task ThenNotFoundExceptionThrownWhenUkprnDoesNotMatch()
     {
         var learningKey = Guid.NewGuid();
         var learning = CreateDomainModel(learningKey, isApproved: true);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, ukprn: 99999999));
+        var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, ukprn: 99999999));
 
-        result.Should().BeNull();
+        await act.Should().ThrowAsync<NotFoundException>();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
     [Test]
-    public async Task ThenWasDeletedIsFalseAndDoesNothingWhenNotApproved()
+    public async Task ThenNotFoundExceptionThrownWhenNotApproved()
     {
         var learningKey = Guid.NewGuid();
         var learning = CreateDomainModel(learningKey, isApproved: false);
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
 
-        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
+        var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
-        result.Should().BeNull();
+        await act.Should().ThrowAsync<NotFoundException>();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
@@ -142,28 +142,14 @@ public class WhenRemoveShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenNoLearningRemovedEventIsRaisedWhenNotApproved()
-    {
-        var learningKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey, isApproved: false);
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
-
-        await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
-
-        learning.FlushEvents()
-            .OfType<Domain.Events.LearningRemovedEvent>()
-            .Should().BeEmpty();
-    }
-
-    [Test]
-    public async Task ThenKeyNotFoundExceptionThrownWhenLearningNotFound()
+    public async Task ThenNotFoundExceptionThrownWhenLearningNotFound()
     {
         var learningKey = Guid.NewGuid();
         _repository.Setup(r => r.Get(learningKey)).ReturnsAsync((ShortCourseLearningDomainModel)null!);
 
         var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learningKey, Ukprn));
 
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     private static ShortCourseLearningDomainModel CreateDomainModel(

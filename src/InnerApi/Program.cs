@@ -6,6 +6,7 @@ using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Learning.Command;
+using SFA.DAS.Learning.InnerApi.Middleware;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Infrastructure.Extensions;
@@ -95,6 +96,7 @@ public static class Program
             });
         }
 
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseDasHealthChecks();
         app.UseHttpsRedirection();
         app.UseAuthentication();
