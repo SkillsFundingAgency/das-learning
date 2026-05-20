@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.SqlClient;
@@ -13,6 +13,8 @@ using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.MessageHandlers.Extensions;
 using SFA.DAS.Learning.Queries;
 using System.Net;
+using Microsoft.Extensions.Configuration;
+using SFA.DAS.Learning.Infrastructure.Configuration;
 
 namespace SFA.DAS.Learning.AcceptanceTests;
 
@@ -39,6 +41,10 @@ public class TestInnerApi : IDisposable
                 services.AddQueryServices().AddCommandServices(_testContext.GenerateConfiguration()).AddEventServices();
                 services.AddSingleton<IMessageSession>(_testContext.MessageSession);
                 services.AddScoped<IPagedLinkHeaderService, PagedLinkHeaderService>();
+
+                var featureFlags = new FeatureFlags();
+                _testContext.GenerateConfiguration().Bind("FeatureFlags", featureFlags);
+                services.AddSingleton(featureFlags);
 
                 AddEntityFrameworkForApprenticeships(services, testContext.SqlDatabase?.DatabaseInfo.ConnectionString!);
             })
