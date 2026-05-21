@@ -18,7 +18,7 @@ public class LearnerUpdatedEventBuilder
         return new LearnerUpdatedEvent
         {
             Key = _learning.Key,
-            ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = _learning.LatestEpisode.ApprovalsApprenticeshipId,
             Uln = _learner.Uln,
             FirstName = _learner.FirstName,
             LastName = _learner.LastName,

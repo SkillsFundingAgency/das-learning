@@ -77,7 +77,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
         
         await _commandHandler.Handle(command);
 
@@ -97,7 +97,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
 
         await _commandHandler.Handle(command);
 
@@ -117,7 +117,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
 
         // Act
         await _commandHandler.Handle(command);
@@ -141,7 +141,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(command.ApprovalsApprenticeshipId, learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
 
         // Act
         await _commandHandler.Handle(command);
@@ -264,7 +264,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
     {
         return
             e.LearningKey == learning.Key &&
-            e.ApprovalsApprenticeshipId == learning.ApprovalsApprenticeshipId &&
+            e.ApprovalsApprenticeshipId == learning.LatestEpisode.ApprovalsApprenticeshipId &&
             e.Uln == learner.Uln &&
             e.FirstName == learner.FirstName &&
             e.LastName == learner.LastName &&

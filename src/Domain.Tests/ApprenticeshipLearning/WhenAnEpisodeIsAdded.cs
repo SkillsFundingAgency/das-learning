@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using AutoFixture;
 using FluentAssertions;
@@ -36,6 +36,7 @@ public class WhenAnEpisodeIsAdded
 
         //Act
         apprenticeship.AddEpisode(
+            episode.ApprovalsApprenticeshipId,
             episode.Ukprn,
             episode.EmployerAccountId,
             episodePrice.StartDate,

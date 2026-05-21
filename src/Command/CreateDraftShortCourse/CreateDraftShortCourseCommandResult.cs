@@ -1,7 +1,9 @@
-﻿namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
+using SFA.DAS.Learning.Models.Dtos;
 
-public class CreateDraftShortCourseCommandResult
+namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
+
+public class CreateDraftShortCourseCommandResult : ShortCourseLearningDto
 {
-    public Guid? LearningKey { get; set; }
-    public Guid? EpisodeKey { get; set; }
+    public Guid EpisodeKey { get; set; }
+    public bool IsReinstated { get; set; }
 }

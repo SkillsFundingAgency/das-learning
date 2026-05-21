@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using SFA.DAS.Learning.Domain.Factories;
 
 namespace SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
@@ -8,6 +8,6 @@ public class ApprenticeshipCustomization : ICustomization
     public void Customize(IFixture fixture)
     {
         fixture.Register(() => 
-            new ApprenticeshipLearningFactory().CreateNew(fixture.Create<long>(), fixture.Create<Guid>()));
+            new ApprenticeshipLearningFactory().CreateNew(fixture.Create<Guid>()));
     }
 }

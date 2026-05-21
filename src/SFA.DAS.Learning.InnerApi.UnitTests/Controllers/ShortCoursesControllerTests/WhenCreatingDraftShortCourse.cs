@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,6 @@ using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Controllers;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
-using SFA.DAS.Learning.InnerApi.Responses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 
@@ -46,10 +45,11 @@ public class WhenCreatingDraftShortCourse
         var request = _fixture.Create<CreateDraftShortCourseRequest>();
         var expectedLearningKey = _fixture.Create<Guid>();
         var expectedEpisodeKey = _fixture.Create<Guid>();
-        var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey };
+        var isReinstated = _fixture.Create<bool>();
+        var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated };
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
+            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(
                 It.IsAny<CreateDraftShortCourseCommand>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(commandResult);
@@ -60,10 +60,10 @@ public class WhenCreatingDraftShortCourse
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
-        okResult.Value.Should().BeEquivalentTo(new CreateShortCourseLearningResponse { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey });
+        okResult.Value.Should().BeEquivalentTo(new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated });
 
         _mockCommandDispatcher.Verify(x =>
-            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult>(
+            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(
                 It.Is<CreateDraftShortCourseCommand>(c =>
                     c.Model.Learner.EmailAddress == request.LearnerUpdateDetails.EmailAddress &&
                     c.Model.OnProgramme.CourseCode == request.OnProgramme.CourseCode

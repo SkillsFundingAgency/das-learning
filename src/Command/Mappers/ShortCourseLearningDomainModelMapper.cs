@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Command.Mappers;
@@ -41,6 +41,7 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
                 LearnerRef = e.LearnerRef,
                 EmployerType = e.EmployerType,
                 ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
+                IsRemoved = e.IsRemoved,
                 TransferSenderId = e.TransferSenderId
             }).ToArray()
         };

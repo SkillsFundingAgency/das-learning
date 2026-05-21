@@ -33,7 +33,7 @@ public class WithdrawalRevertedEventHandlerTests
         await _handler.Handle(domainEvent, default);
 
         _messageSession.Verify(x => x.Publish(
-                It.Is<Types.WithdrawalRevertedEvent>(msg =>
+                It.Is<Types.LearningWithdrawalRevertedEvent>(msg =>
                     msg.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
                     msg.LearningKey == domainEvent.LearningKey),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),

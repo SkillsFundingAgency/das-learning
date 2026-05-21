@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -124,21 +124,37 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
     }
 
-    public bool Delete(long ukprn)
+    public bool Remove(long ukprn)
     {
         var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
 
         if (episode == null || !episode.IsApproved)
             return false;
 
-        episode.Delete();
+        episode.Remove();
 
-        AddEvent(new LearningDeletedEvent
+        AddEvent(new LearningRemovedEvent
         {
             LearningKey = Key,
-            ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
-            LastDayOfLearning = episode.StartDate,
-            EmployerAccountId = episode.EmployerAccountId
+            ApprenticeshipId = episode.ApprovalsApprenticeshipId
+        });
+
+        return true;
+    }
+
+    public bool Reinstate(long ukprn)
+    {
+        var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
+
+        if (episode == null || !episode.IsApproved || !episode.IsRemoved)
+            return false;
+
+        episode.Reinstate();
+
+        AddEvent(new LearningReinstatedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = episode.ApprovalsApprenticeshipId
         });
 
         return true;

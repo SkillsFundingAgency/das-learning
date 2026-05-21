@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
@@ -37,6 +37,7 @@ public class WhenCalculatingAgeAtStartOfApprenticeship
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         apprenticeship.AddEpisode(
             _fixture.Create<long>(), 
+            _fixture.Create<long>(),
             _fixture.Create<long>(),
             startDate,
             _fixture.Create<DateTime>(), 

@@ -53,7 +53,7 @@ public class WhenExpectedEndDateIsUpdated
 
         var expectedEvent = new EndDateChangedEvent
         {
-            ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = _learning.LatestEpisode.ApprovalsApprenticeshipId,
             LearningKey = _learning.Key,
             PlannedEndDate = new DateTime(2026, 07, 31) //todo: can we make this non-nullable?
         };

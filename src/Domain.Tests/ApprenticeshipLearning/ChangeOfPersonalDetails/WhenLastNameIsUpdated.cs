@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
@@ -52,7 +52,7 @@ public class WhenLastNameIsUpdated
 
         var expectedEvent = new PersonalDetailsChangedEvent
         {
-            ApprovalsApprenticeshipId = _learning.ApprovalsApprenticeshipId,
+            ApprovalsApprenticeshipId = _learning.LatestEpisode.ApprovalsApprenticeshipId,
             LearningKey = _learning.Key,
             FirstName = _learner.FirstName,
             LastName = _lastName,

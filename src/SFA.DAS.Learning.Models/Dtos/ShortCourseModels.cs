@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Enums;
 using System.Text.Json.Serialization;
 
 namespace SFA.DAS.Learning.Models.Dtos;
@@ -39,6 +39,7 @@ public class ShortCourseEpisodeDto
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public EmployerType EmployerType { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }
+    public bool IsRemoved { get; set; }
     public long? TransferSenderId { get; set; }
 }
 
