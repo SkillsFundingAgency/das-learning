@@ -53,12 +53,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             TransferEvents(learner, learning);
             await _shortCourseLearningRepository.Add(learning);
 
-            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).Key };
+            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.Episodes.Single().Key };
         }
 
         var ukprn = command.Model.OnProgramme.Ukprn;
 
-        // Validations
         if (!_featureFlags.ShortCourseChangeOfProvider)
         {
             if (learning.Episodes.Any(x => x.Ukprn != ukprn))
@@ -84,11 +83,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         var isReinstated = false;
 
-        var exists = _featureFlags.ShortCourseChangeOfProvider
+        var existingEpisode = _featureFlags.ShortCourseChangeOfProvider
             ? learning.Episodes.Any(x => x.Ukprn == ukprn)
             : learning.Episodes.Any();
 
-        if (!exists)
+        if (!existingEpisode)
         {
             AddEpisode(learning, command);
         }
