@@ -51,6 +51,18 @@ Scenario: Create Draft is called for a learner with an approved short course wit
 	Then the response from the create short course endpoint is 200
 	And for learner with Uln 54321 there is 2 short course episode records
 
+Scenario: ShortCourseChangeOfProvider feature off: Create Draft is called for a learner with an approved short course with new provider (should be ignored)
+	Given the ShortCourseChangeOfProvider feature is toggled off
+	And SLD call the create short course endpoint with the following information
+		| Uln   | Ukprn |
+		| 54321 |     1 |
+	And short course is approved
+	And SLD call the create short course endpoint with the following information
+		| Uln   | Ukprn |
+		| 54321 |     2 |
+	Then the response from the create short course endpoint is 204
+	And for learner with Uln 54321 there is 1 short course episode record
+
 Scenario: Create Draft is called for a learner with an unapproved short course (unapproved record is updated)
 	Given SLD call the create short course endpoint with the following information
 		| Uln   | FirstName | LastName | Milestone                     | LearningSupport[0]                             |

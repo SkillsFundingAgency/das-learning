@@ -9,6 +9,7 @@ using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses;
 
@@ -42,6 +43,31 @@ public class ShortCourseStepDefinitions
     {
         var request = GetDefaultShortCourse();
         await CallCreateShortCourseEndpoint(request);
+    }
+
+    [Given(@"the (.*) feature is toggled (on|off)")]
+    public void GivenTheFeatureIsToggled(string featureFlagName, string toggle)
+    {
+        var value = toggle.Equals("on", StringComparison.OrdinalIgnoreCase);
+
+        var featureFlagsType = typeof(SFA.DAS.Learning.Infrastructure.Configuration.FeatureFlags);
+        var property = featureFlagsType.GetProperty(featureFlagName)
+            ?? throw new ArgumentException($"Feature flag '{featureFlagName}' not found on {featureFlagsType.Name}");
+
+        var innerApiFeatureFlags = _testContext.TestInnerApi.Services.GetService<SFA.DAS.Learning.Infrastructure.Configuration.FeatureFlags>();
+        if (innerApiFeatureFlags != null)
+        {
+            property.SetValue(innerApiFeatureFlags, value);
+        }
+
+        if (_testContext.TestFunction != null)
+        {
+            var functionFeatureFlags = _testContext.TestFunction.Services.GetService<SFA.DAS.Learning.Infrastructure.Configuration.FeatureFlags>();
+            if (functionFeatureFlags != null)
+            {
+                property.SetValue(functionFeatureFlags, value);
+            }
+        }
     }
 
     [Given(@"SLD call the create short course endpoint with the following information")]

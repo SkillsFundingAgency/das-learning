@@ -26,6 +26,8 @@ public class TestInnerApi : IDisposable
     private readonly IEnumerable<MessageHandler> _queueTriggeredFunctions;
     private bool _isDisposed;
 
+    public IServiceProvider Services => _testServer.Services;
+
 
     public TestInnerApi(TestContext testContext)
     {

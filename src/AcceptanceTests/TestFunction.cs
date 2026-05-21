@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
 using Moq;
@@ -15,6 +15,8 @@ public class TestFunction : IDisposable
     private readonly TestServer _testServer;
     private readonly IEnumerable<MessageHandler> _queueTriggeredFunctions;
     private bool _isDisposed;
+
+    public IServiceProvider Services => _testServer.Services;
 
     public string HubName { get; }
 
