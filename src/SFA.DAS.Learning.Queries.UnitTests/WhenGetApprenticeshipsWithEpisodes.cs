@@ -63,6 +63,69 @@ public class WhenGetApprenticeshipsWithEpisodes
     }
 
     [Test]
+    public async Task ThenApprenticeshipsAreNotReturnedWhenAllEpisodesAreRemoved()
+    {
+        // Arrange
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner
+        {
+            Key = learnerKey, Uln = "1111111111",
+            FirstName = "Jane", LastName = "Doe",
+            DateOfBirth = new DateTime(1990, 1, 1)
+        });
+
+        var learning = BuildActiveApprenticeship(DefaultQuery.Ukprn, learnerKey, approvalsId: 1);
+        learning.Episodes.First().IsRemoved = true;
+        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _sut.Handle(DefaultQuery);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ThenRemovedEpisodesAreExcludedFromApprenticeship()
+    {
+        // Arrange
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner
+        {
+            Key = learnerKey, Uln = "1111111111",
+            FirstName = "Jane", LastName = "Doe",
+            DateOfBirth = new DateTime(1990, 1, 1)
+        });
+
+        var learning = BuildActiveApprenticeship(DefaultQuery.Ukprn, learnerKey, approvalsId: 1);
+        
+        var removedEpisode = new ApprenticeshipEpisode
+        {
+            Key = Guid.NewGuid(),
+            Ukprn = DefaultQuery.Ukprn,
+            TrainingCode = "ST0001",
+            FundingType = FundingType.Levy,
+            FundingPlatform = FundingPlatform.DAS,
+            LegalEntityName = "Test Employer",
+            IsRemoved = true
+        };
+        learning.Episodes.Add(removedEpisode);
+
+        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _sut.Handle(DefaultQuery);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Items.Should().HaveCount(1);
+        result.Items.Single().Episodes.Should().HaveCount(1);
+        result.Items.Single().Episodes.Should().NotContain(x => x.Key == removedEpisode.Key);
+    }
+
+    [Test]
     public async Task ThenNullIsReturnedWhenNoApprenticeshipsExist()
     {
         // Act

@@ -12,10 +12,11 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
         var dates = AcademicYearParser.ParseFrom(query.CollectionYear);
 
         var baseQuery = dbContext.ShortCourseLearnings
-            .Include(x => x.Episodes)
-            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn))
+            .Include(x => x.Episodes.Where(e => !e.IsRemoved))
+            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn && !e.IsRemoved))
             .Where(x => x.Episodes.Any(e => !e.IsRemoved))
             .Where(x => x.Episodes.Any(e =>
+                !e.IsRemoved &&
                 e.StartDate <= dates.End &&
                 (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
             .Where(x => !x.CompletionDate.HasValue || x.CompletionDate.Value >= dates.Start)

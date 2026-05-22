@@ -26,9 +26,9 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
             var activeOnDate = query.CollectionYear.GetLastDay(query.CollectionPeriod);
 
             var baseQuery = dbContext.ApprenticeshipLearningDbSet
-                .Include(x => x.Episodes)
+                .Include(x => x.Episodes.Where(e => !e.IsRemoved))
                 .ThenInclude(x => x.Prices)
-                .Where(x => x.Episodes.Any(e => e.Ukprn == query.Ukprn && e.FundingPlatform == FundingPlatform.DAS))
+                .Where(x => x.Episodes.Any(e => e.Ukprn == query.Ukprn && e.FundingPlatform == FundingPlatform.DAS && !e.IsRemoved))
                 .IsActiveInYear(activeOnDate.StartOfCurrentAcademicYear(), activeOnDate.EndOfCurrentAcademicYear())
                 .OrderBy(x => x.LearnerKey)
                 .AsNoTracking();
