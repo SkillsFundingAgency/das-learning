@@ -77,3 +77,16 @@ Scenario: Correct learners returned when actual end date is derived from Complet
 	| previousAY-09-25 | currentAY-07-31  | currentAY-06-30  | Included |
 	| previousAY-09-25 | currentAY-07-31  | null             | Included |
 	| nextAY-09-25     | nextAY-07-31     | null             | Excluded |
+
+Scenario: Do not include learners that are removed
+	Given a provider has learners
+		| Category                   | Number |
+		| CurrentlyActive            |      5 |
+		| CompletedInPreviousYear    |      3 |
+		| StartNextYear              |      2 |
+		| WithdrawnInPreviousYear    |      4 |
+		| WithdrawnToStartInThisYear |      1 |
+		| WithdrawnInThisYear        |      2 |
+		| Removed                    |      1 |
+	When SLD requests the list of active Learnings for the provider in an academic year
+	Then the list of Learnings sent does not include any Learnings where the Learning was removed
