@@ -1,10 +1,12 @@
 ﻿using AutoFixture;
 using Microsoft.Data.SqlClient;
+using NUnit.Framework;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using SFA.DAS.Learning.Models.Dtos;
+using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -81,6 +83,31 @@ public class GetLearnersStepDefinitions
 
         var learners = await _testContext.TestInnerApi.Get<GetLearningsByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{academicYear}/learnings");
         _scenarioContext.Set(learners, _ActiveLearnersResponseKey);
+    }
+
+    [When(@"the GetByAcademicYear endpoint is called for (.*)")]
+    public async Task RetrieveLearnersForCurrentDate(TokenisableDateTime requestedDate)
+    {
+        var collectionYear = requestedDate.AcademicYear();
+
+        var response = await _testContext.TestInnerApi.Get<GetLearningsByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{collectionYear}/learnings");
+        _scenarioContext.Set(response, _ActiveLearnersResponseKey);
+    }
+
+    [Then(@"the learner should be (.*)")]
+    public void VerifyResponse(string expectedResult)
+    {
+        var response = _scenarioContext.Get<GetLearningsByAcademicYearResponse>(_ActiveLearnersResponseKey);
+
+        // We assert on 2 records as we have added a control record to ensure a 404 is not returned from the endpoint
+        if (expectedResult == "Included")
+        {
+            Assert.IsTrue(response.Items.Count() == 2, "Expected learner was not included in response");
+        }
+        else
+        {
+            Assert.IsFalse(response.Items.Count() == 2, "Learner was included in response but should have been excluded");
+        }
     }
 
     [Then(@"the list of Learnings sent does not include any Learnings where the Learning was active in that year and has been been withdrawn back to the Learning's start date")]

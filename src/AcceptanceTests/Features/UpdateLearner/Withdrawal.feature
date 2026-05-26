@@ -11,7 +11,7 @@ Scenario: Apprenticeship withdrawal during learning
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
 	Then the “last day of learning” for the Learning is set to currentAY-11-25
-	And an ApprenticeshipWithdrawnEvent is sent
+	And an LearningWithdrawnEvent is sent
 	And the following changes are returned
 		| Change     |
 		| Withdrawal |
@@ -26,7 +26,7 @@ Scenario: Identical Withdrawal requests do not result in Earnings recalculation
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
 	And an update request is sent again with the same data
-	Then an ApprenticeshipWithdrawnEvent is not sent
+	Then an LearningWithdrawnEvent is not sent
 	And the following changes are returned
 		| Change     |
 	And the learning history is maintained
@@ -41,7 +41,7 @@ Scenario: Apprentice Withdrawn following previous removal
 		| WithdrawalDate | currentAY-11-25 |
 	When the update request is sent
 	Then the “last day of learning” for the Learning is set to currentAY-11-25
-	And an ApprenticeshipWithdrawnEvent is sent
+	And an LearningWithdrawnEvent is sent
 	And the following changes are returned
 		| Change          |
 		| Withdrawal      |
@@ -57,7 +57,7 @@ Scenario: Apprentice Reverse Withdrawal
 		| WithdrawalDate | null  |
 	When the update request is sent
 	Then the “last day of learning” for the Learning is set to null
-	#And an ApprenticeshipWithdrawnEvent is sent --todo: withdrawal reversal event instead
+	#And an LearningWithdrawnEvent is sent --todo: withdrawal reversal event instead
 	And the following changes are returned
 		| Change            |
 		| ReverseWithdrawal |

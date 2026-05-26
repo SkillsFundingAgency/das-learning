@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[EnglishAndMaths]
     [Amount] DECIMAL(15, 5) NOT NULL,
     [PauseDate] DATETIME NULL,
     [LearnAimRef] VARCHAR(8) NOT NULL DEFAULT '',
-    [CombinedFundingAdjustmentPercentage] INT NULL
+    [CombinedFundingAdjustmentPercentage] DECIMAL(18, 6) NULL
 )
 GO
 

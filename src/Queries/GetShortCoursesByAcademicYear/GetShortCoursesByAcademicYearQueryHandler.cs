@@ -14,7 +14,7 @@ public class GetShortCoursesByAcademicYearQueryHandler(LearningDataContext dbCon
         var baseQuery = dbContext.ShortCourseLearnings
             .Include(x => x.Episodes)
             .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn))
-            .Where(x => x.Episodes.Any(e => e.IsApproved))
+            .Where(x => x.Episodes.Any(e => e.IsApproved && !e.IsRemoved))
             .Where(x => x.Episodes.Any(e =>
                 e.StartDate <= dates.End &&
                 (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))

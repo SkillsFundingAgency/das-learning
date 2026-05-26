@@ -68,7 +68,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
 
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.LearnerKey == learnerKey &&
-                        x.ApprovalsApprenticeshipId == approvalsApprenticeshipId)
+                        x.Episodes.Any(e => e.ApprovalsApprenticeshipId == approvalsApprenticeshipId))
             .Include(x => x.EnglishAndMathsCourses)
             .Include(x => x.Episodes)
                 .ThenInclude(e => e.Prices)

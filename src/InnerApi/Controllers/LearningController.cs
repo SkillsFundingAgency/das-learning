@@ -5,7 +5,6 @@ using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
 using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
-using SFA.DAS.Learning.Queries.GetLearningKeyByLearningId;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Command.UpdateLearner;
@@ -78,26 +77,6 @@ public class LearningController : ControllerBase
         Response?.Headers.Add(pageLinks);
 
         return Ok(response);
-    }
-
-    /// <summary>
-    /// Get Learning Key
-    /// </summary>
-    /// <param name="learningId">This should be the id for the learning not the commitment</param>
-    /// <returns>Learning Key</returns>
-    [HttpGet("{learningId}/key2")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> GetLearningKeyByLearningId(long learningId)
-    {
-        var request = new GetLearningKeyByLearningIdRequest { ApprenticeshipId = learningId };
-        var response = await _queryDispatcher.Send<GetLearningKeyByLearningIdRequest, GetLearningKeyByLearningIdResponse>(request);
-        if (response.LearningKey == null)
-        {
-            _logger.LogInformation("{p1} could not be found.", nameof(response.LearningKey));
-            return NotFound();
-        }
-
-        return Ok(response.LearningKey);
     }
 
     /// <summary>

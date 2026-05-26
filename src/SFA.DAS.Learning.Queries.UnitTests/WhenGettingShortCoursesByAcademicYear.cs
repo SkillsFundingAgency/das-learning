@@ -177,6 +177,18 @@ public class WhenGettingShortCoursesByAcademicYear
     }
 
     [Test]
+    public async Task ThenRemovedCourseIsExcluded()
+    {
+        await SeedShortCourse(isApproved: true, isRemoved: true, startDate: new DateTime(2024, 8, 1), expectedEndDate: new DateTime(2025, 7, 31));
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
+        result.TotalItems.Should().Be(0);
+        result.Items.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task ThenPaginationIsApplied()
     {
         for (var i = 0; i < 3; i++)
@@ -197,7 +209,8 @@ public class WhenGettingShortCoursesByAcademicYear
         DateTime startDate,
         DateTime expectedEndDate,
         DateTime? withdrawalDate = null,
-        DateTime? completionDate = null)
+        DateTime? completionDate = null,
+        bool isRemoved = false)
     {
         var learnerKey = Guid.NewGuid();
         var learner = new Learner { Key = learnerKey, Uln = Guid.NewGuid().ToString()[..10], FirstName = "A", LastName = "B" };
@@ -211,6 +224,7 @@ public class WhenGettingShortCoursesByAcademicYear
             Ukprn = UkPrn,
             TrainingCode = "SC-001",
             IsApproved = isApproved,
+            IsRemoved = isRemoved,
             StartDate = startDate,
             ExpectedEndDate = expectedEndDate,
             WithdrawalDate = withdrawalDate,

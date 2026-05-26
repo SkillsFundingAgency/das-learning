@@ -47,7 +47,7 @@ public class LearningRepositoryProviderTests
     public void GetRepository_ByModel_ApprenticeshipModel_ReturnsApprenticeshipRepository()
     {
         var apprenticeshipLearningFactory = new ApprenticeshipLearningFactory();
-        var model = apprenticeshipLearningFactory.CreateNew(1, Guid.NewGuid());
+        var model = apprenticeshipLearningFactory.CreateNew(Guid.NewGuid());
 
         var repo = _provider.GetRepository(model);
 

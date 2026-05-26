@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
@@ -45,22 +44,19 @@ public class RemoveLearnerCommandHandler : ICommandHandler<RemoveLearnerCommand,
 
         if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
         {
-            await SendEvent(learning, lastDayOfLearning);
+            await SendEvent(learning);
         }
 
         return new RemoveLearnerResult { LastDayOfLearning = lastDayOfLearning };
     }
 
-    private async Task SendEvent(ApprenticeshipLearningDomainModel learning, DateTime lastDayOfLearning)
+    private async Task SendEvent(ApprenticeshipLearningDomainModel learning)
     {
-        _logger.LogInformation("Publishing ApprenticeshipWithdrawnEvent for {learningKey}", learning.Key);
-        var message = new ApprenticeshipWithdrawnEvent
+        _logger.LogInformation("Publishing LearningRemovedEvent for {learningKey}", learning.Key);
+        var message = new LearningRemovedEvent
         {
             LearningKey = learning.Key,
-            ApprovalsApprenticeshipId = learning.ApprovalsApprenticeshipId,
-            Reason = WithdrawReason.WithdrawFromStart.ToString(),
-            LastDayOfLearning = lastDayOfLearning,
-            EmployerAccountId = learning.LatestEpisode.EmployerAccountId
+            ApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId
         };
 
         await _messageSession.Publish(message);

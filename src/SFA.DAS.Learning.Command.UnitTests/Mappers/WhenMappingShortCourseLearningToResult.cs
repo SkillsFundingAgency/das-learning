@@ -1,6 +1,6 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using NUnit.Framework;
-using SFA.DAS.Learning.Command.DeleteShortCourse;
+using SFA.DAS.Learning.Command.RemoveShortCourse;
 using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
@@ -24,17 +24,17 @@ public class WhenMappingShortCourseLearningToResult
     }
 
     [Test]
-    public void Map_ShouldMapToDeleteShortCourseResult()
+    public void Map_ShouldMapToRemoveShortCourseResult()
     {
         // Arrange
         var learning = CreateLearning();
         var learner = CreateLearner();
 
         // Act
-        var result = _mapper.Map<DeleteShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
 
         // Assert
-        result.Should().BeOfType<DeleteShortCourseResult>();
+        result.Should().BeOfType<RemoveShortCourseResult>();
         result.LearningKey.Should().Be(learning.Key);
         result.LearnerKey.Should().Be(learning.LearnerKey);
         result.CompletionDate.Should().Be(learning.CompletionDate);
@@ -65,7 +65,7 @@ public class WhenMappingShortCourseLearningToResult
         var learning = CreateLearning();
         var learner = CreateLearner();
 
-        var result = _mapper.Map<DeleteShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
 
         result.Episodes.Should().HaveCount(1);
         result.Episodes.Single().Ukprn.Should().Be(123);
@@ -77,7 +77,7 @@ public class WhenMappingShortCourseLearningToResult
         var learning = CreateLearning();
         var learner = CreateLearner();
 
-        var result = _mapper.Map<DeleteShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
         var episode = result.Episodes.Single();
 
         var source = learning.Episodes.Single(e => e.Ukprn == 123);
@@ -96,7 +96,8 @@ public class WhenMappingShortCourseLearningToResult
             source.Price,
             source.LearnerRef,
             source.EmployerType,
-            source.TransferSenderId
+            source.TransferSenderId,
+            source.IsRemoved
         });
     }
 
@@ -108,7 +109,7 @@ public class WhenMappingShortCourseLearningToResult
 
         var expectedAge = learner.AgeOnDate(learning.Episodes.First().StartDate);
 
-        var result = _mapper.Map<DeleteShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
 
         result.Episodes.Single().AgeAtStart.Should().Be(expectedAge);
     }

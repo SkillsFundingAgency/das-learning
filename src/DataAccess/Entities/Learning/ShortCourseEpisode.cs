@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
@@ -24,6 +24,7 @@ public class ShortCourseEpisode : Episode
     public LearningType LearningType { get; set; }
     public EmployerType EmployerType { get; set; }
     public long? TransferSenderId { get; set; }
+    public bool IsRemoved { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
     public List<ShortCourseLearningSupport> LearningSupport { get; set; }

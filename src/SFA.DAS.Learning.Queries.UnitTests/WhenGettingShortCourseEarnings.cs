@@ -216,6 +216,42 @@ public class WhenGettingShortCourseEarnings
     }
 
     [Test]
+    public async Task ThenLearningWithRemovedEpisodeIsExcluded()
+    {
+        const long ukPrn = 1000;
+        const int collectionYear = 2425;
+
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "333", FirstName = "A", LastName = "B" });
+
+        var learning = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            Episodes =
+            [
+                new ShortCourseEpisode
+                {
+                    Key = Guid.NewGuid(),
+                    Ukprn = ukPrn,
+                    TrainingCode = "REM001",
+                    IsRemoved = true,
+                    StartDate = new DateTime(2024, 8, 1),
+                    ExpectedEndDate = new DateTime(2025, 7, 31),
+                    LearnerRef = string.Empty
+                }
+            ]
+        };
+        learning.LearnerKey = learnerKey;
+        _dbContext.ShortCourseLearnings.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _sut.Handle(new GetShortCoursesForEarningsRequest(ukPrn, collectionYear, 1, 20));
+
+        result.TotalItems.Should().Be(0);
+        result.Items.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task ThenLearningsOutsideDateRangeAreExcluded()
     {
         // Arrange
