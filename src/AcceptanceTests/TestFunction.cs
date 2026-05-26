@@ -50,7 +50,7 @@ public class TestFunction : IDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception occurred in {handler.GetType().Name}", ex);// Some of the tests verify the behaviour on handler errors, for this reason the exception is swallowed
+            Console.WriteLine($"Exception occurred in {handler.GetType().Name}: {ex}");// Some of the tests verify the behaviour on handler errors, for this reason the exception is swallowed
         }
     }
 
