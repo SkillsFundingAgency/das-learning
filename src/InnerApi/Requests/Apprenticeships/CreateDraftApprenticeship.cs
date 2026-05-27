@@ -77,6 +77,11 @@ public class OnProgrammeDetails
     public List<Cost> Costs { get; set; }
 
     /// <summary>
+    /// Achievement date for the OnProgramme delivery
+    /// </summary>
+    public DateTime? AchievementDate { get; set; }
+
+    /// <summary>
     /// Planned end date for the OnProgramme delivery
     /// </summary>
     public DateTime ExpectedEndDate { get; set; }
@@ -269,6 +274,7 @@ public static class CreateDraftApprenticeshipExtensions
                 }),
             OnProgrammeDetails = new Models.UpdateModels.OnProgrammeDetails
             {
+                AchievementDate = request.OnProgramme.AchievementDate,
                 ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
                 Costs = request.OnProgramme.Costs.SelectOrEmptyList(x => new Models.UpdateModels.Cost
                 {

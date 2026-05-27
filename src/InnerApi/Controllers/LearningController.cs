@@ -50,7 +50,7 @@ public class LearningController : ControllerBase
     {
         _logger.LogInformation("Creating learning with ukprn {ukprn} uln {uln}", ukprn, uln);
 
-        var command = new CreateDraftApprenticeshipLearningCommand();
+        var command = new CreateDraftApprenticeshipLearningCommand(ukprn, uln, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<CreateDraftApprenticeshipLearningCommand, CreateDraftApprenticeshipLearningCommandResult>(command);
 

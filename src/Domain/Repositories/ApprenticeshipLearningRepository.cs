@@ -54,6 +54,18 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         return _learningFactory.GetExisting(apprenticeship);
     }
 
+    public async Task<ApprenticeshipLearningDomainModel> GetLearnerKey(Guid key)
+    {
+        var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
+            .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
+            .Include(x => x.Episodes).ThenInclude(y => y.Prices)
+            .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
+            .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
+            .SingleAsync(x => x.LearnerKey == key);
+
+        return _learningFactory.GetExisting(apprenticeship);
+    }
+
     public async Task<ApprenticeshipLearningDomainModel?> Get(
         string uln,
         long approvalsApprenticeshipId)
@@ -129,4 +141,5 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         //Nb, currently all ApprenticeshipLearning is regarded as being "unapproved"
         return await Get(uln, apprenticeshipId);
     }
+
 }
