@@ -2,7 +2,8 @@ CREATE TABLE [dbo].[ApprenticeshipLearning]
 (
     [Key] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
     [LearnerKey] UNIQUEIDENTIFIER NOT NULL,
-    [CompletionDate] DATETIME NULL
+    [CompletionDate] DATETIME NULL,
+    [AchievementDate] DATETIME NULL
 )
     GO
 CREATE INDEX IX_ApprenticeshipLearning_LearnerKey ON ApprenticeshipLearning (LearnerKey)
