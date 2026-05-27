@@ -10,6 +10,7 @@ using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Command.RemoveLearnerCommand;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -37,6 +38,25 @@ public class LearningController : ControllerBase
         _logger = logger;
         _pagedLinkHeaderService = pagedLinkHeaderService;
     }
+
+    /// <summary>
+    /// Creates a draft apprenticeship
+    /// </summary>
+    /// <param name="request">The updated learner details.</param>
+    /// <returns>An array of <see cref="LearningUpdateChanges"/> values indicating the fields that were modified.</returns>
+    [HttpPost("{ukprn}/apprenticeships/{uln}")]
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> CreateDraftLearning(long ukprn, string uln, [FromBody] CreateDraftApprenticeship request)
+    {
+        _logger.LogInformation("Creating learning with ukprn {ukprn} uln {uln}", ukprn, uln);
+
+        var command = new CreateDraftApprenticeshipLearningCommand();
+
+        var result = await _commandDispatcher.Send<CreateDraftApprenticeshipLearningCommand, CreateDraftApprenticeshipLearningCommandResult>(command);
+
+        return new OkObjectResult(result);
+    }
+
 
     /// <summary>
     /// Get learnings
