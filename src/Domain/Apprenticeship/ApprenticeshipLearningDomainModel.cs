@@ -140,6 +140,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     {
         var changes = new List<LearningUpdateChanges>();
 
+        ReinstateIfRemoved(changes);
+
         UpdateLearningDetails(updateContext, changes);
 
         UpdateEnglishAndMathsDetails(updateContext, changes);
@@ -164,11 +166,33 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public void RemoveLearner()
     {
         var latestEpisode = LatestEpisode;
-        var withdrawalDate = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
-        latestEpisode.Withdraw(withdrawalDate);
+        latestEpisode.Remove();
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.EnglishAndMathsCourses.Clear();
+
+        AddEvent(new LearningRemovedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = latestEpisode.ApprovalsApprenticeshipId
+        });
+    }
+
+    private void ReinstateIfRemoved(List<LearningUpdateChanges> changes)
+    {
+        var latestEpisode = LatestEpisode;
+        if (!latestEpisode.IsRemoved)
+            return;
+
+        latestEpisode.Reinstate();
+
+        AddEvent(new LearningReinstatedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = latestEpisode.ApprovalsApprenticeshipId
+        });
+
+        changes.Add(LearningUpdateChanges.Reinstated);
     }
 
     public override void Approve(long employerAccountId)

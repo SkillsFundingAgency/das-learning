@@ -2,17 +2,16 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NServiceBus;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.RemoveLearnerCommand;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
-using LearningRemovedEvent = SFA.DAS.Learning.Types.LearningRemovedEvent;
 
 namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
 
@@ -22,7 +21,6 @@ public class WhenRemovingLearner
 {
     private RemoveLearnerCommandHandler _commandHandler;
     private Mock<IApprenticeshipLearningRepository> _learningRepository;
-    private Mock<IMessageSession> _messageSession;
     private Mock<ILogger<RemoveLearnerCommandHandler>> _logger;
     private Fixture _fixture;
 
@@ -30,12 +28,10 @@ public class WhenRemovingLearner
     public void SetUp()
     {
         _learningRepository = new Mock<IApprenticeshipLearningRepository>();
-        _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<RemoveLearnerCommandHandler>>();
 
         _commandHandler = new RemoveLearnerCommandHandler(
             _learningRepository.Object,
-            _messageSession.Object,
             _logger.Object);
 
         _fixture = new Fixture();
@@ -48,19 +44,27 @@ public class WhenRemovingLearner
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
+        var latestEpisode = _fixture.CreateEpisodeDomainModel();
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
         _learningRepository.Setup(x => x.Get(command.LearnerKey))
                            .ReturnsAsync(domainModel);
 
+        ApprenticeshipLearningDomainModel? updatedModel = null;
+
+        _learningRepository
+            .Setup(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(m => updatedModel = m);
+
         // Act
         await _commandHandler.Handle(command);
 
         // Assert
-        _learningRepository.Verify(x => x.Update(domainModel), Times.Once);
-        _messageSession.Verify(x => x.Publish(It.IsAny<LearningRemovedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
+        updatedModel.Should().NotBeNull();
+        updatedModel!.LatestEpisode.IsRemoved.Should().BeTrue();
+        updatedModel.FlushEvents().OfType<LearningRemovedEvent>().Should().ContainSingle();
     }
 
     [Test]
@@ -167,17 +171,13 @@ public class WhenRemovingLearner
     }
 
     [Test]
-    public async Task ThenAnEventIsPublishedIfFundingPlatformIsDas()
+    public async Task ThenADomainEventIsRaisedWithCorrectProperties()
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        var latestEpisode = _fixture.CreateEpisodeDomainModel(x =>
-        {
-            x.FundingPlatform = FundingPlatform.DAS;
-            x.WithdrawalDate = DateTime.Today;
-        });
+        var latestEpisode = _fixture.CreateEpisodeDomainModel();
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
@@ -188,32 +188,8 @@ public class WhenRemovingLearner
         await _commandHandler.Handle(command);
 
         // Assert
-        _messageSession.Verify(x => x.Publish(
-            It.Is<LearningRemovedEvent>(e =>
-                e.LearningKey == domainModel.Key &&
-                e.ApprenticeshipId == domainModel.LatestEpisode.ApprovalsApprenticeshipId),
-            It.IsAny<PublishOptions>(),
-            It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Test]
-    public async Task ThenTheLastDayOfLearningIsReturned()
-    {
-        // Arrange
-        var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
-
-        var latestEpisode = _fixture.CreateEpisodeDomainModel(x => x.FundingPlatform = FundingPlatform.SLD);
-
-        TestHelper.SetEpisode(domainModel, latestEpisode);
-
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
-                           .ReturnsAsync(domainModel);
-
-        // Act
-        var result = await _commandHandler.Handle(command);
-
-        // Assert
-        result.LastDayOfLearning.Should().Be(latestEpisode.WithdrawalDate);
+        var domainEvent = domainModel.FlushEvents().OfType<LearningRemovedEvent>().Single();
+        domainEvent.LearningKey.Should().Be(domainModel.Key);
+        domainEvent.ApprenticeshipId.Should().Be(domainModel.LatestEpisode.ApprovalsApprenticeshipId);
     }
 }

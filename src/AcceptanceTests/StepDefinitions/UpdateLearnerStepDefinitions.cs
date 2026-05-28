@@ -309,11 +309,51 @@ public class UpdateLearnerStepDefinitions
         learner.CareLeaverEmployerConsentGiven.Should().Be(table.GetBoolean("CareLeaverEmployerConsentGiven"));
     }
 
+    [Given(@"SLD have previously informed us that the learner was withdrawn on (.*)")]
+    public async Task GivenTheLearnerWasPreviouslyWithdrawn(TokenisableDateTime withdrawalDate)
+    {
+        var updateRequest = _scenarioContext.GetUpdateLearnerRequest();
+        updateRequest.Delivery.WithdrawalDate = withdrawalDate.DateTime;
+        var learningKey = _scenarioContext.GetLearningKey();
+        await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{learningKey}", updateRequest);
+
+        await WaitHelper.WaitForIt(() =>
+            _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(),
+            $"Failed to find published {nameof(LearningWithdrawnEvent)} event during prior withdrawal setup");
+        _testContext.MessageSession.ClearEventsOfType<LearningWithdrawnEvent>();
+    }
+
+    [Then(@"an LearningWithdrawnEvent is sent")]
+    public async Task ThenALearningWithdrawnEventIsSent()
+    {
+        await WaitHelper.WaitForIt(() =>
+            _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(),
+            $"Failed to find published {nameof(LearningWithdrawnEvent)} event");
+    }
+
+    [Then(@"an LearningWithdrawnEvent is not sent")]
+    public async Task ThenALearningWithdrawnEventIsNotSent()
+    {
+        await WaitHelper.WaitForUnexpected(() =>
+            _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(),
+            $"Unexpected {nameof(LearningWithdrawnEvent)} event was published.");
+    }
+
+    [Then(@"an LearningWithdrawalRevertedEvent is sent")]
+    public async Task ThenALearningWithdrawalRevertedEventIsSent()
+    {
+        var learningKey = _scenarioContext.GetLearningKey();
+        await WaitHelper.WaitForIt(() =>
+            _testContext.MessageSession.ReceivedEvents<LearningWithdrawalRevertedEvent>().Any(
+                x => x.LearningKey == learningKey),
+            $"Failed to find published {nameof(LearningWithdrawalRevertedEvent)} event");
+    }
+
     [Then(@"the PersonalDetailsChangedEvent is emitted")]
     public async Task ThenTheExpectedEventIsSent()
     {
-        await WaitHelper.WaitForIt(() => 
-            _testContext.MessageSession.ReceivedEvents<PersonalDetailsChangedEvent>().Any(), 
+        await WaitHelper.WaitForIt(() =>
+            _testContext.MessageSession.ReceivedEvents<PersonalDetailsChangedEvent>().Any(),
             $"Failed to find published {nameof(PersonalDetailsChangedEvent)} event");
     }
 
