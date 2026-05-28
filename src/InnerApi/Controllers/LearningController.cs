@@ -1,16 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
+using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
+using SFA.DAS.Learning.Command.RemoveLearnerCommand;
+using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
-using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
+using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
-using SFA.DAS.Learning.InnerApi.Requests;
-using SFA.DAS.Learning.Command.UpdateLearner;
-using SFA.DAS.Learning.Command.RemoveLearnerCommand;
-using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
-using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -42,8 +41,10 @@ public class LearningController : ControllerBase
     /// <summary>
     /// Creates a draft apprenticeship
     /// </summary>
-    /// <param name="request">The updated learner details.</param>
-    /// <returns>An array of <see cref="LearningUpdateChanges"/> values indicating the fields that were modified.</returns>
+    /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
+    /// <param name="uln">Unique Learner Number of the apprenticeship for which the draft is being created.</param>
+    /// <param name="request">Details of learning</param>
+    /// <returns>An array of <see cref="CreateDraftApprenticeshipLearningCommandResult"/> Object containing the result of the draft creation.</returns>
     [HttpPost("{ukprn}/apprenticeships/{uln}")]
     [ProducesResponseType(200)]
     public async Task<IActionResult> CreateDraftLearning(long ukprn, string uln, [FromBody] CreateDraftApprenticeship request)
