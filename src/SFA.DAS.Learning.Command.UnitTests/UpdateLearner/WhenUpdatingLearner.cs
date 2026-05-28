@@ -5,8 +5,11 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -87,6 +90,57 @@ public class WhenUpdatingLearner
         result.Changes.Should().BeEmpty();
 
         // the first call is to make sure the data in the domain model is up to date before the update, that way there should be no changes detected
+    }
+
+    [Test]
+    public async Task ThenARemovedApprenticeshipIsReinstatedOnUpdate()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var removedEpisode = _fixture.CreateEpisodeDomainModel(x => x.IsRemoved = true);
+        TestHelper.SetEpisode(learningDomainModel, removedEpisode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        _learningRepository.Setup(x => x.Get(command.LearningKey))
+            .ReturnsAsync(learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().Contain(LearningUpdateChanges.Reinstated);
+        learningDomainModel.LatestEpisode.IsRemoved.Should().BeFalse();
+        learningDomainModel.FlushEvents().OfType<LearningReinstatedEvent>().Should().ContainSingle(e =>
+            e.LearningKey == learningDomainModel.Key &&
+            e.ApprenticeshipId == removedEpisode.ApprovalsApprenticeshipId);
+    }
+
+    [Test]
+    public async Task ThenAnUpdateOnANonRemovedApprenticeshipDoesNotReinstate()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var activeEpisode = _fixture.CreateEpisodeDomainModel(x => x.IsRemoved = false);
+        TestHelper.SetEpisode(learningDomainModel, activeEpisode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        _learningRepository.Setup(x => x.Get(command.LearningKey))
+            .ReturnsAsync(learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().NotContain(LearningUpdateChanges.Reinstated);
+        learningDomainModel.FlushEvents().OfType<LearningReinstatedEvent>().Should().BeEmpty();
     }
 
 #pragma warning disable CS8620, CS8600

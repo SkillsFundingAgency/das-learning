@@ -134,8 +134,8 @@ public class LearningController : ControllerBase
 
         var command = new RemoveLearnerCommand(learningKey);
 
-        var result = await _commandDispatcher.Send<RemoveLearnerCommand, RemoveLearnerResult>(command);
+        await _commandDispatcher.Send(command);
 
-        return new OkObjectResult(result);
+        return new OkResult();
     }
 }

@@ -29,6 +29,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public string TrainingCode => _entity.TrainingCode;
     public string TrainingCourseVersion => _entity.TrainingCourseVersion;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
+    public bool IsRemoved => _entity.IsRemoved;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime? PauseDate => _entity.PauseDate;
     public IReadOnlyCollection<ApprenticeshipLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ApprenticeshipLearningSupportDomainModel.Get);
@@ -312,6 +313,16 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     internal void ReverseWithdrawal()
     {
         _entity.WithdrawalDate = null;
+    }
+
+    public void Remove()
+    {
+        _entity.IsRemoved = true;
+    }
+
+    public void Reinstate()
+    {
+        _entity.IsRemoved = false;
     }
 
     internal void SetPauseDate(DateTime? pauseDate)

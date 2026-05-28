@@ -13,8 +13,9 @@
     [AccountLegalEntityId] BIGINT NULL,
     [TrainingCode] NCHAR(10) NOT NULL,
     [TrainingCourseVersion] NVARCHAR(10) NULL,
-    [PaymentsFrozen] BIT NOT NULL DEFAULT (0), 
-    [WithdrawalDate] DATETIME NULL, 
+    [PaymentsFrozen] BIT NOT NULL DEFAULT (0),
+    [IsRemoved] BIT NOT NULL DEFAULT(0),
+    [WithdrawalDate] DATETIME NULL,
     [PauseDate] DATETIME NULL
 )
 GO
