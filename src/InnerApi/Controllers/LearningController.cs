@@ -47,6 +47,7 @@ public class LearningController : ControllerBase
     /// <returns>An array of <see cref="CreateDraftApprenticeshipLearningCommandResult"/> Object containing the result of the draft creation.</returns>
     [HttpPost("{ukprn}/apprenticeships/{uln}")]
     [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     public async Task<IActionResult> CreateDraftLearning(long ukprn, string uln, [FromBody] CreateDraftApprenticeship request)
     {
         _logger.LogInformation("Creating learning with ukprn {ukprn} uln {uln}", ukprn, uln);
