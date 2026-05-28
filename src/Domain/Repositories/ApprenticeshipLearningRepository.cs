@@ -54,14 +54,17 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         return _learningFactory.GetExisting(apprenticeship);
     }
 
-    public async Task<ApprenticeshipLearningDomainModel> GetLearnerKey(Guid key)
+    public async Task<ApprenticeshipLearningDomainModel?> GetByLearnerKey(Guid key)
     {
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
-            .SingleAsync(x => x.LearnerKey == key);
+            .SingleOrDefaultAsync(x => x.LearnerKey == key);
+
+        if(apprenticeship == null)
+            return null;
 
         return _learningFactory.GetExisting(apprenticeship);
     }

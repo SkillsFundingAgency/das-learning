@@ -29,7 +29,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         var learner = await _learnerRepository.GetByUln(command.Uln);
         if (learner == null)  return null;
 
-        var learning = await _apprenticeshipLearningRepository.GetLearnerKey(learner.Key);
+        var learning = await _apprenticeshipLearningRepository.GetByLearnerKey(learner.Key);
         if (learning == null) return null;
 
         if(!learning.LatestEpisode.IsRemoved) return null;

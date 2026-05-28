@@ -8,6 +8,6 @@ public interface IApprenticeshipLearningRepository : ILearningRepository
     Task<ApprenticeshipLearningDomainModel> Get(Guid key);
     Task<ApprenticeshipLearningDomainModel?> GetByUln(string uln);
     Task<ApprenticeshipLearningDomainModel?> Get(string uln, long approvalsApprenticeshipId);
-    Task<ApprenticeshipLearningDomainModel> GetLearnerKey(Guid key);
+    Task<ApprenticeshipLearningDomainModel> GetByLearnerKey(Guid key);
     Task Update(ApprenticeshipLearningDomainModel learning);
 }
