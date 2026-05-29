@@ -22,7 +22,6 @@ public class WhenUpdatingAnApprenticeship
     private ApprenticeshipLearningRepository _sut;
     private Fixture _fixture;
     private LearningDataContext _dbContext;
-    private Mock<IDomainEventDispatcher> _domainEventDispatcher;
     private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory;
 
     [SetUp]
@@ -127,10 +126,9 @@ public class WhenUpdatingAnApprenticeship
 
     private void SetUpApprenticeshipRepository()
     {
-        _domainEventDispatcher = new Mock<IDomainEventDispatcher>();
         _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
         _dbContext = InMemoryDbContextCreator.SetUpInMemoryDbContext();
         _sut = new ApprenticeshipLearningRepository(new Lazy<LearningDataContext>(_dbContext),
-            _domainEventDispatcher.Object, _apprenticeshipFactory.Object, new Mock<IUnitOfWork>().Object);
+            _apprenticeshipFactory.Object, new Mock<IUnitOfWork>().Object);
     }
 }

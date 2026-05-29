@@ -47,7 +47,6 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         {
             learning = CreateNewLearning(command, learner);
 
-            TransferEvents(learner, learning);
             await _shortCourseLearningRepository.Add(learning);
 
             return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.LatestEpisode.Key};
@@ -76,14 +75,12 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         //Update existing learning if same provider
         var changes = learning.Update(command.Model);
-        var isReinstated = changes.Contains(ShortCourseUpdateChanges.Reinstated);
 
-        TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
         var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
         result.EpisodeKey = learning.LatestEpisode.Key;
-        result.IsReinstated = isReinstated;
+        result.IsReinstated = changes.Contains(ShortCourseUpdateChanges.Reinstated);
         return result;
     }
 
@@ -138,6 +135,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             };
 
             learner.Update(updateContext);
+            await _learnerRepository.Update(learner);
 
             return learner;
 
@@ -154,20 +152,4 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         return newLearner;
     }
 
-    /// <summary>
-    /// TEMPORARY WORKAROUND
-    /// 
-    /// Because our repositories share a dbcontext, it is enough to update one of the 
-    /// aggregates for changes across both to be persisted. 
-    /// However, events are stored against the aggregate that raised them, so we need to transfer any events raised 
-    /// on the learner to the learning aggregate before saving so they get persisted and dispatched.
-    /// </summary>
-    private static void TransferEvents(LearnerDomainModel learner, ShortCourseLearningDomainModel learning)
-    {
-        var learnerEvents = learner.FlushEvents();
-        foreach (var domainEvent in learnerEvents)
-        {
-            learning.AddEvent(domainEvent);
-        }
-    }
 }

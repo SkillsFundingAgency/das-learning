@@ -8,16 +8,14 @@ namespace SFA.DAS.Learning.Domain.Repositories;
 public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepository
 {
     private readonly Lazy<LearningDataContext> _lazyContext;
-    private IDomainEventDispatcher _domainEventDispatcher;
     private readonly IApprenticeshipLearningFactory _learningFactory;
     private LearningDataContext DbContext => _lazyContext.Value;
 
     private readonly IUnitOfWork _unitOfWork;
 
-    public ApprenticeshipLearningRepository(Lazy<LearningDataContext> dbContext, IDomainEventDispatcher domainEventDispatcher, IApprenticeshipLearningFactory learningFactory, IUnitOfWork unitOfWork)
+    public ApprenticeshipLearningRepository(Lazy<LearningDataContext> dbContext, IApprenticeshipLearningFactory learningFactory, IUnitOfWork unitOfWork)
     {
         _lazyContext = dbContext;
-        _domainEventDispatcher = domainEventDispatcher;
         _learningFactory = learningFactory;
         _unitOfWork = unitOfWork;
     }
@@ -26,20 +24,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     {
         var entity = learning.GetEntity();
         await DbContext.AddAsync(entity);
-        try
-        {
-            await DbContext.SaveChangesAsync();
-        }
-        catch
-        {
-            DbContext.Entry(entity).State = EntityState.Detached;
-            throw;
-        }
-
-        foreach (dynamic domainEvent in learning.FlushEvents())
-        {
-            await _domainEventDispatcher.Send(domainEvent);
-        }
+        _unitOfWork.Track(learning);
     }
 
     public async Task<ApprenticeshipLearningDomainModel> Get(Guid key)

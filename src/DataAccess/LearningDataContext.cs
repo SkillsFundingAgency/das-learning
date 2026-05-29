@@ -43,6 +43,12 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .IsRequired();
 
         modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
+            .HasOne<Learner>()
+            .WithMany()
+            .HasForeignKey(a => a.LearnerKey)
+            .IsRequired();
+
+        modelBuilder.Entity<Entities.Learning.ApprenticeshipLearning>()
             .HasMany(x => x.Episodes)
             .WithOne()
             .HasForeignKey(fk => fk.LearningKey);
@@ -63,6 +69,12 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
 
         modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
             .Property(a => a.LearnerKey)
+            .IsRequired();
+
+        modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
+            .HasOne<Learner>()
+            .WithMany()
+            .HasForeignKey(a => a.LearnerKey)
             .IsRequired();
 
         // Episode
