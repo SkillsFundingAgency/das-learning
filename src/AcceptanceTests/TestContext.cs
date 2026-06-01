@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -40,6 +40,7 @@ public class TestContext : IDisposable
                 new KeyValuePair<string, string?>("ApplicationSettings:NServiceBusConnectionString", "UseLearningEndpoint=true"),
                 new KeyValuePair<string, string?>("ApplicationSettings:LogLevel", "DEBUG"),
                 new KeyValuePair<string, string?>("ApplicationSettings:DbConnectionString", SqlDatabase?.DatabaseInfo.ConnectionString!),
+                new KeyValuePair<string, string?>("FeatureFlags:ShortCourseChangeOfProvider", "true"),
                 new KeyValuePair<string, string?>("SFA.DAS.Encoding", MockEncodingConfig())
             }
         };

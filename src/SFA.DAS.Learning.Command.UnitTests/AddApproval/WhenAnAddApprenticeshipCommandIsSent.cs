@@ -163,9 +163,10 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
+        command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
         await _commandHandler.Handle(command);
 
-        shortCourseLearning.LatestEpisode.IsApproved.Should().BeTrue();
+        shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).IsApproved.Should().BeTrue();
         _learningService.Verify(x => x.UpdateLearning(shortCourseLearning));
 
         shortCourseLearning
@@ -173,7 +174,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .OfType<Domain.Events.LearningApprovedEvent>()
             .Should()
             .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
-                                && e.EpisodeKey == shortCourseLearning.LatestEpisode.Key);
+                                && e.EpisodeKey == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).Key);
     }
 
     [Test]
@@ -188,9 +189,10 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
+        command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
         await _commandHandler.Handle(command);
 
-        shortCourseLearning.LatestEpisode.EmployerAccountId.Should().Be(command.EmployerAccountId);
+        shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).EmployerAccountId.Should().Be(command.EmployerAccountId);
     }
 
     [Test]
@@ -205,9 +207,10 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
+        command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
         await _commandHandler.Handle(command);
 
-        shortCourseLearning.LatestEpisode.EmployerType.Should().Be(command.EmployerType);
+        shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).EmployerType.Should().Be(command.EmployerType);
     }
 
     [Test]
@@ -222,9 +225,10 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
+        command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
         await _commandHandler.Handle(command);
 
-        shortCourseLearning.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(command.ApprovalsApprenticeshipId);
+        shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).ApprovalsApprenticeshipId.Should().Be(command.ApprovalsApprenticeshipId);
     }
 
     [Test]
@@ -239,9 +243,10 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
+        command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
         await _commandHandler.Handle(command);
 
-        shortCourseLearning.LatestEpisode.TransferSenderId.Should().Be(command.TransferSenderId);
+        shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).TransferSenderId.Should().Be(command.TransferSenderId);
     }
 
     [Test]

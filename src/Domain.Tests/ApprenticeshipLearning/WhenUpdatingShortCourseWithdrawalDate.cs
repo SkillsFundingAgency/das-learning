@@ -37,8 +37,8 @@ public class WhenUpdatingShortCourseWithdrawalDate
         events.Should().ContainSingle();
         var @event = events.Single();
         @event.LearningKey.Should().Be(learning.Key);
-        @event.ApprovalsApprenticeshipId.Should().Be(learning.LatestEpisode.ApprovalsApprenticeshipId);
-        @event.EmployerAccountId.Should().Be(learning.LatestEpisode.EmployerAccountId);
+        @event.ApprovalsApprenticeshipId.Should().Be(learning.Episodes.Single().ApprovalsApprenticeshipId);
+        @event.EmployerAccountId.Should().Be(learning.Episodes.Single().EmployerAccountId);
         @event.LastDayOfLearning.Should().Be(withdrawalDate);
     }
 
@@ -107,7 +107,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
 
     private static ShortCourseUpdateContext CreateUpdateContext(ShortCourseLearningDomainModel learning, DateTime? withdrawalDate)
     {
-        var episode = learning.LatestEpisode;
+        var episode = learning.Episodes.Single();
         return new ShortCourseUpdateContext
         {
             LearnerRef = episode.LearnerRef,
@@ -127,3 +127,4 @@ public class WhenUpdatingShortCourseWithdrawalDate
         };
     }
 }
+

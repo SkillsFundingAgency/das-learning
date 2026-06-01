@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
@@ -94,9 +94,9 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
     {
         var baseQuery = DbContext.ShortCourseLearnings
             .Include(x => x.Episodes)
-            .Where(x => x.Episodes.Any(e => e.Ukprn == ukPrn))
-            .Where(x => x.Episodes.Any(e => e.IsApproved))
-            .Where(x => x.Episodes.Any(e =>
+            .Where(x => x.Episodes.Any(e => 
+                e.Ukprn == ukPrn &&
+                e.IsApproved &&
                 e.StartDate <= dates.End &&
                 e.ExpectedEndDate >= dates.Start &&
                 (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))

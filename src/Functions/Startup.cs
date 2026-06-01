@@ -1,4 +1,4 @@
-﻿using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -79,6 +79,10 @@ public class Startup
     {
         services.Replace(ServiceDescriptor.Singleton(typeof(IConfiguration), Configuration));
         services.AddOptions();
+
+        var featureFlags = new FeatureFlags();
+        Configuration.Bind(nameof(FeatureFlags), featureFlags);
+        services.AddSingleton(featureFlags);
 
         services.AddEntityFrameworkForApprenticeships(ApplicationSettings, NotLocal(Configuration));
 

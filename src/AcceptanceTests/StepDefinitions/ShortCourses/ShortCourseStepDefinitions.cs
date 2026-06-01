@@ -9,6 +9,7 @@ using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.Queries.GetShortCoursesByAcademicYear;
 using SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions.ShortCourses;
 
@@ -42,6 +43,31 @@ public class ShortCourseStepDefinitions
     {
         var request = GetDefaultShortCourse();
         await CallCreateShortCourseEndpoint(request);
+    }
+
+    [Given(@"the (.*) feature is toggled (on|off)")]
+    public void GivenTheFeatureIsToggled(string featureFlagName, string toggle)
+    {
+        var value = toggle.Equals("on", StringComparison.OrdinalIgnoreCase);
+
+        var featureFlagsType = typeof(SFA.DAS.Learning.Infrastructure.Configuration.FeatureFlags);
+        var property = featureFlagsType.GetProperty(featureFlagName)
+            ?? throw new ArgumentException($"Feature flag '{featureFlagName}' not found on {featureFlagsType.Name}");
+
+        var innerApiFeatureFlags = _testContext.TestInnerApi.Services.GetService<SFA.DAS.Learning.Infrastructure.Configuration.FeatureFlags>();
+        if (innerApiFeatureFlags != null)
+        {
+            property.SetValue(innerApiFeatureFlags, value);
+        }
+
+        if (_testContext.TestFunction != null)
+        {
+            var functionFeatureFlags = _testContext.TestFunction.Services.GetService<SFA.DAS.Learning.Infrastructure.Configuration.FeatureFlags>();
+            if (functionFeatureFlags != null)
+            {
+                property.SetValue(functionFeatureFlags, value);
+            }
+        }
     }
 
     [Given(@"SLD call the create short course endpoint with the following information")]
@@ -180,14 +206,20 @@ public class ShortCourseStepDefinitions
         expectedStatusCode.Should().Be(statusCode);
     }
 
-    [Then(@"for learner with Uln (.*) there is (.*) short course record")]
-    public async Task ThenForLearnerWithUlnThereIsOnlyShortCourseRecord(string uln, int numberOfRecords)
+    [Then(@"for learner with Uln (.*) there is (.*) short course episode record")]
+    [Then(@"for learner with Uln (.*) there is (.*) short course episode records")]
+    public async Task ThenForLearnerWithUlnThereIsOnlyShortCourseEpisodeRecord(string uln, int numberOfRecords)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learner = dbConnection.GetLearner(uln);
         var shortCourseLearnings = dbConnection.GetShortCourseLearningsForLearner(learner.Key);
 
-        shortCourseLearnings.Count().Should().Be(numberOfRecords);
+        shortCourseLearnings.Count().Should().Be(1);
+
+        var learningKey = shortCourseLearnings.Single().Key;
+        var episodes = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseEpisode>().Where(x => x.LearningKey == learningKey).ToList();
+
+        episodes.Count().Should().Be(numberOfRecords);
     }
 
     [When("SLD requests short courses for earnings for collection year (.*)")]

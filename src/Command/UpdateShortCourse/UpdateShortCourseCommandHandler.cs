@@ -22,14 +22,18 @@ public class UpdateShortCourseCommandHandler(
         if (learning == null)
             throw new KeyNotFoundException($"Short course learning with key {command.LearningKey} not found.");
 
-        var changes = learning.Update(command.Model);
+        var updateResult = learning.Update(command.Model);
 
         await repository.Update(learning);
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
         var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, command.Model.OnProgramme.Ukprn);
-        result.Changes = changes;
+        if (result != null)
+        {
+            result.Changes = updateResult.Changes;
+            result.UpdatedEpisodeKey = updateResult.EpisodeKey;
+        }
         return result;
     }
 }

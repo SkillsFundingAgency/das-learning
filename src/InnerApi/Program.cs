@@ -6,6 +6,7 @@ using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure;
 using SFA.DAS.Configuration.AzureTableStorage;
 using SFA.DAS.Learning.Command;
+using SFA.DAS.Learning.InnerApi.Middleware;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Infrastructure.Extensions;
@@ -51,6 +52,11 @@ public static class Program
         });
 
         var applicationSettings = new ApplicationSettings();
+
+        var featureFlags = new FeatureFlags();
+        builder.Configuration.Bind(nameof(FeatureFlags), featureFlags);
+        builder.Services.AddSingleton(featureFlags);
+
         builder.Configuration.Bind(nameof(ApplicationSettings), applicationSettings);
         builder.Services.AddEntityFrameworkForApprenticeships(applicationSettings, NotLocal(builder.Configuration));
         builder.Services.AddSingleton(x => applicationSettings);
@@ -95,6 +101,7 @@ public static class Program
             });
         }
 
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseDasHealthChecks();
         app.UseHttpsRedirection();
         app.UseAuthentication();
