@@ -76,11 +76,11 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return episode;
     }
 
-    public ShortCourseDomainUpdateResult Update(ShortCourseUpdateContext updateContext, bool shouldReinstate = false)
+    public ShortCourseDomainUpdateResult Update(ShortCourseUpdateContext updateContext)
     {
         var changes = new List<ShortCourseUpdateChanges>();
         var episode = _episodes.Single(e => e.Ukprn == updateContext.OnProgramme.Ukprn);
-        if (shouldReinstate) ReinstateIfRemoved(episode, changes);
+        ReinstateIfRemoved(episode, changes);
         UpdateCompletionDate(updateContext.OnProgramme.CompletionDate, changes);
         UpdateEpisode(episode, updateContext, changes);
         return new ShortCourseDomainUpdateResult

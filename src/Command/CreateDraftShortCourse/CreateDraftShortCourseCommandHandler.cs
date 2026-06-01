@@ -93,10 +93,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
         else
         {
-            var shouldReinstate = _featureFlags.ShortCourseChangeOfProvider
-                ? learning.Episodes.Any(x => x.Ukprn == ukprn && x.IsRemoved)
-                : learning.Episodes.Any(x => x.IsRemoved);
-            updateResult = learning.Update(command.Model, shouldReinstate);
+            updateResult = learning.Update(command.Model);
         }
 
         await _shortCourseLearningRepository.Update(learning);
