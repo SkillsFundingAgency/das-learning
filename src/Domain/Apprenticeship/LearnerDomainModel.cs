@@ -83,16 +83,6 @@ public class LearnerDomainModel : AggregateRoot
 
             changes.Add(LearningUpdateChanges.PersonalDetails);
 
-            var @event = new PersonalDetailsChangedEvent
-            {
-                ApprovalsApprenticeshipId = updateContext.ApprovalsApprenticeshipId,
-                LearningKey = updateContext.LearningKey,
-                FirstName = FirstName,
-                LastName = LastName,
-                EmailAddress = EmailAddress
-            };
-
-            AddEvent(@event);
         }
     }
 

@@ -26,6 +26,31 @@ public class ApprovalCreatedStepDefinitions
         _learningDataSeeder = new LearningDataSeeder(_scenarioContext, _testContext, _fixture);
     }
 
+    [Given(@"No apprenticeship exists")]
+    public void GivenNoApprenticeshipExists()
+    {
+        var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
+            .With(_ => _.TrainingCourseVersion, "1.0")
+            .With(_ => _.IsOnFlexiPaymentPilot, true)
+            .With(_ => _.Uln, _fixture.Create<long>().ToString)
+            .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
+            .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
+                new CommitmentsV2.Messages.Events.PriceEpisode
+                {
+                    Cost = 6500,
+                    FromDate = TokenisableDateTime.FromString("currentAY-09-25").DateTime!.Value,
+                    ToDate = TokenisableDateTime.FromString("nextAY-07-31").DateTime,
+                    EndPointAssessmentPrice = 500,
+                    TrainingPrice = 6000
+                }
+            })
+            .Create();
+
+        // Do not publish the event, just set it in the context for later use in the test
+
+        _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
+    }
+
     [Given(@"An apprenticeship has been created as part of the approvals journey")]
     [Given(@"that an apprentice record has been approved by an employer previously")]
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney()

@@ -18,6 +18,7 @@ public class RemoveLearnerStepDefinitions
     }
 
     [When(@"SLD inform us that a learner is to be removed")]
+    [Given(@"SLD inform us that a learner is to be removed")]
     [Given(@"SLD have previously informed us that the learner is to be removed")]
     public async Task WhenSLDInformUsThatALearnerIsToBeRemoved()
     {
@@ -46,6 +47,7 @@ public class RemoveLearnerStepDefinitions
     }
 
     [Then(@"an LearningReinstatedEvent is sent")]
+    [Then(@"the apprenticeship should be reinstated")]
     public async Task ThenALearningReinstatedEventIsSent()
     {
         var learningKey = await GetLearningKey();

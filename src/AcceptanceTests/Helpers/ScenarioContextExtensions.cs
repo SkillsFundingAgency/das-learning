@@ -1,7 +1,9 @@
-﻿using SFA.DAS.Learning.Command.UpdateLearner;
+﻿using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
+using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
+using System.Net;
 
 namespace SFA.DAS.Learning.AcceptanceTests.Helpers;
 
@@ -45,6 +47,8 @@ internal static class ScenarioContextExtensions
     internal static UpdateLearnerResult GetUpdateLearnerResult(this ScenarioContext context) => context.Get<UpdateLearnerResult>();
     internal static void SetUpdateLearnerResult(this ScenarioContext context, UpdateLearnerResult updateLearnerResult) => context.Set(updateLearnerResult);
 
+    internal static void SetCreateDraftApprenticeshipLearningResult(this ScenarioContext context, (CreateDraftApprenticeshipLearningCommandResult?, HttpStatusCode) result) => context.Set(result);
+    internal static (CreateDraftApprenticeshipLearningCommandResult?, HttpStatusCode) GetCreateDraftApprenticeshipLearningResult(this ScenarioContext context) => context.Get<(CreateDraftApprenticeshipLearningCommandResult?, HttpStatusCode)>();
     /// <summary>
     /// Ensures each call returns a unique Uln starting from 10001
     /// </summary>

@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
@@ -59,6 +59,9 @@ public class GetLearnersStepDefinitions
                     break;
                 case "WithdrawnInThisYear":
                     createdLearners = await CreateWithdrawnLearners(numberToCreate, "currentAY-09-01", "nextAY-07-31", "currentAY-11-01");
+                    break;
+                case "Removed":
+                    createdLearners = await CreateRemovedLearners(numberToCreate, "currentAY-09-01", "nextAY-07-31");
                     break;
             }
 
@@ -122,6 +125,12 @@ public class GetLearnersStepDefinitions
         AssertLearnersInCategoryNotReturned("WithdrawnInPreviousYear");
     }
 
+    [Then(@"the list of Learnings sent does not include any Learnings where the Learning was removed")]
+    public void NoLearnersRemovedReturned()
+    {
+        AssertLearnersInCategoryNotReturned("Removed");
+    }
+
     [Then(@"the list of Learnings sent includes any Learnings where the Learning was active in that year but have now been withdrawn while in-learning")]
     public void IncludesLearnersWithdrawnInCurrentYear()
     {
@@ -138,20 +147,48 @@ public class GetLearnersStepDefinitions
     {
         var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
 
-        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-
-        foreach (var createdEvent in createdEvents)
+        var learningKeys = new List<(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent Event, Guid Key)>();
+        await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
         {
-            var learningKey = dbConnection.GetLearningKey(createdEvent.Uln);
-            var updateRequest = createdEvent.BuildUpdateLearnerRequest();
+            foreach (var createdEvent in createdEvents)
+            {
+                learningKeys.Add((createdEvent, dbConnection.GetLearningKey(createdEvent.Uln)));
+            }
+        }
+
+        foreach (var item in learningKeys)
+        {
+            var updateRequest = item.Event.BuildUpdateLearnerRequest();
 
             updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(withdrawnDate).DateTime!.Value;
-            var updateResponse = await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{learningKey}", updateRequest);
+            var updateResponse = await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{item.Key}", updateRequest);
             
             if (!updateResponse.Changes.Contains(LearningUpdateChanges.Withdrawal))
             {
-                throw new Exception($"Failed to withdraw learner with Uln {createdEvent.Uln}");
+                throw new Exception($"Failed to withdraw learner with Uln {item.Event.Uln}");
             }
+        }
+
+        return createdEvents;
+    }
+
+    private async Task<List<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>> CreateRemovedLearners(int numberToCreate, string startDate, string endDate)
+    {
+        var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
+        var learningKeys = new List<Guid>();
+
+        await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
+        {
+            foreach (var createdEvent in createdEvents)
+            {
+                learningKeys.Add(dbConnection.GetLearningKey(createdEvent.Uln));
+            }
+        }
+
+        foreach (var learningKey in learningKeys)
+        {
+            var ukprn = Constants.UkPrn;
+            await _testContext.TestInnerApi.Delete($"/{ukprn}/{learningKey}");
         }
 
         return createdEvents;

@@ -1,4 +1,4 @@
-﻿using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.DataAccess.Entities.Learning;
 
 namespace SFA.DAS.Learning.DataAccess.Extensions;
 
@@ -13,6 +13,8 @@ public static class LinqExtensions
                     !(x.CompletionDate.HasValue && x.CompletionDate.Value < startOfAcademicYear) &&
 
                     x.Episodes.Any(episode =>
+                        !episode.IsRemoved &&
+                        
                         // Include if Started on or before end of activeOnDate year
                         episode.Prices.Any(price => price.StartDate <= endOfAcademicYear) &&
 

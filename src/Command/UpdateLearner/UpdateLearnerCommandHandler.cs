@@ -50,7 +50,12 @@ public class UpdateLearnerCommandHandler(
 
         logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearningKey, changes);
 
-        learning.AddUpdatedEvent(LearnerUpdatedEvent.From(learner, learning));
+        learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
+        if(changes.Any(x=>x == Enums.LearningUpdateChanges.PersonalDetails))
+        {
+            var episode = learning.LatestEpisode;
+            learner.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, episode));
+        }
 
         await learnerRepository.Update(learner);
         await learningRepository.Update(learning);
