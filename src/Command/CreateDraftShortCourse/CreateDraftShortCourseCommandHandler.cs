@@ -81,11 +81,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             }
         }
 
-        var isReinstated = false;
-        var changes = learning.Update(command.Model); //todo don'th think needed
         var existingEpisode = _featureFlags.ShortCourseChangeOfProvider
             ? learning.Episodes.Any(x => x.Ukprn == ukprn)
             : learning.Episodes.Any();
+
+        ShortCourseDomainUpdateResult? updateResult = null;
 
         if (!existingEpisode)
         {
@@ -93,23 +93,18 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
         else
         {
-            learning.Update(command.Model);
             var shouldReinstate = _featureFlags.ShortCourseChangeOfProvider
                 ? learning.Episodes.Any(x => x.Ukprn == ukprn && x.IsRemoved)
                 : learning.Episodes.Any(x => x.IsRemoved);
-
-            if (shouldReinstate)
-            {
-                learning.Reinstate(ukprn);
-                isReinstated = true;
-            }
+            updateResult = learning.Update(command.Model, shouldReinstate);
         }
 
         await _shortCourseLearningRepository.Update(learning);
 
         var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
         result.EpisodeKey = learning.Episodes.Single(x => x.Ukprn == command.Model.OnProgramme.Ukprn).Key;
-        result.IsReinstated = changes.Contains(ShortCourseUpdateChanges.Reinstated);
+        if(updateResult != null) result.IsReinstated = updateResult.Changes.Any(x => x == ShortCourseUpdateChanges.Reinstated);
+
         return result;
     }
 
