@@ -9,7 +9,6 @@ namespace SFA.DAS.Learning.Domain.Repositories;
 public class ShortCourseLearningRepository : IShortCourseLearningRepository
 {
     private readonly Lazy<LearningDataContext> _lazyContext;
-    private readonly IDomainEventDispatcher _domainEventDispatcher;
     private readonly IShortCourseLearningFactory _learningFactory;
 
     private LearningDataContext DbContext => _lazyContext.Value;
@@ -18,12 +17,10 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
 
     public ShortCourseLearningRepository(
         Lazy<LearningDataContext> dbContext,
-        IDomainEventDispatcher domainEventDispatcher,
         IShortCourseLearningFactory learningFactory,
         IUnitOfWork unitOfWork)
     {
         _lazyContext = dbContext;
-        _domainEventDispatcher = domainEventDispatcher;
         _learningFactory = learningFactory;
         _unitOfWork = unitOfWork;
     }
@@ -31,14 +28,8 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
     public async Task Add(ShortCourseLearningDomainModel learning)
     {
         var entity = learning.GetEntity();
-
         await DbContext.AddAsync(entity);
-        await DbContext.SaveChangesAsync();
-
-        foreach (dynamic domainEvent in learning.FlushEvents())
-        {
-            await _domainEventDispatcher.Send(domainEvent);
-        }
+        _unitOfWork.Track(learning);
     }
 
     public Task Update(ShortCourseLearningDomainModel learning)

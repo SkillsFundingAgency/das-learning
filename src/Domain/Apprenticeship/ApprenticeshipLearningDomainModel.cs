@@ -15,6 +15,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     public Guid Key => _entity.Key;
     public DateTime? CompletionDate => _entity.CompletionDate;
+    public DateTime? AchievementDate => _entity.AchievementDate;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
     public DateTime StartDate
@@ -139,6 +140,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     {
         var changes = new List<LearningUpdateChanges>();
 
+        ReinstateIfRemoved(changes);
+
         UpdateLearningDetails(updateContext, changes);
 
         UpdateEnglishAndMathsDetails(updateContext, changes);
@@ -155,17 +158,41 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateBreaksInLearning(updateContext, changes);
 
+        UpdateAchievementDate(updateContext, changes);
+
         return changes.ToArray();
     }
 
     public void RemoveLearner()
     {
         var latestEpisode = LatestEpisode;
-        var withdrawalDate = latestEpisode.EpisodePrices.Min(x => x.StartDate); // This is also the first day of learning
-        latestEpisode.Withdraw(withdrawalDate);
+        latestEpisode.Remove();
         latestEpisode.UpdateLearningSupportIfChanged([]);
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.EnglishAndMathsCourses.Clear();
+
+        AddEvent(new LearningRemovedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = latestEpisode.ApprovalsApprenticeshipId
+        });
+    }
+
+    private void ReinstateIfRemoved(List<LearningUpdateChanges> changes)
+    {
+        var latestEpisode = LatestEpisode;
+        if (!latestEpisode.IsRemoved)
+            return;
+
+        latestEpisode.Reinstate();
+
+        AddEvent(new LearningReinstatedEvent
+        {
+            LearningKey = Key,
+            ApprenticeshipId = latestEpisode.ApprovalsApprenticeshipId
+        });
+
+        changes.Add(LearningUpdateChanges.Reinstated);
     }
 
     public override void Approve(long ukprn, long employerAccountId)
@@ -333,6 +360,14 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         {
             changes.Add(LearningUpdateChanges.BreaksInLearningUpdated);
         }
+    }
+
+    private void UpdateAchievementDate(LearningUpdateContext updateContext, List<LearningUpdateChanges> changes)
+    {
+        if(updateContext.OnProgrammeDetails.AchievementDate == AchievementDate) return;
+
+        _entity.AchievementDate = updateContext.OnProgrammeDetails.AchievementDate;
+        changes.Add(LearningUpdateChanges.AchievementDateChanged); 
     }
 
 }

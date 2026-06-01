@@ -158,6 +158,7 @@ public class WhenUpdatingBreaksInLearning
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         entity.CompletionDate = entity.CompletionDate?.Date;
+        entity.AchievementDate = null;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = entity.Key;

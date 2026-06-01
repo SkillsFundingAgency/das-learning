@@ -3,6 +3,7 @@ using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
@@ -50,7 +51,6 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         {
             learning = CreateNewLearning(command, learner);
 
-            TransferEvents(learner, learning);
             await _shortCourseLearningRepository.Add(learning);
 
             return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.Episodes.Single().Key };
@@ -82,7 +82,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
 
         var isReinstated = false;
-
+        var changes = learning.Update(command.Model); //todo don'th think needed
         var existingEpisode = _featureFlags.ShortCourseChangeOfProvider
             ? learning.Episodes.Any(x => x.Ukprn == ukprn)
             : learning.Episodes.Any();
@@ -94,7 +94,6 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         else
         {
             learning.Update(command.Model);
-
             var shouldReinstate = _featureFlags.ShortCourseChangeOfProvider
                 ? learning.Episodes.Any(x => x.Ukprn == ukprn && x.IsRemoved)
                 : learning.Episodes.Any(x => x.IsRemoved);
@@ -106,12 +105,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             }
         }
 
-        TransferEvents(learner, learning);
         await _shortCourseLearningRepository.Update(learning);
 
         var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
         result.EpisodeKey = learning.Episodes.Single(x => x.Ukprn == command.Model.OnProgramme.Ukprn).Key;
-        result.IsReinstated = isReinstated;
+        result.IsReinstated = changes.Contains(ShortCourseUpdateChanges.Reinstated);
         return result;
     }
 
@@ -171,6 +169,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             };
 
             learner.Update(updateContext);
+            await _learnerRepository.Update(learner);
 
             return learner;
 
@@ -187,20 +186,4 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         return newLearner;
     }
 
-    /// <summary>
-    /// TEMPORARY WORKAROUND
-    /// 
-    /// Because our repositories share a dbcontext, it is enough to update one of the 
-    /// aggregates for changes across both to be persisted. 
-    /// However, events are stored against the aggregate that raised them, so we need to transfer any events raised 
-    /// on the learner to the learning aggregate before saving so they get persisted and dispatched.
-    /// </summary>
-    private static void TransferEvents(LearnerDomainModel learner, ShortCourseLearningDomainModel learning)
-    {
-        var learnerEvents = learner.FlushEvents();
-        foreach (var domainEvent in learnerEvents)
-        {
-            learning.AddEvent(domainEvent);
-        }
-    }
 }

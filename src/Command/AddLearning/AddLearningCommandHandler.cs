@@ -1,5 +1,3 @@
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
@@ -88,18 +86,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         learning.AddUpdatedEvent(LearnerUpdatedEvent.From(learner, learning));
 
-        try
-        {
-            await _learningService.AddLearning(learning);
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
-        {
-            //2627: violation of unique constraint. 2601: violation of unique index
-            _logger.LogWarning(ex,
-                "Unique constraint violation for given Uln and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
-                command.ApprovalsApprenticeshipId);
-            return;
-        }
+        await _learningService.AddLearning(learning);
 
         if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
         {
@@ -116,20 +103,9 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             return learner;
         }
 
-        try
-        {
-            var newLearner =
-                _learnerFactory.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName);
-            await _learnerRepository.Add(newLearner);
-            return newLearner;
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2627 or 2601 })
-        {
-            //2627: violation of unique constraint. 2601: violation of unique index
-            _logger.LogWarning(ex,
-                "Unique constraint violation for given Uln {Uln}.", command.Uln);
-            throw; //rethrowing will allow the command to be retried. Learner duplication will then be avoided, allowing the new learning to be recorded
-        }
+        var newLearner = _learnerFactory.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName);
+        await _learnerRepository.Add(newLearner);
+        return newLearner;
     }
 
     private async Task SendEvent(ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner)

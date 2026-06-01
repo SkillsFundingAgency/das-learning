@@ -34,24 +34,4 @@ public class WhenRemoveLearning
             _mockLogger.Object,
             _mockPagedLinkHeaderService.Object);
     }
-
-    [Test]
-    public async Task ThenReturnsLastDayOfLearning()
-    {
-        // Arrange
-        var ukprn = _fixture.Create<long>();
-        var learnerKey = _fixture.Create<Guid>();
-        var removeLearnerResult = _fixture.Create<RemoveLearnerResult>();
-
-        _mockCommandDispatcher
-            .Setup(x => x.Send<RemoveLearnerCommand, RemoveLearnerResult>(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(removeLearnerResult));
-
-        // Act
-        var result = await _sut.RemoveLearning(ukprn, learnerKey);
-
-        // Assert
-        result.Should().BeOfType<OkObjectResult>();
-        var okResult = (OkObjectResult)result;
-        okResult.Value.Should().Be(removeLearnerResult);
-    }
 }
