@@ -23,7 +23,8 @@ internal static class ApprenticeshipCreatedEventExtensions
                 EmailAddress = null,
                 CompletionDate = null,
                 DateOfBirth = apprenticeshipCreatedEvent.DateOfBirth,
-                Care = new CareDetails()
+                Care = new CareDetails(),
+                Uln = long.Parse(apprenticeshipCreatedEvent.Uln)
             },
             LearningSupport = new List<LearningSupportDetails>(),
             EnglishAndMathsCourses = new List<EnglishAndMaths>(),

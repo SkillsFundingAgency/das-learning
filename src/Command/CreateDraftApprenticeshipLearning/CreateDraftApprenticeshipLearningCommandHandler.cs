@@ -26,7 +26,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
     {
         _logger.LogInformation("Handling CreateDraftApprenticeshipLearningCommand");
 
-        var learner = await _learnerRepository.GetByUln(command.Uln);
+        var learner = await _learnerRepository.GetByUln(command.LearningUpdateContext.Learner.Uln);
         if (learner == null)  return null;
 
         var learning = await _apprenticeshipLearningRepository.GetByLearnerKey(learner.Key);
@@ -48,7 +48,12 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", updateModel.LearningKey, changes);
 
-        learning.AddUpdatedEvent(LearnerUpdatedEvent.From(learner, learning));
+        learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
+        if (changes.Any(x => x == Enums.LearningUpdateChanges.PersonalDetails))
+        {
+            var episode = learning.Episodes.Single(x => x.Ukprn == command.Ukprn);
+            learner.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, episode));
+        }
 
         await _learnerRepository.Update(learner);
         await _apprenticeshipLearningRepository.Update(learning);

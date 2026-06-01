@@ -124,12 +124,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         _entity.Episodes.Add(episode.GetEntity());
     }
 
-    /// <summary>
-    /// This adds a learner updated event which will be emitted by the repository on save.
-    /// the current purpose of this event is to trigger history generation
-    /// </summary>
-    public void AddUpdatedEvent(LearnerUpdatedEvent learnerUpdatedEvent) => AddEvent(learnerUpdatedEvent);
-
     public Learning.DataAccess.Entities.Learning.ApprenticeshipLearning GetEntity()
     {
         return _entity;

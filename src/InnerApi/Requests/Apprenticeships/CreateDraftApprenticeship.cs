@@ -229,7 +229,8 @@ public static class CreateDraftApprenticeshipExtensions
                 FirstName = request.Learner.FirstName,
                 LastName = request.Learner.LastName,
                 EmailAddress = request.Learner.EmailAddress,
-                DateOfBirth = request.Learner.DateOfBirth
+                DateOfBirth = request.Learner.DateOfBirth,
+                Uln = request.Learner.Uln.ToString()
             },
             Care = new Models.UpdateModels.Shared.CareDetails
             {

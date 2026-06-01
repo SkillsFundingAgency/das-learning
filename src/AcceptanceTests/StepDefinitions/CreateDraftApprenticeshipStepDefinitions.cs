@@ -30,8 +30,7 @@ public class CreateDraftApprenticeshipStepDefinitions
         var createdEvent = _scenarioContext.GetApprenticeshipCreatedEvent();// this may or may not have been sent
         var updateRequest = _scenarioContext.GetUpdateLearnerRequest();
         var ukprn = createdEvent.ProviderId;
-        var uln = createdEvent.Uln;
-        var response = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftApprenticeship, CreateDraftApprenticeshipLearningCommandResult>($"/{ukprn}/apprenticeships/{uln}", updateRequest);
+        var response = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftApprenticeship, CreateDraftApprenticeshipLearningCommandResult>($"/{ukprn}/apprenticeships", updateRequest);
         _scenarioContext.SetCreateDraftApprenticeshipLearningResult(response);
     }
 

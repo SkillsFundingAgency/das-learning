@@ -54,7 +54,7 @@ public class WhenCreateDraftLearning
             .ReturnsAsync(commandResult);
 
         // Act
-        var result = await _sut.CreateDraftLearning(ukprn, uln, request);
+        var result = await _sut.CreateDraftLearning(ukprn, request);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();

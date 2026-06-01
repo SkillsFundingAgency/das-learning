@@ -42,17 +42,16 @@ public class LearningController : ControllerBase
     /// Creates a draft apprenticeship
     /// </summary>
     /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
-    /// <param name="uln">Unique Learner Number of the apprenticeship for which the draft is being created.</param>
     /// <param name="request">Details of learning</param>
     /// <returns>An array of <see cref="CreateDraftApprenticeshipLearningCommandResult"/> Object containing the result of the draft creation.</returns>
-    [HttpPost("{ukprn}/apprenticeships/{uln}")]
+    [HttpPost("{ukprn}/apprenticeships")]
     [ProducesResponseType(200)]
     [ProducesResponseType(204)]
-    public async Task<IActionResult> CreateDraftLearning(long ukprn, string uln, [FromBody] CreateDraftApprenticeship request)
+    public async Task<IActionResult> CreateDraftLearning(long ukprn, [FromBody] CreateDraftApprenticeship request)
     {
-        _logger.LogInformation("Creating learning with ukprn {ukprn} uln {uln}", ukprn, uln);
+        _logger.LogInformation("Creating learning with ukprn {ukprn} uln {uln}", ukprn, request.Learner.Uln);
 
-        var command = new CreateDraftApprenticeshipLearningCommand(ukprn, uln, request.ToUpdateModel());
+        var command = new CreateDraftApprenticeshipLearningCommand(ukprn, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<CreateDraftApprenticeshipLearningCommand, CreateDraftApprenticeshipLearningCommandResult>(command);
 
