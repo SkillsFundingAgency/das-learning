@@ -13,6 +13,7 @@ using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SFA.DAS.Learning.Command.UnitTests.UpdateShortCourse;
@@ -52,6 +53,21 @@ public class WhenUpdateShortCourseCommandIsHandled
             .Returns(_fixture.Create<UpdateShortCourseResult>());
 
         _commandHandler = new UpdateShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object);
+    }
+
+    [Test]
+    public async Task ThenUpdatedEpisodeKeyIsPopulated()
+    {
+        var learningKey = Guid.NewGuid();
+        var learning = CreateDomainModel(learningKey);
+
+        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext());
+
+        var result = await _commandHandler.Handle(command);
+
+        result.UpdatedEpisodeKey.Should().Be(learning.Episodes.Single().Key);
     }
 
     [Test]
@@ -143,7 +159,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         await _commandHandler.Handle(command);
 
-        learning.LatestEpisode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
+        learning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).LearningType.Should().Be(LearningType.ApprenticeshipUnit);
     }
 
     [Test]

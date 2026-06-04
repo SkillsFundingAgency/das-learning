@@ -20,4 +20,6 @@ public class UpdateShortCourseCommand : ICommand
 public class UpdateShortCourseResult : ShortCourseLearningDto
 {
     public ShortCourseUpdateChanges[] Changes { get; set; } = [];
+
+    public Guid UpdatedEpisodeKey { get; set; }
 }

@@ -13,9 +13,9 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
 
         var baseQuery = dbContext.ShortCourseLearnings
             .Include(x => x.Episodes)
-            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn))
-            .Where(x => x.Episodes.Any(e => !e.IsRemoved))
-            .Where(x => x.Episodes.Any(e =>
+            .Where(x => x.Episodes.Any(e => 
+                e.Ukprn == query.UkPrn &&
+                !e.IsRemoved &&
                 e.StartDate <= dates.End &&
                 (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
             .Where(x => !x.CompletionDate.HasValue || x.CompletionDate.Value >= dates.Start)
@@ -50,7 +50,7 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
                         LastName = learner?.LastName,
                         DateOfBirth = learner?.DateOfBirth ?? default
                     },
-                    Episodes = l.Episodes.Where(e => !e.IsRemoved).Select(e => new GetShortCoursesForEarningsEpisode
+                    Episodes = l.Episodes.Where(e => !e.IsRemoved && e.Ukprn == query.UkPrn).Select(e => new GetShortCoursesForEarningsEpisode
                     {
                         CourseCode = e.TrainingCode,
                         IsApproved = e.IsApproved,
