@@ -34,10 +34,9 @@ public static class UpdateLearnerRequestExtensions
     /// </summary>
     /// <param name="request">The request containing learner details</param>
     /// <returns>A command to update the learner</returns>
-    public static LearningUpdateContext ToUpdateModel(this UpdateLearnerRequest request, Guid learningKey)
+    public static LearningUpdateContext ToUpdateModel(this UpdateLearnerRequest request)
     {
         var updateContext = CreateDraftApprenticeshipExtensions.ToUpdateModel(request);
-        updateContext.LearningKey = learningKey;
         return updateContext;
     }
 

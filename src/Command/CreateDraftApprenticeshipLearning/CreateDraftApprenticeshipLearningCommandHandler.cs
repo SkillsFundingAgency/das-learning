@@ -38,15 +38,14 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         // all other behaviours will be developed later as part of different user stories
 
         var updateModel = command.LearningUpdateContext;
-        updateModel.LearningKey = learning.Key;// this does not come from the request and is only available if the learning already exists
 
-        _logger.LogInformation("Reinstating learning with key {LearningKey}", updateModel.LearningKey);
+        _logger.LogInformation("Reinstating learning with key {LearningKey}", learning.Key);
 
         var learningChanges = learning.Update(updateModel);
         var learnerChanges = learner.Update(updateModel);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
 
-        _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", updateModel.LearningKey, changes);
+        _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", learning.Key, changes);
 
         learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
         if (changes.Any(x => x == Enums.LearningUpdateChanges.PersonalDetails))
@@ -58,7 +57,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         await _learnerRepository.Update(learner);
         await _apprenticeshipLearningRepository.Update(learning);
 
-        _logger.LogInformation("Successfully updated learning with key {LearningKey}", updateModel.LearningKey);
+        _logger.LogInformation("Successfully updated learning with key {LearningKey}", learning.Key);
 
         return new CreateDraftApprenticeshipLearningCommandResult
         {

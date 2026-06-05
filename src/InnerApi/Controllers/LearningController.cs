@@ -135,7 +135,7 @@ public class LearningController : ControllerBase
     {
         _logger.LogInformation("Updating learning with key {LearningKey}", learningKey);
 
-        var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel(learningKey));
+        var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<UpdateLearnerCommand, UpdateLearnerResult>(command);
 
