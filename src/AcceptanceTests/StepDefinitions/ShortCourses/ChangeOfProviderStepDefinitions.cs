@@ -14,10 +14,6 @@ public class ChangeOfProviderStepDefinitions
     private readonly ScenarioContext _scenarioContext;
     private readonly TestContext _testContext;
 
-    // Shared with ShortCourseStepDefinitions
-    private const string ShortCourseLearningKey = "ShortCourseLearningKey";
-    private const string ShortCourseEndpointResponseCodeKey = "ShortCourseEndpointResponseCode";
-
     private const string ProviderAUkprnKey = "ProviderAUkprn";
     private const string ProviderBUkprnKey = "ProviderBUkprn";
 
@@ -37,8 +33,8 @@ public class ChangeOfProviderStepDefinitions
         (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>("/shortCourses", request);
 
         var learningKey = responseBody?.LearningKey ?? Guid.Empty;
-        _scenarioContext[ShortCourseLearningKey] = learningKey;
-        _scenarioContext[ShortCourseEndpointResponseCodeKey] = (int)statusCode;
+        _scenarioContext[ShortCourseTestKeys.ShortCourseLearning] = learningKey;
+        _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
         _scenarioContext.Set(responseBody);
         _scenarioContext[ProviderAUkprnKey] = ProviderAUkprn;
 
@@ -53,7 +49,7 @@ public class ChangeOfProviderStepDefinitions
         var request = BuildRequest(ProviderBUkprn);
         (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>("/shortCourses", request);
 
-        _scenarioContext[ShortCourseEndpointResponseCodeKey] = (int)statusCode;
+        _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
         _scenarioContext.Set(responseBody);
         _scenarioContext[ProviderBUkprnKey] = ProviderBUkprn;
 
@@ -165,7 +161,7 @@ public class ChangeOfProviderStepDefinitions
             ? (long)_scenarioContext[ProviderAUkprnKey]
             : (long)_scenarioContext[ProviderBUkprnKey];
 
-    private Guid GetLearningKey() => new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+    private Guid GetLearningKey() => new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
 
     private async Task<DataAccess.Entities.Learning.ShortCourseEpisode> GetEpisodeForProvider(string providerName)
     {
