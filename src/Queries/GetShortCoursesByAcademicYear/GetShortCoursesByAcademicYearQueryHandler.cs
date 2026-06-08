@@ -13,12 +13,12 @@ public class GetShortCoursesByAcademicYearQueryHandler(LearningDataContext dbCon
 
         var baseQuery = dbContext.ShortCourseLearnings
             .Include(x => x.Episodes)
-            .Where(x => x.Episodes.Any(e => 
+            .Where(x => x.Episodes.Any(e =>
                 e.Ukprn == query.UkPrn &&
                 e.IsApproved && !e.IsRemoved &&
                 e.StartDate <= dates.End &&
-                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
-            .Where(x => !x.CompletionDate.HasValue || x.CompletionDate.Value >= dates.Start)
+                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start) &&
+                (!e.CompletionDate.HasValue || e.CompletionDate.Value >= dates.Start)))
             .AsNoTracking();
 
         var totalItems = await baseQuery.CountAsync(cancellationToken);
