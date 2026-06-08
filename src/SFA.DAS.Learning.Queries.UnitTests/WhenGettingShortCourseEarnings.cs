@@ -144,7 +144,6 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
-            CompletionDate = new DateTime(2024, 7, 31), // completed before this A/Y
             Episodes =
             [
                 new ShortCourseEpisode
@@ -154,6 +153,7 @@ public class WhenGettingShortCourseEarnings
                     TrainingCode = "ABC001",
                     StartDate = new DateTime(2023, 8, 1),
                     ExpectedEndDate = new DateTime(2025, 7, 31),
+                    CompletionDate = new DateTime(2024, 7, 31), // completed before this A/Y
                     LearnerRef = string.Empty
                 }
             ]
@@ -186,7 +186,6 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
-            CompletionDate = new DateTime(2025, 3, 15), // completed within this A/Y
             Episodes =
             [
                 new ShortCourseEpisode
@@ -196,6 +195,7 @@ public class WhenGettingShortCourseEarnings
                     TrainingCode = "ABC002",
                     StartDate = new DateTime(2024, 8, 1),
                     ExpectedEndDate = new DateTime(2025, 7, 31),
+                    CompletionDate = new DateTime(2025, 3, 15), // completed within this A/Y
                     LearnerRef = string.Empty
                 }
             ]
