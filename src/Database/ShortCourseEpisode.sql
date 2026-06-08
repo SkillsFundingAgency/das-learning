@@ -15,7 +15,8 @@ CREATE TABLE [dbo].[ShortCourseEpisode]
     [LearningType] TINYINT NOT NULL DEFAULT 0,
     [EmployerType] TINYINT NOT NULL DEFAULT 0,
     [TransferSenderId] BIGINT NULL,
-    [IsRemoved] BIT NOT NULL DEFAULT 0
+    [IsRemoved] BIT NOT NULL DEFAULT 0,
+    [CompletionDate] DATETIME NULL
 )
 GO
 
