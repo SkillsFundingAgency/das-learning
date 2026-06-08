@@ -17,7 +17,6 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
         {
             LearningKey = learning.Key,
             LearnerKey = learning.LearnerKey,
-            CompletionDate = learning.CompletionDate,
             Learner = new ShortCourseLearnerDto
             {
                 Uln = learner.Uln,
@@ -42,7 +41,8 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
                 EmployerType = e.EmployerType,
                 ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
                 IsRemoved = e.IsRemoved,
-                TransferSenderId = e.TransferSenderId
+                TransferSenderId = e.TransferSenderId,
+                CompletionDate = e.CompletionDate
             }).ToArray()
         };
     }

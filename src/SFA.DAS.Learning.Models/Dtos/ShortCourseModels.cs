@@ -8,7 +8,6 @@ public abstract class ShortCourseLearningDto
 {
     public Guid LearningKey { get; set; }
     public Guid LearnerKey { get; set; }
-    public DateTime? CompletionDate { get; set; }
     public ShortCourseLearnerDto Learner { get; set; }
     public ShortCourseEpisodeDto[] Episodes { get; set; } = [];
 }
@@ -41,6 +40,7 @@ public class ShortCourseEpisodeDto
     public long ApprovalsApprenticeshipId { get; set; }
     public bool IsRemoved { get; set; }
     public long? TransferSenderId { get; set; }
+    public DateTime? CompletionDate { get; set; }
 }
 
 #pragma warning restore CS8618
