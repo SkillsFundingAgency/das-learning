@@ -31,8 +31,7 @@ Scenario: Reinstate Provider B's episode does not affect Provider A's episode
     Then Provider B's episode IsRemoved is False
     And Provider A's episode IsRemoved is False
 
-# Test commented out until bug FLP-1868 is fixed.
-#Scenario: Provider A updating their episode does not revert a completion recorded by Provider B
-#    Given Provider B has completed the short course
-#    When SLD calls the update short course endpoint for Provider A
-#    Then the short course status is Complete
+Scenario: Provider A updating their episode does not revert a completion recorded by Provider B
+    Given Provider B has completed the short course
+    When SLD calls the update short course endpoint for Provider A
+    Then Provider B's episode is complete
