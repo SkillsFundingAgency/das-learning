@@ -25,7 +25,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
             // Arrange
             var learnerKey = Guid.NewGuid();
             var learnerRef = _fixture.Create<string>();
-            var shortCourse = ShortCourseLearningDomainModel.New(learnerKey, null);
+            var shortCourse = ShortCourseLearningDomainModel.New(learnerKey);
 
             var ukprn = _fixture.Create<long>();
             var employerAccountId = _fixture.Create<long>();
