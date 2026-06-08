@@ -25,6 +25,7 @@ public class ShortCourseEpisode : Episode
     public EmployerType EmployerType { get; set; }
     public long? TransferSenderId { get; set; }
     public bool IsRemoved { get; set; }
+    public DateTime? CompletionDate { get; set; }
 
     public List<ShortCourseMilestone> Milestones { get; set; }
     public List<ShortCourseLearningSupport> LearningSupport { get; set; }
