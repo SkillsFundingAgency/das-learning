@@ -2,7 +2,7 @@
 --Post-deployment script
 --*/
 
--- FLP-1868 (delete this script once CompletionDate is dropped from ShortCourseLearning)
+-- FLP-1868 (delete on release)
 -- Backfill ShortCourseEpisode.CompletionDate from ShortCourseLearning.CompletionDate.
 IF COL_LENGTH('[dbo].[ShortCourseEpisode]', 'CompletionDate') IS NOT NULL
 BEGIN

@@ -10,6 +10,7 @@ public class ShortCourseMilestoneDomainModel
     public Guid Key => _entity.Key;
     public Guid EpisodeKey => _entity.EpisodeKey;
     public Milestone Milestone => _entity.Milestone;
+    public DateTime CreatedOn => _entity.CreatedOn;
 
     internal static ShortCourseMilestoneDomainModel New(
         Milestone milestone)
