@@ -1,4 +1,4 @@
-﻿Feature: DraftShortCourseCreated
+Feature: DraftShortCourseCreated
 
 Scenario: Create Draft Short Course
 	Given SLD has informed the system that a new short course has been created
@@ -29,8 +29,20 @@ Scenario: Approve Short Course
 	When the Short Course has been approved by an employer
 	Then the Short Course is approved
 
-Scenario: Create Draft is called for a learner with an approved short course (should be ignored)
+Scenario: Create Draft is called for a learner with an approved short course with same provider (should be ignored)
 	Given SLD call the create short course endpoint with the following information
+		| Uln   | Ukprn |
+		| 54321 |     1 |
+	And short course is approved
+	And SLD call the create short course endpoint with the following information
+		| Uln   | Ukprn |
+		| 54321 |     1 |
+	Then the response from the create short course endpoint is 204
+	And for learner with Uln 54321 there is 1 short course episode record
+
+Scenario: ShortCourseChangeOfProvider feature off: Create Draft is called for a learner with an approved short course with new provider (should be ignored)
+	Given the ShortCourseChangeOfProvider feature is toggled off
+	And SLD call the create short course endpoint with the following information
 		| Uln   | Ukprn |
 		| 54321 |     1 |
 	And short course is approved
@@ -38,7 +50,7 @@ Scenario: Create Draft is called for a learner with an approved short course (sh
 		| Uln   | Ukprn |
 		| 54321 |     2 |
 	Then the response from the create short course endpoint is 204
-	And for learner with Uln 54321 there is 1 short course record
+	And for learner with Uln 54321 there is 1 short course episode record
 
 Scenario: Create Draft is called for a learner with an unapproved short course (unapproved record is updated)
 	Given SLD call the create short course endpoint with the following information
@@ -48,7 +60,7 @@ Scenario: Create Draft is called for a learner with an unapproved short course (
 		| Uln   | FirstName | LastName | Milestone        | LearningSupport[0]                             |
 		| 54321 | Bob       | Newname  | LearningComplete | startDate:currentAY-08-25 endDate:nextAY-06-30 |
 	Then the response from the create short course endpoint is 200
-	And for learner with Uln 54321 there is 1 short course record
+	And for learner with Uln 54321 there is 1 short course episode record
 	And a short course record exists with
 		| FirstName | LastName | LearningSupport[0]                             | Milestone        |
 		| Bob       | Newname  | startDate:currentAY-08-25 endDate:nextAY-06-30 | LearningComplete |

@@ -113,12 +113,12 @@ public class ShortCoursesController : ControllerBase
     /// <param name="learningKey">The key of the short course learning record to remove.</param>
     /// <returns>No content.</returns>
     [HttpDelete("{ukprn:long}/shortCourses/{learningKey}")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(RemoveShortCourseResult), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learningKey)
     {
         var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learningKey, ukprn));
-        return shortCourseResult == null ? NoContent() : Ok(shortCourseResult);
+        return Ok(shortCourseResult);
     }
 
     /// <summary>

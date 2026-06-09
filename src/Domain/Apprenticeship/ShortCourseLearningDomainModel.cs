@@ -76,14 +76,18 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return episode;
     }
 
-    public ShortCourseUpdateChanges[] Update(ShortCourseUpdateContext updateContext)
+    public ShortCourseDomainUpdateResult Update(ShortCourseUpdateContext updateContext)
     {
         var changes = new List<ShortCourseUpdateChanges>();
         var episode = _episodes.Single(e => e.Ukprn == updateContext.OnProgramme.Ukprn);
         ReinstateIfRemoved(episode, changes);
         UpdateCompletionDate(updateContext.OnProgramme.CompletionDate, changes);
         UpdateEpisode(episode, updateContext, changes);
-        return changes.ToArray();
+        return new ShortCourseDomainUpdateResult
+        {
+            EpisodeKey = episode.Key,
+            Changes = changes.ToArray()
+        };
     }
 
     private void ReinstateIfRemoved(ShortCourseEpisodeDomainModel episode, List<ShortCourseUpdateChanges> changes)
@@ -140,12 +144,12 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
     }
 
-    public bool Remove(long ukprn)
+    public Guid? Remove(long ukprn)
     {
         var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
 
         if (episode == null || !episode.IsApproved)
-            return false;
+            return null;
 
         episode.Remove();
 
@@ -154,16 +158,15 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             LearningKey = Key,
             ApprenticeshipId = episode.ApprovalsApprenticeshipId
         });
-
-        return true;
+        return episode.Key;
     }
 
-    public override void Approve(long employerAccountId)
-        => Approve(employerAccountId, EmployerType.NonLevy, 0);
+    public override void Approve(long ukprn, long employerAccountId)
+        => Approve(ukprn, employerAccountId, EmployerType.NonLevy, 0);
 
-    public void Approve(long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId, long? transferSenderId = null)
+    public void Approve(long ukprn, long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId, long? transferSenderId = null)
     {
-        var episode = LatestEpisode;
+        var episode = LatestEpisodeForProvider(ukprn);
         episode.Approve(employerAccountId, employerType, approvalsApprenticeshipId, transferSenderId);
 
         AddEvent(new LearningApprovedEvent
@@ -173,13 +176,10 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         });
     }
 
-    public ShortCourseEpisodeDomainModel LatestEpisode
+    public ShortCourseEpisodeDomainModel LatestEpisodeForProvider(long ukprn)
     {
-        get
-        {
-            var latestEpisode = _episodes.MaxBy(x => x.StartDate);
-            return latestEpisode;
-        }
+        var latestEpisode = _episodes.Where(x => x.Ukprn == ukprn).MaxBy(x => x.StartDate);
+        return latestEpisode;
     }
 
     private ShortCourseLearningDomainModel(ShortCourseLearning entity) : base(entity)

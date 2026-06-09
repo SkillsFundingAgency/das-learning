@@ -189,7 +189,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         changes.Add(LearningUpdateChanges.Reinstated);
     }
 
-    public override void Approve(long employerAccountId)
+    public override void Approve(long ukprn, long employerAccountId)
     {
         throw new NotImplementedException("Learning approval is not yet implemented");
     }

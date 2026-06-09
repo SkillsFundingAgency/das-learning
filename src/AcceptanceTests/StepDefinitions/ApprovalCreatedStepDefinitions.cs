@@ -84,6 +84,7 @@ public class ApprovalCreatedStepDefinitions
         var approvalCreatedEvent = _fixture.Build<ApprenticeshipCreatedEvent>()
             .With(_ => _.Uln, "123213")
             .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
+            .With(x => x.ProviderId, 10005001)
             .Create();
 
         await _testContext.TestFunction!.PublishEvent(approvalCreatedEvent);
@@ -221,3 +222,4 @@ public class ApprovalCreatedStepDefinitions
     public ApprenticeshipEpisode LatestEpisode => (ApprenticeshipEpisode)_scenarioContext["Episode"];
     public EpisodePrice LatestEpisodePrice => (EpisodePrice)_scenarioContext["EpisodePrice"];
 }
+

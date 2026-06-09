@@ -11,6 +11,7 @@ using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Models.Dtos;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     private Mock<IShortCourseLearningRepository> _learningRepository = null!;
     private Mock<IShortCourseLearningDomainModelMapper> _mapper = null!;
     private Mock<ILogger<CreateDraftShortCourseCommandHandler>> _logger = null!;
+    private FeatureFlags _featureFlags = null!;
     private Fixture _fixture = null!;
 
     [SetUp]
@@ -47,13 +49,16 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                 It.IsAny<long>()))
             .Returns(new CreateDraftShortCourseCommandResult());
 
+        _featureFlags = new FeatureFlags { ShortCourseChangeOfProvider = true };
+
         _commandHandler = new CreateDraftShortCourseCommandHandler(
             _learnerFactory.Object,
             _learnerRepository.Object,
             _learningRepository.Object,
             _learningFactory.Object,
             _mapper.Object,
-            _logger.Object);
+            _logger.Object,
+            _featureFlags);
 
         _fixture = new Fixture();
     }
@@ -80,8 +85,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         // Assert
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == domainModel)));
         result.LearningKey.Should().Be(domainModel.Key);
-
-        domainModel.LatestEpisode.LearningType.Should().Be(command.Model.OnProgramme.LearningType);
+        domainModel.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).LearningType.Should().Be(command.Model.OnProgramme.LearningType);
         AssertPersonalDetailsEvent(
             domainModel, 
             0, //ApprovalsApprenticeshipId not available on creation
@@ -92,7 +96,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenShortCircuitsIfApprovedEpisodeExistsWithAnotherProvider()
+    public async Task ThenCreatesNewEpisodeIfApprovedEpisodeExistsWithAnotherProvider()
     {
         // Arrange
         var command = _fixture.Create<CreateDraftShortCourseCommand>();
@@ -107,9 +111,10 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.Should().BeNull();
-        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
-        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        result.Should().NotBeNull();
+        existingLearning.Episodes.Should().HaveCount(2);
+        existingLearning.Episodes.Should().Contain(x => x.Ukprn == command.Model.OnProgramme.Ukprn);
+        _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
 
     [Test]
@@ -134,7 +139,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenShortCircuitsIfUnapprovedEpisodeExistsWithAnotherProvider()
+    public async Task ThenCreatesNewEpisodeIfUnapprovedEpisodeExistsWithAnotherProvider()
     {
         // Arrange
         var command = _fixture.Create<CreateDraftShortCourseCommand>();
@@ -149,9 +154,10 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        result.Should().BeNull();
-        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
-        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        result.Should().NotBeNull();
+        existingLearning.Episodes.Should().HaveCount(2);
+        existingLearning.Episodes.Should().Contain(x => x.Ukprn == command.Model.OnProgramme.Ukprn);
+        _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
 
     [Test]
@@ -170,7 +176,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = await _commandHandler.Handle(command);
 
         // Assert
-        existingLearning.LatestEpisode.LearningType.Should().Be(command.Model.OnProgramme.LearningType);
+        existingLearning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).LearningType.Should().Be(command.Model.OnProgramme.LearningType);
         result.IsReinstated.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
@@ -205,12 +211,12 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         result.LearnerKey.Should().Be(learner.Key);
         result.Learner.Should().Be(mappedLearner);
         result.Episodes.Should().BeEquivalentTo(mappedEpisodes);
-        existingLearning.LatestEpisode.IsRemoved.Should().BeFalse();
+        existingLearning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).IsRemoved.Should().BeFalse();
 
         var reinstatedEvent = existingLearning.FlushEvents().OfType<Domain.Events.LearningReinstatedEvent>().SingleOrDefault();
         reinstatedEvent.Should().NotBeNull();
         reinstatedEvent!.LearningKey.Should().Be(existingLearning.Key);
-        reinstatedEvent.ApprenticeshipId.Should().Be(existingLearning.LatestEpisode.ApprovalsApprenticeshipId);
+        reinstatedEvent.ApprenticeshipId.Should().Be(existingLearning.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).ApprovalsApprenticeshipId);
 
         _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
@@ -238,7 +244,47 @@ public class WhenCreateDraftShortCourseCommandIsHandled
             command.Model.Learner.FirstName,
             command.Model.Learner.LastName);
     }
+    [Test]
+    public async Task ThenRejectsCommandIfFeatureFlagIsFalseAndDifferentProviderExists()
+    {
+        // Arrange
+        _featureFlags.ShortCourseChangeOfProvider = false;
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = _fixture.Create<LearnerDomainModel>();
 
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn + 1);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Should().BeNull();
+        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ThenRejectsCommandIfFeatureFlagIsFalseAndApprovedEpisodeExistsForSameProvider()
+    {
+        // Arrange
+        _featureFlags.ShortCourseChangeOfProvider = false;
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = _fixture.Create<LearnerDomainModel>();
+
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Should().BeNull();
+        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
 
     private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship, bool isRemoved = false)
     {
@@ -288,3 +334,5 @@ public class WhenCreateDraftShortCourseCommandIsHandled
 
     }
 }
+
+

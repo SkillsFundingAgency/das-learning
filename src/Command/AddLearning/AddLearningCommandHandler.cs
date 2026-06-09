@@ -44,7 +44,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         {
             _logger.LogInformation("Approving unapproved ShortCourse for ULN {Uln}", command.Uln);
 
-            ((ShortCourseLearningDomainModel)existingLearning).Approve(command.EmployerAccountId, command.EmployerType, command.ApprovalsApprenticeshipId, command.TransferSenderId);
+            ((ShortCourseLearningDomainModel)existingLearning).Approve(command.UKPRN, command.EmployerAccountId, command.EmployerType, command.ApprovalsApprenticeshipId, command.TransferSenderId);
             await _learningService.UpdateLearning(existingLearning);
             return;
         }
