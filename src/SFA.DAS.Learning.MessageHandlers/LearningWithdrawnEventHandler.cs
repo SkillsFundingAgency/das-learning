@@ -14,7 +14,9 @@ namespace SFA.DAS.Learning.MessageHandlers
             {
                 LearningKey = @event.LearningKey,
                 ApprenticeshipId = @event.ApprovalsApprenticeshipId,
-                WithdrawalDate = @event.LastDayOfLearning
+                WithdrawalDate = @event.LastDayOfLearning,
+                WithdrawalReasonCode = -1, // Not currently used, so set to a default value
+                Created = DateTime.UtcNow // This should ideally be the time the event was created, but since we don't have that information in the domain event, we'll use the current time
             };
 
             await messageSession.Publish(message, cancellationToken);
