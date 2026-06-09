@@ -45,20 +45,4 @@ public class WhenEmailAddressIsUpdated
         _learner.EmailAddress.Should().Be(_emailAddress);
     }
 
-    [Test]
-    public void ThenAPersonalDetailsEventIsEmitted()
-    {
-        var events = _learner.FlushEvents();
-
-        var expectedEvent = new PersonalDetailsChangedEvent
-        {
-            ApprovalsApprenticeshipId = _learning.LatestEpisode.ApprovalsApprenticeshipId,
-            LearningKey = _learning.Key,
-            FirstName = _learner.FirstName,
-            LastName = _learner.LastName,
-            EmailAddress = _emailAddress
-        };
-
-        events.Should().ContainEquivalentOf(expectedEvent);
-    }
 }

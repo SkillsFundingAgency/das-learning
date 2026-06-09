@@ -12,15 +12,6 @@ public abstract class AggregateRoot
         }
     }
 
-    protected void AddOrReplaceEvent<T>(IDomainEvent @event)
-    {
-        lock (_events)
-        {
-            _events.RemoveAll(e => e is T);
-            _events.Add(@event);
-        }
-    }
-
     public IEnumerable<IDomainEvent> FlushEvents()
     {
         lock (_events)
