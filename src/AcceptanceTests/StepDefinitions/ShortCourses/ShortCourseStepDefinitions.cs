@@ -19,9 +19,7 @@ public class ShortCourseStepDefinitions
     private readonly ScenarioContext _scenarioContext;
     private readonly TestContext _testContext;
 
-    private string ShortCourseLearningKey = "ShortCourseLearningKey";
-    private string ShortCourseEndpointResponseCodeKey = "ShortCourseEndpointResponseCode";
-    private string UpdateShortCourseResultKey = "UpdateShortCourseResult";
+    private const string UpdateShortCourseResultKey = "UpdateShortCourseResult";
 
     public ShortCourseStepDefinitions(ScenarioContext scenarioContext, TestContext testContext)
     {
@@ -146,7 +144,7 @@ public class ShortCourseStepDefinitions
     [Given(@"short course is approved")]
     public async Task GivenShortCourseWithUlnIsApproved()
     {
-        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
 
         await ApproveCourseInDb(shortCourseLearningKey);
     }
@@ -170,7 +168,7 @@ public class ShortCourseStepDefinitions
     public async Task ThenAShortCourseRecordIsCreatedWith(Table table)
     {
         var row = table.Rows[0];
-        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
 
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learner = dbConnection.GetLearnerByShortCourseKey(shortCourseLearningKey);
@@ -202,7 +200,7 @@ public class ShortCourseStepDefinitions
     [Then(@"the response from the create short course endpoint is (.*)")]
     public void ThenTheResponseFromTheCreateShortCourseEndpointIs(string statusCode)
     {
-        var expectedStatusCode = _scenarioContext[ShortCourseEndpointResponseCodeKey].ToString();
+        var expectedStatusCode = _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode].ToString();
         expectedStatusCode.Should().Be(statusCode);
     }
 
@@ -262,7 +260,7 @@ public class ShortCourseStepDefinitions
     [Then(@"the Short Course is approved")]
     public async Task ThenTheShortCourseIsApproved()
     {
-        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
         var approvalEvent = _scenarioContext.GetApprenticeshipCreatedEvent();
 
         await WaitHelper.WaitForIt(async () =>
@@ -320,8 +318,8 @@ public class ShortCourseStepDefinitions
 
         var learningKey = responseBody?.LearningKey ?? Guid.Empty;
 
-        _scenarioContext[ShortCourseLearningKey] = learningKey;
-        _scenarioContext[ShortCourseEndpointResponseCodeKey] = (int)statusCode;
+        _scenarioContext[ShortCourseTestKeys.ShortCourseLearning] = learningKey;
+        _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
         _scenarioContext.Set(responseBody);
 
         return learningKey;
@@ -330,7 +328,7 @@ public class ShortCourseStepDefinitions
     private async Task<bool> ShortCourseRecordMatchesExpectation()
     {
         await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
-        var shortCourses = (await dbConnection.GetAllAsync<DataAccess.Entities.Learning.ShortCourseLearning>()).Where(x => x.Key == Guid.Parse(_scenarioContext[ShortCourseLearningKey].ToString()));
+        var shortCourses = (await dbConnection.GetAllAsync<DataAccess.Entities.Learning.ShortCourseLearning>()).Where(x => x.Key == Guid.Parse(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()));
         var shortCourse = shortCourses.SingleOrDefault();
 
         return shortCourse != null;
@@ -358,7 +356,7 @@ public class ShortCourseStepDefinitions
     [When(@"SLD remove the short course")]
     public async Task WhenSLDCallsTheRemoveShortCourseEndpoint()
     {
-        var learningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var learningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
         var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
         await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learningKey}");
     }
@@ -372,7 +370,7 @@ public class ShortCourseStepDefinitions
     [Then(@"the short course episode IsRemoved is set to (True|False)")]
     public async Task ThenTheShortCourseEpisodeIsRemovedIsSetTo(bool isRemoved)
     {
-        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var shortCourse = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
         var episode = shortCourse.Episodes.Single();
@@ -460,7 +458,7 @@ public class ShortCourseStepDefinitions
 
     private async Task CallUpdateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
-        var learningKey = new Guid(_scenarioContext[ShortCourseLearningKey].ToString()!);
+        var learningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
         var result = await _testContext.TestInnerApi.Put<CreateDraftShortCourseRequest, UpdateShortCourseTestResult>($"/shortCourses/{learningKey}", request);
         _scenarioContext[UpdateShortCourseResultKey] = result;
     }
