@@ -40,3 +40,9 @@ Scenario: Correct learners returned when actual end date is derived from Complet
 	| previousAY-09-25 | currentAY-07-31  | currentAY-06-30  | Included |
 	| previousAY-09-25 | currentAY-07-31  | null             | Included |
 	| nextAY-09-25     | nextAY-07-31     | null             | Excluded |
+
+Scenario: Removed learners are excluded
+	Given The learner starts on currentAY-09-25 and has a plannedEndDate of currentAY-07-31
+	And SLD have previously informed us that the learner is to be removed
+	When the GetLearningsForFm36 endpoint is called for currentAY-10-15
+	Then the fm36 learner should be Excluded

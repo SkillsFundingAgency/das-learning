@@ -25,4 +25,7 @@ public class  LearnerUpdateDetails
     /// Date of birth of the learner
     /// </summary>
     public DateTime DateOfBirth { get; set; }
+
+    /// <summary> Uln</summary>
+    public long Uln { get; set; }
 }

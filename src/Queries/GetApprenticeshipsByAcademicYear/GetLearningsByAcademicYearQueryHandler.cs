@@ -13,7 +13,7 @@ public class GetLearningsByAcademicYearQueryHandler(LearningDataContext dbContex
         var dates = AcademicYearParser.ParseFrom(query.AcademicYear);
 
         var baseQuery = dbContext.ApprenticeshipLearningDbSet
-            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn))
+            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn && !e.IsRemoved))
             .IsActiveInYear(dates.Start, dates.End)
             .AsNoTracking();
 

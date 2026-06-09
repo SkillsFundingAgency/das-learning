@@ -14,7 +14,6 @@ public static class LearningUpdateModelHelper
     {
         return new LearningUpdateContext
         {
-            LearningKey = learning.Key,
             ApprovalsApprenticeshipId = learning.GetEpisode().ApprovalsApprenticeshipId,
             Learner = new LearnerModel
             {

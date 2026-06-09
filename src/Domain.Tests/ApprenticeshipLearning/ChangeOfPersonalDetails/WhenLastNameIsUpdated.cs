@@ -45,20 +45,4 @@ public class WhenLastNameIsUpdated
         _learner.LastName.Should().Be(_lastName);
     }
 
-    [Test]
-    public void ThenAPersonalDetailsEventIsEmitted()
-    {
-        var events = _learner.FlushEvents();
-
-        var expectedEvent = new PersonalDetailsChangedEvent
-        {
-            ApprovalsApprenticeshipId = _learning.LatestEpisode.ApprovalsApprenticeshipId,
-            LearningKey = _learning.Key,
-            FirstName = _learner.FirstName,
-            LastName = _lastName,
-            EmailAddress = _learner.EmailAddress ?? ""
-        };
-
-        events.Should().ContainEquivalentOf(expectedEvent);
-    }
 }

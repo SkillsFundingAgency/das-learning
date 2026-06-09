@@ -84,7 +84,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TrainingCode,
             command.TrainingCourseVersion);
 
-        learning.AddUpdatedEvent(LearnerUpdatedEvent.From(learner, learning));
+        learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
 
         await _learningService.AddLearning(learning);
 
