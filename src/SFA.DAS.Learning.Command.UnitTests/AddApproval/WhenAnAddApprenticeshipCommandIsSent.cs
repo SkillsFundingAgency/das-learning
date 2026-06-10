@@ -174,7 +174,9 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .OfType<Domain.Events.LearningApprovedEvent>()
             .Should()
             .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
-                                && e.EpisodeKey == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).Key);
+                                && e.EpisodeKey == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).Key
+                                && e.EmployerAccountId == command.EmployerAccountId
+                                && e.FundingAccountId == (command.TransferSenderId ?? command.EmployerAccountId));
     }
 
     [Test]

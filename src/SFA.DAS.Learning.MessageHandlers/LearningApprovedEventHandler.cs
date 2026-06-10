@@ -13,7 +13,9 @@ public class LearningApprovedEventHandler(IMessageSession messageSession, ILogge
         var message = new Types.LearningApprovedEvent
         {
             LearningKey = @event.LearningKey,
-            EpisodeKey = @event.EpisodeKey
+            EpisodeKey = @event.EpisodeKey,
+            EmployerAccountId = @event.EmployerAccountId,
+            FundingAccountId = @event.FundingAccountId
         };
 
         await messageSession.Publish(message, cancellationToken);
