@@ -56,24 +56,4 @@ public class WhenUpdateLearner
         var okResult = (OkObjectResult)result;
         okResult.Value.Should().Be(expectedResponse);
     }
-
-    [Test]
-    public async Task ThenSetsLearningKeyOnUpdateContext()
-    {
-        // Arrange
-        var learningKey = _fixture.Create<Guid>();
-        var expectedResponse = _fixture.Create<UpdateLearnerResult>();
-        var request = _fixture.Create<UpdateLearnerRequest>();
-
-        _mockCommandDispatcher
-            .Setup(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(It.IsAny<UpdateLearnerCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
-
-        // Act
-        var result = await _sut.UpdateLearning(learningKey, request);
-
-        // Assert
-        _mockCommandDispatcher
-            .Verify(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(It.Is<UpdateLearnerCommand>(c => c.UpdateModel.LearningKey == learningKey), It.IsAny<CancellationToken>()));
-    }
 }

@@ -58,4 +58,32 @@ public class WhenIGetApprenticeshipsByAcademicYear
         result.Items.Single().Key.Should().Be(learning.Key);
     }
 
+    [Test]
+    public async Task ThenApprenticeshipsAreNotReturnedWhenAllEpisodesAreRemoved()
+    {
+        // Arrange
+        const long ukPrn = 1000;
+        const int academicYear = 2425;
+
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1234567890", FirstName = "A", LastName = "B" });
+
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        learning.LearnerKey = learnerKey;
+        var episode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", FundingType = FundingType.Levy, LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsRemoved = true };
+        episode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2024, 9, 1), EndDate = new DateTime(2025, 6, 30), TotalPrice = 5000 });
+        learning.Episodes.Add(episode);
+        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        var query = new GetLearningsByAcademicYearRequest(ukPrn, academicYear, 1, 20);
+
+        // Act
+        var result = await _sut.Handle(query);
+
+        // Assert
+        result.TotalItems.Should().Be(0);
+        result.Items.Should().BeEmpty();
+    }
+
 }

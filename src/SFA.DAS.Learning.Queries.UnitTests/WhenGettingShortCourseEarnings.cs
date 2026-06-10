@@ -252,6 +252,55 @@ public class WhenGettingShortCourseEarnings
     }
 
     [Test]
+    public async Task ThenRemovedEpisodesAreExcludedFromLearning()
+    {
+        const long ukPrn = 1000;
+        const int collectionYear = 2425;
+
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "444", FirstName = "A", LastName = "B" });
+
+        var activeEpisode = new ShortCourseEpisode
+        {
+            Key = Guid.NewGuid(),
+            Ukprn = ukPrn,
+            TrainingCode = "ACT001",
+            IsApproved = true,
+            StartDate = new DateTime(2024, 8, 1),
+            ExpectedEndDate = new DateTime(2025, 7, 31),
+            LearnerRef = string.Empty
+        };
+
+        var removedEpisode = new ShortCourseEpisode
+        {
+            Key = Guid.NewGuid(),
+            Ukprn = ukPrn,
+            TrainingCode = "REM001",
+            IsApproved = true,
+            IsRemoved = true,
+            StartDate = new DateTime(2024, 8, 1),
+            ExpectedEndDate = new DateTime(2025, 7, 31),
+            LearnerRef = string.Empty
+        };
+
+        var learning = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            Episodes = [activeEpisode, removedEpisode]
+        };
+        learning.LearnerKey = learnerKey;
+        _dbContext.ShortCourseLearnings.Add(learning);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _sut.Handle(new GetShortCoursesForEarningsRequest(ukPrn, collectionYear, 1, 20));
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+        result.Items.Single().Episodes.Should().HaveCount(1);
+        result.Items.Single().Episodes.Should().NotContain(x => x.CourseCode == removedEpisode.TrainingCode);
+    }
+
+    [Test]
     public async Task ThenLearningsOutsideDateRangeAreExcluded()
     {
         // Arrange

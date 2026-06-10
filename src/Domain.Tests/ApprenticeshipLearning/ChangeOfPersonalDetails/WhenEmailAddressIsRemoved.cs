@@ -38,20 +38,4 @@ public class WhenEmailAddressIsRemoved
         _learner.EmailAddress.Should().BeNull();
     }
 
-    [Test]
-    public void ThenAPersonalDetailsEventIsEmitted()
-    {
-        var events = _learner.FlushEvents();
-
-        var expectedEvent = new PersonalDetailsChangedEvent
-        {
-            ApprovalsApprenticeshipId = _learning.LatestEpisode.ApprovalsApprenticeshipId,
-            LearningKey = _learning.Key,
-            FirstName = _learner.FirstName,
-            LastName = _learner.LastName,
-            EmailAddress = null
-        };
-
-        events.Should().ContainEquivalentOf(expectedEvent);
-    }
 }

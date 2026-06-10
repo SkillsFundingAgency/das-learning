@@ -12,7 +12,11 @@ public class GetShortCoursesByAcademicYearQueryHandler(LearningDataContext dbCon
         var dates = AcademicYearParser.ParseFrom(query.AcademicYear);
 
         var baseQuery = dbContext.ShortCourseLearnings
+<<<<<<< HEAD
+            .Include(x => x.Episodes)
+=======
             .Include(x => x.Episodes.Where(e => !e.IsRemoved))
+>>>>>>> main
             .Where(x => x.Episodes.Any(e =>
                 e.Ukprn == query.UkPrn &&
                 e.IsApproved && !e.IsRemoved &&

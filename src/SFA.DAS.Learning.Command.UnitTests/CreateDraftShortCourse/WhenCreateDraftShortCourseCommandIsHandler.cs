@@ -7,6 +7,7 @@ using SFA.DAS.Learning.Command.CreateDraftShortCourse;
 using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
@@ -72,6 +73,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
 
 
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+
         var domainModel = ShortCourseLearningDomainModel.Get(learningEntity);
 
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(),It.IsAny<DateTime>(),It.IsAny<string>(),It.IsAny<string>(), It.IsAny<string?>())).Returns(learnerDomainModel);
@@ -84,6 +86,13 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == domainModel)));
         result.LearningKey.Should().Be(domainModel.Key);
         domainModel.LatestEpisodeForProvider(command.Model.OnProgramme.Ukprn).LearningType.Should().Be(command.Model.OnProgramme.LearningType);
+        AssertPersonalDetailsEvent(
+            domainModel, 
+            0, //ApprovalsApprenticeshipId not available on creation
+            domainModel.Key,
+            learnerDomainModel.FirstName,
+            learnerDomainModel.LastName);
+
     }
 
     [Test]
@@ -213,6 +222,29 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenPersonalDetailsEventAdded_When_LearnerDetailsAreUpdated_And_LearningStillUnapproved()
+    {
+        // Arrange
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn, learningType: LearningType.ApprenticeshipUnit);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        AssertPersonalDetailsEvent(
+            existingLearning,
+            0, //ApprovalsApprenticeshipId not available on creation
+            existingLearning.Key,
+            command.Model.Learner.FirstName,
+            command.Model.Learner.LastName);
+    }
+    [Test]
     public async Task ThenRejectsCommandIfFeatureFlagIsFalseAndDifferentProviderExists()
     {
         // Arrange
@@ -282,6 +314,24 @@ public class WhenCreateDraftShortCourseCommandIsHandled
             }
         };
         return ShortCourseLearningDomainModel.Get(entity);
+    }
+
+    private void AssertPersonalDetailsEvent(
+        ShortCourseLearningDomainModel domainModel,
+        long approvalsApprenticeshipId,
+        Guid learningKey,
+        string firstName,
+        string lastName)
+    {
+        var domainEvent = domainModel.FlushEvents().OfType<PersonalDetailsChangedEvent>().SingleOrDefault();
+
+        domainEvent.Should().NotBeNull();
+
+        domainEvent!.ApprovalsApprenticeshipId.Should().Be(approvalsApprenticeshipId);
+        domainEvent.LearningKey.Should().Be(learningKey);
+        domainEvent.FirstName.Should().Be(firstName);
+        domainEvent.LastName.Should().Be(lastName);
+
     }
 }
 

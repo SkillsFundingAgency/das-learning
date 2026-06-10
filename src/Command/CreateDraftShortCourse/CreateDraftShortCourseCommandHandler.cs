@@ -1,12 +1,14 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
+using System.Threading.Channels;
 
 namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 
@@ -42,21 +44,24 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
     {
         _logger.LogInformation("Handling CreateDraftShortCourseCommand");
 
-        var learner = await GetOrCreateLearner(command);
+        var (learner, personalDetailsChanged) = await GetOrCreateLearner(command);
 
         var learning = await _shortCourseLearningRepository.GetByLearnerKey(learner.Key);
 
+        var ukprn = command.Model.OnProgramme.Ukprn;
+
         //  Create if learning does not exist
-        if(learning == null)
+        if (learning == null)
         {
             learning = CreateNewLearning(command, learner);
+
+            if (personalDetailsChanged)
+                learning.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, learning.LatestEpisodeForProvider(ukprn)));
 
             await _shortCourseLearningRepository.Add(learning);
 
             return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.Episodes.Single().Key };
         }
-
-        var ukprn = command.Model.OnProgramme.Ukprn;
 
         if (!_featureFlags.ShortCourseChangeOfProvider)
         {
@@ -96,8 +101,12 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             updateResult = learning.Update(command.Model);
         }
 
-        await _shortCourseLearningRepository.Update(learning);
+        var episode = learning.Episodes.Single(e => e.Ukprn == command.Model.OnProgramme.Ukprn);
+        if (personalDetailsChanged)
+            learning.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, episode));
 
+        await _shortCourseLearningRepository.Update(learning);
+        
         var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
         result.EpisodeKey = learning.Episodes.Single(x => x.Ukprn == command.Model.OnProgramme.Ukprn).Key;
         if(updateResult != null) result.IsReinstated = updateResult.Changes.Any(x => x == ShortCourseUpdateChanges.Reinstated);
@@ -136,8 +145,9 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         return learning;
     }
 
-    private async Task<LearnerDomainModel> GetOrCreateLearner(CreateDraftShortCourseCommand command)
+    private async Task<(LearnerDomainModel, bool)> GetOrCreateLearner(CreateDraftShortCourseCommand command)
     {
+        var personalDetailsChanged = false;
         var learner = await _learnerRepository.GetByUln(command.Model.Learner.Uln);
 
         if (learner != null)
@@ -159,10 +169,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
                 }
             };
 
-            learner.Update(updateContext);
+            var changes = learner.Update(updateContext);
             await _learnerRepository.Update(learner);
+            personalDetailsChanged = changes.Any(x=> x == LearningUpdateChanges.PersonalDetails);
 
-            return learner;
+            return (learner, personalDetailsChanged);
 
         }
 
@@ -174,7 +185,10 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             command.Model.Learner.EmailAddress);
 
         await _learnerRepository.Add(newLearner);
-        return newLearner;
+
+        personalDetailsChanged = true;
+
+        return (newLearner, personalDetailsChanged);
     }
 
 }

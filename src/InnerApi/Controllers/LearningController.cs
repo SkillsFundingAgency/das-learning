@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
+using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
+using SFA.DAS.Learning.Command.RemoveLearnerCommand;
+using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
-using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
+using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
-using SFA.DAS.Learning.InnerApi.Requests;
-using SFA.DAS.Learning.Command.UpdateLearner;
-using SFA.DAS.Learning.Command.RemoveLearnerCommand;
-using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 
 namespace SFA.DAS.Learning.InnerApi.Controllers;
 
@@ -37,6 +37,27 @@ public class LearningController : ControllerBase
         _logger = logger;
         _pagedLinkHeaderService = pagedLinkHeaderService;
     }
+
+    /// <summary>
+    /// Creates a draft apprenticeship
+    /// </summary>
+    /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
+    /// <param name="request">Details of learning</param>
+    /// <returns>An array of <see cref="CreateDraftApprenticeshipLearningCommandResult"/> Object containing the result of the draft creation.</returns>
+    [HttpPost("{ukprn}/apprenticeships")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
+    public async Task<IActionResult> CreateDraftLearning(long ukprn, [FromBody] CreateDraftApprenticeship request)
+    {
+        _logger.LogInformation("Creating learning with ukprn {ukprn} uln {uln}", ukprn, request.Learner.Uln);
+
+        var command = new CreateDraftApprenticeshipLearningCommand(ukprn, request.ToUpdateModel());
+
+        var result = await _commandDispatcher.Send<CreateDraftApprenticeshipLearningCommand, CreateDraftApprenticeshipLearningCommandResult>(command);
+
+        return new OkObjectResult(result);
+    }
+
 
     /// <summary>
     /// Get learnings
@@ -114,7 +135,7 @@ public class LearningController : ControllerBase
     {
         _logger.LogInformation("Updating learning with key {LearningKey}", learningKey);
 
-        var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel(learningKey));
+        var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<UpdateLearnerCommand, UpdateLearnerResult>(command);
 
