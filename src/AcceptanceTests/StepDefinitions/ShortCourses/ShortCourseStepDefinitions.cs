@@ -404,7 +404,7 @@ public class ShortCourseStepDefinitions
     public void ThenTheUpdateShortCourseResponseHasACompletionDateOf(DateTime completionDate)
     {
         var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
-        result.CompletionDate.Should().Be(completionDate);
+        result.Episodes.Single().CompletionDate.Should().Be(completionDate);
     }
 
     [Then(@"the update short course response includes the following learner details")]
@@ -466,7 +466,6 @@ public class ShortCourseStepDefinitions
     private class UpdateShortCourseTestResult
     {
         public Guid LearningKey { get; set; }
-        public DateTime? CompletionDate { get; set; }
         public string[] Changes { get; set; } = [];
         public UpdateShortCourseTestResultLearner Learner { get; set; } = null!;
         public UpdateShortCourseTestResultEpisode[] Episodes { get; set; } = [];
@@ -485,6 +484,7 @@ public class ShortCourseStepDefinitions
         public long EmployerAccountId { get; set; }
         public string CourseCode { get; set; } = null!;
         public string CourseType { get; set; } = null!;
+        public DateTime? CompletionDate { get; set; }
         public bool IsApproved { get; set; }
         public decimal Price { get; set; }
         public int AgeAtStart { get; set; }

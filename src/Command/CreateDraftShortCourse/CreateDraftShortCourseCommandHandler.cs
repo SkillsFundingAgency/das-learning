@@ -127,7 +127,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             command.Model.OnProgramme.WithdrawalDate,
             command.Model.OnProgramme.Milestones,
             command.Model.OnProgramme.Price,
-            command.Model.OnProgramme.LearningType);
+            command.Model.OnProgramme.LearningType,
+            completionDate: command.Model.OnProgramme.CompletionDate);
 
         foreach (var learningSupport in command.Model.LearningSupport)
         {
@@ -137,9 +138,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
     private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)
     {
-        var learning = _shortCourseLearningFactory.CreateNew(
-            learner.Key,
-            command.Model.OnProgramme.CompletionDate);
+        var learning = _shortCourseLearningFactory.CreateNew(learner.Key);
 
         AddEpisode(learning, command);
 

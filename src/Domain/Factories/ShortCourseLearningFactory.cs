@@ -5,22 +5,16 @@ namespace SFA.DAS.Learning.Domain.Factories;
 
 public interface IShortCourseLearningFactory
 {
-    ShortCourseLearningDomainModel CreateNew(
-        Guid learnerKey,
-        DateTime? completionDate);
+    ShortCourseLearningDomainModel CreateNew(Guid learnerKey);
 
     ShortCourseLearningDomainModel GetExisting(DataAccess.Entities.Learning.ShortCourseLearning model);
 }
 
 public class ShortCourseLearningFactory : IShortCourseLearningFactory
 {
-    public ShortCourseLearningDomainModel CreateNew(
-        Guid learnerKey,
-        DateTime? completionDate)
+    public ShortCourseLearningDomainModel CreateNew(Guid learnerKey)
     {
-        return ShortCourseLearningDomainModel.New(
-            learnerKey, 
-            completionDate);
+        return ShortCourseLearningDomainModel.New(learnerKey);
     }
 
     public ShortCourseLearningDomainModel GetExisting(ShortCourseLearning model)

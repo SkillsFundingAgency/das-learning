@@ -58,7 +58,7 @@ public class LearningRepositoryProviderTests
     public void GetRepository_ByModel_ShortCourseModel_ReturnsShortCourseRepository()
     {
         var shortCourseLearningFactory = new ShortCourseLearningFactory();
-        var model = shortCourseLearningFactory.CreateNew(Guid.NewGuid(), null);
+        var model = shortCourseLearningFactory.CreateNew(Guid.NewGuid());
 
         var repo = _provider.GetRepository(model);
 

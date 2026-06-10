@@ -148,12 +148,11 @@ public class ChangeOfProviderStepDefinitions
         await CallUpdateShortCourseEndpoint(request);
     }
 
-    [Then(@"the short course status is Complete")]
-    public async Task ThenTheShortCourseStatusIsComplete()
+    [Then(@"Provider B's episode is complete")]
+    public async Task ThenProviderBsEpisodeIsComplete()
     {
-        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var shortCourse = dbConnection.GetShortCourseLearning(GetLearningKey());
-        shortCourse.CompletionDate.Should().NotBeNull();
+        var episode = await GetEpisodeForProvider("Provider B");
+        episode.CompletionDate.Should().NotBeNull();
     }
 
     private long ResolveUkprn(string providerName) =>
