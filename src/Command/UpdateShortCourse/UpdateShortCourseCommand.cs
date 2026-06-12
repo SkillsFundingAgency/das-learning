@@ -7,12 +7,12 @@ namespace SFA.DAS.Learning.Command.UpdateShortCourse;
 
 public class UpdateShortCourseCommand : ICommand
 {
-    public Guid LearningKey { get; }
+    public Guid LearnerKey { get; }
     public ShortCourseUpdateContext Model { get; }
 
-    public UpdateShortCourseCommand(Guid learningKey, ShortCourseUpdateContext model)
+    public UpdateShortCourseCommand(Guid learnerKey, ShortCourseUpdateContext model)
     {
-        LearningKey = learningKey;
+        LearnerKey = learnerKey;
         Model = model;
     }
 }

@@ -460,8 +460,8 @@ public class ShortCourseStepDefinitions
 
     private async Task CallUpdateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
-        var learningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
-        var result = await _testContext.TestInnerApi.Put<CreateDraftShortCourseRequest, UpdateShortCourseTestResult>($"/shortCourses/{learningKey}", request);
+        var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
+        var result = await _testContext.TestInnerApi.Put<CreateDraftShortCourseRequest, UpdateShortCourseTestResult>($"/shortCourses/{learnerKey}", request);
         _scenarioContext[UpdateShortCourseResultKey] = result;
     }
 

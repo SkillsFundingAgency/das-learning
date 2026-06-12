@@ -175,7 +175,7 @@ public class ChangeOfProviderStepDefinitions
 
     private async Task CallUpdateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
-        await _testContext.TestInnerApi.Put<CreateDraftShortCourseRequest, object>($"/shortCourses/{GetLearningKey()}", request);
+        await _testContext.TestInnerApi.Put<CreateDraftShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", request);
     }
 
     private static CreateDraftShortCourseRequest BuildRequest(long ukprn) => new()
