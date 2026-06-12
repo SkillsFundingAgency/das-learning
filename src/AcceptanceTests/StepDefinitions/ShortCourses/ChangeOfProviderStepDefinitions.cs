@@ -33,7 +33,9 @@ public class ChangeOfProviderStepDefinitions
         (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>("/shortCourses", request);
 
         var learningKey = responseBody?.LearningKey ?? Guid.Empty;
+        var learnerKey = responseBody?.LearnerKey ?? Guid.Empty;
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearning] = learningKey;
+        _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = learnerKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
         _scenarioContext.Set(responseBody);
         _scenarioContext[ProviderAUkprnKey] = ProviderAUkprn;
@@ -87,7 +89,7 @@ public class ChangeOfProviderStepDefinitions
     public async Task SLDRemovesTheShortCourseForProvider(string providerName)
     {
         var ukprn = ResolveUkprn(providerName);
-        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{GetLearningKey()}");
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{GetLearnerKey()}");
     }
 
     [When(@"SLD reinstates the short course for (Provider A|Provider B)")]
@@ -161,6 +163,7 @@ public class ChangeOfProviderStepDefinitions
             : (long)_scenarioContext[ProviderBUkprnKey];
 
     private Guid GetLearningKey() => new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
+    private Guid GetLearnerKey() => new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
 
     private async Task<DataAccess.Entities.Learning.ShortCourseEpisode> GetEpisodeForProvider(string providerName)
     {

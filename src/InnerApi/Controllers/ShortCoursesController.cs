@@ -110,14 +110,14 @@ public class ShortCoursesController : ControllerBase
     /// Removes a short course learner record.
     /// </summary>
     /// <param name="ukprn">The ukprn of the provider in context</param>
-    /// <param name="learningKey">The key of the short course learning record to remove.</param>
+    /// <param name="learnerKey">The key of the short course learner record to remove.</param>
     /// <returns>No content.</returns>
-    [HttpDelete("{ukprn:long}/shortCourses/{learningKey}")]
+    [HttpDelete("{ukprn:long}/shortCourses/{learnerKey}")]
     [ProducesResponseType(typeof(RemoveShortCourseResult), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learningKey)
+    public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learnerKey)
     {
-        var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learningKey, ukprn));
+        var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learnerKey, ukprn));
         return Ok(shortCourseResult);
     }
 

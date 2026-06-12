@@ -317,8 +317,10 @@ public class ShortCourseStepDefinitions
         (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>($"/shortCourses", request);
 
         var learningKey = responseBody?.LearningKey ?? Guid.Empty;
+        var learnerKey = responseBody?.LearnerKey ?? Guid.Empty;
 
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearning] = learningKey;
+        _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = learnerKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
         _scenarioContext.Set(responseBody);
 
@@ -356,9 +358,9 @@ public class ShortCourseStepDefinitions
     [When(@"SLD remove the short course")]
     public async Task WhenSLDCallsTheRemoveShortCourseEndpoint()
     {
-        var learningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
+        var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
         var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
-        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learningKey}");
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learnerKey}");
     }
 
     [When(@"SLD calls the update short course endpoint with no changes")]

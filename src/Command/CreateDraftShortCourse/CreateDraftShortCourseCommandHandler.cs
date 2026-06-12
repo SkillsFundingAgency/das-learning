@@ -60,7 +60,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
             await _shortCourseLearningRepository.Add(learning);
 
-            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, EpisodeKey = learning.Episodes.Single().Key };
+            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, LearnerKey = learner.Key, EpisodeKey = learning.Episodes.Single().Key };
         }
 
         if (!_featureFlags.ShortCourseChangeOfProvider)
