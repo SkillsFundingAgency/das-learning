@@ -58,12 +58,12 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenUpdatedEpisodeKeyIsPopulated()
     {
-        var learningKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey);
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel();
 
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext());
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext());
 
         var result = await _commandHandler.Handle(command);
 
@@ -73,12 +73,12 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenWithdrawalDateChangeIsDetected()
     {
-        var learningKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey, withdrawalDate: null);
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(withdrawalDate: null);
 
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext(withdrawalDate: DateTime.Today));
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext(withdrawalDate: DateTime.Today));
 
         var result = await _commandHandler.Handle(command);
 
@@ -88,12 +88,12 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenCompletionDateChangeIsDetected()
     {
-        var learningKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey, completionDate: null);
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(completionDate: null);
 
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext(completionDate: DateTime.Today));
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext(completionDate: DateTime.Today));
 
         var result = await _commandHandler.Handle(command);
 
@@ -103,12 +103,12 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenMilestoneChangeIsDetected()
     {
-        var learningKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey, milestones: new List<Milestone> { Milestone.ThirtyPercentLearningComplete });
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(milestones: new List<Milestone> { Milestone.ThirtyPercentLearningComplete });
 
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext(milestones: new List<Milestone> { Milestone.ThirtyPercentLearningComplete, Milestone.LearningComplete }));
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext(milestones: new List<Milestone> { Milestone.ThirtyPercentLearningComplete, Milestone.LearningComplete }));
 
         var result = await _commandHandler.Handle(command);
 
@@ -118,12 +118,12 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenLearnerRefChangeIsDetected()
     {
-        var learningKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey);
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel();
 
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext(learnerRef:"LearnerRefChanged"));
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext(learnerRef: "LearnerRefChanged"));
 
         var result = await _commandHandler.Handle(command);
 
@@ -133,14 +133,14 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenNoChangesReturnedWhenNothingChanged()
     {
-        var learningKey = Guid.NewGuid();
+        var learnerKey = Guid.NewGuid();
         var withdrawalDate = DateTime.Today;
         var milestones = new List<Milestone> { Milestone.ThirtyPercentLearningComplete };
-        var learning = CreateDomainModel(learningKey, withdrawalDate: withdrawalDate, milestones: milestones);
+        var learning = CreateDomainModel(withdrawalDate: withdrawalDate, milestones: milestones);
 
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext(withdrawalDate: withdrawalDate, milestones: milestones));
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext(withdrawalDate: withdrawalDate, milestones: milestones));
 
         var result = await _commandHandler.Handle(command);
 
@@ -150,12 +150,12 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenLearningTypeIsNotChangedByPut()
     {
-        var learningKey = Guid.NewGuid();
-        var learning = CreateDomainModel(learningKey, isApproved: true, learningType: LearningType.ApprenticeshipUnit);
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: true, learningType: LearningType.ApprenticeshipUnit);
 
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext());
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext());
 
         await _commandHandler.Handle(command);
 
@@ -165,18 +165,19 @@ public class WhenUpdateShortCourseCommandIsHandled
     [Test]
     public async Task ThenKeyNotFoundExceptionThrownWhenLearningNotFound()
     {
-        var learningKey = Guid.NewGuid();
-        _repository.Setup(r => r.Get(learningKey)).ReturnsAsync((ShortCourseLearningDomainModel)null!);
+        var learnerKey = Guid.NewGuid();
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
 
-        var command = new UpdateShortCourseCommand(learningKey, CreateUpdateContext());
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext());
 
         var act = async () => await _commandHandler.Handle(command);
 
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
-    private static ShortCourseLearningDomainModel CreateDomainModel(Guid learningKey, Guid? learnerKey = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship)
+    private static ShortCourseLearningDomainModel CreateDomainModel(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship)
     {
+        var learningKey = Guid.NewGuid();
         var episodeKey = Guid.NewGuid();
         var episode = new ShortCourseEpisode
         {
@@ -203,7 +204,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         var entity = new ShortCourseLearning
         {
             Key = learningKey,
-            LearnerKey = learnerKey ?? Guid.NewGuid(),
+            LearnerKey = Guid.NewGuid(),
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };
@@ -212,8 +213,8 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     private static ShortCourseUpdateContext CreateUpdateContext(
-        DateTime? withdrawalDate = null, 
-        List<Milestone>? milestones = null, 
+        DateTime? withdrawalDate = null,
+        List<Milestone>? milestones = null,
         DateTime? completionDate = null,
         string learnerRef = "LEARNER1")
     {

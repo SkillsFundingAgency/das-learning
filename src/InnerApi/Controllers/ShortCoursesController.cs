@@ -110,14 +110,14 @@ public class ShortCoursesController : ControllerBase
     /// Removes a short course learner record.
     /// </summary>
     /// <param name="ukprn">The ukprn of the provider in context</param>
-    /// <param name="learningKey">The key of the short course learning record to remove.</param>
+    /// <param name="learnerKey">The key of the short course learner record to remove.</param>
     /// <returns>No content.</returns>
-    [HttpDelete("{ukprn:long}/shortCourses/{learningKey}")]
+    [HttpDelete("{ukprn:long}/shortCourses/{learnerKey}")]
     [ProducesResponseType(typeof(RemoveShortCourseResult), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learningKey)
+    public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learnerKey)
     {
-        var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learningKey, ukprn));
+        var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learnerKey, ukprn));
         return Ok(shortCourseResult);
     }
 
@@ -127,11 +127,11 @@ public class ShortCoursesController : ControllerBase
     /// <param name="learningKey">The key of the short course learning record to update.</param>
     /// <param name="request">The updated learner and short course details.</param>
     /// <returns>The LearningKey and list of fields that changed.</returns>
-    [HttpPut("shortCourses/{learningKey}")]
+    [HttpPut("shortCourses/{learnerKey}")]
     [ProducesResponseType(typeof(UpdateShortCourseResult), 200)]
-    public async Task<IActionResult> UpdateShortCourse(Guid learningKey, [FromBody] CreateDraftShortCourseRequest request)
+    public async Task<IActionResult> UpdateShortCourse(Guid learnerKey, [FromBody] CreateDraftShortCourseRequest request)
     {
-        var command = new UpdateShortCourseCommand(learningKey, request.ToCreateModel());
+        var command = new UpdateShortCourseCommand(learnerKey, request.ToCreateModel());
         var result = await _commandDispatcher.Send<UpdateShortCourseCommand, UpdateShortCourseResult>(command);
         return new OkObjectResult(result);
     }

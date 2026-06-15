@@ -34,7 +34,7 @@ public class GetShortCoursesByAcademicYearQueryHandler(LearningDataContext dbCon
                 (learning, learner) => new ShortCourseLearnerItem
                 {
                     Uln = learner.Uln,
-                    Key = learning.Key
+                    Key = learner.Key
                 })
             .ToListAsync(cancellationToken);
 
