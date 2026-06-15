@@ -11,18 +11,14 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     private readonly List<ShortCourseEpisodeDomainModel> _episodes;
 
     public Guid Key => _entity.Key;
-    public DateTime? CompletionDate => _entity.CompletionDate;
     public IReadOnlyCollection<ShortCourseEpisodeDomainModel> Episodes => new ReadOnlyCollection<ShortCourseEpisodeDomainModel>(_episodes);
 
-    internal static ShortCourseLearningDomainModel New(
-        Guid learnerKey,
-        DateTime? completionDate)
+    internal static ShortCourseLearningDomainModel New(Guid learnerKey)
     {
         return new ShortCourseLearningDomainModel(new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
-            LearnerKey = learnerKey,
-            CompletionDate = completionDate
+            LearnerKey = learnerKey
         });
     }
 
@@ -48,7 +44,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         IEnumerable<Milestone> milestones,
         decimal price = 0,
         LearningType learningType = LearningType.Apprenticeship,
-        EmployerType employerType = EmployerType.NonLevy)
+        EmployerType employerType = EmployerType.NonLevy,
+        DateTime? completionDate = null)
     {
         var episode = ShortCourseEpisodeDomainModel.New(
             _entity.Key,
@@ -62,7 +59,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             withdrawalDate,
             price,
             learningType,
-            employerType
+            employerType,
+            completionDate
         );
 
         foreach (var milestone in milestones)
@@ -81,7 +79,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         var changes = new List<ShortCourseUpdateChanges>();
         var episode = _episodes.Single(e => e.Ukprn == updateContext.OnProgramme.Ukprn);
         ReinstateIfRemoved(episode, changes);
-        UpdateCompletionDate(updateContext.OnProgramme.CompletionDate, changes);
         UpdateEpisode(episode, updateContext, changes);
         return new ShortCourseDomainUpdateResult
         {
@@ -106,20 +103,17 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         changes.Add(ShortCourseUpdateChanges.Reinstated);
     }
 
-    private void UpdateCompletionDate(DateTime? completionDate, List<ShortCourseUpdateChanges> changes)
-    {
-        if (_entity.CompletionDate != completionDate)
-            changes.Add(ShortCourseUpdateChanges.CompletionDate);
-        _entity.CompletionDate = completionDate;
-    }
-
     private void UpdateEpisode(ShortCourseEpisodeDomainModel episode, ShortCourseUpdateContext updateContext, List<ShortCourseUpdateChanges> changes)
     {
         var prevWithdrawalDate = episode.WithdrawalDate;
+        var prevCompletionDate = episode.CompletionDate;
         var prevMilestones = episode.Milestones.Select(m => m.Milestone).ToHashSet();
         var prevLearnerRef = episode.LearnerRef;
 
         episode.Update(updateContext);
+
+        if (episode.CompletionDate != prevCompletionDate)
+            changes.Add(ShortCourseUpdateChanges.CompletionDate);
 
         if (episode.WithdrawalDate != prevWithdrawalDate)
         {

@@ -1,3 +1,14 @@
 ﻿--/*
 --Post-deployment script
 --*/
+
+-- FLP-1868 (delete on release)
+-- Backfill ShortCourseEpisode.CompletionDate from ShortCourseLearning.CompletionDate.
+IF COL_LENGTH('[dbo].[ShortCourseEpisode]', 'CompletionDate') IS NOT NULL
+BEGIN
+	UPDATE [sce]
+	SET [sce].[CompletionDate] = [scl].[CompletionDate]
+	FROM [dbo].[ShortCourseEpisode] AS [sce]
+	INNER JOIN [dbo].[ShortCourseLearning] AS [scl]
+	ON [scl].[Key] = [sce].[LearningKey]
+END

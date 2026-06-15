@@ -37,7 +37,7 @@ public class WhenMappingShortCourseLearningToResult
         result.Should().BeOfType<RemoveShortCourseResult>();
         result.LearningKey.Should().Be(learning.Key);
         result.LearnerKey.Should().Be(learning.LearnerKey);
-        result.CompletionDate.Should().Be(learning.CompletionDate);
+        result.Episodes.Single().CompletionDate.Should().Be(learning.Episodes.Single().CompletionDate);
 
         result.Learner.Should().BeEquivalentTo(new
         {
@@ -97,7 +97,8 @@ public class WhenMappingShortCourseLearningToResult
             source.LearnerRef,
             source.EmployerType,
             source.TransferSenderId,
-            source.IsRemoved
+            source.IsRemoved,
+            source.CompletionDate
         });
     }
 
@@ -120,7 +121,6 @@ public class WhenMappingShortCourseLearningToResult
         {
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
-            CompletionDate = new DateTime(2024, 1, 1),
             Episodes = new List<ShortCourseEpisode>
             {
                 new ShortCourseEpisode
@@ -136,7 +136,8 @@ public class WhenMappingShortCourseLearningToResult
                     Price = 1500,
                     LearnerRef = "Ref1",
                     EmployerType = Enums.EmployerType.Levy,
-                    TransferSenderId = 456L
+                    TransferSenderId = 456L,
+                    CompletionDate = new DateTime(2024, 1, 1)
                 }
             }
         };

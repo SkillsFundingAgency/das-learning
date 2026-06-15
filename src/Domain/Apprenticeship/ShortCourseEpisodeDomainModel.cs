@@ -24,6 +24,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public bool IsApproved => _entity.IsApproved;
     public bool IsRemoved => _entity.IsRemoved;
+    public DateTime? CompletionDate => _entity.CompletionDate;
     public decimal Price => _entity.Price;
     public LearningType LearningType => _entity.LearningType;
     public EmployerType EmployerType => _entity.EmployerType;
@@ -45,7 +46,8 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         DateTime? withdrawalDate,
         decimal price = 0,
         LearningType learningType = LearningType.Apprenticeship,
-        EmployerType employerType = EmployerType.NonLevy)
+        EmployerType employerType = EmployerType.NonLevy,
+        DateTime? completionDate = null)
     {
         return new ShortCourseEpisodeDomainModel(new ShortCourseEpisode
         {
@@ -61,7 +63,8 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             WithdrawalDate = withdrawalDate,
             Price = price,
             LearningType = learningType,
-            EmployerType = employerType
+            EmployerType = employerType,
+            CompletionDate = completionDate
         });
     }
 
@@ -124,6 +127,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         }
 
         _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
+        _entity.CompletionDate = updateContext.OnProgramme.CompletionDate;
         _entity.LearnerRef = updateContext.LearnerRef;
 
         UpdateMilestones(updateContext.OnProgramme.Milestones);

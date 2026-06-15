@@ -12,4 +12,5 @@ public class ShortCourseMilestone
 
     public Guid EpisodeKey { get; set; }
     public Milestone Milestone { get; set; }
+    public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 }
