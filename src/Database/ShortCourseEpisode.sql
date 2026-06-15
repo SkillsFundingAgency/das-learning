@@ -7,7 +7,7 @@ CREATE TABLE [dbo].[ShortCourseEpisode]
     [StartDate] DATETIME NOT NULL,
     [ExpectedEndDate] DATETIME NOT NULL,
     [WithdrawalDate] DATETIME NULL,
-    [TrainingCode] VARCHAR(8) NOT NULL,
+    [TrainingCode] VARCHAR(8) NOT NULL DEFAULT '',
     [ApprovalsApprenticeshipId] BIGINT NOT NULL DEFAULT 0,
     [IsApproved] BIT NOT NULL DEFAULT 0,
     [Price] MONEY NOT NULL DEFAULT 0,
