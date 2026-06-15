@@ -9,12 +9,12 @@ public class RemoveShortCourseResult : ShortCourseLearningDto
 
 public class RemoveShortCourseCommand : ICommand
 {
-    public Guid LearningKey { get; }
+    public Guid LearnerKey { get; }
     public long Ukprn { get; }
 
-    public RemoveShortCourseCommand(Guid learningKey, long ukprn)
+    public RemoveShortCourseCommand(Guid learnerKey, long ukprn)
     {
-        LearningKey = learningKey;
+        LearnerKey = learnerKey;
         Ukprn = ukprn;
     }
 }

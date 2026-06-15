@@ -40,7 +40,7 @@ public class WhenGettingShortCoursesByAcademicYear
         result.TotalItems.Should().Be(1);
         result.Items.Should().HaveCount(1);
         var item = result.Items.Single();
-        item.Key.Should().Be(learning.Key);
+        item.Key.Should().Be(learner.Key);
         item.Uln.Should().Be(learner.Uln);
     }
 

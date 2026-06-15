@@ -14,12 +14,12 @@ public class UpdateShortCourseCommandHandler(
 
     public async Task<UpdateShortCourseResult> Handle(UpdateShortCourseCommand command, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Handling UpdateShortCourseCommand for LearningKey {LearningKey}", command.LearningKey);
+        logger.LogInformation("Handling UpdateShortCourseCommand for LearnerKey {LearnerKey}", command.LearnerKey);
 
-        var learning = await repository.Get(command.LearningKey);
+        var learning = await repository.GetByLearnerKey(command.LearnerKey);
 
         if (learning == null)
-            throw new KeyNotFoundException($"Short course learning with key {command.LearningKey} not found.");
+            throw new KeyNotFoundException($"Short course learning for learner key {command.LearnerKey} not found.");
 
         var updateResult = learning.Update(command.Model);
 
