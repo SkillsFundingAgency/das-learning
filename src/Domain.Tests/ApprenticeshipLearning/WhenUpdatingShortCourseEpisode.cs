@@ -49,7 +49,7 @@ public class WhenUpdatingShortCourseEpisode
 
         episode.Ukprn.Should().Be(99999999);
         episode.EmployerAccountId.Should().Be(456);
-        episode.TrainingCode.Should().Be("NEW");
+        episode.TrainingCode.Should().Be("OLD");
         episode.StartDate.Should().Be(new DateTime(2025, 1, 1));
         episode.ExpectedEndDate.Should().Be(new DateTime(2025, 12, 1));
         episode.WithdrawalDate.Should().Be(new DateTime(2025, 6, 1));
