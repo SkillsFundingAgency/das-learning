@@ -2,7 +2,7 @@
 (
     [Key] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
     [LearnerKey] UNIQUEIDENTIFIER NOT NULL,
-    [TrainingCode] VARCHAR(8) NOT NULL,
+    [TrainingCode] VARCHAR(8) NOT NULL DEFAULT '',
     [CompletionDate] DATETIME NULL
 )
 GO

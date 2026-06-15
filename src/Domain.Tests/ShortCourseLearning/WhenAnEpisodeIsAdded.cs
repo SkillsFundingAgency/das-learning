@@ -36,8 +36,8 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
             shortCourse.AddEpisode(
                 ukprn,
                 employerAccountId,
-                trainingCode,
                 learnerRef,
+                trainingCode,
                 false,
                 DateTime.UtcNow.AddMonths(-2),
                 DateTime.UtcNow.AddMonths(6),
