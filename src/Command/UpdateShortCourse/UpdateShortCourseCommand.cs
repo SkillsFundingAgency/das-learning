@@ -22,4 +22,8 @@ public class UpdateShortCourseResult : ShortCourseLearningDto
     public ShortCourseUpdateChanges[] Changes { get; set; } = [];
 
     public Guid UpdatedEpisodeKey { get; set; }
+
+    public bool IsNewLearning { get; set; }
+
+    public bool IsIgnored { get; set; }
 }

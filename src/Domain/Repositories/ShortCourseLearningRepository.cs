@@ -90,6 +90,22 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
+    public async Task<ShortCourseLearningDomainModel?> GetByLearnerKeyAndCourseCode(Guid learnerKey, string courseCode)
+    {
+        var shortCourseLearning = await DbContext
+            .ShortCourseLearnings
+            .IncludeAllChildren()
+            .SingleOrDefaultAsync(x => x.LearnerKey == learnerKey && x.TrainingCode == courseCode);
+
+        if (shortCourseLearning == null)
+            return null;
+
+        if (shortCourseLearning.Episodes.Count == 0)
+            return null;
+
+        return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
     public async Task<PagedResult<Models.Dtos.Learning>> GetApprovedByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
     {
         var baseQuery = DbContext.ShortCourseLearnings
