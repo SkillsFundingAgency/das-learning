@@ -103,7 +103,7 @@ public class WhenGettingShortCourseEarnings
         {
             Key = Guid.NewGuid(),
             Ukprn = ukPrn,
-            TrainingCode = "XYZ999",
+            TrainingCode = "EP999",
             IsApproved = false,
             Price = 750m,
             StartDate = new DateTime(2024, 8, 1),
@@ -125,7 +125,7 @@ public class WhenGettingShortCourseEarnings
 
         // Assert
         var resultEpisode = result.Items.Single().Episodes.Single();
-        resultEpisode.CourseCode.Should().Be(episode.TrainingCode);
+        resultEpisode.CourseCode.Should().Be(learning.TrainingCode);
         resultEpisode.IsApproved.Should().Be(episode.IsApproved);
         resultEpisode.Price.Should().Be(episode.Price);
         resultEpisode.LearnerRef.Should().Be(episode.LearnerRef);

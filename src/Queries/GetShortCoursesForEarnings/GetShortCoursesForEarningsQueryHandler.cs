@@ -53,7 +53,7 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
                     },
                     Episodes = l.Episodes.Where(e => !e.IsRemoved && e.Ukprn == query.UkPrn).Select(e => new GetShortCoursesForEarningsEpisode
                     {
-                        CourseCode = e.TrainingCode,
+                        CourseCode = l.TrainingCode,
                         IsApproved = e.IsApproved,
                         Price = e.Price,
                         LearnerRef = e.LearnerRef,

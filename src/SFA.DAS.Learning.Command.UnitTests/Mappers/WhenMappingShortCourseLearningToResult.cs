@@ -86,7 +86,7 @@ public class WhenMappingShortCourseLearningToResult
         {
             source.Ukprn,
             source.EmployerAccountId,
-            CourseCode = source.TrainingCode,
+            CourseCode = learning.TrainingCode,
             CourseType = CourseTypeConstants.ShortCourse,
             source.LearningType,
             source.StartDate,
@@ -128,7 +128,7 @@ public class WhenMappingShortCourseLearningToResult
                 {
                     Ukprn = 123,
                     EmployerAccountId = 1,
-                    TrainingCode = "SC001",
+                    TrainingCode = "EP001",
                     LearningType = Enums.LearningType.ApprenticeshipUnit,
                     StartDate = new DateTime(2023, 1, 1),
                     ExpectedEndDate = new DateTime(2023, 6, 1),
