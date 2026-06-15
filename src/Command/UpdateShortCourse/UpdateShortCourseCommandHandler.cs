@@ -3,6 +3,7 @@ using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Infrastructure.Configuration;
+using SFA.DAS.Learning.Models.UpdateModels;
 
 namespace SFA.DAS.Learning.Command.UpdateShortCourse;
 
@@ -13,13 +14,24 @@ public class UpdateShortCourseCommandHandler(
     IShortCourseLearningDomainModelMapper mapper,
     FeatureFlags featureFlags,
     IShortCourseLearningFactory? factory = null)
-    : ICommandHandler<UpdateShortCourseCommand, UpdateShortCourseResult>
+    : ICommandHandler<UpdateShortCourseCommand, List<UpdateShortCourseResult>>
 {
-    public async Task<UpdateShortCourseResult> Handle(UpdateShortCourseCommand command, CancellationToken cancellationToken = default)
+    public async Task<List<UpdateShortCourseResult>> Handle(UpdateShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Handling UpdateShortCourseCommand for LearnerKey {LearnerKey}", command.LearnerKey);
 
-        var learning = await repository.GetByLearnerKeyAndCourseCode(command.LearnerKey, command.Model.OnProgramme.CourseCode);
+        var results = new List<UpdateShortCourseResult>();
+        foreach (var model in command.Models)
+        {
+            results.Add(await HandleSingleItem(command.LearnerKey, model));
+        }
+
+        return results;
+    }
+
+    private async Task<UpdateShortCourseResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model)
+    {
+        var learning = await repository.GetByLearnerKeyAndCourseCode(learnerKey, model.OnProgramme.CourseCode);
 
         if (learning == null)
         {
@@ -27,35 +39,36 @@ public class UpdateShortCourseCommandHandler(
             {
                 logger.LogInformation(
                     "No learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} and ShortCourseProgression is disabled — ignoring",
-                    command.LearnerKey, command.Model.OnProgramme.CourseCode);
+                    learnerKey, model.OnProgramme.CourseCode);
                 return new UpdateShortCourseResult { IsIgnored = true };
             }
 
-            return await CreateNewLearning(command);
+            return await CreateNewLearning(learnerKey, model);
         }
 
-        var updateResult = learning.Update(command.Model);
+        var updateResult = learning.Update(model);
 
         await repository.Update(learning);
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
-        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, command.Model.OnProgramme.Ukprn);
+        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, model.OnProgramme.Ukprn);
+        result.CourseCode = model.OnProgramme.CourseCode;
         result.Changes = updateResult.Changes;
         result.UpdatedEpisodeKey = updateResult.EpisodeKey;
         return result;
     }
 
-    private async Task<UpdateShortCourseResult> CreateNewLearning(UpdateShortCourseCommand command)
+    private async Task<UpdateShortCourseResult> CreateNewLearning(Guid learnerKey, ShortCourseUpdateContext model)
     {
-        var op = command.Model.OnProgramme;
+        var op = model.OnProgramme;
 
-        var learning = factory!.CreateNew(command.LearnerKey, op.CourseCode);
+        var learning = factory!.CreateNew(learnerKey, op.CourseCode);
 
         var episode = learning.AddEpisode(
             op.Ukprn,
             op.EmployerId,
-            command.Model.LearnerRef,
+            model.LearnerRef,
             op.CourseCode,
             false,
             op.StartDate,
@@ -66,14 +79,15 @@ public class UpdateShortCourseCommandHandler(
             op.LearningType,
             completionDate: op.CompletionDate);
 
-        foreach (var ls in command.Model.LearningSupport)
+        foreach (var ls in model.LearningSupport)
             episode.AddLearningSupport(ls.StartDate, ls.EndDate);
 
         await repository.Add(learning);
 
-        var learner = await learnerRepository.Get(command.LearnerKey);
+        var learner = await learnerRepository.Get(learnerKey);
 
         var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, op.Ukprn);
+        result.CourseCode = op.CourseCode;
         result.UpdatedEpisodeKey = episode.Key;
         result.IsNewLearning = true;
         return result;
