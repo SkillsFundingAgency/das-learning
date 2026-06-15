@@ -121,6 +121,7 @@ public class WhenMappingShortCourseLearningToResult
         {
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
+            TrainingCode = "SC001",
             Episodes = new List<ShortCourseEpisode>
             {
                 new ShortCourseEpisode

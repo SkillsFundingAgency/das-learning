@@ -186,6 +186,7 @@ public class WhenRemoveShortCourseCommandIsHandled
         var entity = new ShortCourseLearning
         {
             Key = learningKey,
+            TrainingCode = "SC001",
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };

@@ -48,6 +48,7 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
+            TrainingCode = "ABC123",
             Episodes =
             [
                 new ShortCourseEpisode
@@ -111,7 +112,7 @@ public class WhenGettingShortCourseEarnings
             EmployerType = EmployerType.Levy
         };
 
-        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), Episodes = [episode] };
+        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "XYZ999", Episodes = [episode] };
         learning.LearnerKey = learnerKey;
 
         _dbContext.ShortCourseLearnings.Add(learning);
@@ -144,6 +145,7 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
+            TrainingCode = "ABC001",
             Episodes =
             [
                 new ShortCourseEpisode
@@ -186,6 +188,7 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
+            TrainingCode = "ABC002",
             Episodes =
             [
                 new ShortCourseEpisode
@@ -227,6 +230,7 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
+            TrainingCode = "REM001",
             Episodes =
             [
                 new ShortCourseEpisode
@@ -286,6 +290,7 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
+            TrainingCode = "ACT001",
             Episodes = [activeEpisode, removedEpisode]
         };
         learning.LearnerKey = learnerKey;
@@ -313,6 +318,7 @@ public class WhenGettingShortCourseEarnings
         var learning = new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
+            TrainingCode = "OLD001",
             Episodes =
             [
                 new ShortCourseEpisode
