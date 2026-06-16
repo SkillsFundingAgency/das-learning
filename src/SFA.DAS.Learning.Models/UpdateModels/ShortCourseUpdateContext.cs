@@ -19,6 +19,7 @@ public class OnProgramme
     public long Ukprn { get; init; }
     public DateTime StartDate { get; init; }
     public DateTime? WithdrawalDate { get; init; }
+    public short? WithdrawalReasonCode { get; init; }
     public DateTime? CompletionDate { get; init; }
     public DateTime ExpectedEndDate { get; init; }
     public List<Milestone> Milestones { get; set; }
