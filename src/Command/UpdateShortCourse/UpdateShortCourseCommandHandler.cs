@@ -14,9 +14,9 @@ public class UpdateShortCourseCommandHandler(
     IShortCourseLearningDomainModelMapper mapper,
     FeatureFlags featureFlags,
     IShortCourseLearningFactory? factory = null)
-    : ICommandHandler<UpdateShortCourseCommand, List<UpdateShortCourseResult>>
+    : ICommandHandler<UpdateShortCourseCommand, UpdateShortCourseResponse>
 {
-    public async Task<List<UpdateShortCourseResult>> Handle(UpdateShortCourseCommand command, CancellationToken cancellationToken = default)
+    public async Task<UpdateShortCourseResponse> Handle(UpdateShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Handling UpdateShortCourseCommand for LearnerKey {LearnerKey}", command.LearnerKey);
 
@@ -34,7 +34,7 @@ public class UpdateShortCourseCommandHandler(
         if (featureFlags.ShortCourseProgression)
             await RemoveOmittedLearnings(command, results, processedLearningKeys);
 
-        return results;
+        return new UpdateShortCourseResponse { Results = results };
     }
 
     private async Task RemoveOmittedLearnings(UpdateShortCourseCommand command, List<UpdateShortCourseResult> results, HashSet<Guid> processedLearningKeys)

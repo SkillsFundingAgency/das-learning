@@ -26,3 +26,8 @@ public class UpdateShortCourseResult : ShortCourseLearningDto
     public bool IsIgnored { get; set; }
     public bool IsRemoved { get; set; }
 }
+
+public class UpdateShortCourseResponse
+{
+    public List<UpdateShortCourseResult> Results { get; set; } = [];
+}

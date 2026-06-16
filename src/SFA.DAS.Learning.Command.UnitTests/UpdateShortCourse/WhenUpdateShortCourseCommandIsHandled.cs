@@ -76,7 +76,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Single().UpdatedEpisodeKey.Should().Be(learning.Episodes.Single().Key);
+        results.Results.Single().UpdatedEpisodeKey.Should().Be(learning.Episodes.Single().Key);
     }
 
     [Test]
@@ -91,7 +91,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
     }
 
     [Test]
@@ -106,7 +106,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.CompletionDate);
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.CompletionDate);
     }
 
     [Test]
@@ -121,7 +121,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.Milestone);
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.Milestone);
     }
 
     [Test]
@@ -136,7 +136,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.LearnerRef);
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.LearnerRef);
     }
 
     [Test]
@@ -153,7 +153,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Single().Changes.Should().BeEmpty();
+        results.Results.Single().Changes.Should().BeEmpty();
     }
 
     [Test]
@@ -183,7 +183,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Single().IsIgnored.Should().BeTrue();
+        results.Results.Single().IsIgnored.Should().BeTrue();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
@@ -229,7 +229,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Should().NotContain(r => r.IsRemoved);
+        results.Results.Should().NotContain(r => r.IsRemoved);
         omittedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
         _repository.Verify(r => r.GetAllByLearnerKey(It.IsAny<Guid>()), Times.Never);
     }
@@ -254,7 +254,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
+        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
         omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
         _repository.Verify(r => r.Update(omittedLearning), Times.Once);
     }
@@ -279,7 +279,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
+        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
         omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
         _repository.Verify(r => r.Update(omittedLearning), Times.Once);
     }
@@ -296,7 +296,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         var results = await _commandHandler.Handle(command);
 
         learning.Episodes.Single().IsRemoved.Should().BeFalse();
-        results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.Reinstated);
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.Reinstated);
         learning.FlushEvents().Should().NotContain(e => e is LearningReinstatedEvent);
     }
 
