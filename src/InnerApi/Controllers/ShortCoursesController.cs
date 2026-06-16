@@ -131,7 +131,7 @@ public class ShortCoursesController : ControllerBase
     [ProducesResponseType(typeof(UpdateShortCourseResponse), 200)]
     public async Task<IActionResult> UpdateShortCourse(Guid learnerKey, [FromBody] UpdateShortCourseRequest request)
     {
-        var command = new UpdateShortCourseCommand(learnerKey, request.ToUpdateModels());
+        var command = new UpdateShortCourseCommand(learnerKey, request.Ukprn, request.ToUpdateModels());
         var result = await _commandDispatcher.Send<UpdateShortCourseCommand, UpdateShortCourseResponse>(command);
         return new OkObjectResult(result);
     }

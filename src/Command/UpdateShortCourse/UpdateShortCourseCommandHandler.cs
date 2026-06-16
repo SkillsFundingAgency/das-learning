@@ -28,29 +28,32 @@ public class UpdateShortCourseCommandHandler(
             var result = await HandleSingleItem(command.LearnerKey, model);
             results.Add(result);
             if (!result.IsIgnored)
+            {
                 processedLearningKeys.Add(result.LearningKey);
+            }
         }
 
         if (featureFlags.ShortCourseProgression)
+        {
             await RemoveOmittedLearnings(command, results, processedLearningKeys);
+        }
 
         return new UpdateShortCourseResponse { Results = results };
     }
 
     private async Task RemoveOmittedLearnings(UpdateShortCourseCommand command, List<UpdateShortCourseResult> results, HashSet<Guid> processedLearningKeys)
     {
-        var requestUkprn = command.Models.First().OnProgramme.Ukprn;
         var allLearnings = await repository.GetAllByLearnerKey(command.LearnerKey);
 
         foreach (var learning in allLearnings.Where(l => !processedLearningKeys.Contains(l.Key)))
         {
-            var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == requestUkprn && !e.IsRemoved);
+            var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
             if (activeEpisode == null)
                 continue;
 
             var removedEpisodeKey = activeEpisode.IsApproved
-                ? learning.Remove(requestUkprn)
-                : learning.RemoveUnapproved(requestUkprn);
+                ? learning.Remove(command.Ukprn)
+                : learning.RemoveUnapproved(command.Ukprn);
 
             if (!removedEpisodeKey.HasValue)
                 continue;
@@ -79,7 +82,7 @@ public class UpdateShortCourseCommandHandler(
             if (!featureFlags.ShortCourseProgression)
             {
                 logger.LogInformation(
-                    "No learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} and ShortCourseProgression is disabled — ignoring",
+                    "No learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} and Short Course Progression is disabled — ignoring",
                     learnerKey, model.OnProgramme.CourseCode);
                 return new UpdateShortCourseResult { IsIgnored = true };
             }

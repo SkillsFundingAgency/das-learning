@@ -89,6 +89,7 @@ public class OnProgramme
 /// </summary>
 public class UpdateShortCourseRequest
 {
+    public long Ukprn { get; set; }
     public ShortCourseLearnerUpdateDetails LearnerUpdateDetails { get; set; }
     public List<OnProgramme> OnProgramme { get; set; } = new();
 }

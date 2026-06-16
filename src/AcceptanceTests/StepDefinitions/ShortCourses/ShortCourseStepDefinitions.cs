@@ -463,6 +463,7 @@ public class ShortCourseStepDefinitions
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
         var updateRequest = new UpdateShortCourseRequest
         {
+            Ukprn = request.OnProgramme.Ukprn,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
             OnProgramme = [request.OnProgramme]
         };
