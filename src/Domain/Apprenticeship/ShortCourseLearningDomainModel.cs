@@ -91,16 +91,19 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
     private void ReinstateIfRemoved(ShortCourseEpisodeDomainModel episode, List<ShortCourseUpdateChanges> changes)
     {
-        if (!episode.IsApproved || !episode.IsRemoved)
+        if (!episode.IsRemoved)
             return;
 
         episode.Reinstate();
 
-        AddEvent(new LearningReinstatedEvent
+        if (episode.IsApproved)
         {
-            LearningKey = Key,
-            ApprenticeshipId = episode.ApprovalsApprenticeshipId
-        });
+            AddEvent(new LearningReinstatedEvent
+            {
+                LearningKey = Key,
+                ApprenticeshipId = episode.ApprovalsApprenticeshipId
+            });
+        }
 
         changes.Add(ShortCourseUpdateChanges.Reinstated);
     }
@@ -154,6 +157,17 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             LearningKey = Key,
             ApprenticeshipId = episode.ApprovalsApprenticeshipId
         });
+        return episode.Key;
+    }
+
+    public Guid? RemoveUnapproved(long ukprn)
+    {
+        var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn && !e.IsApproved);
+
+        if (episode == null)
+            return null;
+
+        episode.Remove();
         return episode.Key;
     }
 

@@ -21,12 +21,53 @@ public class UpdateShortCourseCommandHandler(
         logger.LogInformation("Handling UpdateShortCourseCommand for LearnerKey {LearnerKey}", command.LearnerKey);
 
         var results = new List<UpdateShortCourseResult>();
+        var processedLearningKeys = new HashSet<Guid>();
+
         foreach (var model in command.Models)
         {
-            results.Add(await HandleSingleItem(command.LearnerKey, model));
+            var result = await HandleSingleItem(command.LearnerKey, model);
+            results.Add(result);
+            if (!result.IsIgnored)
+                processedLearningKeys.Add(result.LearningKey);
         }
 
+        if (featureFlags.ShortCourseProgression)
+            await RemoveOmittedLearnings(command, results, processedLearningKeys);
+
         return results;
+    }
+
+    private async Task RemoveOmittedLearnings(UpdateShortCourseCommand command, List<UpdateShortCourseResult> results, HashSet<Guid> processedLearningKeys)
+    {
+        var requestUkprn = command.Models.First().OnProgramme.Ukprn;
+        var allLearnings = await repository.GetAllByLearnerKey(command.LearnerKey);
+
+        foreach (var learning in allLearnings.Where(l => !processedLearningKeys.Contains(l.Key)))
+        {
+            var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == requestUkprn && !e.IsRemoved);
+            if (activeEpisode == null)
+                continue;
+
+            var removedEpisodeKey = activeEpisode.IsApproved
+                ? learning.Remove(requestUkprn)
+                : learning.RemoveUnapproved(requestUkprn);
+
+            if (!removedEpisodeKey.HasValue)
+                continue;
+
+            await repository.Update(learning);
+
+            logger.LogInformation("Removed omitted Learning {LearningKey} / {CourseCode} for LearnerKey {LearnerKey}",
+                learning.Key, learning.TrainingCode, command.LearnerKey);
+
+            results.Add(new UpdateShortCourseResult
+            {
+                IsRemoved = true,
+                LearningKey = learning.Key,
+                CourseCode = learning.TrainingCode,
+                UpdatedEpisodeKey = removedEpisodeKey.Value
+            });
+        }
     }
 
     private async Task<UpdateShortCourseResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model)

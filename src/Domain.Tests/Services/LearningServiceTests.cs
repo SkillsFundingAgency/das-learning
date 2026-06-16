@@ -40,7 +40,7 @@ public class LearningServiceTests
         var expected = apprenticeshipLearningFactory.CreateNew(Guid.NewGuid());
 
         _repo
-            .Setup(r => r.GetUnapprovedLearning(uln, approvalsId))
+            .Setup(r => r.GetUnapprovedLearning(uln, approvalsId, It.IsAny<string>()))
             .ReturnsAsync(expected);
 
         // Act
@@ -52,7 +52,7 @@ public class LearningServiceTests
         // Assert
         Assert.That(result, Is.EqualTo(expected));
         _provider.Verify(p => p.GetRepository(LearningType.Apprenticeship), Times.Once);
-        _repo.Verify(r => r.GetUnapprovedLearning(uln, approvalsId), Times.Once);
+        _repo.Verify(r => r.GetUnapprovedLearning(uln, approvalsId, It.IsAny<string>()), Times.Once);
     }
 
     [Test]

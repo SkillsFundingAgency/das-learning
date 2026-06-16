@@ -7,6 +7,7 @@ using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Command.UpdateShortCourse;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Domain.Factories;
@@ -54,7 +55,11 @@ public class WhenUpdateShortCourseCommandIsHandled
         _mapper.Setup(x => x.Map<UpdateShortCourseResult>(
             It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
             )
-            .Returns(_fixture.Create<UpdateShortCourseResult>());
+            .Returns(() => _fixture.Build<UpdateShortCourseResult>().With(x => x.IsRemoved, false).Create());
+
+        _repository
+            .Setup(r => r.GetAllByLearnerKey(It.IsAny<Guid>()))
+            .ReturnsAsync(new List<ShortCourseLearningDomainModel>());
 
         _commandHandler = new UpdateShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object, _featureFlags, factory: null);
     }
@@ -171,6 +176,7 @@ public class WhenUpdateShortCourseCommandIsHandled
     public async Task ThenIgnoredResultReturnedWhenLearningNotFoundAndFlagDisabled()
     {
         var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseProgression = false;
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync((ShortCourseLearningDomainModel?)null);
 
         var command = new UpdateShortCourseCommand(learnerKey, [CreateUpdateContext()]);
@@ -206,7 +212,95 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
     }
 
-    private static ShortCourseLearningDomainModel CreateDomainModel(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship)
+    [Test]
+    public async Task ThenOmittedLearningIsNotRemovedWhenFlagDisabled()
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseProgression = false;
+
+        var includedLearning = CreateDomainModel(courseCode: "TEST01");
+        var omittedLearning = CreateDomainModel(courseCode: "TEST02", isApproved: true);
+
+        _repository
+            .Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01"))
+            .ReturnsAsync(includedLearning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Should().NotContain(r => r.IsRemoved);
+        omittedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _repository.Verify(r => r.GetAllByLearnerKey(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ThenOmittedUnapprovedLearningIsRemovedWhenFlagEnabled()
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseProgression = true;
+
+        var includedLearning = CreateDomainModel(courseCode: "TEST01");
+        var omittedLearning = CreateDomainModel(courseCode: "TEST02", isApproved: false);
+
+        _repository
+            .Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01"))
+            .ReturnsAsync(includedLearning);
+        _repository
+            .Setup(r => r.GetAllByLearnerKey(learnerKey))
+            .ReturnsAsync([includedLearning, omittedLearning]);
+
+        var command = new UpdateShortCourseCommand(learnerKey, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
+        omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
+        _repository.Verify(r => r.Update(omittedLearning), Times.Once);
+    }
+
+    [Test]
+    public async Task ThenOmittedApprovedLearningIsRemovedWhenFlagEnabled()
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseProgression = true;
+
+        var includedLearning = CreateDomainModel(courseCode: "TEST01");
+        var omittedLearning = CreateDomainModel(courseCode: "TEST02", isApproved: true);
+
+        _repository
+            .Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01"))
+            .ReturnsAsync(includedLearning);
+        _repository
+            .Setup(r => r.GetAllByLearnerKey(learnerKey))
+            .ReturnsAsync([includedLearning, omittedLearning]);
+
+        var command = new UpdateShortCourseCommand(learnerKey, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
+        omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
+        _repository.Verify(r => r.Update(omittedLearning), Times.Once);
+    }
+
+    [Test]
+    public async Task ThenRemovedUnapprovedEpisodeIsReinstatedWhenItReappearsInPut()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: false, isRemoved: true);
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        learning.Episodes.Single().IsRemoved.Should().BeFalse();
+        results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.Reinstated);
+        learning.FlushEvents().Should().NotContain(e => e is LearningReinstatedEvent);
+    }
+
+    private static ShortCourseLearningDomainModel CreateDomainModel(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, bool isRemoved = false, LearningType learningType = LearningType.Apprenticeship, string courseCode = "TEST01", long ukprn = 12345678)
     {
         var learningKey = Guid.NewGuid();
         var episodeKey = Guid.NewGuid();
@@ -214,11 +308,12 @@ public class WhenUpdateShortCourseCommandIsHandled
         {
             Key = episodeKey,
             LearningKey = learningKey,
-            Ukprn = 12345678,
+            Ukprn = ukprn,
             EmployerAccountId = 1,
-            TrainingCode = "TEST01",
+            TrainingCode = courseCode,
             LearnerRef = "LEARNER1",
             IsApproved = isApproved,
+            IsRemoved = isRemoved,
             StartDate = DateTime.Today.AddMonths(-1),
             ExpectedEndDate = DateTime.Today.AddMonths(6),
             WithdrawalDate = withdrawalDate,
@@ -236,7 +331,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         {
             Key = learningKey,
             LearnerKey = Guid.NewGuid(),
-            TrainingCode = "SC001",
+            TrainingCode = courseCode,
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };

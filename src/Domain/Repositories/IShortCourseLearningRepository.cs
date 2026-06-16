@@ -9,4 +9,5 @@ public interface IShortCourseLearningRepository : ILearningRepository
     Task<ShortCourseLearningDomainModel> Get(Guid key);
     Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey);
     Task<ShortCourseLearningDomainModel?> GetByLearnerKeyAndCourseCode(Guid learnerKey, string courseCode);
+    Task<List<ShortCourseLearningDomainModel>> GetAllByLearnerKey(Guid learnerKey);
 }

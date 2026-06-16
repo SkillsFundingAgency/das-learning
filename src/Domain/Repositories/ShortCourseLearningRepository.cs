@@ -47,7 +47,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
-    public async Task<ShortCourseLearningDomainModel> Get(string uln, bool unapprovedOnly=false)
+    public async Task<ShortCourseLearningDomainModel> Get(string uln, bool unapprovedOnly = false, string? trainingCode = null)
     {
         var learnerKey = await DbContext.LearnersDbSet
             .Where(l => l.Uln == uln)
@@ -58,6 +58,9 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
 
         var query = DbContext.Set<ShortCourseLearning>()
             .Where(x => x.LearnerKey == learnerKey);
+
+        if (trainingCode != null)
+            query = query.Where(x => x.TrainingCode == trainingCode);
 
         if (unapprovedOnly)
         {
@@ -88,6 +91,17 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
             return null;
 
         return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
+    public async Task<List<ShortCourseLearningDomainModel>> GetAllByLearnerKey(Guid learnerKey)
+    {
+        var learnings = await DbContext
+            .ShortCourseLearnings
+            .IncludeAllChildren()
+            .Where(x => x.LearnerKey == learnerKey)
+            .ToListAsync();
+
+        return learnings.Select(_learningFactory.GetExisting).ToList();
     }
 
     public async Task<ShortCourseLearningDomainModel?> GetByLearnerKeyAndCourseCode(Guid learnerKey, string courseCode)
@@ -156,9 +170,9 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return Update(domainModel);
     }
 
-    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId)
+    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null)
     {
-        return await Get(uln, true);
+        return await Get(uln, unapprovedOnly: true, trainingCode: trainingCode);
     }
 }
 

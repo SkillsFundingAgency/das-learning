@@ -8,10 +8,11 @@ public class LearningService(ILearningRepositoryProvider provider) : ILearningSe
     public Task<LearningDomainModel?> GetUnapprovedLearning(
         string uln,
         LearningType type,
-        long approvalsApprenticeshipId)
+        long approvalsApprenticeshipId,
+        string? trainingCode = null)
     {
         var repo = provider.GetRepository(type);
-        return repo.GetUnapprovedLearning(uln, approvalsApprenticeshipId);
+        return repo.GetUnapprovedLearning(uln, approvalsApprenticeshipId, trainingCode);
     }
 
     public Task AddLearning(LearningDomainModel model)
