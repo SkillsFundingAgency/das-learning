@@ -114,8 +114,16 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         var prevCompletionDate = episode.CompletionDate;
         var prevMilestones = episode.Milestones.Select(m => m.Milestone).ToHashSet();
         var prevLearnerRef = episode.LearnerRef;
+        var prevStartDate = episode.StartDate;
+        var prevExpectedEndDate = episode.ExpectedEndDate;
 
         episode.Update(updateContext);
+
+        if (episode.StartDate != prevStartDate)
+            changes.Add(ShortCourseUpdateChanges.StartDate);
+
+        if (episode.ExpectedEndDate != prevExpectedEndDate)
+            changes.Add(ShortCourseUpdateChanges.ExpectedEndDate);
 
         if (episode.CompletionDate != prevCompletionDate)
             changes.Add(ShortCourseUpdateChanges.CompletionDate);

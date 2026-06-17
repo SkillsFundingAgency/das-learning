@@ -125,6 +125,51 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenStartDateChangeIsDetectedOnUnapprovedEpisode()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: false);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(startDate: DateTime.Today)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.StartDate);
+    }
+
+    [Test]
+    public async Task ThenStartDateChangeIsNotDetectedOnApprovedEpisode()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: true);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(startDate: DateTime.Today)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().Changes.Should().NotContain(ShortCourseUpdateChanges.StartDate);
+    }
+
+    [Test]
+    public async Task ThenExpectedEndDateChangeIsDetectedOnUnapprovedEpisode()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: false);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(expectedEndDate: DateTime.Today.AddMonths(12))]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.ExpectedEndDate);
+    }
+
+    [Test]
     public async Task ThenLearnerRefChangeIsDetected()
     {
         var learnerKey = Guid.NewGuid();
@@ -343,7 +388,9 @@ public class WhenUpdateShortCourseCommandIsHandled
         DateTime? withdrawalDate = null,
         List<Milestone>? milestones = null,
         DateTime? completionDate = null,
-        string learnerRef = "LEARNER1")
+        string learnerRef = "LEARNER1",
+        DateTime? startDate = null,
+        DateTime? expectedEndDate = null)
     {
         return new ShortCourseUpdateContext
         {
@@ -355,8 +402,8 @@ public class WhenUpdateShortCourseCommandIsHandled
                 CourseCode = "TEST01",
                 EmployerId = 1,
                 Ukprn = 12345678,
-                StartDate = DateTime.Today.AddMonths(-1),
-                ExpectedEndDate = DateTime.Today.AddMonths(6),
+                StartDate = startDate ?? DateTime.Today.AddMonths(-1),
+                ExpectedEndDate = expectedEndDate ?? DateTime.Today.AddMonths(6),
                 WithdrawalDate = withdrawalDate,
                 CompletionDate = completionDate,
                 Milestones = milestones ?? new List<Milestone>(),
