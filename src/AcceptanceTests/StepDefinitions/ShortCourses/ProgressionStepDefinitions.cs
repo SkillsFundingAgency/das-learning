@@ -44,7 +44,7 @@ public class ProgressionStepDefinitions
     public async Task GivenTheLearnerHasEndedCourse(string endType, string courseCode)
     {
         var onProgramme = endType == "completed"
-            ? BuildOnProgramme(courseCode, completionDate: new DateTime(2025, 6, 1), milestones: [Milestone.LearningComplete])
+            ? BuildOnProgramme(courseCode, completionDate: new DateTime(2025, 6, 1), milestones: [Milestone.LearningComplete, Milestone.ThirtyPercentLearningComplete])
             : BuildOnProgramme(courseCode, withdrawalDate: new DateTime(2025, 6, 1));
 
         _scenarioContext[ShortCourseTestKeys.EndedOnProgramme] = onProgramme;

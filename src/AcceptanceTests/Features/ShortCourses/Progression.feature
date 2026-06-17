@@ -25,7 +25,7 @@ Scenario: Simultaneous completion and progression creates a new Learning
     And a learning exists for course SC-002
 
 Scenario: Claiming the 30% milestone on the second course does not affect the first
-    Given the learner has completed SC-001
+    Given the learner has withdrawn SC-001
     And a progression PUT has added new course SC-002
     When SLD claims the 30% milestone on SC-002
     Then SC-002 has the 30% milestone
