@@ -29,7 +29,7 @@ Scenario: Claiming the 30% milestone on the second course does not affect the fi
     And a progression PUT has added new course SC-002
     When SLD claims the 30% milestone on SC-002
     Then SC-002 has the 30% milestone
-    And SC-001 has no milestones
+    And SC-001 has no 30% milestone
 
 Scenario: Withdrawing the second course does not affect the first
     Given the learner has completed SC-001

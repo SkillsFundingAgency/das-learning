@@ -44,7 +44,7 @@ public class ProgressionStepDefinitions
     public async Task GivenTheLearnerHasEndedCourse(string endType, string courseCode)
     {
         var onProgramme = endType == "completed"
-            ? BuildOnProgramme(courseCode, completionDate: new DateTime(2025, 6, 1))
+            ? BuildOnProgramme(courseCode, completionDate: new DateTime(2025, 6, 1), milestones: [Milestone.LearningComplete])
             : BuildOnProgramme(courseCode, withdrawalDate: new DateTime(2025, 6, 1));
 
         _scenarioContext[ShortCourseTestKeys.EndedOnProgramme] = onProgramme;
@@ -186,11 +186,12 @@ public class ProgressionStepDefinitions
         GetEpisodeForCourse(dbConnection, courseCode).Milestones.Should().NotBeEmpty();
     }
 
-    [Then(@"(.*) has no milestones")]
-    public async Task ThenCourseHasNoMilestones(string courseCode)
+    [Then(@"(.*) has no 30% milestone")]
+    public async Task ThenCourseHasNoThirtyPercentMilestone(string courseCode)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        GetEpisodeForCourse(dbConnection, courseCode).Milestones.Should().BeEmpty();
+        GetEpisodeForCourse(dbConnection, courseCode).Milestones
+            .Should().NotContain(m => m.Milestone == Milestone.ThirtyPercentLearningComplete);
     }
 
     [Then(@"^(\S+) is withdrawn$")]
