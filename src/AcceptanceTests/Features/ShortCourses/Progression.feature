@@ -24,38 +24,51 @@ Scenario: Simultaneous completion and progression creates a new Learning
     And a learning exists for course SC-001
     And a learning exists for course SC-002
 
-Scenario: Claiming the 30% milestone on SC-002 does not affect SC-001
+Scenario: Claiming the 30% milestone on the second course does not affect the first
     Given the learner has completed SC-001
     And a progression PUT has added new course SC-002
     When SLD claims the 30% milestone on SC-002
     Then SC-002 has the 30% milestone
     And SC-001 has no milestones
 
-Scenario: Withdrawing SC-002 does not affect SC-001
+Scenario: Withdrawing the second course does not affect the first
     Given the learner has completed SC-001
     And a progression PUT has added new course SC-002
     When SLD withdraws SC-002
     Then SC-002 is withdrawn
     And SC-001 is not withdrawn
 
-Scenario: Updating the completion date of SC-001 does not affect SC-002
+Scenario: Updating the completion date of the first course does not affect the second
     Given the learner has completed SC-001
     And a progression PUT has added new course SC-002
     When SLD updates the completion date of SC-001
     Then SC-001 has a completion date
     And SC-002 has no completion date
 
-Scenario: Removing SC-002 does not affect SC-001
+Scenario: Removing the second course does not affect the first
     Given the learner has completed SC-001
     And a progression PUT has added new course SC-002
     When SLD omits SC-002 from the next PUT
     Then SC-002 is removed
     And SC-001 is not removed
 
-Scenario: Reinstating SC-002 does not affect SC-001
+Scenario: Reinstating the second course does not affect the first
     Given the learner has completed SC-001
     And a progression PUT has added new course SC-002
     And SLD has omitted SC-002 from the next PUT
     When SLD includes SC-002 in the next PUT
     Then SC-002 is not removed
     And SC-001 is not removed
+
+Scenario: Updating the start date of the progression episode is persisted in Learning
+    Given the learner has completed SC-001
+    And a progression PUT has added new course SC-002
+    When SLD updates the start date of SC-002
+    Then SC-002 has the updated start date
+
+Scenario: Removing the short course removes all of the learner's episodes for that provider
+    Given the learner has completed SC-001
+    And a progression PUT has added new course SC-002
+    When SLD removes all learning for the learner
+    Then SC-001 is removed
+    And SC-002 is removed

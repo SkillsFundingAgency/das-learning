@@ -147,27 +147,18 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     {
         var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
 
-        if (episode == null || !episode.IsApproved)
-            return null;
-
-        episode.Remove();
-
-        AddEvent(new LearningRemovedEvent
-        {
-            LearningKey = Key,
-            ApprenticeshipId = episode.ApprovalsApprenticeshipId
-        });
-        return episode.Key;
-    }
-
-    public Guid? RemoveUnapproved(long ukprn)
-    {
-        var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn && !e.IsApproved);
-
         if (episode == null)
             return null;
 
         episode.Remove();
+
+        if (episode.IsApproved)
+            AddEvent(new LearningRemovedEvent
+            {
+                LearningKey = Key,
+                ApprenticeshipId = episode.ApprovalsApprenticeshipId
+            });
+
         return episode.Key;
     }
 

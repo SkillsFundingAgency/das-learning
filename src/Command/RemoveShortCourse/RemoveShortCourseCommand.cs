@@ -2,7 +2,12 @@ using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Command.RemoveShortCourse;
 
-public class RemoveShortCourseResult : ShortCourseLearningDto
+public class RemoveShortCourseResult
+{
+    public List<RemoveShortCourseItemResult> Results { get; set; } = [];
+}
+
+public class RemoveShortCourseItemResult : ShortCourseLearningDto
 {
     public Guid RemovedEpisodeKey { get; set; }
 }

@@ -51,9 +51,7 @@ public class UpdateShortCourseCommandHandler(
             if (activeEpisode == null)
                 continue;
 
-            var removedEpisodeKey = activeEpisode.IsApproved
-                ? learning.Remove(command.Ukprn)
-                : learning.RemoveUnapproved(command.Ukprn);
+            var removedEpisodeKey = learning.Remove(command.Ukprn);
 
             if (!removedEpisodeKey.HasValue)
                 continue;

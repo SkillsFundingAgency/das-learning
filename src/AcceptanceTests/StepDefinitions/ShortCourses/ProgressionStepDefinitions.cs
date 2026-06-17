@@ -100,7 +100,7 @@ public class ProgressionStepDefinitions
         await PutWithCourseModified(courseCode, BuildOnProgramme(courseCode, milestones: [Milestone.ThirtyPercentLearningComplete]));
     }
 
-    [When(@"SLD withdraws (.*)")]
+    [When(@"^SLD withdraws (\S+)$")]
     public async Task WhenSLDWithdraws(string courseCode)
     {
         await PutWithCourseModified(courseCode, BuildOnProgramme(courseCode, withdrawalDate: new DateTime(2025, 9, 1)));
@@ -110,6 +110,12 @@ public class ProgressionStepDefinitions
     public async Task WhenSLDUpdatesCompletionDateOf(string courseCode)
     {
         await PutWithCourseModified(courseCode, BuildOnProgramme(courseCode, completionDate: new DateTime(2025, 6, 15)));
+    }
+
+    [When(@"SLD updates the start date of (.*)")]
+    public async Task WhenSLDUpdatesStartDateOf(string courseCode)
+    {
+        await PutWithCourseModified(courseCode, BuildOnProgramme(courseCode, startDate: new DateTime(2025, 3, 1)));
     }
 
     [Given(@"SLD has omitted (.*) from the next PUT")]
@@ -131,6 +137,12 @@ public class ProgressionStepDefinitions
         };
 
         await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", updateRequest);
+    }
+
+    [When(@"SLD removes all learning for the learner")]
+    public async Task WhenSLDRemovesTheShortCourse()
+    {
+        await _testContext.TestInnerApi.Delete($"/{ProviderUkprn}/shortCourses/{GetLearnerKey()}");
     }
 
     [When(@"SLD includes (.*) in the next PUT")]
@@ -181,14 +193,14 @@ public class ProgressionStepDefinitions
         GetEpisodeForCourse(dbConnection, courseCode).Milestones.Should().BeEmpty();
     }
 
-    [Then(@"(.*) is withdrawn")]
+    [Then(@"^(\S+) is withdrawn$")]
     public async Task ThenCourseIsWithdrawn(string courseCode)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         GetEpisodeForCourse(dbConnection, courseCode).WithdrawalDate.Should().NotBeNull();
     }
 
-    [Then(@"(.*) is not withdrawn")]
+    [Then(@"^(\S+) is not withdrawn$")]
     public async Task ThenCourseIsNotWithdrawn(string courseCode)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
@@ -207,6 +219,13 @@ public class ProgressionStepDefinitions
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         GetEpisodeForCourse(dbConnection, courseCode).CompletionDate.Should().BeNull();
+    }
+
+    [Then(@"(.*) has the updated start date")]
+    public async Task ThenCourseHasUpdatedStartDate(string courseCode)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        GetEpisodeForCourse(dbConnection, courseCode).StartDate.Should().Be(new DateTime(2025, 3, 1));
     }
 
     [Then(@"(.*) is removed")]
@@ -253,11 +272,11 @@ public class ProgressionStepDefinitions
 
     private Guid GetLearnerKey() => new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
 
-    private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null) => new()
+    private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? startDate = null) => new()
     {
         Ukprn = ProviderUkprn,
         CourseCode = courseCode,
-        StartDate = new DateTime(2025, 1, 1),
+        StartDate = startDate ?? new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
         CompletionDate = completionDate,
         WithdrawalDate = withdrawalDate,
