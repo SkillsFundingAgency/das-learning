@@ -25,19 +25,19 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
             // Arrange
             var learnerKey = Guid.NewGuid();
             var learnerRef = _fixture.Create<string>();
-            var shortCourse = ShortCourseLearningDomainModel.New(learnerKey);
-
             var ukprn = _fixture.Create<long>();
             var employerAccountId = _fixture.Create<long>();
             var trainingCode = _fixture.Create<string>();
             var milestones = _fixture.CreateMany<Milestone>().ToList();
 
+            var shortCourse = ShortCourseLearningDomainModel.New(learnerKey, trainingCode);
+
             // Act
             shortCourse.AddEpisode(
                 ukprn,
                 employerAccountId,
-                trainingCode,
                 learnerRef,
+                trainingCode,
                 false,
                 DateTime.UtcNow.AddMonths(-2),
                 DateTime.UtcNow.AddMonths(6),
@@ -50,6 +50,8 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
             episode.Ukprn.Should().Be(ukprn);
             episode.EmployerAccountId.Should().Be(employerAccountId);
             episode.TrainingCode.Should().Be(trainingCode);
+
+            shortCourse.TrainingCode.Should().Be(trainingCode);
 
             episode.Milestones.Should().HaveCount(milestones.Count);
             episode.Milestones.Select(m => m.Milestone)

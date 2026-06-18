@@ -221,6 +221,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         {
             Key = learningKey,
             LearnerKey = Guid.NewGuid(),
+            TrainingCode = "SC001",
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };
