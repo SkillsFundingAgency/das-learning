@@ -2,12 +2,14 @@ Feature: UpdateShortCourse
 
 Scenario: Update short course withdrawal date
     Given SLD has informed the system that a new short course has been created
+    And short course is approved
     When SLD calls the update short course endpoint with the following information
-        | WithdrawalDate |
-        | 2025-01-01     |
+        | WithdrawalDate | WithdrawalReasonCode |
+        | 2025-01-01     | 2                    |
     Then the update short course response includes changes
         | Change         |
         | WithdrawalDate |
+    And the correct learning withdrawn event is emitted
 
 Scenario: Update short course completion date
     Given SLD has informed the system that a new short course has been created
