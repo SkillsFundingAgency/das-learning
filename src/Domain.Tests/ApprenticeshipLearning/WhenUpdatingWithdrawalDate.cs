@@ -91,7 +91,7 @@ public class WhenUpdatingWithdrawalDate
 
         var withdrawnEvent = domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Single();
         withdrawnEvent.WithdrawalReasonCode.Should().Be(0);
-        withdrawnEvent.Created.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(2));
+        withdrawnEvent.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
     }
 
     private LearnerDomainModel GetLearnerDomainModel()

@@ -42,7 +42,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
         @event.EmployerAccountId.Should().Be(learning.Episodes.Single().EmployerAccountId);
         @event.LastDayOfLearning.Should().Be(withdrawalDate);
         @event.WithdrawalReasonCode.Should().Be(withdrawalReasonCode);
-        @event.Created.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(2));
+        @event.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
     }
 
     [Test]

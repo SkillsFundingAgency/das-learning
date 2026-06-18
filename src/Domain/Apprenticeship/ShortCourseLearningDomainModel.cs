@@ -129,7 +129,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
                     ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
                     LastDayOfLearning = episode.WithdrawalDate.Value,
                     WithdrawalReasonCode = episode.WithdrawalReason ?? 0,
-                    Created = DateTime.Now,
+                    Created = DateTime.UtcNow,
                     EmployerAccountId = episode.EmployerAccountId
                 });
             }

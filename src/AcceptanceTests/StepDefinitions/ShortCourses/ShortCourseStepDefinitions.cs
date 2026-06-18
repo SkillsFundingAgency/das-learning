@@ -381,7 +381,7 @@ public class ShortCourseStepDefinitions
 
         @event.WithdrawalDate.Should().Be(expectedWithdrawalDate);
         @event.WithdrawalReasonCode.Should().Be(expectedWithdrawalReasonCode);
-        @event.Created.Should().BeCloseTo(DateTime.Now, TimeSpan.FromMinutes(2));
+        @event.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(2));
     }
 
     [Given(@"SLD remove the short course")]
