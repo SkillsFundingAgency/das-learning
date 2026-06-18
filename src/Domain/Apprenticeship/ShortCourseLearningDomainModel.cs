@@ -43,6 +43,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         DateTime startDate,
         DateTime expectedEndDate,
         DateTime? withdrawalDate,
+        short? withdrawalReasonCode,
         IEnumerable<Milestone> milestones,
         decimal price = 0,
         LearningType learningType = LearningType.Apprenticeship,
@@ -59,6 +60,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             startDate,
             expectedEndDate,
             withdrawalDate,
+            withdrawalReasonCode,
             price,
             learningType,
             employerType,
@@ -128,6 +130,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
                     LearningKey = Key,
                     ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
                     LastDayOfLearning = episode.WithdrawalDate.Value,
+                    WithdrawalReasonCode = episode.WithdrawalReason ?? 0,
+                    Created = DateTime.UtcNow,
                     EmployerAccountId = episode.EmployerAccountId
                 });
             }

@@ -20,6 +20,8 @@ public class ShortCourseStepDefinitions
     private readonly TestContext _testContext;
 
     private const string UpdateShortCourseResultKey = "UpdateShortCourseResult";
+    private const string ExpectedShortCourseWithdrawalDateKey = "ExpectedShortCourseWithdrawalDate";
+    private const string ExpectedShortCourseWithdrawalReasonCodeKey = "ExpectedShortCourseWithdrawalReasonCode";
 
     public ShortCourseStepDefinitions(ScenarioContext scenarioContext, TestContext testContext)
     {
@@ -121,6 +123,9 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
             request.OnProgramme.WithdrawalDate = parsedWithdrawalDate;
 
+        if (row.TryGetValue("WithdrawalReasonCode", out var withdrawalReasonCode) && short.TryParse(withdrawalReasonCode, out var parsedWithdrawalReasonCode))
+            request.OnProgramme.WithdrawalReasonCode = parsedWithdrawalReasonCode;
+
         if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
             request.OnProgramme.CompletionDate = parsedCompletionDate;
 
@@ -194,6 +199,17 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("Milestone", out var milestone))
         {
             shortCourseLearning.Episodes.First().Milestones.Should().Contain(m => m.Milestone.ToString() == milestone);
+        }
+
+        if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
+        {
+            shortCourseLearning.Episodes.First().WithdrawalDate.Should().Be(parsedWithdrawalDate);
+        }
+
+        if (row.TryGetValue("WithdrawalReasonCode", out var withdrawalReasonCode) &&
+            short.TryParse(withdrawalReasonCode, out var parsedWithdrawalReasonCode))
+        {
+            shortCourseLearning.Episodes.First().WithdrawalReason.Should().Be(parsedWithdrawalReasonCode);
         }
     }
 
@@ -348,10 +364,38 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
             request.OnProgramme.CompletionDate = parsedCompletionDate;
 
+        if (row.TryGetValue("WithdrawalReasonCode", out var withdrawalReasonCode) && short.TryParse(withdrawalReasonCode, out var parsedWithdrawalReasonCode))
+            request.OnProgramme.WithdrawalReasonCode = parsedWithdrawalReasonCode;
+
         if (row.TryGetValue("Milestone", out var milestone) && Enum.TryParse<Milestone>(milestone, out var parsedMilestone))
             request.OnProgramme.Milestones = new List<Milestone> { parsedMilestone };
 
+        if (request.OnProgramme.WithdrawalDate.HasValue)
+            _scenarioContext[ExpectedShortCourseWithdrawalDateKey] = request.OnProgramme.WithdrawalDate.Value;
+
+        _scenarioContext[ExpectedShortCourseWithdrawalReasonCodeKey] = request.OnProgramme.WithdrawalReasonCode ?? (short)0;
+
         await CallUpdateShortCourseEndpoint(request);
+    }
+
+    [Then(@"the correct learning withdrawn event is emitted")]
+    public async Task ThenTheCorrectLearningWithdrawnEventIsEmitted()
+    {
+        var learningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
+        var expectedWithdrawalDate = _scenarioContext.Get<DateTime>(ExpectedShortCourseWithdrawalDateKey);
+        var expectedWithdrawalReasonCode = _scenarioContext.Get<short>(ExpectedShortCourseWithdrawalReasonCodeKey);
+
+        await WaitHelper.WaitForIt(() =>
+            _testContext.MessageSession.ReceivedEvents<SFA.DAS.Learning.Types.LearningWithdrawnEvent>()
+                .Any(e => e.LearningKey == learningKey),
+            $"Failed to find published {nameof(SFA.DAS.Learning.Types.LearningWithdrawnEvent)} event for learning key {learningKey}");
+
+        var @event = _testContext.MessageSession.ReceivedEvents<SFA.DAS.Learning.Types.LearningWithdrawnEvent>()
+            .Last(e => e.LearningKey == learningKey);
+
+        @event.WithdrawalDate.Should().Be(expectedWithdrawalDate);
+        @event.WithdrawalReasonCode.Should().Be(expectedWithdrawalReasonCode);
+        @event.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(2));
     }
 
     [Given(@"SLD remove the short course")]

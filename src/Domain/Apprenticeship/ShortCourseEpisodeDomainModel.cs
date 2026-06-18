@@ -19,6 +19,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public long EmployerAccountId => _entity.EmployerAccountId;
     public string TrainingCode => _entity.TrainingCode;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
+    public short? WithdrawalReason => _entity.WithdrawalReason;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
     public DateTime StartDate => _entity.StartDate;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
@@ -44,6 +45,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         DateTime startDate,
         DateTime expectedEndDate,
         DateTime? withdrawalDate,
+        short? withdrawalReasonCode = null,
         decimal price = 0,
         LearningType learningType = LearningType.Apprenticeship,
         EmployerType employerType = EmployerType.NonLevy,
@@ -61,6 +63,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             StartDate = startDate,
             ExpectedEndDate = expectedEndDate,
             WithdrawalDate = withdrawalDate,
+            WithdrawalReason = withdrawalReasonCode,
             Price = price,
             LearningType = learningType,
             EmployerType = employerType,
@@ -126,6 +129,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         }
 
         _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
+        _entity.WithdrawalReason = updateContext.OnProgramme.WithdrawalReasonCode;
         _entity.CompletionDate = updateContext.OnProgramme.CompletionDate;
         _entity.LearnerRef = updateContext.LearnerRef;
 

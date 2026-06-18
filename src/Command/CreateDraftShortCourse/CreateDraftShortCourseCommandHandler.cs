@@ -125,6 +125,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             command.Model.OnProgramme.StartDate,
             command.Model.OnProgramme.ExpectedEndDate,
             command.Model.OnProgramme.WithdrawalDate,
+            command.Model.OnProgramme.WithdrawalReasonCode,
             command.Model.OnProgramme.Milestones,
             command.Model.OnProgramme.Price,
             command.Model.OnProgramme.LearningType,

@@ -101,6 +101,21 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenWithdrawalReasonIsUpdatedOnEpisode()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(withdrawalReason: null);
+
+        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, CreateUpdateContext(withdrawalReasonCode: 2));
+
+        await _commandHandler.Handle(command);
+
+        learning.Episodes.Single().WithdrawalReason.Should().Be(2);
+    }
+
+    [Test]
     public async Task ThenMilestoneChangeIsDetected()
     {
         var learnerKey = Guid.NewGuid();
@@ -175,7 +190,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
-    private static ShortCourseLearningDomainModel CreateDomainModel(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship)
+    private static ShortCourseLearningDomainModel CreateDomainModel(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, LearningType learningType = LearningType.Apprenticeship, short? withdrawalReason = null)
     {
         var learningKey = Guid.NewGuid();
         var episodeKey = Guid.NewGuid();
@@ -191,6 +206,7 @@ public class WhenUpdateShortCourseCommandIsHandled
             StartDate = DateTime.Today.AddMonths(-1),
             ExpectedEndDate = DateTime.Today.AddMonths(6),
             WithdrawalDate = withdrawalDate,
+            WithdrawalReason = withdrawalReason,
             Price = 1000,
             LearningType = learningType,
             Milestones = new List<ShortCourseMilestone>()
@@ -217,7 +233,8 @@ public class WhenUpdateShortCourseCommandIsHandled
         DateTime? withdrawalDate = null,
         List<Milestone>? milestones = null,
         DateTime? completionDate = null,
-        string learnerRef = "LEARNER1")
+        string learnerRef = "LEARNER1",
+        short? withdrawalReasonCode = null)
     {
         return new ShortCourseUpdateContext
         {
@@ -232,6 +249,7 @@ public class WhenUpdateShortCourseCommandIsHandled
                 StartDate = DateTime.Today.AddMonths(-1),
                 ExpectedEndDate = DateTime.Today.AddMonths(6),
                 WithdrawalDate = withdrawalDate,
+                WithdrawalReasonCode = withdrawalReasonCode,
                 CompletionDate = completionDate,
                 Milestones = milestones ?? new List<Milestone>(),
                 Price = 1000
