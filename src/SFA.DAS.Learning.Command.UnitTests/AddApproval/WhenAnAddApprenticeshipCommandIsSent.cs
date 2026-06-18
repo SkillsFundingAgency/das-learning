@@ -176,7 +176,9 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
                                 && e.EpisodeKey == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).Key
                                 && e.EmployerAccountId == command.EmployerAccountId
-                                && e.FundingAccountId == (command.TransferSenderId ?? command.EmployerAccountId));
+                                && e.FundingAccountId == (command.TransferSenderId ?? command.EmployerAccountId)
+                                && e.LearnerKey == shortCourseLearning.LearnerKey
+                                && e.LearnerRef == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).LearnerRef);
     }
 
     [Test]

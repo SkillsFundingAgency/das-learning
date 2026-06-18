@@ -37,7 +37,9 @@ public class LearningApprovedEventHandlerTests
                     e.LearningKey == domainEvent.LearningKey &&
                     e.EpisodeKey == domainEvent.EpisodeKey &&
                     e.EmployerAccountId == domainEvent.EmployerAccountId &&
-                    e.FundingAccountId == domainEvent.FundingAccountId),
+                    e.FundingAccountId == domainEvent.FundingAccountId &&
+                    e.LearnerKey == domainEvent.LearnerKey &&
+                    e.LearnerRef == domainEvent.LearnerRef),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }

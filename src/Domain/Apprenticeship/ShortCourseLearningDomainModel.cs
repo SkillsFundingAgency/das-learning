@@ -168,7 +168,9 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             LearningKey = Key,
             EpisodeKey = episode.Key,
             EmployerAccountId = employerAccountId,
-            FundingAccountId = transferSenderId ?? employerAccountId
+            FundingAccountId = transferSenderId ?? employerAccountId,
+            LearnerKey = _entity.LearnerKey,
+            LearnerRef = episode.LearnerRef
         });
     }
 
