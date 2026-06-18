@@ -123,6 +123,9 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
             request.OnProgramme.WithdrawalDate = parsedWithdrawalDate;
 
+        if (row.TryGetValue("WithdrawalReasonCode", out var withdrawalReasonCode) && short.TryParse(withdrawalReasonCode, out var parsedWithdrawalReasonCode))
+            request.OnProgramme.WithdrawalReasonCode = parsedWithdrawalReasonCode;
+
         if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
             request.OnProgramme.CompletionDate = parsedCompletionDate;
 
@@ -196,6 +199,17 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("Milestone", out var milestone))
         {
             shortCourseLearning.Episodes.First().Milestones.Should().Contain(m => m.Milestone.ToString() == milestone);
+        }
+
+        if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
+        {
+            shortCourseLearning.Episodes.First().WithdrawalDate.Should().Be(parsedWithdrawalDate);
+        }
+
+        if (row.TryGetValue("WithdrawalReasonCode", out var withdrawalReasonCode) &&
+            short.TryParse(withdrawalReasonCode, out var parsedWithdrawalReasonCode))
+        {
+            shortCourseLearning.Episodes.First().WithdrawalReason.Should().Be(parsedWithdrawalReasonCode);
         }
     }
 
