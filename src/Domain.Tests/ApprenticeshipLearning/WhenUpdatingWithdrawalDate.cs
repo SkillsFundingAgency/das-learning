@@ -88,6 +88,10 @@ public class WhenUpdatingWithdrawalDate
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.Withdrawal);
         domainModel.Episodes.First().WithdrawalDate.Should().Be(withdrawalDate);
+
+        var withdrawnEvent = domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Single();
+        withdrawnEvent.WithdrawnReasonCode.Should().Be(0);
+        withdrawnEvent.Created.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(2));
     }
 
     private LearnerDomainModel GetLearnerDomainModel()

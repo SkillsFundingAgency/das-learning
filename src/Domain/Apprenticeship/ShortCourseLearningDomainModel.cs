@@ -128,6 +128,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
                     LearningKey = Key,
                     ApprovalsApprenticeshipId = episode.ApprovalsApprenticeshipId,
                     LastDayOfLearning = episode.WithdrawalDate.Value,
+                    WithdrawnReasonCode = episode.WithdrawalReason ?? 0,
+                    Created = DateTime.Now,
                     EmployerAccountId = episode.EmployerAccountId
                 });
             }

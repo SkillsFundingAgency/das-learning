@@ -27,7 +27,10 @@ public class LearningWithdrawnEventHandlerTests
     public async Task Handle_PublishesLearningWithdrawnEventMessage()
     {
         // Arrange
-        var domainEvent = _fixture.Create<LearningWithdrawnEvent>();
+        var domainEvent = _fixture.Build<LearningWithdrawnEvent>()
+            .With(x => x.WithdrawnReasonCode, _fixture.Create<short>())
+            .With(x => x.Created, _fixture.Create<DateTime>())
+            .Create();
 
         // Act
         await _handler.Handle(domainEvent, default);
@@ -36,7 +39,9 @@ public class LearningWithdrawnEventHandlerTests
                 It.Is<Types.LearningWithdrawnEvent>(msg =>
                     msg.ApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
                     msg.LearningKey == domainEvent.LearningKey &&
-                    msg.WithdrawalDate == domainEvent.LastDayOfLearning
+                    msg.WithdrawalDate == domainEvent.LastDayOfLearning &&
+                    msg.WithdrawnReasonCode == domainEvent.WithdrawnReasonCode &&
+                    msg.Created == domainEvent.Created
                 ),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
