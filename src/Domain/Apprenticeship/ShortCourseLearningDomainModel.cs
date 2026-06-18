@@ -11,14 +11,16 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     private readonly List<ShortCourseEpisodeDomainModel> _episodes;
 
     public Guid Key => _entity.Key;
+    public string TrainingCode => _entity.TrainingCode;
     public IReadOnlyCollection<ShortCourseEpisodeDomainModel> Episodes => new ReadOnlyCollection<ShortCourseEpisodeDomainModel>(_episodes);
 
-    internal static ShortCourseLearningDomainModel New(Guid learnerKey)
+    internal static ShortCourseLearningDomainModel New(Guid learnerKey, string trainingCode)
     {
         return new ShortCourseLearningDomainModel(new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
-            LearnerKey = learnerKey
+            LearnerKey = learnerKey,
+            TrainingCode = trainingCode
         });
     }
 
@@ -51,8 +53,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             _entity.Key,
             ukprn,
             employerAccountId,
-            learnerRef,
             trainingCode,
+            learnerRef,
             isApproved,
             startDate,
             expectedEndDate,

@@ -119,8 +119,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         var episode = learning.AddEpisode(
             command.Model.OnProgramme.Ukprn,
             command.Model.OnProgramme.EmployerId,
-            command.Model.OnProgramme.CourseCode,
             command.Model.LearnerRef,
+            command.Model.OnProgramme.CourseCode,
             false,
             command.Model.OnProgramme.StartDate,
             command.Model.OnProgramme.ExpectedEndDate,
@@ -138,7 +138,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
     private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)
     {
-        var learning = _shortCourseLearningFactory.CreateNew(learner.Key);
+        var learning = _shortCourseLearningFactory.CreateNew(learner.Key, command.Model.OnProgramme.CourseCode);
 
         AddEpisode(learning, command);
 
