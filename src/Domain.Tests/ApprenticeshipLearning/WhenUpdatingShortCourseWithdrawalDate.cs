@@ -41,7 +41,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
         @event.ApprovalsApprenticeshipId.Should().Be(learning.Episodes.Single().ApprovalsApprenticeshipId);
         @event.EmployerAccountId.Should().Be(learning.Episodes.Single().EmployerAccountId);
         @event.LastDayOfLearning.Should().Be(withdrawalDate);
-        @event.WithdrawnReasonCode.Should().Be(withdrawalReasonCode);
+        @event.WithdrawalReasonCode.Should().Be(withdrawalReasonCode);
         @event.Created.Should().BeCloseTo(DateTime.Now, TimeSpan.FromSeconds(2));
     }
 

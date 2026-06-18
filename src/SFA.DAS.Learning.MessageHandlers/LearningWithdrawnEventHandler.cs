@@ -15,7 +15,7 @@ namespace SFA.DAS.Learning.MessageHandlers
                 LearningKey = @event.LearningKey,
                 ApprenticeshipId = @event.ApprovalsApprenticeshipId,
                 WithdrawalDate = @event.LastDayOfLearning,
-                WithdrawnReasonCode = @event.WithdrawnReasonCode,
+                WithdrawalReasonCode = @event.WithdrawalReasonCode,
                 Created = @event.Created
             };
 

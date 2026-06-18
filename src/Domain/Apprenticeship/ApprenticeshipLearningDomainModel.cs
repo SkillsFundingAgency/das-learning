@@ -307,7 +307,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
-                WithdrawnReasonCode = 0,
+                WithdrawalReasonCode = 0,
                 Created = DateTime.Now,
                 EmployerAccountId = LatestEpisode.EmployerAccountId
             };

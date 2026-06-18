@@ -28,7 +28,7 @@ public class LearningWithdrawnEventHandlerTests
     {
         // Arrange
         var domainEvent = _fixture.Build<LearningWithdrawnEvent>()
-            .With(x => x.WithdrawnReasonCode, _fixture.Create<short>())
+            .With(x => x.WithdrawalReasonCode, _fixture.Create<short>())
             .With(x => x.Created, _fixture.Create<DateTime>())
             .Create();
 
@@ -40,7 +40,7 @@ public class LearningWithdrawnEventHandlerTests
                     msg.ApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
                     msg.LearningKey == domainEvent.LearningKey &&
                     msg.WithdrawalDate == domainEvent.LastDayOfLearning &&
-                    msg.WithdrawnReasonCode == domainEvent.WithdrawnReasonCode &&
+                    msg.WithdrawalReasonCode == domainEvent.WithdrawalReasonCode &&
                     msg.Created == domainEvent.Created
                 ),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
