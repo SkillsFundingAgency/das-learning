@@ -105,7 +105,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn + 1);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -127,7 +127,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -148,7 +148,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn + 1);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -170,7 +170,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn, learningType: LearningType.Apprenticeship);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -191,7 +191,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn, isRemoved: true);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         var mappedLearner = new ShortCourseLearnerDto { Uln = "1234567890", FirstName = "Jane", LastName = "Smith" };
         var mappedEpisodes = new[] { new ShortCourseEpisodeDto { CourseCode = "SC-001" } };
@@ -231,7 +231,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn, learningType: LearningType.ApprenticeshipUnit);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -245,6 +245,36 @@ public class WhenCreateDraftShortCourseCommandIsHandled
             command.Model.Learner.LastName);
     }
     [Test]
+    public async Task ThenCreatesNewLearningForCourseCodeRatherThanFindingUnrelatedLearningForSameLearner()
+    {
+        // Arrange - learner already has a Learning for a *different* CourseCode (e.g. from a prior Progression POST).
+        // The lookup must be scoped by CourseCode, not just LearnerKey, or this POST will incorrectly
+        // find and mutate the unrelated Learning instead of creating a new one.
+        var command = _fixture.Create<CreateDraftShortCourseCommand>();
+        var learner = _fixture.Create<LearnerDomainModel>();
+
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        var unrelatedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn);
+        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(unrelatedLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
+
+        var newLearningEntity = _fixture.Create<ShortCourseLearning>();
+        newLearningEntity.Episodes = new List<ShortCourseEpisode>();
+        var newDomainModel = ShortCourseLearningDomainModel.Get(newLearningEntity);
+        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), command.Model.OnProgramme.CourseCode)).Returns(newDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == newDomainModel)), Times.Once);
+        _learningRepository.Verify(x => x.Update(unrelatedLearning), Times.Never);
+        unrelatedLearning.Episodes.Should().HaveCount(1);
+        result!.LearningKey.Should().Be(newDomainModel.Key);
+    }
+
+    [Test]
     public async Task ThenRejectsCommandIfFeatureFlagIsFalseAndDifferentProviderExists()
     {
         // Arrange
@@ -255,7 +285,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: command.Model.OnProgramme.Ukprn + 1);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -276,7 +306,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
 
         var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: command.Model.OnProgramme.Ukprn);
-        _learningRepository.Setup(x => x.GetByLearnerKey(learner.Key)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         // Act
         var result = await _commandHandler.Handle(command);

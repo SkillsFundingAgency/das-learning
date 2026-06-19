@@ -46,7 +46,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         var (learner, personalDetailsChanged) = await GetOrCreateLearner(command);
 
-        var learning = await _shortCourseLearningRepository.GetByLearnerKey(learner.Key);
+        var learning = await _shortCourseLearningRepository.GetByLearnerKeyAndCourseCode(learner.Key, command.Model.OnProgramme.CourseCode);
 
         var ukprn = command.Model.OnProgramme.Ukprn;
 
