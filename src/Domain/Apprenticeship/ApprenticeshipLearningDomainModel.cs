@@ -307,6 +307,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
+                WithdrawalReasonCode = 0, //to be populated in a future story (FLP-1881)
+                Created = DateTime.UtcNow,
                 EmployerAccountId = LatestEpisode.EmployerAccountId
             };
 

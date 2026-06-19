@@ -116,6 +116,7 @@ public class UpdateShortCourseCommandHandler(
             op.StartDate,
             op.ExpectedEndDate,
             op.WithdrawalDate,
+            op.WithdrawalReasonCode,
             op.Milestones,
             op.Price,
             op.LearningType,

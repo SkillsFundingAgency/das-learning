@@ -59,6 +59,11 @@ public class OnProgramme
     public DateTime? WithdrawalDate { get; set; }
 
     /// <summary>
+    /// Withdrawal reason code
+    /// </summary>
+    public short? WithdrawalReasonCode { get; set; }
+
+    /// <summary>
     /// Completion date of the short course
     /// </summary>
     public DateTime? CompletionDate { get; set; }
@@ -117,6 +122,7 @@ public static class UpdateShortCourseRequestExtensions
                 Ukprn = op.Ukprn,
                 StartDate = op.StartDate,
                 WithdrawalDate = op.WithdrawalDate,
+                WithdrawalReasonCode = op.WithdrawalReasonCode,
                 CompletionDate = op.CompletionDate,
                 ExpectedEndDate = op.ExpectedEndDate,
                 Milestones = op.Milestones ?? new List<Milestone>(),
@@ -163,6 +169,7 @@ public static class CreateDraftShortCourseRequestExtensions
                 Ukprn = request.OnProgramme.Ukprn,
                 StartDate = request.OnProgramme.StartDate,
                 WithdrawalDate = request.OnProgramme.WithdrawalDate,
+                WithdrawalReasonCode = request.OnProgramme.WithdrawalReasonCode,
                 CompletionDate = request.OnProgramme.CompletionDate,
                 ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
                 Milestones = request.OnProgramme.Milestones ?? new List<Milestone>(),

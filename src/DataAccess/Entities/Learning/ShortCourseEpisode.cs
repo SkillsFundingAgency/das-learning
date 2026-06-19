@@ -15,6 +15,7 @@ public class ShortCourseEpisode : Episode
     }
 
     public DateTime? WithdrawalDate { get; set; }
+    public short? WithdrawalReason { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime ExpectedEndDate { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }

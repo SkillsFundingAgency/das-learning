@@ -24,6 +24,14 @@ Scenario: Create Draft Short Course with learning support
 		| LearningSupport[0]                             |
 		| startDate:currentAY-09-25 endDate:nextAY-07-31 |
 
+Scenario: Create Draft Short Course with Withdrawal
+    Given SLD call the create short course endpoint with the following information
+		| WithdrawalDate  | WithdrawalReasonCode |
+		| currentAY-11-15 |                    2 |
+	Then a short course record is created with
+		| WithdrawalDate  | WithdrawalReasonCode |
+		| currentAY-11-15 |                    2 |
+
 Scenario: Approve Short Course
 	Given SLD has informed the system that a new short course has been created
 	When the Short Course has been approved by an employer

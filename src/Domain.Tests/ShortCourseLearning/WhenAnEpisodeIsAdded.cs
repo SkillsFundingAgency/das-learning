@@ -42,6 +42,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
                 DateTime.UtcNow.AddMonths(-2),
                 DateTime.UtcNow.AddMonths(6),
                 null,
+                null,
                 milestones);
 
             // Assert
