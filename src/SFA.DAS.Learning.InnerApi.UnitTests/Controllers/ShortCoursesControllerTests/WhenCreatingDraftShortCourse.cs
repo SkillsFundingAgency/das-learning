@@ -9,6 +9,7 @@ using SFA.DAS.Learning.InnerApi.Controllers;
 using SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
+using System.Linq;
 
 namespace SFA.DAS.Learning.InnerApi.UnitTests.Controllers.ShortCoursesControllerTests;
 
@@ -49,10 +50,10 @@ public class WhenCreatingDraftShortCourse
         var commandResult = new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated };
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(
+            .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>(
                 It.IsAny<CreateDraftShortCourseCommand>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(commandResult);
+            .ReturnsAsync(new CreateDraftShortCourseCommandResponse { Results = [commandResult] });
 
         // Act
         var result = await _sut.CreateDraftShortCourse(request);
@@ -60,13 +61,14 @@ public class WhenCreatingDraftShortCourse
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
-        okResult.Value.Should().BeEquivalentTo(new CreateDraftShortCourseCommandResult { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated });
+        okResult.Value.Should().BeEquivalentTo(new CreateDraftShortCourseCommandResponse { Results = [new() { LearningKey = expectedLearningKey, EpisodeKey = expectedEpisodeKey, IsReinstated = isReinstated }] });
 
         _mockCommandDispatcher.Verify(x =>
-            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(
+            x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>(
                 It.Is<CreateDraftShortCourseCommand>(c =>
-                    c.Model.Learner.EmailAddress == request.LearnerUpdateDetails.EmailAddress &&
-                    c.Model.OnProgramme.CourseCode == request.OnProgramme.CourseCode
+                    c.Models.Count == request.OnProgramme.Count &&
+                    c.Models.All(m => m.Learner.EmailAddress == request.LearnerUpdateDetails.EmailAddress) &&
+                    c.Models.Select(m => m.OnProgramme.CourseCode).SequenceEqual(request.OnProgramme.Select(op => op.CourseCode))
                 ),
                 It.IsAny<CancellationToken>()),
             Times.Once);

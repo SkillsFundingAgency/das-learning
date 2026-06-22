@@ -25,7 +25,7 @@ public class CreateDraftShortCourseRequest
     /// <summary>
     /// On programme details
     /// </summary>
-    public OnProgramme OnProgramme { get; set; }
+    public List<OnProgramme> OnProgramme { get; set; } = new();
 }
 
 /// <summary>
@@ -139,13 +139,13 @@ public static class UpdateShortCourseRequestExtensions
 public static class CreateDraftShortCourseRequestExtensions
 {
     /// <summary>
-    /// Maps a <see cref="CreateDraftShortCourseRequest"/> to a <see cref="ShortCourseUpdateContext"/>.
+    /// Maps a <see cref="CreateDraftShortCourseRequest"/> to a list of <see cref="ShortCourseUpdateContext"/>, one per OnProgramme item.
     /// </summary>
     /// <param name="request">The request to map.</param>
-    /// <returns>A new instance of <see cref="ShortCourseUpdateContext"/>.</returns>
-    public static ShortCourseUpdateContext ToCreateModel(this CreateDraftShortCourseRequest request)
+    /// <returns>A new list of <see cref="ShortCourseUpdateContext"/>.</returns>
+    public static List<ShortCourseUpdateContext> ToCreateModels(this CreateDraftShortCourseRequest request)
     {
-        return new ShortCourseUpdateContext
+        return request.OnProgramme.Select(op => new ShortCourseUpdateContext
         {
             LearnerRef = request.LearnerUpdateDetails.LearnerRef,
             Learner = new LearnerModel
@@ -164,18 +164,18 @@ public static class CreateDraftShortCourseRequestExtensions
                 }),
             OnProgramme = new Learning.Models.UpdateModels.OnProgramme
             {
-                CourseCode = request.OnProgramme.CourseCode,
-                EmployerId = request.OnProgramme.EmployerId,
-                Ukprn = request.OnProgramme.Ukprn,
-                StartDate = request.OnProgramme.StartDate,
-                WithdrawalDate = request.OnProgramme.WithdrawalDate,
-                WithdrawalReasonCode = request.OnProgramme.WithdrawalReasonCode,
-                CompletionDate = request.OnProgramme.CompletionDate,
-                ExpectedEndDate = request.OnProgramme.ExpectedEndDate,
-                Milestones = request.OnProgramme.Milestones ?? new List<Milestone>(),
-                Price = request.OnProgramme.Price,
-                LearningType = request.OnProgramme.LearningType
+                CourseCode = op.CourseCode,
+                EmployerId = op.EmployerId,
+                Ukprn = op.Ukprn,
+                StartDate = op.StartDate,
+                WithdrawalDate = op.WithdrawalDate,
+                WithdrawalReasonCode = op.WithdrawalReasonCode,
+                CompletionDate = op.CompletionDate,
+                ExpectedEndDate = op.ExpectedEndDate,
+                Milestones = op.Milestones ?? new List<Milestone>(),
+                Price = op.Price,
+                LearningType = op.LearningType
             }
-        };
+        }).ToList();
     }
 }

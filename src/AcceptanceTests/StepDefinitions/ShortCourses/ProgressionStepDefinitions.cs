@@ -28,10 +28,11 @@ public class ProgressionStepDefinitions
     public async Task GivenAnApprovedShortCourseExistsForCourse(string courseCode)
     {
         var request = BuildRequest(courseCode);
-        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>("/shortCourses", request);
+        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
+        var result = responseBody?.Results.SingleOrDefault();
 
-        var learningKey = responseBody?.LearningKey ?? Guid.Empty;
-        var learnerKey = responseBody?.LearnerKey ?? Guid.Empty;
+        var learningKey = result?.LearningKey ?? Guid.Empty;
+        var learnerKey = result?.LearnerKey ?? Guid.Empty;
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearning] = learningKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = learnerKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
@@ -297,7 +298,7 @@ public class ProgressionStepDefinitions
 
     private static CreateDraftShortCourseRequest BuildRequest(string courseCode) => new()
     {
-        OnProgramme = BuildOnProgramme(courseCode),
+        OnProgramme = [BuildOnProgramme(courseCode)],
         LearnerUpdateDetails = BuildLearnerDetails(),
         LearningSupport = new List<LearningSupportDetails>()
     };
