@@ -50,15 +50,55 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         var learnerHasExistingLearnings = existingLearnings.Count > 0;
 
         var results = new List<CreateDraftShortCourseCommandResult>();
+        var processedLearningKeys = new HashSet<Guid>();
 
         foreach (var model in command.Models)
         {
             var result = await HandleSingleItem(model, learner, personalDetailsChanged, learnerHasExistingLearnings);
             if (result != null)
+            {
                 results.Add(result);
+                if (!result.IsIgnored)
+                {
+                    processedLearningKeys.Add(result.LearningKey);
+                }
+            }
+        }
+
+        if (_featureFlags.ShortCourseProgression)
+        {
+            await RemoveOmittedLearnings(command, existingLearnings, results, processedLearningKeys);
         }
 
         return new CreateDraftShortCourseCommandResponse { Results = results };
+    }
+
+    private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys)
+    {
+        foreach (var learning in existingLearnings.Where(l => !processedLearningKeys.Contains(l.Key)))
+        {
+            var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
+            if (activeEpisode == null)
+                continue;
+
+            var removedEpisodeKey = learning.Remove(command.Ukprn);
+
+            if (!removedEpisodeKey.HasValue)
+                continue;
+
+            await _shortCourseLearningRepository.Update(learning);
+
+            _logger.LogInformation("Removed omitted Learning {LearningKey} / {CourseCode} for LearnerKey {LearnerKey}",
+                learning.Key, learning.TrainingCode, learning.LearnerKey);
+
+            results.Add(new CreateDraftShortCourseCommandResult
+            {
+                IsRemoved = true,
+                LearningKey = learning.Key,
+                CourseCode = learning.TrainingCode,
+                EpisodeKey = removedEpisodeKey.Value
+            });
+        }
     }
 
     private async Task<CreateDraftShortCourseCommandResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged, bool learnerHasExistingLearnings)

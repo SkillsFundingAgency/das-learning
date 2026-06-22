@@ -13,6 +13,11 @@ namespace SFA.DAS.Learning.InnerApi.Requests.ShortCourses;
 public class CreateDraftShortCourseRequest
 {
     /// <summary>
+    /// Provider UKPRN for this request
+    /// </summary>
+    public long Ukprn { get; set; }
+
+    /// <summary>
     /// Learner details to be updated
     /// </summary>
     public ShortCourseLearnerUpdateDetails LearnerUpdateDetails { get; set; }

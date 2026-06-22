@@ -71,7 +71,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     private CreateDraftShortCourseCommand CreateSingleItemCommand(out ShortCourseUpdateContext model)
     {
         model = _fixture.Create<ShortCourseUpdateContext>();
-        return new CreateDraftShortCourseCommand([model]);
+        return new CreateDraftShortCourseCommand(model.OnProgramme.Ukprn, [model]);
     }
 
     [Test]
@@ -285,11 +285,12 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var results = await _commandHandler.Handle(command);
 
         // Assert
-        var result = results.Results.Single();
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == newDomainModel)), Times.Once);
-        _learningRepository.Verify(x => x.Update(unrelatedLearning), Times.Never);
-        unrelatedLearning.Episodes.Should().HaveCount(1);
-        result.LearningKey.Should().Be(newDomainModel.Key);
+        results.Results.Should().Contain(r => r.LearningKey == newDomainModel.Key);
+
+        // The unrelated Learning is omitted from this bundle, so it is removed (full-state-upsert semantics, same as PUT).
+        _learningRepository.Verify(x => x.Update(unrelatedLearning), Times.Once);
+        unrelatedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
     }
 
     [Test]
@@ -322,7 +323,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _featureFlags.ShortCourseProgression = true;
         var originalModel = _fixture.Create<ShortCourseUpdateContext>();
         var newModel = _fixture.Create<ShortCourseUpdateContext>();
-        var command = new CreateDraftShortCourseCommand([originalModel, newModel]);
+        var command = new CreateDraftShortCourseCommand(originalModel.OnProgramme.Ukprn, [originalModel, newModel]);
 
         var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
@@ -331,6 +332,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, originalModel.OnProgramme.CourseCode)).ReturnsAsync(originalLearning);
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, newModel.OnProgramme.CourseCode)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
         _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([originalLearning]);
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(originalLearning, learner, originalModel.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = originalLearning.Key, LearnerKey = learner.Key });
 
         var newLearningEntity = _fixture.Create<ShortCourseLearning>();
         newLearningEntity.Episodes = new List<ShortCourseEpisode>();
@@ -387,6 +390,84 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         // Assert
         results.Results.Should().BeEmpty();
         _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ThenOmittedLearningIsNotRemovedWhenFlagDisabled()
+    {
+        // Arrange
+        _featureFlags.ShortCourseProgression = false;
+        var command = CreateSingleItemCommand(out var model);
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var includedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
+        var omittedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(includedLearning);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([includedLearning, omittedLearning]);
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(includedLearning, learner, model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert
+        results.Results.Should().NotContain(r => r.IsRemoved);
+        omittedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
+        includedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _learningRepository.Verify(x => x.Update(omittedLearning), Times.Never);
+    }
+
+    [Test]
+    public async Task ThenOmittedUnapprovedLearningIsRemovedWhenFlagEnabled()
+    {
+        // Arrange
+        _featureFlags.ShortCourseProgression = true;
+        var command = CreateSingleItemCommand(out var model);
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var includedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
+        var omittedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(includedLearning);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([includedLearning, omittedLearning]);
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(includedLearning, learner, model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert
+        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == omittedLearning.TrainingCode);
+        omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
+        includedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _learningRepository.Verify(x => x.Update(omittedLearning), Times.Once);
+    }
+
+    [Test]
+    public async Task ThenOmittedApprovedLearningIsRemovedWhenFlagEnabled()
+    {
+        // Arrange
+        _featureFlags.ShortCourseProgression = true;
+        var command = CreateSingleItemCommand(out var model);
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var includedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
+        var omittedLearning = BuildLearningWithEpisode(isApproved: true, ukprn: model.OnProgramme.Ukprn);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(includedLearning);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([includedLearning, omittedLearning]);
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(includedLearning, learner, model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert
+        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == omittedLearning.TrainingCode);
+        omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
+        includedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _learningRepository.Verify(x => x.Update(omittedLearning), Times.Once);
     }
 
     private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship, bool isRemoved = false)

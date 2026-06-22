@@ -95,7 +95,7 @@ public class ShortCoursesController : ControllerBase
     {
         _logger.LogInformation("Creating draft short course (ukprn: {ukprn})", request.OnProgramme.FirstOrDefault()?.Ukprn);
 
-        var command = new CreateDraftShortCourseCommand(request.ToCreateModels());
+        var command = new CreateDraftShortCourseCommand(request.Ukprn, request.ToCreateModels());
 
         var response =
             await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>(command);
