@@ -78,6 +78,7 @@ public class ApprovalCreatedStepDefinitions
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
     }
 
+    [Given(@"short course is approved via a ApprenticeshipCreatedEvent")]
     [When(@"the Short Course has been approved by an employer")]
     public async Task GivenTheShortCourseHasBeenApprovedByAnEmployer()
     {
