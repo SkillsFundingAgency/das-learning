@@ -61,6 +61,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
                 if (!result.IsIgnored)
                 {
                     processedLearningKeys.Add(result.LearningKey);
+                    learnerHasExistingLearnings = true;
                 }
             }
         }
