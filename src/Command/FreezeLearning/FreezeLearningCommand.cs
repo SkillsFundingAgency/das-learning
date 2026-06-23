@@ -5,4 +5,10 @@
 // Therefore, we can use the same command to handle both events.
 public class FreezeLearningCommand : ICommand
 {
+	public FreezeLearningCommand(long approvalsApprenticeshipId)
+	{
+		ApprovalsApprenticeshipId = approvalsApprenticeshipId;
+	}
+
+	public long ApprovalsApprenticeshipId { get; }
 }

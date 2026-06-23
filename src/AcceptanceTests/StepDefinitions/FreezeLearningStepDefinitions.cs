@@ -114,9 +114,7 @@ public class FreezeLearningStepDefinitions
 
     private static bool IsExpectedPaymentsStatusUpdatedEvent(PaymentsStatusUpdatedForEpisode @event, Guid learningKey)
     {
-        return @event.PaymentsFrozen
-               && Guid.TryParse(@event.LearningKey, out var eventLearningKey)
-               && eventLearningKey == learningKey;
+        return @event.PaymentsFrozen && @event.LearningKey == learningKey;
     }
 
 }

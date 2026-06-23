@@ -182,6 +182,13 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return latestEpisode;
     }
 
+    public ShortCourseEpisodeDomainModel FreezeEpisodePayments(long approvalsApprenticeshipId)
+    {
+        var episode = _episodes.Single(e => e.ApprovalsApprenticeshipId == approvalsApprenticeshipId);
+        episode.UpdatePaymentStatus(true);
+        return episode;
+    }
+
     private ShortCourseLearningDomainModel(ShortCourseLearning entity) : base(entity)
     {
         _entity = entity;

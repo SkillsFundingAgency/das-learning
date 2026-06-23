@@ -4,9 +4,9 @@
 
 public class PaymentsStatusUpdatedForEpisode
 {
-    public string LearnerKey { get; set; }
-    public string LearningKey { get; set; }
-    public string EpisodeKey { get; set; }
+    public Guid LearnerKey { get; set; }
+    public Guid LearningKey { get; set; }
+    public Guid EpisodeKey { get; set; }
     public bool PaymentsFrozen { get; set; } 
 }
 

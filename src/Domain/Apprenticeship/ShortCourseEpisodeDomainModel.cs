@@ -30,6 +30,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public LearningType LearningType => _entity.LearningType;
     public EmployerType EmployerType => _entity.EmployerType;
     public long? TransferSenderId => _entity.TransferSenderId;
+    public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
         new ReadOnlyCollection<ShortCourseMilestoneDomainModel>(_milestones);
 
@@ -114,6 +115,11 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public void Reinstate()
     {
         _entity.IsRemoved = false;
+    }
+
+    public void UpdatePaymentStatus(bool isFrozen)
+    {
+        _entity.PaymentsFrozen = isFrozen;
     }
 
     public void Update(ShortCourseUpdateContext updateContext)
