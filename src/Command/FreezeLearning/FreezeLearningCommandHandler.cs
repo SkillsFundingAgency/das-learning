@@ -30,7 +30,8 @@ public class FreezeLearningCommandHandler : ICommandHandler<FreezeLearningComman
         var shortCourseLearning = await _shortCourseLearningRepository.GetByApprovalsApprenticeshipId(command.ApprovalsApprenticeshipId);
         if (shortCourseLearning == null)
         {
-            _logger.LogInformation("No short course learning found for ApprovalsApprenticeshipId {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
+            // Logged as a warning for now. When we introduce freeze for full apprenticeships, if no learning is found then we should raise an error
+            _logger.LogWarning("No short course learning found for ApprovalsApprenticeshipId {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
             return;
         }
 
