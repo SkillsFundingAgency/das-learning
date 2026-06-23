@@ -17,7 +17,8 @@ CREATE TABLE [dbo].[ShortCourseEpisode]
     [EmployerType] TINYINT NOT NULL DEFAULT 0,
     [TransferSenderId] BIGINT NULL,
     [IsRemoved] BIT NOT NULL DEFAULT 0,
-    [CompletionDate] DATETIME NULL
+    [CompletionDate] DATETIME NULL,
+    [PaymentsFrozen] BIT NOT NULL DEFAULT 0
 )
 GO
 

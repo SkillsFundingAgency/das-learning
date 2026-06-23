@@ -90,6 +90,19 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
+    public async Task<ShortCourseLearningDomainModel?> GetByApprovalsApprenticeshipId(long approvalsApprenticeshipId)
+    {
+        var shortCourseLearning = await DbContext
+            .ShortCourseLearnings
+            .IncludeAllChildren()
+            .SingleOrDefaultAsync(x => x.Episodes.Any(e => e.ApprovalsApprenticeshipId == approvalsApprenticeshipId));
+
+        if (shortCourseLearning == null)
+            return null;
+
+        return _learningFactory.GetExisting(shortCourseLearning);
+    }
+
     public async Task<PagedResult<Models.Dtos.Learning>> GetApprovedByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
     {
         var baseQuery = DbContext.ShortCourseLearnings

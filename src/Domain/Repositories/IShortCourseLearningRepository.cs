@@ -8,4 +8,5 @@ public interface IShortCourseLearningRepository : ILearningRepository
     Task Update(ShortCourseLearningDomainModel learning);
     Task<ShortCourseLearningDomainModel> Get(Guid key);
     Task<ShortCourseLearningDomainModel?> GetByLearnerKey(Guid learnerKey);
+    Task<ShortCourseLearningDomainModel?> GetByApprovalsApprenticeshipId(long approvalsApprenticeshipId);
 }
