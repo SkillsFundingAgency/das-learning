@@ -31,8 +31,7 @@ public class FreezeLearningStepDefinitions
         {
             await _testContext.TestFunction!.PublishEvent(new ApprenticeshipPausedEvent
             {
-                ApprenticeshipId = approvalsApprenticeshipId,
-                PausedOn = DateTime.UtcNow
+                ApprenticeshipId = approvalsApprenticeshipId
             });
             return;
         }
@@ -41,10 +40,7 @@ public class FreezeLearningStepDefinitions
         {
             await _testContext.TestFunction!.PublishEvent(new ApprenticeshipStoppedEvent
             {
-                ApprenticeshipId = approvalsApprenticeshipId,
-                StopDate = DateTime.UtcNow.Date,
-                AppliedOn = DateTime.UtcNow,
-                ProviderId = await GetUkprn(learningKey)
+                ApprenticeshipId = approvalsApprenticeshipId
             });
             return;
         }
@@ -62,17 +58,15 @@ public class FreezeLearningStepDefinitions
     }
 
     [Then("a paymentStatus updated event is published with a frozen flag set to (.*)")]
-    public async Task ThenAPaymentStatusUpdatedEventIsPublishedWithAFrozenFlagSetToTrue(bool paymentStatus)
+    public async Task ThenAPaymentStatusUpdatedEventIsPublishedWithAFrozenFlagSetToExpectedValue(bool paymentStatus)
     {
         var learningKey = GetShortCourseLearningKey();
 
         await WaitHelper.WaitForIt(() =>
-                _testContext.MessageSession.ReceivedEvents<PaymentsStatusUpdatedForEpisode>()
-                    .Any(e => IsExpectedPaymentsStatusUpdatedEvent(e, learningKey)),
+                _testContext.MessageSession.ReceivedEvents<PaymentsStatusUpdatedForEpisode>().Any(e => e.LearningKey == learningKey),
             $"Failed to find published {nameof(PaymentsStatusUpdatedForEpisode)} event for learning key {learningKey}");
 
-        var @event = _testContext.MessageSession.ReceivedEvents<PaymentsStatusUpdatedForEpisode>()
-            .Last(e => IsExpectedPaymentsStatusUpdatedEvent(e, learningKey));
+        var @event = _testContext.MessageSession.ReceivedEvents<PaymentsStatusUpdatedForEpisode>().Last(e => e.LearningKey == learningKey);
 
         @event.PaymentsFrozen.Should().Be(paymentStatus);
     }
@@ -100,21 +94,6 @@ public class FreezeLearningStepDefinitions
               FROM dbo.ShortCourseEpisode
               WHERE LearningKey = @learningKey",
             new { learningKey });
-    }
-
-    private async Task<long> GetUkprn(Guid learningKey)
-    {
-            await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-            return await dbConnection.QuerySingleAsync<long>(
-                    @"SELECT TOP 1 Ukprn
-                        FROM dbo.ShortCourseEpisode
-                        WHERE LearningKey = @learningKey",
-                    new { learningKey });
-    }
-
-    private static bool IsExpectedPaymentsStatusUpdatedEvent(PaymentsStatusUpdatedForEpisode @event, Guid learningKey)
-    {
-        return @event.PaymentsFrozen && @event.LearningKey == learningKey;
     }
 
 }
