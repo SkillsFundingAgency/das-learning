@@ -345,6 +345,43 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenNewEpisodeIsAddedWhenExistingEpisodeBelongsToDifferentProviderAndChangeOfProviderEnabled()
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseChangeOfProvider = true;
+        var learning = CreateDomainModel(ukprn: 99999999);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeFalse();
+        learning.Episodes.Should().HaveCount(2);
+        learning.Episodes.Should().Contain(e => e.Ukprn == 99999999);
+        learning.Episodes.Should().Contain(e => e.Ukprn == 12345678);
+    }
+
+    [Test]
+    public async Task ThenIgnoredResultReturnedWhenExistingEpisodeBelongsToDifferentProviderAndChangeOfProviderDisabled()
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseChangeOfProvider = false;
+        var learning = CreateDomainModel(ukprn: 99999999);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeTrue();
+        learning.Episodes.Should().HaveCount(1);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
     public async Task ThenRemovedUnapprovedEpisodeIsReinstatedWhenItReappearsInPut()
     {
         var learnerKey = Guid.NewGuid();

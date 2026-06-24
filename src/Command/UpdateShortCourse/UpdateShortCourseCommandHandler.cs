@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Infrastructure.Configuration;
@@ -88,16 +89,65 @@ public class UpdateShortCourseCommandHandler(
             return await CreateNewLearning(learnerKey, model);
         }
 
+        var ukprn = model.OnProgramme.Ukprn;
+        var existingEpisodeForProvider = learning.Episodes.Any(x => x.Ukprn == ukprn);
+
+        if (!existingEpisodeForProvider)
+        {
+            if (!featureFlags.ShortCourseChangeOfProvider)
+            {
+                logger.LogInformation(
+                    "Learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} but the existing episode belongs to a different provider; Short Course Change of Provider is disabled — ignoring",
+                    learnerKey, model.OnProgramme.CourseCode);
+                return new UpdateShortCourseResult { IsIgnored = true };
+            }
+
+            return await AddEpisodeToExistingLearning(learning, model);
+        }
+
         var updateResult = learning.Update(model);
 
         await repository.Update(learning);
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
-        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, model.OnProgramme.Ukprn);
+        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, ukprn);
         result.CourseCode = model.OnProgramme.CourseCode;
         result.Changes = updateResult.Changes;
         result.UpdatedEpisodeKey = updateResult.EpisodeKey;
+        return result;
+    }
+
+    private async Task<UpdateShortCourseResult> AddEpisodeToExistingLearning(ShortCourseLearningDomainModel learning, ShortCourseUpdateContext model)
+    {
+        var op = model.OnProgramme;
+
+        var episode = learning.AddEpisode(
+            op.Ukprn,
+            op.EmployerId,
+            model.LearnerRef,
+            op.CourseCode,
+            false,
+            op.StartDate,
+            op.ExpectedEndDate,
+            op.WithdrawalDate,
+            op.WithdrawalReasonCode,
+            op.Milestones,
+            op.Price,
+            op.LearningType,
+            completionDate: op.CompletionDate);
+
+        foreach (var ls in model.LearningSupport)
+            episode.AddLearningSupport(ls.StartDate, ls.EndDate);
+
+        await repository.Update(learning);
+
+        var learner = await learnerRepository.Get(learning.LearnerKey);
+
+        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, op.Ukprn);
+        result.CourseCode = op.CourseCode;
+        result.UpdatedEpisodeKey = episode.Key;
+        result.IsNewEpisode = true;
         return result;
     }
 
