@@ -93,7 +93,7 @@ public class ShortCoursesController : ControllerBase
     [ProducesResponseType(200)]
     public async Task<IActionResult> CreateDraftShortCourse([FromBody] CreateDraftShortCourseRequest request)
     {
-        _logger.LogInformation("Creating draft short course (ukprn: {ukprn})", request.OnProgramme.FirstOrDefault()?.Ukprn);
+        _logger.LogInformation("Creating draft short course (ukprn: {ukprn})", request.Ukprn);
 
         var command = new CreateDraftShortCourseCommand(request.Ukprn, request.ToCreateModels());
 

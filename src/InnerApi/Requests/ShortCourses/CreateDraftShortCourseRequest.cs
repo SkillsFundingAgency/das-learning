@@ -124,7 +124,7 @@ public static class UpdateShortCourseRequestExtensions
             {
                 CourseCode = op.CourseCode,
                 EmployerId = op.EmployerId,
-                Ukprn = op.Ukprn,
+                Ukprn = request.Ukprn,
                 StartDate = op.StartDate,
                 WithdrawalDate = op.WithdrawalDate,
                 WithdrawalReasonCode = op.WithdrawalReasonCode,
@@ -171,7 +171,7 @@ public static class CreateDraftShortCourseRequestExtensions
             {
                 CourseCode = op.CourseCode,
                 EmployerId = op.EmployerId,
-                Ukprn = op.Ukprn,
+                Ukprn = request.Ukprn,
                 StartDate = op.StartDate,
                 WithdrawalDate = op.WithdrawalDate,
                 WithdrawalReasonCode = op.WithdrawalReasonCode,

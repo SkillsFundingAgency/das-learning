@@ -47,7 +47,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
-    public async Task<ShortCourseLearningDomainModel> Get(string uln, bool unapprovedOnly = false, string? trainingCode = null)
+    public async Task<ShortCourseLearningDomainModel?> Get(string uln, bool unapprovedOnly = false, string? trainingCode = null)
     {
         var learnerKey = await DbContext.LearnersDbSet
             .Where(l => l.Uln == uln)
