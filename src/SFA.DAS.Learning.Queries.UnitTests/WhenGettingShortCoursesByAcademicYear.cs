@@ -216,7 +216,7 @@ public class WhenGettingShortCoursesByAcademicYear
         var learner = new Learner { Key = learnerKey, Uln = Guid.NewGuid().ToString()[..10], FirstName = "A", LastName = "B" };
         _dbContext.LearnersDbSet.Add(learner);
 
-        var learning = new ShortCourseLearning { Key = Guid.NewGuid() };
+        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "SC001" };
         learning.LearnerKey = learnerKey;
         learning.Episodes.Add(new ShortCourseEpisode
         {

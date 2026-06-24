@@ -8,7 +8,8 @@ public interface ILearningService
     Task<LearningDomainModel?> GetUnapprovedLearning(
         string uln,
         LearningType type,
-        long approvalsApprenticeshipId);
+        long approvalsApprenticeshipId,
+        string? trainingCode = null);
 
     Task AddLearning(LearningDomainModel model);
 

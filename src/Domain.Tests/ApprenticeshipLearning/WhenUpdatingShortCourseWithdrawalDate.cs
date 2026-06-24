@@ -28,8 +28,9 @@ public class WhenUpdatingShortCourseWithdrawalDate
     {
         var startDate = new DateTime(2024, 1, 1);
         var withdrawalDate = new DateTime(2024, 6, 1);
+        const short withdrawalReasonCode = 7;
         var learning = CreateLearning(isApproved: true, startDate: startDate, withdrawalDate: null);
-        var updateContext = CreateUpdateContext(learning, withdrawalDate);
+        var updateContext = CreateUpdateContext(learning, withdrawalDate, withdrawalReasonCode);
 
         learning.Update(updateContext);
 
@@ -40,6 +41,8 @@ public class WhenUpdatingShortCourseWithdrawalDate
         @event.ApprovalsApprenticeshipId.Should().Be(learning.Episodes.Single().ApprovalsApprenticeshipId);
         @event.EmployerAccountId.Should().Be(learning.Episodes.Single().EmployerAccountId);
         @event.LastDayOfLearning.Should().Be(withdrawalDate);
+        @event.WithdrawalReasonCode.Should().Be(withdrawalReasonCode);
+        @event.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
     }
 
     [Test]
@@ -105,7 +108,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
         return ShortCourseLearningDomainModel.Get(entity);
     }
 
-    private static ShortCourseUpdateContext CreateUpdateContext(ShortCourseLearningDomainModel learning, DateTime? withdrawalDate)
+    private static ShortCourseUpdateContext CreateUpdateContext(ShortCourseLearningDomainModel learning, DateTime? withdrawalDate, short? withdrawalReasonCode = null)
     {
         var episode = learning.Episodes.Single();
         return new ShortCourseUpdateContext
@@ -119,6 +122,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
                 StartDate = episode.StartDate,
                 ExpectedEndDate = episode.ExpectedEndDate,
                 WithdrawalDate = withdrawalDate,
+                WithdrawalReasonCode = withdrawalReasonCode,
                 Price = episode.Price,
                 LearningType = episode.LearningType,
                 Milestones = new List<Milestone>()

@@ -77,7 +77,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var domainModel = ShortCourseLearningDomainModel.Get(learningEntity);
 
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(),It.IsAny<DateTime>(),It.IsAny<string>(),It.IsAny<string>(), It.IsAny<string?>())).Returns(learnerDomainModel);
-        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>())).Returns(domainModel);
+        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), It.IsAny<string>())).Returns(domainModel);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -293,6 +293,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         {
             Key = learningKey,
             LearnerKey = Guid.NewGuid(),
+            TrainingCode = "SC001",
             Episodes = new List<ShortCourseEpisode>
             {
                 new ShortCourseEpisode

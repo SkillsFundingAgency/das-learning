@@ -5,16 +5,16 @@ namespace SFA.DAS.Learning.Domain.Factories;
 
 public interface IShortCourseLearningFactory
 {
-    ShortCourseLearningDomainModel CreateNew(Guid learnerKey);
+    ShortCourseLearningDomainModel CreateNew(Guid learnerKey, string trainingCode);
 
     ShortCourseLearningDomainModel GetExisting(DataAccess.Entities.Learning.ShortCourseLearning model);
 }
 
 public class ShortCourseLearningFactory : IShortCourseLearningFactory
 {
-    public ShortCourseLearningDomainModel CreateNew(Guid learnerKey)
+    public ShortCourseLearningDomainModel CreateNew(Guid learnerKey, string trainingCode)
     {
-        return ShortCourseLearningDomainModel.New(learnerKey);
+        return ShortCourseLearningDomainModel.New(learnerKey, trainingCode);
     }
 
     public ShortCourseLearningDomainModel GetExisting(ShortCourseLearning model)

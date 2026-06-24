@@ -41,6 +41,7 @@ public class TestContext : IDisposable
                 new KeyValuePair<string, string?>("ApplicationSettings:LogLevel", "DEBUG"),
                 new KeyValuePair<string, string?>("ApplicationSettings:DbConnectionString", SqlDatabase?.DatabaseInfo.ConnectionString!),
                 new KeyValuePair<string, string?>("FeatureFlags:ShortCourseChangeOfProvider", "true"),
+                new KeyValuePair<string, string?>("FeatureFlags:ShortCourseProgression", "true"),
                 new KeyValuePair<string, string?>("SFA.DAS.Encoding", MockEncodingConfig())
             }
         };

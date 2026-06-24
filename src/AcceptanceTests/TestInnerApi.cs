@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.DataAccess;
@@ -38,7 +39,8 @@ public class TestInnerApi : IDisposable
             .ConfigureServices(services =>
             {
                 services.AddControllers()
-                    .AddApplicationPart(typeof(SFA.DAS.Learning.InnerApi.Controllers.LearningController).Assembly);
+                    .AddApplicationPart(typeof(SFA.DAS.Learning.InnerApi.Controllers.LearningController).Assembly)
+                    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
                 services.AddQueryServices().AddCommandServices(_testContext.GenerateConfiguration()).AddEventServices();
                 services.AddSingleton<IMessageSession>(_testContext.MessageSession);

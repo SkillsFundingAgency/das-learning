@@ -9,5 +9,7 @@ public class ShortCourseLearning : Learning
         Episodes = new List<ShortCourseEpisode>();
     }
 
+    public string TrainingCode { get; set; } = null!;
+
     public List<ShortCourseEpisode> Episodes { get; set; }
 }

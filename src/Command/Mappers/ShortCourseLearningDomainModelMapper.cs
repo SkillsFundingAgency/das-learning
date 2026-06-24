@@ -28,7 +28,7 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
             {
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId,
-                CourseCode = e.TrainingCode,
+                CourseCode = learning.TrainingCode,
                 CourseType = CourseTypeConstants.ShortCourse,
                 LearningType = e.LearningType,
                 StartDate = e.StartDate,

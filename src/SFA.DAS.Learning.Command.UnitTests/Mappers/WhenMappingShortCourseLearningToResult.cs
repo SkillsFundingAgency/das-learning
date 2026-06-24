@@ -24,17 +24,17 @@ public class WhenMappingShortCourseLearningToResult
     }
 
     [Test]
-    public void Map_ShouldMapToRemoveShortCourseResult()
+    public void Map_ShouldMapToRemoveShortCourseItemResult()
     {
         // Arrange
         var learning = CreateLearning();
         var learner = CreateLearner();
 
         // Act
-        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 123);
 
         // Assert
-        result.Should().BeOfType<RemoveShortCourseResult>();
+        result.Should().BeOfType<RemoveShortCourseItemResult>();
         result.LearningKey.Should().Be(learning.Key);
         result.LearnerKey.Should().Be(learning.LearnerKey);
         result.Episodes.Single().CompletionDate.Should().Be(learning.Episodes.Single().CompletionDate);
@@ -65,7 +65,7 @@ public class WhenMappingShortCourseLearningToResult
         var learning = CreateLearning();
         var learner = CreateLearner();
 
-        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 123);
 
         result.Episodes.Should().HaveCount(1);
         result.Episodes.Single().Ukprn.Should().Be(123);
@@ -77,7 +77,7 @@ public class WhenMappingShortCourseLearningToResult
         var learning = CreateLearning();
         var learner = CreateLearner();
 
-        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 123);
         var episode = result.Episodes.Single();
 
         var source = learning.Episodes.Single(e => e.Ukprn == 123);
@@ -86,7 +86,7 @@ public class WhenMappingShortCourseLearningToResult
         {
             source.Ukprn,
             source.EmployerAccountId,
-            CourseCode = source.TrainingCode,
+            CourseCode = learning.TrainingCode,
             CourseType = CourseTypeConstants.ShortCourse,
             source.LearningType,
             source.StartDate,
@@ -110,7 +110,7 @@ public class WhenMappingShortCourseLearningToResult
 
         var expectedAge = learner.AgeOnDate(learning.Episodes.First().StartDate);
 
-        var result = _mapper.Map<RemoveShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 123);
 
         result.Episodes.Single().AgeAtStart.Should().Be(expectedAge);
     }
@@ -121,13 +121,14 @@ public class WhenMappingShortCourseLearningToResult
         {
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
+            TrainingCode = "SC001",
             Episodes = new List<ShortCourseEpisode>
             {
                 new ShortCourseEpisode
                 {
                     Ukprn = 123,
                     EmployerAccountId = 1,
-                    TrainingCode = "SC001",
+                    TrainingCode = "EP001",
                     LearningType = Enums.LearningType.ApprenticeshipUnit,
                     StartDate = new DateTime(2023, 1, 1),
                     ExpectedEndDate = new DateTime(2023, 6, 1),

@@ -9,5 +9,7 @@ public enum ShortCourseUpdateChanges
     Milestone = 1,
     CompletionDate = 2,
     LearnerRef = 3,
-    Reinstated = 4
+    Reinstated = 4,
+    StartDate = 5,
+    ExpectedEndDate = 6
 }

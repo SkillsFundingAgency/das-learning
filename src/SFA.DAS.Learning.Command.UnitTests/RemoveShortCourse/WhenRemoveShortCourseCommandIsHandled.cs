@@ -38,10 +38,10 @@ public class WhenRemoveShortCourseCommandIsHandled
 
         _learnerRepository.Setup(r => r.Get(It.IsAny<Guid>())).ReturnsAsync(CreateLearnerDomainModel());
 
-        _mapper.Setup(x => x.Map<RemoveShortCourseResult>(
+        _mapper.Setup(x => x.Map<RemoveShortCourseItemResult>(
             It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
             )
-            .Returns(_fixture.Create<RemoveShortCourseResult>());
+            .Returns(_fixture.Create<RemoveShortCourseItemResult>());
 
         _commandHandler = new RemoveShortCourseCommandHandler(_logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object);
     }
@@ -52,7 +52,7 @@ public class WhenRemoveShortCourseCommandIsHandled
         var learnerKey = Guid.NewGuid();
         var startDate = new DateTime(2024, 8, 1);
         var learning = CreateDomainModel(Guid.NewGuid(), startDate: startDate);
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
 
         await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
 
@@ -64,7 +64,7 @@ public class WhenRemoveShortCourseCommandIsHandled
     {
         var learnerKey = Guid.NewGuid();
         var learning = CreateDomainModel(Guid.NewGuid());
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
 
         await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
 
@@ -76,11 +76,12 @@ public class WhenRemoveShortCourseCommandIsHandled
     {
         var learnerKey = Guid.NewGuid();
         var learning = CreateDomainModel(Guid.NewGuid(), isApproved: true);
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
 
         var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
 
         result.Should().NotBeNull();
+        result!.Results.Should().ContainSingle();
     }
 
     [Test]
@@ -88,12 +89,12 @@ public class WhenRemoveShortCourseCommandIsHandled
     {
         var learnerKey = Guid.NewGuid();
         var learning = CreateDomainModel(Guid.NewGuid(), isApproved: true);
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
 
         var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
 
         result.Should().NotBeNull();
-        result!.RemovedEpisodeKey.Should().Be(learning.Episodes.Single().Key);
+        result!.Results.Single().RemovedEpisodeKey.Should().Be(learning.Episodes.Single().Key);
     }
 
     [Test]
@@ -101,22 +102,9 @@ public class WhenRemoveShortCourseCommandIsHandled
     {
         var learnerKey = Guid.NewGuid();
         var learning = CreateDomainModel(Guid.NewGuid(), isApproved: true);
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
 
         var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, ukprn: 99999999));
-
-        await act.Should().ThrowAsync<NotFoundException>();
-        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
-    }
-
-    [Test]
-    public async Task ThenNotFoundExceptionThrownWhenNotApproved()
-    {
-        var learnerKey = Guid.NewGuid();
-        var learning = CreateDomainModel(Guid.NewGuid(), isApproved: false);
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
-
-        var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
 
         await act.Should().ThrowAsync<NotFoundException>();
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
@@ -131,7 +119,7 @@ public class WhenRemoveShortCourseCommandIsHandled
         var employerAccountId = 99L;
         var startDate = new DateTime(2024, 8, 1);
         var learning = CreateDomainModel(learningKey, startDate: startDate, approvalsApprenticeshipId: approvalsApprenticeshipId, employerAccountId: employerAccountId, isApproved: true);
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
 
         await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
 
@@ -143,14 +131,61 @@ public class WhenRemoveShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenNotFoundExceptionThrownWhenLearningNotFound()
+    public async Task ThenNotFoundExceptionThrownWhenNoLearningsFound()
     {
         var learnerKey = Guid.NewGuid();
-        _repository.Setup(r => r.GetByLearnerKey(learnerKey)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([]);
 
         var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
 
         await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Test]
+    public async Task ThenNotFoundExceptionThrownWhenNoLearningHasAMatchingEpisode()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(Guid.NewGuid(), isApproved: true);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
+
+        var act = async () => await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, ukprn: 99999999));
+
+        await act.Should().ThrowAsync<NotFoundException>();
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task ThenAllLearningsWithAMatchingEpisodeAreRemoved()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learningOne = CreateDomainModel(Guid.NewGuid(), isApproved: true);
+        var learningTwo = CreateDomainModel(Guid.NewGuid(), isApproved: false);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learningOne, learningTwo]);
+
+        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
+
+        learningOne.Episodes.Single().IsRemoved.Should().BeTrue();
+        learningTwo.Episodes.Single().IsRemoved.Should().BeTrue();
+        result.Should().NotBeNull();
+        result!.Results.Should().HaveCount(2);
+        _repository.Verify(r => r.Update(learningOne), Times.Once);
+        _repository.Verify(r => r.Update(learningTwo), Times.Once);
+    }
+
+    [Test]
+    public async Task ThenOnlyLearningsWithAMatchingEpisodeAreUpdated()
+    {
+        var learnerKey = Guid.NewGuid();
+        var matchingLearning = CreateDomainModel(Guid.NewGuid(), isApproved: true);
+        var nonMatchingLearning = CreateDomainModel(Guid.NewGuid(), isApproved: true, ukprn: 99999999);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([matchingLearning, nonMatchingLearning]);
+
+        var result = await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn));
+
+        result.Should().NotBeNull();
+        result!.Results.Should().ContainSingle();
+        _repository.Verify(r => r.Update(matchingLearning), Times.Once);
+        _repository.Verify(r => r.Update(nonMatchingLearning), Times.Never);
     }
 
     private static ShortCourseLearningDomainModel CreateDomainModel(
@@ -160,7 +195,8 @@ public class WhenRemoveShortCourseCommandIsHandled
         List<Milestone>? milestones = null,
         bool isApproved = true,
         long approvalsApprenticeshipId = 1,
-        long employerAccountId = 1)
+        long employerAccountId = 1,
+        long ukprn = Ukprn)
     {
         startDate ??= DateTime.Today.AddMonths(-1);
         var episodeKey = Guid.NewGuid();
@@ -168,7 +204,7 @@ public class WhenRemoveShortCourseCommandIsHandled
         {
             Key = episodeKey,
             LearningKey = learningKey,
-            Ukprn = 12345678,
+            Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
             ApprovalsApprenticeshipId = approvalsApprenticeshipId,
             TrainingCode = "TEST01",
@@ -186,6 +222,7 @@ public class WhenRemoveShortCourseCommandIsHandled
         var entity = new ShortCourseLearning
         {
             Key = learningKey,
+            TrainingCode = "SC001",
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };

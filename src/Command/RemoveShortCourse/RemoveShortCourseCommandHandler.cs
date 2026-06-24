@@ -15,22 +15,30 @@ public class RemoveShortCourseCommandHandler(
     {
         logger.LogInformation("Handling RemoveShortCourseCommand for LearnerKey {LearnerKey}", command.LearnerKey);
 
-        var learning = await repository.GetByLearnerKey(command.LearnerKey);
+        var learnings = await repository.GetAllByLearnerKey(command.LearnerKey);
 
-        if (learning == null)
+        if (learnings.Count == 0)
             throw new NotFoundException($"Short course learning for learner key {command.LearnerKey} not found.");
 
-        var removedEpisodeKey = learning.Remove(command.Ukprn);
+        var learner = await learnerRepository.Get(command.LearnerKey);
 
-        if (removedEpisodeKey == null)
-            throw new NotFoundException($"No approved short course episode found for learner key {command.LearnerKey} and ukprn {command.Ukprn}.");
+        var result = new RemoveShortCourseResult();
 
-        await repository.Update(learning);
+        foreach (var learning in learnings)
+        {
+            var removedEpisodeKey = learning.Remove(command.Ukprn);
+            if (removedEpisodeKey == null) continue;
 
-        var learner = await learnerRepository.Get(learning.LearnerKey);
+            await repository.Update(learning);
 
-        var result = mapper.Map<RemoveShortCourseResult>(learning, learner!, command.Ukprn);
-        result?.RemovedEpisodeKey = removedEpisodeKey.Value;
+            var itemResult = mapper.Map<RemoveShortCourseItemResult>(learning, learner!, command.Ukprn);
+            itemResult.RemovedEpisodeKey = removedEpisodeKey.Value;
+            result.Results.Add(itemResult);
+        }
+
+        if (result.Results.Count == 0)
+            throw new NotFoundException($"No short course episode found for learner key {command.LearnerKey} and ukprn {command.Ukprn}.");
+
         return result;
     }
 }
