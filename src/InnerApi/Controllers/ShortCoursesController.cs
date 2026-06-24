@@ -128,11 +128,11 @@ public class ShortCoursesController : ControllerBase
     /// <param name="request">The updated learner and short course details.</param>
     /// <returns>The LearningKey and list of fields that changed.</returns>
     [HttpPut("shortCourses/{learnerKey}")]
-    [ProducesResponseType(typeof(UpdateShortCourseResult), 200)]
-    public async Task<IActionResult> UpdateShortCourse(Guid learnerKey, [FromBody] CreateDraftShortCourseRequest request)
+    [ProducesResponseType(typeof(UpdateShortCourseResponse), 200)]
+    public async Task<IActionResult> UpdateShortCourse(Guid learnerKey, [FromBody] UpdateShortCourseRequest request)
     {
-        var command = new UpdateShortCourseCommand(learnerKey, request.ToCreateModel());
-        var result = await _commandDispatcher.Send<UpdateShortCourseCommand, UpdateShortCourseResult>(command);
+        var command = new UpdateShortCourseCommand(learnerKey, request.Ukprn, request.ToUpdateModels());
+        var result = await _commandDispatcher.Send<UpdateShortCourseCommand, UpdateShortCourseResponse>(command);
         return new OkObjectResult(result);
     }
 }

@@ -93,16 +93,19 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
     private void ReinstateIfRemoved(ShortCourseEpisodeDomainModel episode, List<ShortCourseUpdateChanges> changes)
     {
-        if (!episode.IsApproved || !episode.IsRemoved)
+        if (!episode.IsRemoved)
             return;
 
         episode.Reinstate();
 
-        AddEvent(new LearningReinstatedEvent
+        if (episode.IsApproved)
         {
-            LearningKey = Key,
-            ApprenticeshipId = episode.ApprovalsApprenticeshipId
-        });
+            AddEvent(new LearningReinstatedEvent
+            {
+                LearningKey = Key,
+                ApprenticeshipId = episode.ApprovalsApprenticeshipId
+            });
+        }
 
         changes.Add(ShortCourseUpdateChanges.Reinstated);
     }
@@ -113,8 +116,16 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         var prevCompletionDate = episode.CompletionDate;
         var prevMilestones = episode.Milestones.Select(m => m.Milestone).ToHashSet();
         var prevLearnerRef = episode.LearnerRef;
+        var prevStartDate = episode.StartDate;
+        var prevExpectedEndDate = episode.ExpectedEndDate;
 
         episode.Update(updateContext);
+
+        if (episode.StartDate != prevStartDate)
+            changes.Add(ShortCourseUpdateChanges.StartDate);
+
+        if (episode.ExpectedEndDate != prevExpectedEndDate)
+            changes.Add(ShortCourseUpdateChanges.ExpectedEndDate);
 
         if (episode.CompletionDate != prevCompletionDate)
             changes.Add(ShortCourseUpdateChanges.CompletionDate);
@@ -148,16 +159,18 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
     {
         var episode = _episodes.SingleOrDefault(e => e.Ukprn == ukprn);
 
-        if (episode == null || !episode.IsApproved)
+        if (episode == null)
             return null;
 
         episode.Remove();
 
-        AddEvent(new LearningRemovedEvent
-        {
-            LearningKey = Key,
-            ApprenticeshipId = episode.ApprovalsApprenticeshipId
-        });
+        if (episode.IsApproved)
+            AddEvent(new LearningRemovedEvent
+            {
+                LearningKey = Key,
+                ApprenticeshipId = episode.ApprovalsApprenticeshipId
+            });
+
         return episode.Key;
     }
 

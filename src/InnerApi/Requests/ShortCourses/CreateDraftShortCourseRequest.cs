@@ -90,6 +90,50 @@ public class OnProgramme
 }
 
 /// <summary>
+/// Request to update an existing short course learner record with an array of OnProgramme items.
+/// </summary>
+public class UpdateShortCourseRequest
+{
+    public long Ukprn { get; set; }
+    public ShortCourseLearnerUpdateDetails LearnerUpdateDetails { get; set; }
+    public List<OnProgramme> OnProgramme { get; set; } = new();
+}
+
+public static class UpdateShortCourseRequestExtensions
+{
+    public static List<ShortCourseUpdateContext> ToUpdateModels(this UpdateShortCourseRequest request)
+    {
+        return request.OnProgramme.Select(op => new ShortCourseUpdateContext
+        {
+            LearnerRef = request.LearnerUpdateDetails.LearnerRef,
+            Learner = new LearnerModel
+            {
+                FirstName = request.LearnerUpdateDetails.FirstName,
+                LastName = request.LearnerUpdateDetails.LastName,
+                EmailAddress = request.LearnerUpdateDetails.EmailAddress,
+                DateOfBirth = request.LearnerUpdateDetails.DateOfBirth,
+                Uln = request.LearnerUpdateDetails.Uln.ToString()
+            },
+            LearningSupport = new List<Learning.Models.UpdateModels.Shared.LearningSupportDetails>(),
+            OnProgramme = new Learning.Models.UpdateModels.OnProgramme
+            {
+                CourseCode = op.CourseCode,
+                EmployerId = op.EmployerId,
+                Ukprn = op.Ukprn,
+                StartDate = op.StartDate,
+                WithdrawalDate = op.WithdrawalDate,
+                WithdrawalReasonCode = op.WithdrawalReasonCode,
+                CompletionDate = op.CompletionDate,
+                ExpectedEndDate = op.ExpectedEndDate,
+                Milestones = op.Milestones ?? new List<Milestone>(),
+                Price = op.Price,
+                LearningType = op.LearningType
+            }
+        }).ToList();
+    }
+}
+
+/// <summary>
 /// CreateDraftShortCourse request extensions
 /// </summary>
 public static class CreateDraftShortCourseRequestExtensions
