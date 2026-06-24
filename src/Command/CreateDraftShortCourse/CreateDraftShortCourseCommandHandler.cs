@@ -68,15 +68,16 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         if (_featureFlags.ShortCourseProgression)
         {
-            await RemoveOmittedLearnings(command, existingLearnings, results, processedLearningKeys);
+            var requestedCourseCodes = command.Models.Select(m => m.OnProgramme.CourseCode).ToHashSet();
+            await RemoveOmittedLearnings(command, existingLearnings, results, processedLearningKeys, requestedCourseCodes);
         }
 
         return new CreateDraftShortCourseCommandResponse { Results = results };
     }
 
-    private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys)
+    private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys, HashSet<string> requestedCourseCodes)
     {
-        foreach (var learning in existingLearnings.Where(l => !processedLearningKeys.Contains(l.Key)))
+        foreach (var learning in existingLearnings.Where(l => !processedLearningKeys.Contains(l.Key) && !requestedCourseCodes.Contains(l.TrainingCode)))
         {
             var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
             if (activeEpisode == null)

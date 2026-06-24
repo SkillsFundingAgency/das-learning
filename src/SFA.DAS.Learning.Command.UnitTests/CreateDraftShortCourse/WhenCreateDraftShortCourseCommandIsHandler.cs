@@ -151,6 +151,29 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenNoOpRepeatPostOfApprovedSameProviderCourseIsNotRemovedByOmission()
+    {
+        // Arrange - re-POSTing the exact same, already-approved course (same provider) results in a no-op
+        // A bug resulted in this no-op being treated as an omission, and the existing Episode being removed. This test ensures that does not happen.
+        _featureFlags.ShortCourseProgression = true;
+        var command = CreateSingleItemCommand(out var model);
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: model.OnProgramme.Ukprn, courseCode: model.OnProgramme.CourseCode);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([existingLearning]);
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert
+        results.Results.Should().BeEmpty();
+        existingLearning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _learningRepository.Verify(x => x.Update(existingLearning), Times.Never);
+    }
+
+    [Test]
     public async Task ThenCreatesNewEpisodeIfUnapprovedEpisodeExistsWithAnotherProvider()
     {
         // Arrange
@@ -470,14 +493,14 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Verify(x => x.Update(omittedLearning), Times.Once);
     }
 
-    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship, bool isRemoved = false)
+    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship, bool isRemoved = false, string courseCode = "SC001")
     {
         var learningKey = Guid.NewGuid();
         var entity = new ShortCourseLearning
         {
             Key = learningKey,
             LearnerKey = Guid.NewGuid(),
-            TrainingCode = "SC001",
+            TrainingCode = courseCode,
             Episodes = new List<ShortCourseEpisode>
             {
                 new ShortCourseEpisode
