@@ -298,6 +298,7 @@ public class ProgressionStepDefinitions
 
     private static CreateDraftShortCourseRequest BuildRequest(string courseCode) => new()
     {
+        Ukprn = ProviderUkprn,
         OnProgramme = [BuildOnProgramme(courseCode)],
         LearnerUpdateDetails = BuildLearnerDetails(),
         LearningSupport = new List<LearningSupportDetails>()

@@ -86,7 +86,10 @@ public class ShortCourseStepDefinitions
         onProgramme.WithdrawalDate = null;
 
         if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
+        {
+            request.Ukprn = parsedUkprn;
             onProgramme.Ukprn = parsedUkprn;
+        }
 
         if (row.TryGetValue("FirstName", out var firstName))
             request.LearnerUpdateDetails.FirstName = firstName;
@@ -302,6 +305,7 @@ public class ShortCourseStepDefinitions
     {
         return new CreateDraftShortCourseRequest
         {
+            Ukprn = 10005001,
             OnProgramme = new List<OnProgramme>
             {
                 new OnProgramme
