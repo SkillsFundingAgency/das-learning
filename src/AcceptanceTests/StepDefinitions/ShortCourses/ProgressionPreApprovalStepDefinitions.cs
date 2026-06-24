@@ -50,6 +50,30 @@ public class ProgressionPreApprovalStepDefinitions
         await WhenSLDPOSTsEndedCourseAndNewCourse(endedOnProgramme.CourseCode, newCourseCode);
     }
 
+    [Given(@"SLD has omitted (.*) from the next POST")]
+    [When(@"SLD omits (.*) from the next POST")]
+    public async Task WhenSLDOmitsCourseFromNextPOST(string omittedCourseCode)
+    {
+        var endedOnProgramme = (OnProgramme)_scenarioContext[ShortCourseTestKeys.EndedOnProgramme];
+        var progressionCourseCode = (string)_scenarioContext[ShortCourseTestKeys.ProgressionCourseCode];
+
+        var onProgrammeItems = new List<OnProgramme>();
+        if (endedOnProgramme.CourseCode != omittedCourseCode) onProgrammeItems.Add(endedOnProgramme);
+        if (progressionCourseCode != omittedCourseCode) onProgrammeItems.Add(BuildOnProgramme(progressionCourseCode));
+
+        var createRequest = BuildRequest(onProgrammeItems.First().CourseCode);
+        createRequest.OnProgramme = onProgrammeItems;
+
+        await _testContext.TestInnerApi.Post<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", createRequest);
+    }
+
+    [When(@"SLD includes (.*) in the next POST")]
+    public async Task WhenSLDIncludesCourseInNextPOST(string courseCode)
+    {
+        var endedOnProgramme = (OnProgramme)_scenarioContext[ShortCourseTestKeys.EndedOnProgramme];
+        await WhenSLDPOSTsEndedCourseAndNewCourse(endedOnProgramme.CourseCode, courseCode);
+    }
+
     private const long BrandNewLearnerUln = 999999;
 
     [When(@"SLD POSTs a brand new learner with courses (.*) and (.*)")]
@@ -112,6 +136,7 @@ public class ProgressionPreApprovalStepDefinitions
 
     private static CreateDraftShortCourseRequest BuildRequest(string courseCode, long uln = 123213) => new()
     {
+        Ukprn = ProviderUkprn,
         OnProgramme =
         [
             new OnProgramme
