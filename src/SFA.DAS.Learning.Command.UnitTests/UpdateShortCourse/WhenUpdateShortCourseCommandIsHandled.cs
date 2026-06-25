@@ -381,6 +381,47 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenIgnoredResultReturnedWhenIsRestart(bool progressionEnabled)
+    {
+        _featureFlags.ShortCourseProgression = progressionEnabled;
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeTrue();
+        learning.Episodes.Single().WithdrawalDate.Should().Be(DateTime.Today.AddDays(-5));
+        learning.Episodes.Single().StartDate.Should().Be(DateTime.Today.AddMonths(-1));
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenOriginalEpisodeFollowingIgnoredRestartIsNotRemovedByOmittedLearningCleanup(bool progressionEnabled)
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseProgression = progressionEnabled;
+
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Should().NotContain(r => r.IsRemoved);
+        learning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
     [Test]
     public async Task ThenRemovedUnapprovedEpisodeIsReinstatedWhenItReappearsInPut()
     {

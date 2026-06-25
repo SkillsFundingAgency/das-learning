@@ -28,7 +28,7 @@ public class UpdateShortCourseCommandHandler(
         {
             var result = await HandleSingleItem(command.LearnerKey, model);
             results.Add(result);
-            if (!result.IsIgnored)
+            if (!result.IsIgnored || result.LearningKey != Guid.Empty)
             {
                 processedLearningKeys.Add(result.LearningKey);
             }
@@ -103,6 +103,15 @@ public class UpdateShortCourseCommandHandler(
             }
 
             return await AddEpisodeToExistingLearning(learning, model);
+        }
+
+        var episodeForProvider = learning.Episodes.Single(x => x.Ukprn == ukprn);
+        if (episodeForProvider.HasActualEndDate)
+        {
+            logger.LogInformation(
+                "Episode for LearnerKey {LearnerKey} / CourseCode {CourseCode} / Provider {Ukprn} has actual end date (withdrawn or completed) and Restarts are not supported - ignoring",
+                learnerKey, model.OnProgramme.CourseCode, ukprn);
+            return new UpdateShortCourseResult { IsIgnored = true, LearningKey = learning.Key };
         }
 
         var updateResult = learning.Update(model);
