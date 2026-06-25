@@ -106,7 +106,8 @@ public class UpdateShortCourseCommandHandler(
         }
 
         var episodeForProvider = learning.Episodes.Single(x => x.Ukprn == ukprn);
-        if (episodeForProvider.HasActualEndDate)
+        var isRestartAttempt = episodeForProvider.HasActualEndDate && episodeForProvider.StartDate != model.OnProgramme.StartDate;
+        if (isRestartAttempt)
         {
             logger.LogInformation(
                 "Episode for LearnerKey {LearnerKey} / CourseCode {CourseCode} / Provider {Ukprn} has actual end date (withdrawn or completed) and Restarts are not supported - ignoring",

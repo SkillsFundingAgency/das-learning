@@ -403,6 +403,27 @@ public class WhenUpdateShortCourseCommandIsHandled
 
     [TestCase(true)]
     [TestCase(false)]
+    public async Task ThenWithdrawalIsReplacedByCompletionWhenStartDateUnchanged(bool progressionEnabled)
+    {
+        _featureFlags.ShortCourseProgression = progressionEnabled;
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(withdrawalDate: null, completionDate: DateTime.Today)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.CompletionDate);
+        learning.Episodes.Single().WithdrawalDate.Should().BeNull();
+        learning.Episodes.Single().CompletionDate.Should().Be(DateTime.Today);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
     public async Task ThenOriginalEpisodeFollowingIgnoredRestartIsNotRemovedByOmittedLearningCleanup(bool progressionEnabled)
     {
         var learnerKey = Guid.NewGuid();
