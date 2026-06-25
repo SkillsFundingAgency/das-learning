@@ -42,6 +42,7 @@ public class ShortCourseStepDefinitions
     public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated()
     {
         var request = GetDefaultShortCourse();
+        request.OnProgramme.Single().WithdrawalDate = null;
         await CallCreateShortCourseEndpoint(request);
     }
 
@@ -368,6 +369,7 @@ public class ShortCourseStepDefinitions
         var row = table.Rows[0];
         var request = GetDefaultShortCourse();
         var onProgramme = request.OnProgramme.Single();
+        onProgramme.WithdrawalDate = null;
 
         if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
             onProgramme.WithdrawalDate = parsedWithdrawalDate;
@@ -421,7 +423,9 @@ public class ShortCourseStepDefinitions
     [When(@"SLD calls the update short course endpoint with no changes")]
     public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
     {
-        await CallUpdateShortCourseEndpoint(GetDefaultShortCourse());
+        var request = GetDefaultShortCourse();
+        request.OnProgramme.Single().WithdrawalDate = null;
+        await CallUpdateShortCourseEndpoint(request);
     }
 
     [Then(@"the short course episode IsRemoved is set to (True|False)")]
