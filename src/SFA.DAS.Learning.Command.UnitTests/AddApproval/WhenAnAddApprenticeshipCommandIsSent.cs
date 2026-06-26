@@ -175,6 +175,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
             .Should()
             .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
                                 && e.EpisodeKey == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).Key
+                                && e.ApprovalsApprenticeshipId == command.ApprovalsApprenticeshipId
                                 && e.EmployerAccountId == command.EmployerAccountId
                                 && e.FundingAccountId == (command.TransferSenderId ?? command.EmployerAccountId)
                                 && e.LearnerKey == shortCourseLearning.LearnerKey

@@ -14,6 +14,7 @@ public class LearningApprovedEventHandler(IMessageSession messageSession, ILogge
         {
             LearningKey = @event.LearningKey,
             EpisodeKey = @event.EpisodeKey,
+            ApprovalsApprenticeshipId = @event.ApprovalsApprenticeshipId,
             EmployerAccountId = @event.EmployerAccountId,
             FundingAccountId = @event.FundingAccountId,
             LearnerKey = @event.LearnerKey,

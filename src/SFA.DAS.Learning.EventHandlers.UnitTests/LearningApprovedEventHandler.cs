@@ -36,6 +36,7 @@ public class LearningApprovedEventHandlerTests
                 It.Is<Types.LearningApprovedEvent>(e =>
                     e.LearningKey == domainEvent.LearningKey &&
                     e.EpisodeKey == domainEvent.EpisodeKey &&
+                    e.ApprovalsApprenticeshipId == domainEvent.ApprovalsApprenticeshipId &&
                     e.EmployerAccountId == domainEvent.EmployerAccountId &&
                     e.FundingAccountId == domainEvent.FundingAccountId &&
                     e.LearnerKey == domainEvent.LearnerKey &&

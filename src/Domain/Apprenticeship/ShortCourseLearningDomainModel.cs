@@ -186,6 +186,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         {
             LearningKey = Key,
             EpisodeKey = episode.Key,
+            ApprovalsApprenticeshipId = approvalsApprenticeshipId,
             EmployerAccountId = employerAccountId,
             FundingAccountId = transferSenderId ?? employerAccountId,
             LearnerKey = _entity.LearnerKey,
