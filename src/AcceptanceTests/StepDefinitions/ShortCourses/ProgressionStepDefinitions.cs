@@ -60,6 +60,15 @@ public class ProgressionStepDefinitions
         await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", updateRequest);
     }
 
+    [Given(@"the progression course (.*) is approved")]
+    public async Task GivenTheProgressionCourseIsApproved(string courseCode)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learnings = dbConnection.GetShortCourseLearningsForLearner(GetLearnerKey());
+        var learning = learnings.Single(l => l.TrainingCode == courseCode);
+        dbConnection.SetAllEpisodesForShortCourseToApproved(learning.Key);
+    }
+
     [Given(@"a progression PUT has added new course (.*)")]
     [When(@"SLD submits a progression PUT for new course (.*)")]
     public async Task WhenSLDSubmitsAProgressionPUTForNewCourse(string newCourseCode)

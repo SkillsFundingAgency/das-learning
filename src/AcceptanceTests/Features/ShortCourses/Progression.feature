@@ -72,3 +72,12 @@ Scenario: Removing the short course removes all of the learner's episodes for th
     When SLD removes all learning for the learner
     Then SC-001 is removed
     And SC-002 is removed
+
+Scenario: GET returns the learner only once when they have two approved courses in the same academic year
+    Given the learner has completed SC-001
+    And a progression PUT has added new course SC-002
+    And the progression course SC-002 is approved
+    When SLD requests the list of short courses for academic year 2425
+    Then short courses are returned for the following Ulns
+        | Uln    |
+        | 123213 |
