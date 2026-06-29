@@ -71,7 +71,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     private CreateDraftShortCourseCommand CreateSingleItemCommand(out ShortCourseUpdateContext model)
     {
         model = _fixture.Create<ShortCourseUpdateContext>();
-        return new CreateDraftShortCourseCommand(model.OnProgramme.Ukprn, [model]);
+        return new CreateDraftShortCourseCommand(model.OnProgramme.Ukprn, 0, [model]);
     }
 
     [Test]
@@ -346,7 +346,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _featureFlags.ShortCourseProgression = true;
         var originalModel = _fixture.Create<ShortCourseUpdateContext>();
         var newModel = _fixture.Create<ShortCourseUpdateContext>();
-        var command = new CreateDraftShortCourseCommand(originalModel.OnProgramme.Ukprn, [originalModel, newModel]);
+        var command = new CreateDraftShortCourseCommand(originalModel.OnProgramme.Ukprn, 0, [originalModel, newModel]);
 
         var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
