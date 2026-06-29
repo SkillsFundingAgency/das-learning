@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
+using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Factories;
@@ -77,7 +78,17 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
     private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys, HashSet<string> requestedCourseCodes)
     {
-        foreach (var learning in existingLearnings.Where(l => !processedLearningKeys.Contains(l.Key) && !requestedCourseCodes.Contains(l.TrainingCode)))
+        var ayDates = AcademicYearParser.ParseFrom(command.AcademicYear);
+
+        foreach (var learning in existingLearnings.Where(l =>
+            !processedLearningKeys.Contains(l.Key) &&
+            !requestedCourseCodes.Contains(l.TrainingCode) &&
+            l.Episodes.Any(e =>
+                e.Ukprn == command.Ukprn &&
+                !e.IsRemoved &&
+                e.StartDate <= ayDates.End &&
+                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= ayDates.Start) &&
+                (!e.CompletionDate.HasValue || e.CompletionDate.Value >= ayDates.Start))))
         {
             var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
             if (activeEpisode == null)
