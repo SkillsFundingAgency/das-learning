@@ -182,6 +182,7 @@ public class ChangeOfProviderStepDefinitions
         var updateRequest = new UpdateShortCourseRequest
         {
             Ukprn = request.Ukprn,
+            AcademicYear = 2425,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
             OnProgramme = request.OnProgramme
         };
@@ -191,6 +192,7 @@ public class ChangeOfProviderStepDefinitions
     private static CreateDraftShortCourseRequest BuildRequest(long ukprn) => new()
     {
         Ukprn = ukprn,
+        AcademicYear = 2425,
         OnProgramme = new List<OnProgramme>
         {
             new OnProgramme

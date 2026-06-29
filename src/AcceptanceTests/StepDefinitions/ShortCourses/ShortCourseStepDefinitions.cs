@@ -307,6 +307,7 @@ public class ShortCourseStepDefinitions
         return new CreateDraftShortCourseRequest
         {
             Ukprn = 10005001,
+            AcademicYear = 2425,
             OnProgramme = new List<OnProgramme>
             {
                 new OnProgramme
@@ -523,6 +524,7 @@ public class ShortCourseStepDefinitions
         var updateRequest = new UpdateShortCourseRequest
         {
             Ukprn = request.OnProgramme.Single().Ukprn,
+            AcademicYear = 2425,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
             OnProgramme = request.OnProgramme
         };
