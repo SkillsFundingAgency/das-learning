@@ -47,7 +47,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
-    public async Task<ShortCourseLearningDomainModel> Get(string uln, bool unapprovedOnly = false, string? trainingCode = null)
+    public async Task<ShortCourseLearningDomainModel?> Get(string uln, bool unapprovedOnly = false, string? trainingCode = null)
     {
         var learnerKey = await DbContext.LearnersDbSet
             .Where(l => l.Uln == uln)
@@ -75,7 +75,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
 
         var shortCourseLearning = await query.SingleOrDefaultAsync();
 
-        if (shortCourseLearning is { Episodes.Count: 0 }) return null; //learnings without an episode are treated as if not exists
+        if (shortCourseLearning is null or { Episodes.Count: 0 }) return null; //no match, or a learning without an episode, are treated as if not exists
 
         return _learningFactory.GetExisting(shortCourseLearning);
     }

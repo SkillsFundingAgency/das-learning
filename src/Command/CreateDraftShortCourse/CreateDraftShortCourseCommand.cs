@@ -4,12 +4,14 @@ namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 
 public class CreateDraftShortCourseCommand : ICommand
 {
-    public CreateDraftShortCourseCommand(ShortCourseUpdateContext model)
+    public CreateDraftShortCourseCommand(long ukprn, List<ShortCourseUpdateContext> models)
     {
-        Model = model;
+        Ukprn = ukprn;
+        Models = models;
     }
 
-    public ShortCourseUpdateContext Model { get; }
+    public long Ukprn { get; }
+    public List<ShortCourseUpdateContext> Models { get; }
 }
 
 public class CreateDraftShortCourseResult

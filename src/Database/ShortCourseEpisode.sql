@@ -34,3 +34,8 @@ GO
 CREATE NONCLUSTERED INDEX IX_ShortCourseEpisode_Ukprn
     ON [dbo].[ShortCourseEpisode] ([Ukprn])
 GO
+
+CREATE NONCLUSTERED INDEX IX_ShortCourseEpisode_Ukprn_Approval
+    ON [dbo].[ShortCourseEpisode] ([Ukprn], [IsApproved], [IsRemoved], [StartDate])
+    INCLUDE ([LearningKey], [WithdrawalDate], [CompletionDate])
+GO

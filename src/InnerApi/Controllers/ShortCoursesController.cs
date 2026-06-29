@@ -93,17 +93,17 @@ public class ShortCoursesController : ControllerBase
     [ProducesResponseType(200)]
     public async Task<IActionResult> CreateDraftShortCourse([FromBody] CreateDraftShortCourseRequest request)
     {
-        _logger.LogInformation("Creating draft short course (ukprn: {ukprn})", request.OnProgramme.Ukprn);
+        _logger.LogInformation("Creating draft short course (ukprn: {ukprn})", request.Ukprn);
 
-        var command = new CreateDraftShortCourseCommand(request.ToCreateModel());
+        var command = new CreateDraftShortCourseCommand(request.Ukprn, request.ToCreateModels());
 
-        var result =
-            await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>(command);
+        var response =
+            await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>(command);
 
-        if (result == null)
+        if (response.Results.Count == 0)
             return NoContent();
 
-        return new OkObjectResult(result);
+        return new OkObjectResult(response);
     }
 
     /// <summary>

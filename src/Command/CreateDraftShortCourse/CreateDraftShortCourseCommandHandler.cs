@@ -12,7 +12,7 @@ using System.Threading.Channels;
 
 namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 
-public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResult?>
+public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>
 {
     private readonly ILearnerFactory _learnerFactory;
     private readonly ILearnerRepository _learnerRepository;
@@ -40,27 +40,95 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         _featureFlags = featureFlags;
     }
 
-    public async Task<CreateDraftShortCourseCommandResult?> Handle(CreateDraftShortCourseCommand command, CancellationToken cancellationToken = default)
+    public async Task<CreateDraftShortCourseCommandResponse> Handle(CreateDraftShortCourseCommand command, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Handling CreateDraftShortCourseCommand");
 
         var (learner, personalDetailsChanged) = await GetOrCreateLearner(command);
 
-        var learning = await _shortCourseLearningRepository.GetByLearnerKey(learner.Key);
+        var existingLearnings = await _shortCourseLearningRepository.GetAllByLearnerKey(learner.Key);
+        var learnerHasExistingLearnings = existingLearnings.Count > 0;
 
-        var ukprn = command.Model.OnProgramme.Ukprn;
+        var results = new List<CreateDraftShortCourseCommandResult>();
+        var processedLearningKeys = new HashSet<Guid>();
 
-        //  Create if learning does not exist
+        foreach (var model in command.Models)
+        {
+            var result = await HandleSingleItem(model, learner, personalDetailsChanged, learnerHasExistingLearnings);
+            if (result != null)
+            {
+                results.Add(result);
+                if (!result.IsIgnored)
+                {
+                    processedLearningKeys.Add(result.LearningKey);
+                    learnerHasExistingLearnings = true;
+                }
+            }
+        }
+
+        if (_featureFlags.ShortCourseProgression)
+        {
+            var requestedCourseCodes = command.Models.Select(m => m.OnProgramme.CourseCode).ToHashSet();
+            await RemoveOmittedLearnings(command, existingLearnings, results, processedLearningKeys, requestedCourseCodes);
+        }
+
+        return new CreateDraftShortCourseCommandResponse { Results = results };
+    }
+
+    private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys, HashSet<string> requestedCourseCodes)
+    {
+        foreach (var learning in existingLearnings.Where(l => !processedLearningKeys.Contains(l.Key) && !requestedCourseCodes.Contains(l.TrainingCode)))
+        {
+            var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
+            if (activeEpisode == null)
+                continue;
+
+            var removedEpisodeKey = learning.Remove(command.Ukprn);
+
+            if (!removedEpisodeKey.HasValue)
+                continue;
+
+            await _shortCourseLearningRepository.Update(learning);
+
+            _logger.LogInformation("Removed omitted Learning {LearningKey} / {CourseCode} for LearnerKey {LearnerKey}",
+                learning.Key, learning.TrainingCode, learning.LearnerKey);
+
+            results.Add(new CreateDraftShortCourseCommandResult
+            {
+                IsRemoved = true,
+                LearningKey = learning.Key,
+                CourseCode = learning.TrainingCode,
+                EpisodeKey = removedEpisodeKey.Value
+            });
+        }
+    }
+
+    private async Task<CreateDraftShortCourseCommandResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged, bool learnerHasExistingLearnings)
+    {
+        var ukprn = model.OnProgramme.Ukprn;
+
+        var learning = await _shortCourseLearningRepository.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode);
+
+        //  Create if learning does not exist for this CourseCode
         if (learning == null)
         {
-            learning = CreateNewLearning(command, learner);
+            // Learner already has at least one Learning for a different CourseCode - this is Progression, gated behind the feature flag.
+            if (learnerHasExistingLearnings && !_featureFlags.ShortCourseProgression)
+            {
+                _logger.LogInformation(
+                    "No learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} and learner already has other learnings; Short Course Progression is disabled — ignoring",
+                    learner.Key, model.OnProgramme.CourseCode);
+                return new CreateDraftShortCourseCommandResult { IsIgnored = true };
+            }
+
+            var newLearning = CreateNewLearning(model, learner);
 
             if (personalDetailsChanged)
-                learning.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, learning.LatestEpisodeForProvider(ukprn)));
+                newLearning.AddEvent(PersonalDetailsChangedEvent.From(learner, newLearning, newLearning.LatestEpisodeForProvider(ukprn)));
 
-            await _shortCourseLearningRepository.Add(learning);
+            await _shortCourseLearningRepository.Add(newLearning);
 
-            return new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, LearnerKey = learner.Key, EpisodeKey = learning.Episodes.Single().Key };
+            return new CreateDraftShortCourseCommandResult { LearningKey = newLearning.Key, LearnerKey = learner.Key, EpisodeKey = newLearning.Episodes.Single().Key };
         }
 
         if (!_featureFlags.ShortCourseChangeOfProvider)
@@ -94,54 +162,54 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         if (!existingEpisode)
         {
-            AddEpisode(learning, command);
+            AddEpisode(learning, model);
         }
         else
         {
-            updateResult = learning.Update(command.Model);
+            updateResult = learning.Update(model);
         }
 
-        var episode = learning.Episodes.Single(e => e.Ukprn == command.Model.OnProgramme.Ukprn);
+        var episode = learning.Episodes.Single(e => e.Ukprn == ukprn);
         if (personalDetailsChanged)
             learning.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, episode));
 
         await _shortCourseLearningRepository.Update(learning);
-        
-        var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Model.OnProgramme.Ukprn);
-        result.EpisodeKey = learning.Episodes.Single(x => x.Ukprn == command.Model.OnProgramme.Ukprn).Key;
-        if(updateResult != null) result.IsReinstated = updateResult.Changes.Any(x => x == ShortCourseUpdateChanges.Reinstated);
+
+        var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, ukprn);
+        result.EpisodeKey = learning.Episodes.Single(x => x.Ukprn == ukprn).Key;
+        if (updateResult != null) result.IsReinstated = updateResult.Changes.Any(x => x == ShortCourseUpdateChanges.Reinstated);
 
         return result;
     }
 
-    private void AddEpisode(ShortCourseLearningDomainModel learning, CreateDraftShortCourseCommand command)
+    private void AddEpisode(ShortCourseLearningDomainModel learning, ShortCourseUpdateContext model)
     {
         var episode = learning.AddEpisode(
-            command.Model.OnProgramme.Ukprn,
-            command.Model.OnProgramme.EmployerId,
-            command.Model.LearnerRef,
-            command.Model.OnProgramme.CourseCode,
+            model.OnProgramme.Ukprn,
+            model.OnProgramme.EmployerId,
+            model.LearnerRef,
+            model.OnProgramme.CourseCode,
             false,
-            command.Model.OnProgramme.StartDate,
-            command.Model.OnProgramme.ExpectedEndDate,
-            command.Model.OnProgramme.WithdrawalDate,
-            command.Model.OnProgramme.WithdrawalReasonCode,
-            command.Model.OnProgramme.Milestones,
-            command.Model.OnProgramme.Price,
-            command.Model.OnProgramme.LearningType,
-            completionDate: command.Model.OnProgramme.CompletionDate);
+            model.OnProgramme.StartDate,
+            model.OnProgramme.ExpectedEndDate,
+            model.OnProgramme.WithdrawalDate,
+            model.OnProgramme.WithdrawalReasonCode,
+            model.OnProgramme.Milestones,
+            model.OnProgramme.Price,
+            model.OnProgramme.LearningType,
+            completionDate: model.OnProgramme.CompletionDate);
 
-        foreach (var learningSupport in command.Model.LearningSupport)
+        foreach (var learningSupport in model.LearningSupport)
         {
             episode.AddLearningSupport(learningSupport.StartDate, learningSupport.EndDate);
         }
     }
 
-    private ShortCourseLearningDomainModel CreateNewLearning(CreateDraftShortCourseCommand command, LearnerDomainModel learner)
+    private ShortCourseLearningDomainModel CreateNewLearning(ShortCourseUpdateContext model, LearnerDomainModel learner)
     {
-        var learning = _shortCourseLearningFactory.CreateNew(learner.Key, command.Model.OnProgramme.CourseCode);
+        var learning = _shortCourseLearningFactory.CreateNew(learner.Key, model.OnProgramme.CourseCode);
 
-        AddEpisode(learning, command);
+        AddEpisode(learning, model);
 
         return learning;
     }
@@ -149,7 +217,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
     private async Task<(LearnerDomainModel, bool)> GetOrCreateLearner(CreateDraftShortCourseCommand command)
     {
         var personalDetailsChanged = false;
-        var learner = await _learnerRepository.GetByUln(command.Model.Learner.Uln);
+        var learnerModel = command.Models.First().Learner;
+        var learner = await _learnerRepository.GetByUln(learnerModel.Uln);
 
         if (learner != null)
         {
@@ -157,10 +226,10 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             {
                 Learner = new LearnerModel
                 {
-                    FirstName = command.Model.Learner.FirstName,
-                    LastName = command.Model.Learner.LastName,
-                    DateOfBirth = command.Model.Learner.DateOfBirth,
-                    EmailAddress = command.Model.Learner.EmailAddress
+                    FirstName = learnerModel.FirstName,
+                    LastName = learnerModel.LastName,
+                    DateOfBirth = learnerModel.DateOfBirth,
+                    EmailAddress = learnerModel.EmailAddress
                 },
                 Care = new CareDetails // We need to pass in the same details so they don't get overwritten
                 {
@@ -179,11 +248,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
 
         var newLearner = _learnerFactory.CreateNew(
-            command.Model.Learner.Uln, 
-            command.Model.Learner.DateOfBirth, 
-            command.Model.Learner.FirstName, 
-            command.Model.Learner.LastName,
-            command.Model.Learner.EmailAddress);
+            learnerModel.Uln,
+            learnerModel.DateOfBirth,
+            learnerModel.FirstName,
+            learnerModel.LastName,
+            learnerModel.EmailAddress);
 
         await _learnerRepository.Add(newLearner);
 

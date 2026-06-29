@@ -345,6 +345,105 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenNewEpisodeIsAddedWhenExistingEpisodeBelongsToDifferentProviderAndChangeOfProviderEnabled()
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseChangeOfProvider = true;
+        var learning = CreateDomainModel(ukprn: 99999999);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeFalse();
+        learning.Episodes.Should().HaveCount(2);
+        learning.Episodes.Should().Contain(e => e.Ukprn == 99999999);
+        learning.Episodes.Should().Contain(e => e.Ukprn == 12345678);
+    }
+
+    [Test]
+    public async Task ThenIgnoredResultReturnedWhenExistingEpisodeBelongsToDifferentProviderAndChangeOfProviderDisabled()
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseChangeOfProvider = false;
+        var learning = CreateDomainModel(ukprn: 99999999);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeTrue();
+        learning.Episodes.Should().HaveCount(1);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenIgnoredResultReturnedWhenIsRestart(bool progressionEnabled)
+    {
+        _featureFlags.ShortCourseProgression = progressionEnabled;
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeTrue();
+        learning.Episodes.Single().WithdrawalDate.Should().Be(DateTime.Today.AddDays(-5));
+        learning.Episodes.Single().StartDate.Should().Be(DateTime.Today.AddMonths(-1));
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenWithdrawalIsReplacedByCompletionWhenStartDateUnchanged(bool progressionEnabled)
+    {
+        _featureFlags.ShortCourseProgression = progressionEnabled;
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(withdrawalDate: null, completionDate: DateTime.Today)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.CompletionDate);
+        learning.Episodes.Single().WithdrawalDate.Should().BeNull();
+        learning.Episodes.Single().CompletionDate.Should().Be(DateTime.Today);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenOriginalEpisodeFollowingIgnoredRestartIsNotRemovedByOmittedLearningCleanup(bool progressionEnabled)
+    {
+        var learnerKey = Guid.NewGuid();
+        _featureFlags.ShortCourseProgression = progressionEnabled;
+
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Should().NotContain(r => r.IsRemoved);
+        learning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
     public async Task ThenRemovedUnapprovedEpisodeIsReinstatedWhenItReappearsInPut()
     {
         var learnerKey = Guid.NewGuid();

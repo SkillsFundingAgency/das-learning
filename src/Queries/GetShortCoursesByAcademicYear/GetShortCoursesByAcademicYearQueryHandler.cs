@@ -11,27 +11,27 @@ public class GetShortCoursesByAcademicYearQueryHandler(LearningDataContext dbCon
     {
         var dates = AcademicYearParser.ParseFrom(query.AcademicYear);
 
-        var baseQuery = dbContext.ShortCourseLearnings
-            .Include(x => x.Episodes.Where(e => !e.IsRemoved))
+        var matchingLearnerKeys = dbContext.ShortCourseLearnings
             .Where(x => x.Episodes.Any(e =>
                 e.Ukprn == query.UkPrn &&
                 e.IsApproved && !e.IsRemoved &&
                 e.StartDate <= dates.End &&
                 (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start) &&
                 (!e.CompletionDate.HasValue || e.CompletionDate.Value >= dates.Start)))
-            .AsNoTracking();
+            .Select(x => x.LearnerKey)
+            .Distinct();
 
-        var totalItems = await baseQuery.CountAsync(cancellationToken);
+        var totalItems = await matchingLearnerKeys.CountAsync(cancellationToken);
 
-        var items = await baseQuery
-            .OrderBy(x => x.Key)
+        var items = await matchingLearnerKeys
+            .OrderBy(k => k)
             .Skip(query.Offset)
             .Take(query.Limit)
             .Join(
                 dbContext.LearnersDbSet.AsNoTracking(),
-                learning => learning.LearnerKey,
+                key => key,
                 learner => learner.Key,
-                (learning, learner) => new ShortCourseLearnerItem
+                (key, learner) => new ShortCourseLearnerItem
                 {
                     Uln = learner.Uln,
                     Key = learner.Key

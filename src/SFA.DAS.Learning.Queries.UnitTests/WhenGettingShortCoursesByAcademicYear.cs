@@ -204,6 +204,21 @@ public class WhenGettingShortCoursesByAcademicYear
         result.Page.Should().Be(1);
     }
 
+    [Test]
+    public async Task ThenLearnerWithMultipleApprovedCoursesInSameAcademicYearAppearsOnce()
+    {
+        var (_, learner) = await SeedShortCourse(isApproved: true, startDate: new DateTime(2024, 8, 1), expectedEndDate: new DateTime(2024, 12, 1), completionDate: new DateTime(2024, 12, 1));
+        await SeedAdditionalCourse(learner, isApproved: true, startDate: new DateTime(2025, 1, 1), expectedEndDate: new DateTime(2025, 6, 30));
+
+        var query = new GetShortCoursesByAcademicYearRequest(UkPrn, AcademicYear, 1, 20);
+
+        var result = await _sut.Handle(query);
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+        result.Items.Single().Key.Should().Be(learner.Key);
+    }
+
     private async Task<(ShortCourseLearning, Learner)> SeedShortCourse(
         bool isApproved,
         DateTime startDate,
@@ -236,5 +251,33 @@ public class WhenGettingShortCoursesByAcademicYear
 
         await _dbContext.SaveChangesAsync();
         return (learning, learner);
+    }
+
+    private async Task SeedAdditionalCourse(
+        Learner learner,
+        bool isApproved,
+        DateTime startDate,
+        DateTime expectedEndDate,
+        DateTime? withdrawalDate = null,
+        DateTime? completionDate = null)
+    {
+        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "SC002" };
+        learning.LearnerKey = learner.Key;
+        learning.Episodes.Add(new ShortCourseEpisode
+        {
+            Key = Guid.NewGuid(),
+            Ukprn = UkPrn,
+            TrainingCode = "SC-002",
+            IsApproved = isApproved,
+            IsRemoved = false,
+            StartDate = startDate,
+            ExpectedEndDate = expectedEndDate,
+            WithdrawalDate = withdrawalDate,
+            CompletionDate = completionDate,
+            Price = 1000m,
+            LearnerRef = "LRN123"
+        });
+        _dbContext.ShortCourseLearnings.Add(learning);
+        await _dbContext.SaveChangesAsync();
     }
 }

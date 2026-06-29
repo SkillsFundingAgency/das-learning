@@ -30,14 +30,16 @@ public class ChangeOfProviderStepDefinitions
     public async Task GivenAShortCourseExistsWithProviderA()
     {
         var request = BuildRequest(ProviderAUkprn);
-        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>("/shortCourses", request);
+        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
+        var result = responseBody?.Results.SingleOrDefault();
 
-        var learningKey = responseBody?.LearningKey ?? Guid.Empty;
-        var learnerKey = responseBody?.LearnerKey ?? Guid.Empty;
+        var learningKey = result?.LearningKey ?? Guid.Empty;
+        var learnerKey = result?.LearnerKey ?? Guid.Empty;
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearning] = learningKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = learnerKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
-        _scenarioContext.Set(responseBody);
+        if (result != null)
+            _scenarioContext.Set(result);
         _scenarioContext[ProviderAUkprnKey] = ProviderAUkprn;
 
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
@@ -49,10 +51,12 @@ public class ChangeOfProviderStepDefinitions
     public async Task AChangeOfProviderHasOccurredToProviderB()
     {
         var request = BuildRequest(ProviderBUkprn);
-        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>("/shortCourses", request);
+        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
+        var result = responseBody?.Results.SingleOrDefault();
 
         _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
-        _scenarioContext.Set(responseBody);
+        if (result != null)
+            _scenarioContext.Set(result);
         _scenarioContext[ProviderBUkprnKey] = ProviderBUkprn;
 
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
@@ -72,7 +76,7 @@ public class ChangeOfProviderStepDefinitions
     public async Task WhenSLDWithdrawsProviderFromTheShortCourse(string providerName)
     {
         var request = BuildRequest(ResolveUkprn(providerName));
-        request.OnProgramme.WithdrawalDate = new DateTime(2025, 1, 1);
+        request.OnProgramme.Single().WithdrawalDate = new DateTime(2025, 1, 1);
         await CallUpdateShortCourseEndpoint(request);
     }
 
@@ -80,7 +84,7 @@ public class ChangeOfProviderStepDefinitions
     public async Task WhenSLDCallsUpdateForProviderWithThirtyPercentMilestone(string providerName)
     {
         var request = BuildRequest(ResolveUkprn(providerName));
-        request.OnProgramme.Milestones = new List<Milestone> { Milestone.ThirtyPercentLearningComplete };
+        request.OnProgramme.Single().Milestones = new List<Milestone> { Milestone.ThirtyPercentLearningComplete };
         await CallUpdateShortCourseEndpoint(request);
     }
 
@@ -96,7 +100,7 @@ public class ChangeOfProviderStepDefinitions
     public async Task WhenSLDReinstatesTheShortCourseForProvider(string providerName)
     {
         var request = BuildRequest(ResolveUkprn(providerName));
-        await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>("/shortCourses", request);
+        await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
     }
 
     [Then(@"(Provider A|Provider B)'s episode is withdrawn")]
@@ -138,7 +142,7 @@ public class ChangeOfProviderStepDefinitions
     public async Task GivenProviderBHasCompletedTheShortCourse()
     {
         var request = BuildRequest(ProviderBUkprn);
-        request.OnProgramme.CompletionDate = new DateTime(2024, 12, 1);
+        request.OnProgramme.Single().CompletionDate = new DateTime(2024, 12, 1);
         await CallUpdateShortCourseEndpoint(request);
     }
 
@@ -146,7 +150,7 @@ public class ChangeOfProviderStepDefinitions
     public async Task WhenSLDCallsUpdateForProvider(string providerName)
     {
         var request = BuildRequest(ResolveUkprn(providerName));
-        request.OnProgramme.StartDate = new DateTime(2024, 1, 2);
+        request.OnProgramme.Single().StartDate = new DateTime(2024, 1, 2);
         await CallUpdateShortCourseEndpoint(request);
     }
 
@@ -177,25 +181,30 @@ public class ChangeOfProviderStepDefinitions
     {
         var updateRequest = new UpdateShortCourseRequest
         {
+            Ukprn = request.Ukprn,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
-            OnProgramme = [request.OnProgramme]
+            OnProgramme = request.OnProgramme
         };
         await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", updateRequest);
     }
 
     private static CreateDraftShortCourseRequest BuildRequest(long ukprn) => new()
     {
-        OnProgramme = new OnProgramme
+        Ukprn = ukprn,
+        OnProgramme = new List<OnProgramme>
         {
-            Ukprn = ukprn,
-            StartDate = new DateTime(2024, 1, 1),
-            ExpectedEndDate = new DateTime(2024, 12, 1),
-            WithdrawalDate = null,
-            CompletionDate = null,
-            CourseCode = "SC-ART1",
-            EmployerId = 99999999,
-            Price = 1000,
-            Milestones = new List<Milestone>()
+            new OnProgramme
+            {
+                Ukprn = ukprn,
+                StartDate = new DateTime(2024, 1, 1),
+                ExpectedEndDate = new DateTime(2024, 12, 1),
+                WithdrawalDate = null,
+                CompletionDate = null,
+                CourseCode = "SC-ART1",
+                EmployerId = 99999999,
+                Price = 1000,
+                Milestones = new List<Milestone>()
+            }
         },
         LearnerUpdateDetails = new ShortCourseLearnerUpdateDetails
         {
