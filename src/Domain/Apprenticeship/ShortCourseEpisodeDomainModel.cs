@@ -26,6 +26,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public bool IsApproved => _entity.IsApproved;
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? CompletionDate => _entity.CompletionDate;
+    public bool HasActualEndDate => IsApproved && (WithdrawalDate.HasValue || CompletionDate.HasValue);
     public decimal Price => _entity.Price;
     public LearningType LearningType => _entity.LearningType;
     public EmployerType EmployerType => _entity.EmployerType;

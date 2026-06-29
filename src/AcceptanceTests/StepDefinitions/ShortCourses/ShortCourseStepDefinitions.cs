@@ -42,6 +42,7 @@ public class ShortCourseStepDefinitions
     public async Task SLDHasInformedTheSystemThatANewShortCourseHasBeenCreated()
     {
         var request = GetDefaultShortCourse();
+        request.OnProgramme.Single().WithdrawalDate = null;
         await CallCreateShortCourseEndpoint(request);
     }
 
@@ -82,10 +83,14 @@ public class ShortCourseStepDefinitions
     private async Task CallShortCourseEndpointFromTableRow(TableRow row)
     {
         var request = GetDefaultShortCourse();
-        request.OnProgramme.WithdrawalDate = null;
+        var onProgramme = request.OnProgramme.Single();
+        onProgramme.WithdrawalDate = null;
 
         if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
-            request.OnProgramme.Ukprn = parsedUkprn;
+        {
+            request.Ukprn = parsedUkprn;
+            onProgramme.Ukprn = parsedUkprn;
+        }
 
         if (row.TryGetValue("FirstName", out var firstName))
             request.LearnerUpdateDetails.FirstName = firstName;
@@ -97,16 +102,16 @@ public class ShortCourseStepDefinitions
             request.LearnerUpdateDetails.Uln = parsedUln;
 
         if (row.TryGetValue("StartDate", out var startDate) && DateTime.TryParse(startDate, out var parsedStartDate))
-            request.OnProgramme.StartDate = parsedStartDate;
+            onProgramme.StartDate = parsedStartDate;
 
         if (row.TryGetValue("ExpectedEndDate", out var expectedEndDate) && DateTime.TryParse(expectedEndDate, out var parsedExpectedEndDate))
-            request.OnProgramme.ExpectedEndDate = parsedExpectedEndDate;
+            onProgramme.ExpectedEndDate = parsedExpectedEndDate;
 
         if(row.TryGetValue("Milestone", out var milestone))
         {
             if (Enum.TryParse<Milestone>(milestone, out var parsedMilestone))
             {
-                request.OnProgramme.Milestones = new List<Milestone> { parsedMilestone };
+                onProgramme.Milestones = new List<Milestone> { parsedMilestone };
             }
         }
 
@@ -118,16 +123,16 @@ public class ShortCourseStepDefinitions
         }
 
         if (row.TryGetValue("Price", out var price) && decimal.TryParse(price, out var parsedPrice))
-            request.OnProgramme.Price = parsedPrice;
+            onProgramme.Price = parsedPrice;
 
         if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
-            request.OnProgramme.WithdrawalDate = parsedWithdrawalDate;
+            onProgramme.WithdrawalDate = parsedWithdrawalDate;
 
         if (row.TryGetValue("WithdrawalReasonCode", out var withdrawalReasonCode) && short.TryParse(withdrawalReasonCode, out var parsedWithdrawalReasonCode))
-            request.OnProgramme.WithdrawalReasonCode = parsedWithdrawalReasonCode;
+            onProgramme.WithdrawalReasonCode = parsedWithdrawalReasonCode;
 
         if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
-            request.OnProgramme.CompletionDate = parsedCompletionDate;
+            onProgramme.CompletionDate = parsedCompletionDate;
 
         var learningKey = await CallCreateShortCourseEndpoint(request);
 
@@ -157,7 +162,7 @@ public class ShortCourseStepDefinitions
     [When("SLD requests the list of short courses for academic year (.*)")]
     public async Task WhenSLDRequestsTheListOfShortCoursesForAcademicYear(int academicYear)
     {
-        var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
+        var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
         var response = await _testContext.TestInnerApi.Get<GetShortCoursesByAcademicYearResponse>($"/{ukprn}/academicyears/{academicYear}/shortCourses");
         _scenarioContext.Set<GetShortCoursesByAcademicYearResponse>(response);
     }
@@ -239,7 +244,7 @@ public class ShortCourseStepDefinitions
     [When("SLD requests short courses for earnings for collection year (.*)")]
     public async Task WhenSLDRequestsShortCoursesForEarningsForCollectionYear(int collectionYear)
     {
-        var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
+        var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
         var response = await _testContext.TestInnerApi.Get<GetShortCoursesForEarningsResponse>($"/{ukprn}/{collectionYear}/shortCourses");
         _scenarioContext.Set<GetShortCoursesForEarningsResponse>(response);
     }
@@ -301,20 +306,24 @@ public class ShortCourseStepDefinitions
     {
         return new CreateDraftShortCourseRequest
         {
-            OnProgramme = new OnProgramme
+            Ukprn = 10005001,
+            OnProgramme = new List<OnProgramme>
             {
-                WithdrawalDate = new DateTime(2024, 7, 1),
-                ExpectedEndDate = new DateTime(2024, 12, 1),
-                StartDate = new DateTime(2024, 1, 1),
-                CompletionDate = null,
-                Ukprn = 10005001,
-                EmployerId = 99999999,
-                CourseCode = "SC-ART1",
-                Milestones = new List<Milestone>
+                new OnProgramme
                 {
-                    Milestone.ThirtyPercentLearningComplete
-                },
-                Price = 1000
+                    WithdrawalDate = new DateTime(2024, 7, 1),
+                    ExpectedEndDate = new DateTime(2024, 12, 1),
+                    StartDate = new DateTime(2024, 1, 1),
+                    CompletionDate = null,
+                    Ukprn = 10005001,
+                    EmployerId = 99999999,
+                    CourseCode = "SC-ART1",
+                    Milestones = new List<Milestone>
+                    {
+                        Milestone.ThirtyPercentLearningComplete
+                    },
+                    Price = 1000
+                }
             },
             LearnerUpdateDetails = new ShortCourseLearnerUpdateDetails
             {
@@ -330,15 +339,17 @@ public class ShortCourseStepDefinitions
 
     private async Task<Guid> CallCreateShortCourseEndpoint(CreateDraftShortCourseRequest request)
     {
-        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResult?>($"/shortCourses", request);
+        (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>($"/shortCourses", request);
+        var result = responseBody?.Results.SingleOrDefault();
 
-        var learningKey = responseBody?.LearningKey ?? Guid.Empty;
-        var learnerKey = responseBody?.LearnerKey ?? Guid.Empty;
+        var learningKey = result?.LearningKey ?? Guid.Empty;
+        var learnerKey = result?.LearnerKey ?? Guid.Empty;
 
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearning] = learningKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = learnerKey;
         _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode] = (int)statusCode;
-        _scenarioContext.Set(responseBody);
+        if (result != null)
+            _scenarioContext.Set(result);
 
         return learningKey;
     }
@@ -357,23 +368,25 @@ public class ShortCourseStepDefinitions
     {
         var row = table.Rows[0];
         var request = GetDefaultShortCourse();
+        var onProgramme = request.OnProgramme.Single();
+        onProgramme.WithdrawalDate = null;
 
         if (row.TryGetValue("WithdrawalDate", out var withdrawalDate) && DateTime.TryParse(withdrawalDate, out var parsedWithdrawalDate))
-            request.OnProgramme.WithdrawalDate = parsedWithdrawalDate;
+            onProgramme.WithdrawalDate = parsedWithdrawalDate;
 
         if (row.TryGetValue("CompletionDate", out var completionDate) && DateTime.TryParse(completionDate, out var parsedCompletionDate))
-            request.OnProgramme.CompletionDate = parsedCompletionDate;
+            onProgramme.CompletionDate = parsedCompletionDate;
 
         if (row.TryGetValue("WithdrawalReasonCode", out var withdrawalReasonCode) && short.TryParse(withdrawalReasonCode, out var parsedWithdrawalReasonCode))
-            request.OnProgramme.WithdrawalReasonCode = parsedWithdrawalReasonCode;
+            onProgramme.WithdrawalReasonCode = parsedWithdrawalReasonCode;
 
         if (row.TryGetValue("Milestone", out var milestone) && Enum.TryParse<Milestone>(milestone, out var parsedMilestone))
-            request.OnProgramme.Milestones = new List<Milestone> { parsedMilestone };
+            onProgramme.Milestones = new List<Milestone> { parsedMilestone };
 
-        if (request.OnProgramme.WithdrawalDate.HasValue)
-            _scenarioContext[ExpectedShortCourseWithdrawalDateKey] = request.OnProgramme.WithdrawalDate.Value;
+        if (onProgramme.WithdrawalDate.HasValue)
+            _scenarioContext[ExpectedShortCourseWithdrawalDateKey] = onProgramme.WithdrawalDate.Value;
 
-        _scenarioContext[ExpectedShortCourseWithdrawalReasonCodeKey] = request.OnProgramme.WithdrawalReasonCode ?? (short)0;
+        _scenarioContext[ExpectedShortCourseWithdrawalReasonCodeKey] = onProgramme.WithdrawalReasonCode ?? (short)0;
 
         await CallUpdateShortCourseEndpoint(request);
     }
@@ -403,14 +416,16 @@ public class ShortCourseStepDefinitions
     public async Task WhenSLDCallsTheRemoveShortCourseEndpoint()
     {
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
-        var ukprn = GetDefaultShortCourse().OnProgramme.Ukprn;
+        var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
         await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learnerKey}");
     }
 
     [When(@"SLD calls the update short course endpoint with no changes")]
     public async Task WhenSLDCallsTheUpdateShortCourseEndpointWithNoChanges()
     {
-        await CallUpdateShortCourseEndpoint(GetDefaultShortCourse());
+        var request = GetDefaultShortCourse();
+        request.OnProgramme.Single().WithdrawalDate = null;
+        await CallUpdateShortCourseEndpoint(request);
     }
 
     [Then(@"the short course episode IsRemoved is set to (True|False)")]
@@ -507,9 +522,9 @@ public class ShortCourseStepDefinitions
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
         var updateRequest = new UpdateShortCourseRequest
         {
-            Ukprn = request.OnProgramme.Ukprn,
+            Ukprn = request.OnProgramme.Single().Ukprn,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
-            OnProgramme = [request.OnProgramme]
+            OnProgramme = request.OnProgramme
         };
         var response = await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, UpdateShortCourseTestResponse>($"/shortCourses/{learnerKey}", updateRequest);
         _scenarioContext[UpdateShortCourseResultKey] = response.Results.Single();
