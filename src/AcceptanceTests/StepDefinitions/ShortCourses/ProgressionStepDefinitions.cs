@@ -156,7 +156,7 @@ public class ProgressionStepDefinitions
     [When(@"SLD removes all learning for the learner")]
     public async Task WhenSLDRemovesTheShortCourse()
     {
-        await _testContext.TestInnerApi.Delete($"/{ProviderUkprn}/shortCourses/{GetLearnerKey()}");
+        await _testContext.TestInnerApi.Delete($"/{ProviderUkprn}/shortCourses/{GetLearnerKey()}?academicYear=2425");
     }
 
     [When(@"SLD includes (.*) in the next PUT")]

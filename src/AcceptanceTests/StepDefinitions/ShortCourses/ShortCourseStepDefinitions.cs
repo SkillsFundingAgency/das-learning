@@ -418,7 +418,7 @@ public class ShortCourseStepDefinitions
     {
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
         var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
-        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learnerKey}");
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learnerKey}?academicYear=2425");
     }
 
     [When(@"SLD calls the update short course endpoint with no changes")]

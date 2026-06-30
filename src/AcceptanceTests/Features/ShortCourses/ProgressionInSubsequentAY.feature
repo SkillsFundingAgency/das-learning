@@ -15,3 +15,25 @@ Scenario Outline: Prior-AY <EndType> course is unaffected when a new course is P
         | EndType   |
         | completed |
         | withdrawn |
+
+Scenario Outline: Prior-AY <EndType> course is unaffected when the new-AY course is updated via PUT
+    Given a short course SC-001 was <EndType> by the learner in a prior academic year
+    And SLD has POSTed a new course SC-002 in the subsequent academic year
+    When SLD PUTs an update to SC-002 in the subsequent academic year
+    Then SC-001 is not removed
+
+    Examples:
+        | EndType   |
+        | completed |
+        | withdrawn |
+
+Scenario Outline: Prior-AY <EndType> course is unaffected when the new-AY course is DELETEd
+    Given a short course SC-001 was <EndType> by the learner in a prior academic year
+    And SLD has POSTed a new course SC-002 in the subsequent academic year
+    When SLD DELETEs the learner in the subsequent academic year
+    Then SC-001 is not removed
+
+    Examples:
+        | EndType   |
+        | completed |
+        | withdrawn |

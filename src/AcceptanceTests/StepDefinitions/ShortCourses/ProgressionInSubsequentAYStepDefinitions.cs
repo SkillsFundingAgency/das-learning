@@ -43,30 +43,41 @@ public class ProgressionInSubsequentAYStepDefinitions
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = result?.LearnerKey ?? Guid.Empty;
     }
 
+    [Given(@"SLD has POSTed a new course (SC-\S+) in the subsequent academic year")]
     [When(@"SLD POSTs a new course (SC-\S+) in the subsequent academic year")]
     public async Task WhenSLDPOSTsANewCourseInTheSubsequentAcademicYear(string courseCode)
     {
-        var subsequentAYOnProgramme = new OnProgramme
-        {
-            Ukprn = ProviderUkprn,
-            CourseCode = courseCode,
-            StartDate = new DateTime(2025, 9, 1),
-            ExpectedEndDate = new DateTime(2026, 6, 30),
-            EmployerId = 99999999,
-            Price = 1000,
-            Milestones = []
-        };
-
         var request = new CreateDraftShortCourseRequest
         {
             Ukprn = ProviderUkprn,
             AcademicYear = 2526,
-            OnProgramme = [subsequentAYOnProgramme],
+            OnProgramme = [BuildSubsequentAYOnProgramme(courseCode)],
             LearnerUpdateDetails = BuildLearnerDetails(),
             LearningSupport = []
         };
 
         await _testContext.TestInnerApi.Post<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
+    }
+
+    [When(@"SLD PUTs an update to (SC-\S+) in the subsequent academic year")]
+    public async Task WhenSLDPutsAnUpdateInTheSubsequentAcademicYear(string courseCode)
+    {
+        var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
+        var updateRequest = new UpdateShortCourseRequest
+        {
+            Ukprn = ProviderUkprn,
+            AcademicYear = 2526,
+            LearnerUpdateDetails = BuildLearnerDetails(),
+            OnProgramme = [BuildSubsequentAYOnProgramme(courseCode)]
+        };
+        await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{learnerKey}", updateRequest);
+    }
+
+    [When(@"SLD DELETEs the learner in the subsequent academic year")]
+    public async Task WhenSLDDeletesInTheSubsequentAcademicYear()
+    {
+        var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
+        await _testContext.TestInnerApi.Delete($"/{ProviderUkprn}/shortCourses/{learnerKey}?academicYear=2526");
     }
 
     private static OnProgramme BuildOnProgramme(
@@ -84,6 +95,17 @@ public class ProgressionInSubsequentAYStepDefinitions
         EmployerId = 99999999,
         Price = 1000,
         Milestones = milestones ?? []
+    };
+
+    private static OnProgramme BuildSubsequentAYOnProgramme(string courseCode) => new()
+    {
+        Ukprn = ProviderUkprn,
+        CourseCode = courseCode,
+        StartDate = new DateTime(2025, 9, 1),
+        ExpectedEndDate = new DateTime(2026, 6, 30),
+        EmployerId = 99999999,
+        Price = 1000,
+        Milestones = []
     };
 
     private static ShortCourseLearnerUpdateDetails BuildLearnerDetails() => new()
