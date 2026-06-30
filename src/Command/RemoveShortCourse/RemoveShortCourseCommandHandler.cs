@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
-using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Repositories;
 
 namespace SFA.DAS.Learning.Command.RemoveShortCourse;
@@ -22,16 +21,12 @@ public class RemoveShortCourseCommandHandler(
             throw new NotFoundException($"Short course learning for learner key {command.LearnerKey} not found.");
 
         var learner = await learnerRepository.Get(command.LearnerKey);
-        var ayDates = AcademicYearParser.ParseFrom(command.AcademicYear);
-
         var result = new RemoveShortCourseResult();
 
         foreach (var learning in learnings.Where(l => l.Episodes.Any(e =>
             e.Ukprn == command.Ukprn &&
             !e.IsRemoved &&
-            e.StartDate <= ayDates.End &&
-            (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= ayDates.Start) &&
-            (!e.CompletionDate.HasValue || e.CompletionDate.Value >= ayDates.Start))))
+            e.OverlapsAcademicYear(command.AcademicYear))))
         {
             var removedEpisodeKey = learning.Remove(command.Ukprn);
             if (removedEpisodeKey == null) continue;

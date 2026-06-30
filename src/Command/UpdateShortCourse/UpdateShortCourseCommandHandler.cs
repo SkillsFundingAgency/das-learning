@@ -46,16 +46,13 @@ public class UpdateShortCourseCommandHandler(
     private async Task RemoveOmittedLearnings(UpdateShortCourseCommand command, List<UpdateShortCourseResult> results, HashSet<Guid> processedLearningKeys)
     {
         var allLearnings = await repository.GetAllByLearnerKey(command.LearnerKey);
-        var ayDates = AcademicYearParser.ParseFrom(command.AcademicYear);
 
         foreach (var learning in allLearnings.Where(l =>
             !processedLearningKeys.Contains(l.Key) &&
             l.Episodes.Any(e =>
                 e.Ukprn == command.Ukprn &&
                 !e.IsRemoved &&
-                e.StartDate <= ayDates.End &&
-                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= ayDates.Start) &&
-                (!e.CompletionDate.HasValue || e.CompletionDate.Value >= ayDates.Start))))
+                e.OverlapsAcademicYear(command.AcademicYear))))
         {
             var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
             if (activeEpisode == null)

@@ -78,17 +78,13 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
     private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys, HashSet<string> requestedCourseCodes)
     {
-        var ayDates = AcademicYearParser.ParseFrom(command.AcademicYear);
-
         foreach (var learning in existingLearnings.Where(l =>
             !processedLearningKeys.Contains(l.Key) &&
             !requestedCourseCodes.Contains(l.TrainingCode) &&
             l.Episodes.Any(e =>
                 e.Ukprn == command.Ukprn &&
                 !e.IsRemoved &&
-                e.StartDate <= ayDates.End &&
-                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= ayDates.Start) &&
-                (!e.CompletionDate.HasValue || e.CompletionDate.Value >= ayDates.Start))))
+                e.OverlapsAcademicYear(command.AcademicYear))))
         {
             var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
             if (activeEpisode == null)
