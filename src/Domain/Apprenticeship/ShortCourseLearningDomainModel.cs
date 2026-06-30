@@ -185,7 +185,12 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         AddEvent(new LearningApprovedEvent
         {
             LearningKey = Key,
-            EpisodeKey = episode.Key
+            EpisodeKey = episode.Key,
+            ApprovalsApprenticeshipId = approvalsApprenticeshipId,
+            EmployerAccountId = employerAccountId,
+            FundingAccountId = transferSenderId ?? employerAccountId,
+            LearnerKey = _entity.LearnerKey,
+            LearnerRef = episode.LearnerRef
         });
     }
 

@@ -4,5 +4,10 @@
     {
         public Guid LearningKey { get; set; }
         public Guid EpisodeKey { get; set; }
+        public long ApprovalsApprenticeshipId { get; set; }
+        public long EmployerAccountId { get; set; }
+        public long FundingAccountId { get; set; }
+        public Guid LearnerKey { get; set; }
+        public string LearnerRef { get; set; } 
     }
 }
