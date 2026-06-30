@@ -19,7 +19,7 @@ Scenario Outline: Prior-AY <EndType> course is unaffected when a new course is P
 Scenario Outline: Prior-AY <EndType> course is unaffected when the new-AY course is updated via PUT
     Given a short course SC-001 was <EndType> by the learner in a prior academic year
     And SLD has POSTed a new course SC-002 in the subsequent academic year
-    When SLD PUTs an update to SC-002 in the subsequent academic year
+    When SLD PUTs the 30% milestone for SC-002 in the subsequent academic year
     Then SC-001 is not removed
 
     Examples:
@@ -37,3 +37,14 @@ Scenario Outline: Prior-AY <EndType> course is unaffected when the new-AY course
         | EndType   |
         | completed |
         | withdrawn |
+
+Scenario: A course with no end date spanning the AY boundary can be PUT updated in the subsequent AY
+    Given a short course SC-001 started in a prior academic year with no completion or withdrawal date
+    When SLD PUTs the 30% milestone for SC-001 in the subsequent academic year
+    Then SC-001 has the 30% milestone
+    And SC-001 is not removed
+
+Scenario: A course with no end date spanning the AY boundary is removed when DELETEd in the subsequent AY
+    Given a short course SC-001 started in a prior academic year with no completion or withdrawal date
+    When SLD DELETEs the learner in the subsequent academic year
+    Then SC-001 is removed

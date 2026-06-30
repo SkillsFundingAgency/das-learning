@@ -43,6 +43,23 @@ public class ProgressionInSubsequentAYStepDefinitions
         _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = result?.LearnerKey ?? Guid.Empty;
     }
 
+    [Given(@"a short course (SC-\S+) started in a prior academic year with no completion or withdrawal date")]
+    public async Task GivenAShortCourseStartedInPriorAYWithNoEndDate(string courseCode)
+    {
+        var request = new CreateDraftShortCourseRequest
+        {
+            Ukprn = ProviderUkprn,
+            AcademicYear = 2425,
+            OnProgramme = [BuildOnProgramme(courseCode)],
+            LearnerUpdateDetails = BuildLearnerDetails(),
+            LearningSupport = []
+        };
+
+        (var responseBody, _) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
+        var result = responseBody?.Results.SingleOrDefault();
+        _scenarioContext[ShortCourseTestKeys.ShortCourseLearner] = result?.LearnerKey ?? Guid.Empty;
+    }
+
     [Given(@"SLD has POSTed a new course (SC-\S+) in the subsequent academic year")]
     [When(@"SLD POSTs a new course (SC-\S+) in the subsequent academic year")]
     public async Task WhenSLDPOSTsANewCourseInTheSubsequentAcademicYear(string courseCode)
@@ -59,16 +76,18 @@ public class ProgressionInSubsequentAYStepDefinitions
         await _testContext.TestInnerApi.Post<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
     }
 
-    [When(@"SLD PUTs an update to (SC-\S+) in the subsequent academic year")]
-    public async Task WhenSLDPutsAnUpdateInTheSubsequentAcademicYear(string courseCode)
+    [When(@"SLD PUTs the 30% milestone for (SC-\S+) in the subsequent academic year")]
+    public async Task WhenSLDPutsThirtyPercentMilestoneInTheSubsequentAcademicYear(string courseCode)
     {
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
+        var onProgramme = BuildSubsequentAYOnProgramme(courseCode);
+        onProgramme.Milestones = [Milestone.ThirtyPercentLearningComplete];
         var updateRequest = new UpdateShortCourseRequest
         {
             Ukprn = ProviderUkprn,
             AcademicYear = 2526,
             LearnerUpdateDetails = BuildLearnerDetails(),
-            OnProgramme = [BuildSubsequentAYOnProgramme(courseCode)]
+            OnProgramme = [onProgramme]
         };
         await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{learnerKey}", updateRequest);
     }
