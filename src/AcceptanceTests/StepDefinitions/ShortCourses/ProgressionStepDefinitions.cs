@@ -24,10 +24,21 @@ public class ProgressionStepDefinitions
 
     // --- Setup steps ---
 
-    [Given(@"an approved short course exists for course (.*)")]
+    [Given(@"^an approved short course exists for course (\S+)$")]
     public async Task GivenAnApprovedShortCourseExistsForCourse(string courseCode)
     {
-        var request = BuildRequest(courseCode);
+        await CreateApprovedShortCourse(courseCode, ProviderUkprn);
+    }
+
+    [Given(@"^an approved short course exists for course (\S+) with Provider (\d+)$")]
+    public async Task GivenAnApprovedShortCourseExistsForCourseWithProvider(string courseCode, long ukprn)
+    {
+        await CreateApprovedShortCourse(courseCode, ukprn);
+    }
+
+    private async Task CreateApprovedShortCourse(string courseCode, long ukprn)
+    {
+        var request = BuildRequest(courseCode, ukprn);
         (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
         var result = responseBody?.Results.SingleOrDefault();
 
@@ -307,6 +318,31 @@ public class ProgressionStepDefinitions
         await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", updateRequest);
     }
 
+    [When(@"^Provider (\d+) records the 30% milestone for (\S+)$")]
+    public async Task WhenProviderRecordsThirtyPercentMilestoneFor(long ukprn, string courseCode)
+    {
+        await SubmitSingleProviderUpdate(ukprn, BuildOnProgramme(courseCode, ukprn: ukprn, milestones: [Milestone.ThirtyPercentLearningComplete]));
+    }
+
+    [When(@"^Provider (\d+) records the completion date for (\S+)$")]
+    public async Task WhenProviderRecordsCompletionDateFor(long ukprn, string courseCode)
+    {
+        await SubmitSingleProviderUpdate(ukprn, BuildOnProgramme(courseCode, ukprn: ukprn, completionDate: new DateTime(2025, 6, 1)));
+    }
+
+    private async Task SubmitSingleProviderUpdate(long ukprn, OnProgramme onProgramme)
+    {
+        var updateRequest = new UpdateShortCourseRequest
+        {
+            AcademicYear = 2425,
+            Ukprn = ukprn,
+            LearnerUpdateDetails = BuildLearnerDetails(),
+            OnProgramme = [onProgramme]
+        };
+
+        await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", updateRequest);
+    }
+
     private DataAccess.Entities.Learning.ShortCourseEpisode GetEpisodeForCourse(SqlConnection dbConnection, string courseCode)
     {
         var learnings = dbConnection.GetShortCourseLearningsForLearner(GetLearnerKey());
@@ -316,9 +352,9 @@ public class ProgressionStepDefinitions
 
     private Guid GetLearnerKey() => new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
 
-    private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? startDate = null) => new()
+    private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? startDate = null, long? ukprn = null) => new()
     {
-        Ukprn = ProviderUkprn,
+        Ukprn = ukprn ?? ProviderUkprn,
         CourseCode = courseCode,
         StartDate = startDate ?? new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
@@ -338,11 +374,11 @@ public class ProgressionStepDefinitions
         LearnerRef = "LR-123213"
     };
 
-    private static CreateDraftShortCourseRequest BuildRequest(string courseCode) => new()
+    private static CreateDraftShortCourseRequest BuildRequest(string courseCode, long ukprn = ProviderUkprn) => new()
     {
-        Ukprn = ProviderUkprn,
+        Ukprn = ukprn,
         AcademicYear = 2425,
-        OnProgramme = [BuildOnProgramme(courseCode)],
+        OnProgramme = [BuildOnProgramme(courseCode, ukprn: ukprn)],
         LearnerUpdateDetails = BuildLearnerDetails(),
         LearningSupport = new List<LearningSupportDetails>()
     };

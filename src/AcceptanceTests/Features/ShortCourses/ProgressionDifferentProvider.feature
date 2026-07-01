@@ -1,5 +1,5 @@
 Feature: Short Course Progression with a Different Provider
-    Covers FLP-1861 and FLP-1862. A learner completes or withdraws from a short course with Provider A,
+    Covers FLP-1861, FLP-1862 and FLP-1863. A learner completes or withdraws from a short course with Provider A,
     then begins a different short course with Provider B in the same academic year.
     Provider B has no prior history for this learner so the new course always arrives as a POST.
 
@@ -46,3 +46,17 @@ Scenario: Approving the second course (different provider) does not affect the f
     When short course SC-002 is approved
     Then SC-002 is approved
     And SC-001 remains approved and unchanged
+
+Scenario: Recording the 30% milestone on the second course (different provider) does not affect the first
+    Given an approved short course exists for course SC-001 with Provider 1
+    And an approved short course exists for course SC-002 with Provider 2
+    When Provider 2 records the 30% milestone for SC-002
+    Then SC-002 has the 30% milestone
+    And SC-001 has no 30% milestone
+
+Scenario: Recording the completion date on the second course (different provider) does not affect the first
+    Given an approved short course exists for course SC-001 with Provider 1
+    And an approved short course exists for course SC-002 with Provider 2
+    When Provider 2 records the completion date for SC-002
+    Then SC-002 has a completion date
+    And SC-001 has no completion date
