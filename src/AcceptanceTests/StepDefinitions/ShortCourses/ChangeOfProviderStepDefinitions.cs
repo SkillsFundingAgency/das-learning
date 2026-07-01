@@ -93,7 +93,7 @@ public class ChangeOfProviderStepDefinitions
     public async Task SLDRemovesTheShortCourseForProvider(string providerName)
     {
         var ukprn = ResolveUkprn(providerName);
-        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{GetLearnerKey()}");
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{GetLearnerKey()}?academicYear=2425");
     }
 
     [When(@"SLD reinstates the short course for (Provider A|Provider B)")]
@@ -182,6 +182,7 @@ public class ChangeOfProviderStepDefinitions
         var updateRequest = new UpdateShortCourseRequest
         {
             Ukprn = request.Ukprn,
+            AcademicYear = 2425,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
             OnProgramme = request.OnProgramme
         };
@@ -191,6 +192,7 @@ public class ChangeOfProviderStepDefinitions
     private static CreateDraftShortCourseRequest BuildRequest(long ukprn) => new()
     {
         Ukprn = ukprn,
+        AcademicYear = 2425,
         OnProgramme = new List<OnProgramme>
         {
             new OnProgramme

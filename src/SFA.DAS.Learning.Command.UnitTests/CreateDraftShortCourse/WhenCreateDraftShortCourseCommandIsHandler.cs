@@ -71,7 +71,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     private CreateDraftShortCourseCommand CreateSingleItemCommand(out ShortCourseUpdateContext model)
     {
         model = _fixture.Create<ShortCourseUpdateContext>();
-        return new CreateDraftShortCourseCommand(model.OnProgramme.Ukprn, [model]);
+        return new CreateDraftShortCourseCommand(model.OnProgramme.Ukprn, 2526, [model]);
     }
 
     [Test]
@@ -346,7 +346,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _featureFlags.ShortCourseProgression = true;
         var originalModel = _fixture.Create<ShortCourseUpdateContext>();
         var newModel = _fixture.Create<ShortCourseUpdateContext>();
-        var command = new CreateDraftShortCourseCommand(originalModel.OnProgramme.Ukprn, [originalModel, newModel]);
+        var command = new CreateDraftShortCourseCommand(originalModel.OnProgramme.Ukprn, 2526, [originalModel, newModel]);
 
         var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
@@ -493,7 +493,44 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Verify(x => x.Update(omittedLearning), Times.Once);
     }
 
-    private ShortCourseLearningDomainModel BuildLearningWithEpisode(bool isApproved, long ukprn, LearningType learningType = LearningType.Apprenticeship, bool isRemoved = false, string courseCode = "SC001")
+    [Test]
+    public async Task ThenPriorAYCompletedLearningIsNotRemovedByOmissionInSubsequentAY()
+    {
+        // Arrange: learner completed a course in AY 2425, now starts a different course in AY 2526.
+        // The prior-AY learning is not in the POST payload, but must not be treated as a candidate for removal
+        _featureFlags.ShortCourseProgression = true;
+        var command = CreateSingleItemCommand(out var model); // AY 2526
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var newLearningEntity = _fixture.Create<ShortCourseLearning>();
+        newLearningEntity.Episodes = new List<ShortCourseEpisode>();
+        var newLearning = ShortCourseLearningDomainModel.Get(newLearningEntity);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
+        _learningFactory.Setup(x => x.CreateNew(learner.Key, model.OnProgramme.CourseCode)).Returns(newLearning);
+
+        // Prior AY episode: completed before AY 2526 begins (i.e., CompletionDate < 2025-08-01)
+        var priorAYLearning = BuildLearningWithEpisode(isApproved: true, ukprn: model.OnProgramme.Ukprn,
+            startDate: new DateTime(2024, 9, 1), completionDate: new DateTime(2025, 7, 1));
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([priorAYLearning]);
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert
+        results.Results.Should().NotContain(r => r.IsRemoved);
+        priorAYLearning.Episodes.Single().IsRemoved.Should().BeFalse();
+        _learningRepository.Verify(x => x.Update(priorAYLearning), Times.Never);
+    }
+
+    private ShortCourseLearningDomainModel BuildLearningWithEpisode(
+        bool isApproved,
+        long ukprn,
+        LearningType learningType = LearningType.Apprenticeship,
+        bool isRemoved = false,
+        string courseCode = "SC001",
+        DateTime? startDate = null,
+        DateTime? completionDate = null)
     {
         var learningKey = Guid.NewGuid();
         var entity = new ShortCourseLearning
@@ -513,8 +550,9 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                     LearnerRef = _fixture.Create<string>(),
                     IsApproved = isApproved,
                     IsRemoved = isRemoved,
-                    StartDate = _fixture.Create<DateTime>(),
-                    ExpectedEndDate = _fixture.Create<DateTime>(),
+                    StartDate = startDate ?? new DateTime(2025, 9, 1),
+                    ExpectedEndDate = new DateTime(2025, 12, 31),
+                    CompletionDate = completionDate,
                     LearningType = learningType,
                     Milestones = new List<ShortCourseMilestone>(),
                     LearningSupport = new List<ShortCourseLearningSupport>()

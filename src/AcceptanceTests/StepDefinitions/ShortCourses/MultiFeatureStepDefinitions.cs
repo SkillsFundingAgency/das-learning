@@ -34,6 +34,7 @@ public class MultiFeatureStepDefinitions
         var updateRequest = new UpdateShortCourseRequest
         {
             Ukprn = ProviderBUkprn,
+            AcademicYear = 2425,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme = [BuildOnProgramme(courseCode, ProviderBUkprn, withdrawalDate: new DateTime(2025, 6, 1))]
         };
@@ -47,6 +48,7 @@ public class MultiFeatureStepDefinitions
         var updateRequest = new UpdateShortCourseRequest
         {
             Ukprn = ProviderAUkprn,
+            AcademicYear = 2425,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme = [BuildOnProgramme(courseCode, ProviderAUkprn)]
         };
@@ -113,6 +115,7 @@ public class MultiFeatureStepDefinitions
     private static CreateDraftShortCourseRequest BuildCreateRequest(string courseCode, long ukprn) => new()
     {
         Ukprn = ukprn,
+        AcademicYear = 2425,
         OnProgramme = [BuildOnProgramme(courseCode, ukprn)],
         LearnerUpdateDetails = BuildLearnerDetails(),
         LearningSupport = []

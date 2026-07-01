@@ -18,6 +18,11 @@ public class CreateDraftShortCourseRequest
     public long Ukprn { get; set; }
 
     /// <summary>
+    /// Academic year (e.g. 2526)
+    /// </summary>
+    public int AcademicYear { get; set; }
+
+    /// <summary>
     /// Learner details to be updated
     /// </summary>
     public ShortCourseLearnerUpdateDetails LearnerUpdateDetails { get; set; }
@@ -100,6 +105,7 @@ public class OnProgramme
 public class UpdateShortCourseRequest
 {
     public long Ukprn { get; set; }
+    public int AcademicYear { get; set; }
     public ShortCourseLearnerUpdateDetails LearnerUpdateDetails { get; set; }
     public List<OnProgramme> OnProgramme { get; set; } = new();
 }

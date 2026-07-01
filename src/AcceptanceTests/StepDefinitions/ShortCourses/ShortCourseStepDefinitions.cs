@@ -307,6 +307,7 @@ public class ShortCourseStepDefinitions
         return new CreateDraftShortCourseRequest
         {
             Ukprn = 10005001,
+            AcademicYear = 2425,
             OnProgramme = new List<OnProgramme>
             {
                 new OnProgramme
@@ -417,7 +418,7 @@ public class ShortCourseStepDefinitions
     {
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
         var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
-        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learnerKey}");
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learnerKey}?academicYear=2425");
     }
 
     [When(@"SLD calls the update short course endpoint with no changes")]
@@ -523,6 +524,7 @@ public class ShortCourseStepDefinitions
         var updateRequest = new UpdateShortCourseRequest
         {
             Ukprn = request.OnProgramme.Single().Ukprn,
+            AcademicYear = 2425,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
             OnProgramme = request.OnProgramme
         };
