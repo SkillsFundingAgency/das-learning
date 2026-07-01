@@ -1,6 +1,6 @@
 Feature: Short Course Progression with a Different Provider
-    Covers FLP-1861, FLP-1862 and FLP-1863. A learner completes or withdraws from a short course with Provider A,
-    then begins a different short course with Provider B in the same academic year.
+    Covers FLP-1861, FLP-1862, FLP-1863 and FLP-1878. A learner completes or withdraws from a short course with Provider A,
+    then begins a different short course with Provider B in the same or a subsequent academic year.
     Provider B has no prior history for this learner so the new course always arrives as a POST.
 
 Scenario: Learner completes a course with Provider A then begins a different course with Provider B (unapproved earnings)
@@ -60,3 +60,16 @@ Scenario: Recording the completion date on the second course (different provider
     When Provider 2 records the completion date for SC-002
     Then SC-002 has a completion date
     And SC-001 has no completion date
+
+Scenario Outline: Learner <EndType> a course with Provider A then begins a different course with Provider B in the subsequent academic year (unapproved earnings)
+    Given a short course SC-001 was <EndType> by the learner in a prior academic year
+    When SLD POSTs a new course SC-002 with Provider 2 in the subsequent academic year
+    Then 2 short course learnings exist for the learner
+    And a learning exists for course SC-001
+    And a learning exists for course SC-002
+    And SC-001 is not removed
+
+    Examples:
+        | EndType   |
+        | completed |
+        | withdrawn |
