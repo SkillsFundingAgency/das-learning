@@ -184,12 +184,23 @@ public class ProgressionStepDefinitions
         learnings.Should().HaveCount(expectedCount);
     }
 
-    [Then(@"a learning exists for course (.*)")]
+    [Then(@"^a learning exists for course (\S+)$")]
     public async Task ThenALearningExistsForCourse(string courseCode)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learnings = dbConnection.GetShortCourseLearningsForLearner(GetLearnerKey());
         learnings.Should().Contain(l => l.TrainingCode == courseCode, $"expected a learning with course code {courseCode} to exist");
+    }
+
+    [Then(@"a learning exists for course (.*) with Ukprn (\d+)")]
+    public async Task ThenALearningExistsForCourseWithUkprn(string courseCode, long ukprn)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learnings = dbConnection.GetShortCourseLearningsForLearner(GetLearnerKey());
+        var learning = learnings.SingleOrDefault(l => l.TrainingCode == courseCode);
+        learning.Should().NotBeNull($"expected a learning with course code {courseCode} to exist");
+        var fullLearning = dbConnection.GetShortCourseLearning(learning!.Key);
+        fullLearning.Episodes.Should().Contain(e => e.Ukprn == ukprn, $"expected an episode with Ukprn {ukprn} for course {courseCode}");
     }
 
     // --- Lifecycle isolation assertions ---
