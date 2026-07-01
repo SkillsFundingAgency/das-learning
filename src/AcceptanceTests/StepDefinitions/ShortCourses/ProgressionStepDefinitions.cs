@@ -62,6 +62,8 @@ public class ProgressionStepDefinitions
     }
 
     [Given(@"the progression course (.*) is approved")]
+    [Given(@"short course (.*) is approved")]
+    [When(@"short course (.*) is approved")]
     public async Task GivenTheProgressionCourseIsApproved(string courseCode)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
@@ -253,6 +255,20 @@ public class ProgressionStepDefinitions
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         GetEpisodeForCourse(dbConnection, courseCode).StartDate.Should().Be(new DateTime(2025, 3, 1));
+    }
+
+    [Then(@"^(\S+) is approved$")]
+    public async Task ThenCourseIsApproved(string courseCode)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        GetEpisodeForCourse(dbConnection, courseCode).IsApproved.Should().BeTrue();
+    }
+
+    [Then(@"^(\S+) remains approved and unchanged$")]
+    public async Task ThenCourseRemainsApprovedAndUnchanged(string courseCode)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        GetEpisodeForCourse(dbConnection, courseCode).IsApproved.Should().BeTrue();
     }
 
     [Then(@"(.*) is removed")]
