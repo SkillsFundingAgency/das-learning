@@ -8,12 +8,12 @@ SELECT
 		UPDATE Domain.ShortCourseEpisode
 		SET EmployerAccountId = ' + CONVERT(nvarchar(200), Lrn.EmployerAccountId) + ',
 		FundingEmployerAccountId = ' + CONVERT(nvarchar(200), Lrn.FundingEmployerAccountId) + '
-		WHERE LearningKey = ''' + CONVERT(nvarchar(200), Lrn.LearningKey) + ''' AND EmployerAccountId IS NUll AND FundingEmployerAccountId IS NULL
+		WHERE [Key] = ''' + CONVERT(nvarchar(200), Lrn.EpisodeKey) + ''' AND EmployerAccountId IS NUll AND FundingEmployerAccountId IS NULL
 	'
 FROM
 	(
 		SELECT 
-			LearningKey, 
+			[Key] As EpisodeKey, 
 			EmployerAccountId, 
 			CASE WHEN TransferSenderId IS NULL THEN EmployerAccountId ELSE TransferSenderId END As FundingEmployerAccountId
 		FROM 
