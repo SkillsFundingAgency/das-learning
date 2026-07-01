@@ -1,7 +1,6 @@
 Feature: Short Course Progression with a Different Provider
     Covers FLP-1861, FLP-1862, FLP-1863 and FLP-1878. A learner completes or withdraws from a short course with Provider A,
     then begins a different short course with Provider B in the same or a subsequent academic year.
-    Provider B has no prior history for this learner so the new course always arrives as a POST.
 
 Scenario: Learner completes a course with Provider A then begins a different course with Provider B (unapproved earnings)
     Given SLD call the create short course endpoint with the following information
