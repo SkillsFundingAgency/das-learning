@@ -101,6 +101,9 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("Uln", out var uln) && long.TryParse(uln, out var parsedUln))
             request.LearnerUpdateDetails.Uln = parsedUln;
 
+        if (row.TryGetValue("CourseCode", out var courseCode))
+            onProgramme.CourseCode = courseCode;
+
         if (row.TryGetValue("StartDate", out var startDate) && DateTime.TryParse(startDate, out var parsedStartDate))
             onProgramme.StartDate = parsedStartDate;
 
@@ -223,6 +226,15 @@ public class ShortCourseStepDefinitions
     {
         var expectedStatusCode = _scenarioContext[ShortCourseTestKeys.ShortCourseEndpointResponseCode].ToString();
         expectedStatusCode.Should().Be(statusCode);
+    }
+
+    [Then(@"for learner with Uln (.*) there are (.*) short course learning records")]
+    public async Task ThenForLearnerWithUlnThereAreShortCourseLearningRecords(string uln, int expectedCount)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learner = dbConnection.GetLearner(uln);
+        var learnings = dbConnection.GetShortCourseLearningsForLearner(learner.Key);
+        learnings.Should().HaveCount(expectedCount);
     }
 
     [Then(@"for learner with Uln (.*) there is (.*) short course episode record")]
