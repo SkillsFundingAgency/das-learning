@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
+using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -46,7 +47,12 @@ public class UpdateShortCourseCommandHandler(
     {
         var allLearnings = await repository.GetAllByLearnerKey(command.LearnerKey);
 
-        foreach (var learning in allLearnings.Where(l => !processedLearningKeys.Contains(l.Key)))
+        foreach (var learning in allLearnings.Where(l =>
+            !processedLearningKeys.Contains(l.Key) &&
+            l.Episodes.Any(e =>
+                e.Ukprn == command.Ukprn &&
+                !e.IsRemoved &&
+                e.OverlapsAcademicYear(command.AcademicYear))))
         {
             var activeEpisode = learning.Episodes.SingleOrDefault(e => e.Ukprn == command.Ukprn && !e.IsRemoved);
             if (activeEpisode == null)

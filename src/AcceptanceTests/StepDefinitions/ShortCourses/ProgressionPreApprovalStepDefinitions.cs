@@ -137,6 +137,7 @@ public class ProgressionPreApprovalStepDefinitions
     private static CreateDraftShortCourseRequest BuildRequest(string courseCode, long uln = 123213) => new()
     {
         Ukprn = ProviderUkprn,
+        AcademicYear = 2425,
         OnProgramme =
         [
             new OnProgramme

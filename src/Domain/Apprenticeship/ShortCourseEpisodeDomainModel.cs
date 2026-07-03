@@ -27,6 +27,14 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public bool HasActualEndDate => IsApproved && (WithdrawalDate.HasValue || CompletionDate.HasValue);
+
+    public bool OverlapsAcademicYear(int academicYear)
+    {
+        var dates = AcademicYearParser.ParseFrom(academicYear);
+        return StartDate <= dates.End &&
+               (!WithdrawalDate.HasValue || WithdrawalDate.Value >= dates.Start) &&
+               (!CompletionDate.HasValue || CompletionDate.Value >= dates.Start);
+    }
     public decimal Price => _entity.Price;
     public LearningType LearningType => _entity.LearningType;
     public EmployerType EmployerType => _entity.EmployerType;

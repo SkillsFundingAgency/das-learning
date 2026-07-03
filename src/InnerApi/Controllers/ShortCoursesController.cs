@@ -95,7 +95,7 @@ public class ShortCoursesController : ControllerBase
     {
         _logger.LogInformation("Creating draft short course (ukprn: {ukprn})", request.Ukprn);
 
-        var command = new CreateDraftShortCourseCommand(request.Ukprn, request.ToCreateModels());
+        var command = new CreateDraftShortCourseCommand(request.Ukprn, request.AcademicYear, request.ToCreateModels());
 
         var response =
             await _commandDispatcher.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>(command);
@@ -115,9 +115,9 @@ public class ShortCoursesController : ControllerBase
     [HttpDelete("{ukprn:long}/shortCourses/{learnerKey}")]
     [ProducesResponseType(typeof(RemoveShortCourseResult), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learnerKey)
+    public async Task<IActionResult> RemoveShortCourse(long ukprn, Guid learnerKey, [FromQuery] int academicYear = 0)
     {
-        var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learnerKey, ukprn));
+        var shortCourseResult = await _commandDispatcher.Send<RemoveShortCourseCommand, RemoveShortCourseResult?>(new RemoveShortCourseCommand(learnerKey, ukprn, academicYear));
         return Ok(shortCourseResult);
     }
 
@@ -131,7 +131,7 @@ public class ShortCoursesController : ControllerBase
     [ProducesResponseType(typeof(UpdateShortCourseResponse), 200)]
     public async Task<IActionResult> UpdateShortCourse(Guid learnerKey, [FromBody] UpdateShortCourseRequest request)
     {
-        var command = new UpdateShortCourseCommand(learnerKey, request.Ukprn, request.ToUpdateModels());
+        var command = new UpdateShortCourseCommand(learnerKey, request.Ukprn, request.AcademicYear, request.ToUpdateModels());
         var result = await _commandDispatcher.Send<UpdateShortCourseCommand, UpdateShortCourseResponse>(command);
         return new OkObjectResult(result);
     }

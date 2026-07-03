@@ -52,6 +52,7 @@ public class ProgressionStepDefinitions
 
         var updateRequest = new UpdateShortCourseRequest
         {
+            AcademicYear = 2425,
             Ukprn = ProviderUkprn,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme = [onProgramme]
@@ -77,6 +78,7 @@ public class ProgressionStepDefinitions
         var endedOnProgramme = (OnProgramme)_scenarioContext[ShortCourseTestKeys.EndedOnProgramme];
         var updateRequest = new UpdateShortCourseRequest
         {
+            AcademicYear = 2425,
             Ukprn = ProviderUkprn,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme = [endedOnProgramme, BuildOnProgramme(newCourseCode)]
@@ -90,6 +92,7 @@ public class ProgressionStepDefinitions
     {
         var updateRequest = new UpdateShortCourseRequest
         {
+            AcademicYear = 2425,
             Ukprn = ProviderUkprn,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme =
@@ -141,6 +144,7 @@ public class ProgressionStepDefinitions
 
         var updateRequest = new UpdateShortCourseRequest
         {
+            AcademicYear = 2425,
             Ukprn = ProviderUkprn,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme = onProgrammeItems
@@ -152,7 +156,7 @@ public class ProgressionStepDefinitions
     [When(@"SLD removes all learning for the learner")]
     public async Task WhenSLDRemovesTheShortCourse()
     {
-        await _testContext.TestInnerApi.Delete($"/{ProviderUkprn}/shortCourses/{GetLearnerKey()}");
+        await _testContext.TestInnerApi.Delete($"/{ProviderUkprn}/shortCourses/{GetLearnerKey()}?academicYear=2425");
     }
 
     [When(@"SLD includes (.*) in the next PUT")]
@@ -161,6 +165,7 @@ public class ProgressionStepDefinitions
         var endedOnProgramme = (OnProgramme)_scenarioContext[ShortCourseTestKeys.EndedOnProgramme];
         var updateRequest = new UpdateShortCourseRequest
         {
+            AcademicYear = 2425,
             Ukprn = ProviderUkprn,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme = [endedOnProgramme, BuildOnProgramme(courseCode)]
@@ -262,6 +267,7 @@ public class ProgressionStepDefinitions
 
         var updateRequest = new UpdateShortCourseRequest
         {
+            AcademicYear = 2425,
             Ukprn = ProviderUkprn,
             LearnerUpdateDetails = BuildLearnerDetails(),
             OnProgramme =
@@ -308,6 +314,7 @@ public class ProgressionStepDefinitions
     private static CreateDraftShortCourseRequest BuildRequest(string courseCode) => new()
     {
         Ukprn = ProviderUkprn,
+        AcademicYear = 2425,
         OnProgramme = [BuildOnProgramme(courseCode)],
         LearnerUpdateDetails = BuildLearnerDetails(),
         LearningSupport = new List<LearningSupportDetails>()

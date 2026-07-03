@@ -21,10 +21,12 @@ public class RemoveShortCourseCommandHandler(
             throw new NotFoundException($"Short course learning for learner key {command.LearnerKey} not found.");
 
         var learner = await learnerRepository.Get(command.LearnerKey);
-
         var result = new RemoveShortCourseResult();
 
-        foreach (var learning in learnings)
+        foreach (var learning in learnings.Where(l => l.Episodes.Any(e =>
+            e.Ukprn == command.Ukprn &&
+            !e.IsRemoved &&
+            e.OverlapsAcademicYear(command.AcademicYear))))
         {
             var removedEpisodeKey = learning.Remove(command.Ukprn);
             if (removedEpisodeKey == null) continue;
