@@ -130,6 +130,7 @@ public class WhenGettingShortCourseEarnings
         resultEpisode.Price.Should().Be(episode.Price);
         resultEpisode.LearnerRef.Should().Be(episode.LearnerRef);
         resultEpisode.EmployerType.Should().Be(episode.EmployerType);
+        resultEpisode.StartDate.Should().Be(episode.StartDate);
     }
 
     [Test]
