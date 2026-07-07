@@ -13,6 +13,8 @@ internal static class NServiceBusConfiguration
     {
         hostBuilder.UseNServiceBus((config, endpointConfiguration) =>
         {
+            endpointConfiguration.AdvancedConfiguration.AssemblyScanner().ScanFileSystemAssemblies = false;
+
             endpointConfiguration.Transport.SubscriptionRuleNamingConvention = AzureRuleNameShortener.Shorten;
             endpointConfiguration.AdvancedConfiguration.SendFailedMessagesTo($"{Constants.EndpointName}-error");
             endpointConfiguration.AdvancedConfiguration.Conventions().SetConventions();
