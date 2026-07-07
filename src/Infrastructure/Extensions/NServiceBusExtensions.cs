@@ -15,6 +15,8 @@ public static class NServiceBusExtensions
         transport.CustomTokenCredential(fullyQualifiedNamespace, new DefaultAzureCredential());
         endpointConfiguration.Conventions().SetConventions();
 
+        endpointConfiguration.AssemblyScanner().ScanFileSystemAssemblies = false;
+
         var endpointInstance = Endpoint.Start(endpointConfiguration).GetAwaiter().GetResult();
         services.AddSingleton<IMessageSession>(endpointInstance);
     }
