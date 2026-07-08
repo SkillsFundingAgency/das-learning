@@ -90,7 +90,6 @@ public class Startup
 
         services.AddLogging((options) =>
         {
-            options.AddApplicationInsights();
             options.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
             options.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
             options.AddFilter("SFA.DAS", LogLevel.Information); // this is because all logging is filtered out by default
