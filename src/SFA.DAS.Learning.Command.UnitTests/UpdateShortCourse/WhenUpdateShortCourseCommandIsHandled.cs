@@ -55,7 +55,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         _mapper.Setup(x => x.Map<UpdateShortCourseResult>(
             It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
             )
-            .Returns(() => _fixture.Build<UpdateShortCourseResult>().With(x => x.IsRemoved, false).Create());
+            .Returns(() => _fixture.Build<UpdateShortCourseResult>().With(x => x.IsRemoved, false).With(x => x.IsIgnored, false).Create());
 
         _repository
             .Setup(r => r.GetAllByLearnerKey(It.IsAny<Guid>()))
@@ -457,6 +457,35 @@ public class WhenUpdateShortCourseCommandIsHandled
         learning.Episodes.Single().IsRemoved.Should().BeFalse();
         results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.Reinstated);
         learning.FlushEvents().Should().NotContain(e => e is LearningReinstatedEvent);
+    }
+
+    [Test]
+    public async Task ThenIgnoresSecondItemWithSameCourseCodeWithinABundledPut()
+    {
+        // Arrange - a single bundled PUT contains two items for the same CourseCode and provider
+        // The second must be ignored, until Restarts and Repeats are implemented
+        var learnerKey = Guid.NewGuid();
+        var existingCompletionDate = DateTime.Today.AddDays(-10);
+        var existingStartDate = DateTime.Today.AddMonths(-6);
+        var learning = CreateDomainModel(completionDate: existingCompletionDate, startDate: existingStartDate, isApproved: false);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var item1 = CreateUpdateContext(completionDate: existingCompletionDate, startDate: existingStartDate);
+        var item2 = CreateUpdateContext(completionDate: null, startDate: DateTime.Today.AddDays(-1));
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [item1, item2]);
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert - item 1's data survives untouched, item 2 is ignored rather than silently overwriting it
+        learning.Episodes.Single().CompletionDate.Should().Be(existingCompletionDate);
+        learning.Episodes.Single().StartDate.Should().Be(existingStartDate);
+        _repository.Verify(r => r.Update(learning), Times.Once);
+
+        results.Results.Should().HaveCount(2);
+        results.Results.Should().Contain(r => r.IsIgnored);
     }
 
     [Test]
