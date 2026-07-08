@@ -48,7 +48,7 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
                            .ReturnsAsync(domainModel);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
@@ -78,7 +78,7 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
             .ReturnsAsync(domainModel);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
@@ -108,7 +108,7 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
             .ReturnsAsync(domainModel);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
@@ -138,7 +138,7 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
             .ReturnsAsync(domainModel);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
@@ -162,12 +162,12 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
                            .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
-        Assert.That(ex.Message, Is.EqualTo($"Learning with key {command.LearnerKey} not found."));
+        Assert.That(ex.Message, Is.EqualTo($"Learning for Learner with key {command.LearnerKey} not found."));
     }
 
     [Test]
@@ -181,7 +181,7 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.Get(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
                            .ReturnsAsync(domainModel);
 
         // Act

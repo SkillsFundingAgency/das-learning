@@ -84,8 +84,8 @@ public class UpdateLearnerStepDefinitions
     public async Task WhenTheUpdateRequestIsSent()
     {
         var updateRequest = _scenarioContext.GetUpdateLearnerRequest();
-        var learningKey = _scenarioContext.GetLearningKey();
-        var updateResponse =  await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{learningKey}", updateRequest);
+        var learnerKey = _scenarioContext.GetLearnerKey();
+        var updateResponse =  await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{learnerKey}", updateRequest);
         _scenarioContext.SetUpdateLearnerResult(updateResponse);
     }
 
@@ -314,8 +314,8 @@ public class UpdateLearnerStepDefinitions
     {
         var updateRequest = _scenarioContext.GetUpdateLearnerRequest();
         updateRequest.Delivery.WithdrawalDate = withdrawalDate.DateTime;
-        var learningKey = _scenarioContext.GetLearningKey();
-        await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{learningKey}", updateRequest);
+        var learnerKey = _scenarioContext.GetLearnerKey();
+        await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{learnerKey}", updateRequest);
 
         await WaitHelper.WaitForIt(() =>
             _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(),

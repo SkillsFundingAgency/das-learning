@@ -24,8 +24,8 @@ public class RemoveLearnerStepDefinitions
     {
         var learning = await GetCurrentApprenticeshipLearning();
         var ukprn = learning.Episodes.First().Ukprn;
-        var learningKey = learning.Key;
-        await _testContext.TestInnerApi.Delete($"/{ukprn}/{learningKey}");
+        var learnerKey = learning.LearnerKey;
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/{learnerKey}");
 
     }
 

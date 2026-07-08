@@ -15,6 +15,10 @@ internal static class ScenarioContextExtensions
     internal static Guid GetLearningKey(this ScenarioContext context) => context.Get<Guid>("LearningKey");
     internal static void SetLearningKey(this ScenarioContext context, Guid learningKey) => context.Set(learningKey, "LearningKey");
 
+    internal static Guid GetLearnerKey(this ScenarioContext context) => context.Get<Guid>("LearnerKey");
+    internal static void SetLearnerKey(this ScenarioContext context, Guid learningKey) => context.Set(learningKey, "LearnerKey");
+
+
     internal static UpdateLearnerRequest GetUpdateLearnerRequest(this ScenarioContext context)
     {
         if (context.ContainsKey(typeof(UpdateLearnerRequest).ToString()))

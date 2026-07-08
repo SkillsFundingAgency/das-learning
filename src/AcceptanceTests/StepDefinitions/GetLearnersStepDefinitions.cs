@@ -147,16 +147,16 @@ public class GetLearnersStepDefinitions
     {
         var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
 
-        var learningKeys = new List<(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent Event, Guid Key)>();
+        var learnerKeys = new List<(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent Event, Guid Key)>();
         await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
         {
             foreach (var createdEvent in createdEvents)
             {
-                learningKeys.Add((createdEvent, dbConnection.GetLearningKey(createdEvent.Uln)));
+                learnerKeys.Add((createdEvent, dbConnection.GetLearnerKey(createdEvent.Uln)));
             }
         }
 
-        foreach (var item in learningKeys)
+        foreach (var item in learnerKeys)
         {
             var updateRequest = item.Event.BuildUpdateLearnerRequest();
 
@@ -175,20 +175,20 @@ public class GetLearnersStepDefinitions
     private async Task<List<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>> CreateRemovedLearners(int numberToCreate, string startDate, string endDate)
     {
         var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
-        var learningKeys = new List<Guid>();
+        var learnerKeys = new List<Guid>();
 
         await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
         {
             foreach (var createdEvent in createdEvents)
             {
-                learningKeys.Add(dbConnection.GetLearningKey(createdEvent.Uln));
+                learnerKeys.Add(dbConnection.GetLearnerKey(createdEvent.Uln));
             }
         }
 
-        foreach (var learningKey in learningKeys)
+        foreach (var learnerKey in learnerKeys)
         {
             var ukprn = Constants.UkPrn;
-            await _testContext.TestInnerApi.Delete($"/{ukprn}/{learningKey}");
+            await _testContext.TestInnerApi.Delete($"/{ukprn}/{learnerKey}");
         }
 
         return createdEvents;

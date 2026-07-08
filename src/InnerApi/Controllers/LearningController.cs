@@ -124,18 +124,18 @@ public class LearningController : ControllerBase
     }
 
     /// <summary>
-    /// Updates the details of a learner associated with a specific learning key.
+    /// Updates the details of a learner associated with a specific learner key.
     /// </summary>
-    /// <param name="learningKey">The unique identifier for the learner record to update.</param>
+    /// <param name="learnerKey">The unique identifier for the learner record to update.</param>
     /// <param name="request">The updated learner details.</param>
     /// <returns>An array of <see cref="LearningUpdateChanges"/> values indicating the fields that were modified.</returns>
-    [HttpPut("{learningKey}")]
+    [HttpPut("{learnerKey}")]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> UpdateLearning(Guid learningKey, [FromBody] UpdateLearnerRequest request)
+    public async Task<IActionResult> UpdateLearning(Guid learnerKey, [FromBody] UpdateLearnerRequest request)
     {
-        _logger.LogInformation("Updating learning with key {LearningKey}", learningKey);
+        _logger.LogInformation("Updating learning with key {LearnerKey}", learnerKey);
 
-        var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel());
+        var command = new UpdateLearnerCommand(learnerKey, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<UpdateLearnerCommand, UpdateLearnerResult>(command);
 
@@ -143,17 +143,17 @@ public class LearningController : ControllerBase
     }
 
     /// <summary>
-    /// Removes a learner associated with a specific learning key.
+    /// Removes a learner associated with a specific learner key.
     /// </summary>
     /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
-    /// <param name="learningKey">The unique identifier for the learner record to remove.</param> -->
-    [HttpDelete("{ukprn}/{learningKey}")]
+    /// <param name="learnerKey">The unique identifier for the learner record to remove.</param> -->
+    [HttpDelete("{ukprn}/{learnerKey}")]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> RemoveLearning(long ukprn, Guid learningKey)
+    public async Task<IActionResult> RemoveLearning(long ukprn, Guid learnerKey)
     {
-        _logger.LogInformation("Deleting learning with key {LearningKey}", learningKey);
+        _logger.LogInformation("Deleting learning with key {LearnerKey}", learnerKey);
 
-        var command = new RemoveLearnerCommand(learningKey);
+        var command = new RemoveLearnerCommand(learnerKey);
 
         await _commandDispatcher.Send(command);
 

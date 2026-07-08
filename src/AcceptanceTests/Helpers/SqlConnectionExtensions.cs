@@ -53,6 +53,12 @@ internal static class SqlConnectionExtensions
         return learning.Key;
     }
 
+    internal static Guid GetLearnerKey(this SqlConnection dbConnection, string uln)
+    {
+        var learner = dbConnection.GetLearner(uln);
+        return learner.Key;
+    }
+
     internal static DataAccess.Entities.Learning.Learner GetLearnerByShortCourseKey(this SqlConnection dbConnection, Guid shortCourseLearningKey)
     {
         var shortCourse = dbConnection.GetAll<DataAccess.Entities.Learning.ShortCourseLearning>().Single(x => x.Key == shortCourseLearningKey);

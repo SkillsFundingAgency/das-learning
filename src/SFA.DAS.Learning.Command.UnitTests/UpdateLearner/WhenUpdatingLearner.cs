@@ -44,7 +44,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         // Act
@@ -77,7 +77,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         _ = learningDomainModel.Update(command.UpdateModel);
@@ -105,7 +105,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         // Act
@@ -132,7 +132,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         // Act
@@ -150,12 +150,12 @@ public class WhenUpdatingLearner
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
 
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
+        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
                            .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
-        Assert.That(ex!.Message, Is.EqualTo($"Learning with key {command.LearningKey} not found."));
+        Assert.That(ex!.Message, Is.EqualTo($"Learning with key {command.LearnerKey} not found."));
     }
 #pragma warning restore CS8620, CS8600
 }

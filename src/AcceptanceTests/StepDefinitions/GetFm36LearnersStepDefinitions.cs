@@ -45,8 +45,10 @@ public class GetFm36LearnersStepDefinitions
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
 
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var learnerKey = dbConnection.GetLearningKey(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        _scenarioContext.SetLearningKey(learnerKey);
+        var learningKey = dbConnection.GetLearningKey(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        var learnerKey = dbConnection.GetLearnerKey(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        _scenarioContext.SetLearningKey(learningKey);
+        _scenarioContext.SetLearnerKey(learnerKey);
     }
 
     [Given(@"a withdrawn date of (.*) is set")]
