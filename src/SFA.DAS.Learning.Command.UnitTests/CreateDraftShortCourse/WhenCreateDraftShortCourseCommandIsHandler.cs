@@ -374,6 +374,58 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenIgnoresSecondItemWithSameCourseCodeWithinABundledPost()
+    {
+        // Arrange - a single bundled POST contains two items for the same CourseCode and provider
+        // The second must be ignored, until Restarts and Repeats are implemented
+        _featureFlags.ShortCourseProgression = true;
+
+        var model1 = _fixture.Create<ShortCourseUpdateContext>();
+        var model2 = _fixture.Create<ShortCourseUpdateContext>();
+        model2.OnProgramme = new OnProgramme
+        {
+            CourseCode = model1.OnProgramme.CourseCode,
+            Ukprn = model1.OnProgramme.Ukprn,
+            EmployerId = model1.OnProgramme.EmployerId,
+            StartDate = model1.OnProgramme.StartDate.AddMonths(6),
+            ExpectedEndDate = model1.OnProgramme.ExpectedEndDate.AddMonths(6),
+            WithdrawalDate = null,
+            WithdrawalReasonCode = null,
+            CompletionDate = null,
+            Milestones = new List<Milestone>(),
+            Price = model1.OnProgramme.Price,
+            LearningType = model1.OnProgramme.LearningType
+        };
+
+        var command = new CreateDraftShortCourseCommand(model1.OnProgramme.Ukprn, 2526, [model1, model2]);
+
+        var learner = _fixture.Create<LearnerDomainModel>();
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model1.OnProgramme.CourseCode)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
+
+        var learningEntity1 = _fixture.Create<ShortCourseLearning>();
+        learningEntity1.Episodes = new List<ShortCourseEpisode>();
+        var domainModel1 = ShortCourseLearningDomainModel.Get(learningEntity1);
+
+        _learningFactory.Setup(x => x.CreateNew(learner.Key, model1.OnProgramme.CourseCode)).Returns(domainModel1);
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert - only one Learning is ever created for this CourseCode, and it is untouched by item 2
+        _learningFactory.Verify(x => x.CreateNew(learner.Key, model1.OnProgramme.CourseCode), Times.Once);
+        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        domainModel1.Episodes.Should().HaveCount(1);
+        domainModel1.Episodes.Single().StartDate.Should().Be(model1.OnProgramme.StartDate);
+        
+        results.Results.Should().HaveCount(2);
+        results.Results.Should().Contain(r => r.LearningKey == domainModel1.Key);
+        results.Results.Should().Contain(r => r.IsIgnored);
+    }
+
+    [Test]
     public async Task ThenRejectsCommandIfFeatureFlagIsFalseAndDifferentProviderExists()
     {
         // Arrange
