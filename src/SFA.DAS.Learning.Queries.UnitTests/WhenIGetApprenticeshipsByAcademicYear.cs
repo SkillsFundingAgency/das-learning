@@ -55,7 +55,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
         result.PageSize.Should().Be(20);
         result.Items.Should().HaveCount(1);
         result.Items.Single().Uln.Should().Be("1234567890");
-        result.Items.Single().Key.Should().Be(learning.Key);
+        result.Items.Single().Key.Should().Be(learnerKey);
     }
 
     [Test]

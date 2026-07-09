@@ -30,7 +30,7 @@ public class GetLearningsByAcademicYearQueryHandler(LearningDataContext dbContex
                 (learning, learner) => new GetLearningsByDatesResponseItem
                 {
                     Uln = learner.Uln,
-                    Key = learning.Key
+                    Key = learner.Key
                 })
             .ToListAsync(cancellationToken);
 

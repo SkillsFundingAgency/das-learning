@@ -146,7 +146,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
                 (learning, learner) => new Models.Dtos.Learning
                 {
                     Uln = learner.Uln,
-                    LearnerKey = learner.Key
+                    Key = learning.Key
                 })
             .ToListAsync(cancellationToken);
 
