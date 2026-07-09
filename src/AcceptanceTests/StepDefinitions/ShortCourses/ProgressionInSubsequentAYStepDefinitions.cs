@@ -64,11 +64,22 @@ public class ProgressionInSubsequentAYStepDefinitions
     [When(@"SLD POSTs a new course (SC-\S+) in the subsequent academic year")]
     public async Task WhenSLDPOSTsANewCourseInTheSubsequentAcademicYear(string courseCode)
     {
+        await PostNewCourseInSubsequentAcademicYear(courseCode, ProviderUkprn);
+    }
+
+    [When(@"^SLD POSTs a new course (SC-\S+) with Provider (\d+) in the subsequent academic year$")]
+    public async Task WhenSLDPOSTsANewCourseWithProviderInTheSubsequentAcademicYear(string courseCode, long ukprn)
+    {
+        await PostNewCourseInSubsequentAcademicYear(courseCode, ukprn);
+    }
+
+    private async Task PostNewCourseInSubsequentAcademicYear(string courseCode, long ukprn)
+    {
         var request = new CreateDraftShortCourseRequest
         {
-            Ukprn = ProviderUkprn,
+            Ukprn = ukprn,
             AcademicYear = 2526,
-            OnProgramme = [BuildSubsequentAYOnProgramme(courseCode)],
+            OnProgramme = [BuildSubsequentAYOnProgramme(courseCode, ukprn)],
             LearnerUpdateDetails = BuildLearnerDetails(),
             LearningSupport = []
         };
@@ -116,9 +127,9 @@ public class ProgressionInSubsequentAYStepDefinitions
         Milestones = milestones ?? []
     };
 
-    private static OnProgramme BuildSubsequentAYOnProgramme(string courseCode) => new()
+    private static OnProgramme BuildSubsequentAYOnProgramme(string courseCode, long ukprn = ProviderUkprn) => new()
     {
-        Ukprn = ProviderUkprn,
+        Ukprn = ukprn,
         CourseCode = courseCode,
         StartDate = new DateTime(2025, 9, 1),
         ExpectedEndDate = new DateTime(2026, 6, 30),
