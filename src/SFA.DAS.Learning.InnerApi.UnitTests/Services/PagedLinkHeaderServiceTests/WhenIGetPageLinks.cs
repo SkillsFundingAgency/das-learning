@@ -25,7 +25,7 @@ public class WhenIGetPageLinks
     [Test, MoqAutoData]
     public void Then_Next_And_Prev_Links_Are_Returned_When_Not_First_Nor_Last_Page(
         PagedQuery request,
-        GetLearningsByAcademicYearResponse response,
+        GetApprenticeshipLearnersByAcademicYearResponse response,
         Mock<HttpContext> httpContext,
         [Frozen] Mock<IHttpContextAccessor> mockHttpContextAccessor,
         PagedLinkHeaderService sut
@@ -65,7 +65,7 @@ public class WhenIGetPageLinks
     [Test, MoqAutoData]
     public void Then_Only_Next_Links_Are_Returned_When_First_Page(
         PagedQuery request,
-        GetLearningsByAcademicYearResponse response,
+        GetApprenticeshipLearnersByAcademicYearResponse response,
         Mock<HttpContext> httpContext,
         [Frozen] Mock<IHttpContextAccessor> mockHttpContextAccessor,
         PagedLinkHeaderService sut
@@ -102,7 +102,7 @@ public class WhenIGetPageLinks
     [Test, MoqAutoData]
     public void Then_Only_Prev_Links_Are_Returned_When_Last_Page(
         PagedQuery request,
-        GetLearningsByAcademicYearResponse response,
+        GetApprenticeshipLearnersByAcademicYearResponse response,
         Mock<HttpContext> httpContext,
         [Frozen] Mock<IHttpContextAccessor> mockHttpContextAccessor,
         PagedLinkHeaderService sut

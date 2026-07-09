@@ -34,11 +34,11 @@ public class WhenGettingByAcademicYear
     {
         var ukprn = _fixture.Create<long>();
         const int academicYear = 2526;
-        var expectedResult = _fixture.Create<GetLearningsByAcademicYearResponse>();
+        var expectedResult = _fixture.Create<GetApprenticeshipLearnersByAcademicYearResponse>();
 
         _queryDispatcher
-            .Setup(x => x.Send<GetLearningsByAcademicYearRequest, GetLearningsByAcademicYearResponse>(
-                It.Is<GetLearningsByAcademicYearRequest>(r => r.UkPrn == ukprn && r.AcademicYear == academicYear && r.Page == 1))
+            .Setup(x => x.Send<GetApprenticeshipLearnersByAcademicYearRequest, GetApprenticeshipLearnersByAcademicYearResponse>(
+                It.Is<GetApprenticeshipLearnersByAcademicYearRequest>(r => r.UkPrn == ukprn && r.AcademicYear == academicYear && r.Page == 1))
             ).ReturnsAsync(expectedResult);
 
         var result = await _sut.GetByAcademicYear(ukprn, academicYear, 1);

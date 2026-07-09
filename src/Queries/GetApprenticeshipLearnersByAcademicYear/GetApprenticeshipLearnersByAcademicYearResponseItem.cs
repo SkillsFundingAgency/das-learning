@@ -1,6 +1,6 @@
 namespace SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 
-public record GetLearningsByDatesResponseItem
+public record GetApprenticeshipLearnersByAcademicYearResponseItem
 {
     public string Uln { get; init; }
     public Guid Key { get; set; }

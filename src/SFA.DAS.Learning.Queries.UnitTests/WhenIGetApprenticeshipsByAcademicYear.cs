@@ -10,7 +10,7 @@ namespace SFA.DAS.Learning.Queries.UnitTests;
 public class WhenIGetApprenticeshipsByAcademicYear
 {
     private LearningDataContext _dbContext;
-    private GetLearningsByAcademicYearQueryHandler _sut;
+    private GetApprenticeshipLearnersByAcademicYearQueryHandler _sut;
 
     [SetUp]
     public void Setup()
@@ -20,7 +20,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
             .Options;
 
         _dbContext = new LearningDataContext(options);
-        _sut = new GetLearningsByAcademicYearQueryHandler(_dbContext);
+        _sut = new GetApprenticeshipLearnersByAcademicYearQueryHandler(_dbContext);
     }
 
     [TearDown]
@@ -44,7 +44,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
         _dbContext.ApprenticeshipLearningDbSet.Add(learning);
         await _dbContext.SaveChangesAsync();
 
-        var query = new GetLearningsByAcademicYearRequest(ukPrn, academicYear, 1, 20);
+        var query = new GetApprenticeshipLearnersByAcademicYearRequest(ukPrn, academicYear, 1, 20);
 
         // Act
         var result = await _sut.Handle(query);
@@ -76,7 +76,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
         _dbContext.ApprenticeshipLearningDbSet.Add(learning);
         await _dbContext.SaveChangesAsync();
 
-        var query = new GetLearningsByAcademicYearRequest(ukPrn, academicYear, 1, 20);
+        var query = new GetApprenticeshipLearnersByAcademicYearRequest(ukPrn, academicYear, 1, 20);
 
         // Act
         var result = await _sut.Handle(query);

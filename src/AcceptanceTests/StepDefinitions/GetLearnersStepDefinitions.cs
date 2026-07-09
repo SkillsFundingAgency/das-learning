@@ -84,7 +84,7 @@ public class GetLearnersStepDefinitions
         int startYearOfCurrentAcademicYear = System.DateTime.Now.Month > 7 ? System.DateTime.Now.Year : System.DateTime.Now.Year - 1;
         var academicYear = $"{startYearOfCurrentAcademicYear % 100:D2}{(startYearOfCurrentAcademicYear + 1) % 100:D2}";
 
-        var learners = await _testContext.TestInnerApi.Get<GetLearningsByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{academicYear}/learnings");
+        var learners = await _testContext.TestInnerApi.Get<GetApprenticeshipLearnersByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{academicYear}/learnings");
         _scenarioContext.Set(learners, _ActiveLearnersResponseKey);
     }
 
@@ -93,14 +93,14 @@ public class GetLearnersStepDefinitions
     {
         var collectionYear = requestedDate.AcademicYear();
 
-        var response = await _testContext.TestInnerApi.Get<GetLearningsByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{collectionYear}/learnings");
+        var response = await _testContext.TestInnerApi.Get<GetApprenticeshipLearnersByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{collectionYear}/learnings");
         _scenarioContext.Set(response, _ActiveLearnersResponseKey);
     }
 
     [Then(@"the learner should be (.*)")]
     public void VerifyResponse(string expectedResult)
     {
-        var response = _scenarioContext.Get<GetLearningsByAcademicYearResponse>(_ActiveLearnersResponseKey);
+        var response = _scenarioContext.Get<GetApprenticeshipLearnersByAcademicYearResponse>(_ActiveLearnersResponseKey);
 
         // We assert on 2 records as we have added a control record to ensure a 404 is not returned from the endpoint
         if (expectedResult == "Included")
@@ -215,7 +215,7 @@ public class GetLearnersStepDefinitions
     private void AssertLearnersInCategoryNotReturned(string category)
     {
         var learnersByCategory = _scenarioContext.Get<Dictionary<string, List<string>>>(_LearnersByCategoryKey);
-        var activeLearnersResponse = _scenarioContext.Get<GetLearningsByAcademicYearResponse>(_ActiveLearnersResponseKey);
+        var activeLearnersResponse = _scenarioContext.Get<GetApprenticeshipLearnersByAcademicYearResponse>(_ActiveLearnersResponseKey);
         var learnersNotExpected = learnersByCategory[category];
 
         activeLearnersResponse.Items.Should().NotContain(learner => learnersNotExpected.Contains(learner.Uln));
@@ -225,7 +225,7 @@ public class GetLearnersStepDefinitions
     private void AssertLearnersInCategoryAreReturned(string category)
     {
         var learnersByCategory = _scenarioContext.Get<Dictionary<string, List<string>>>(_LearnersByCategoryKey);
-        var activeLearnersResponse = _scenarioContext.Get<GetLearningsByAcademicYearResponse>(_ActiveLearnersResponseKey);
+        var activeLearnersResponse = _scenarioContext.Get<GetApprenticeshipLearnersByAcademicYearResponse>(_ActiveLearnersResponseKey);
         var learnersExpected = learnersByCategory[category];
 
         activeLearnersResponse.Items.Should().Contain(learner => learnersExpected.Contains(learner.Uln));

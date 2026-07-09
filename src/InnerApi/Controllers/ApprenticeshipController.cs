@@ -77,21 +77,21 @@ public class ApprenticeshipController : ControllerBase
     }   
 
     /// <summary>
-    /// Get paginated learnings for a provider between specified dates.
+    /// Get paginated learnersfor a provider between specified dates.
     /// </summary>
     /// <param name="ukprn">UkPrn filter value</param>
     /// <param name="academicYear">Academic year in yyyy format (e.g. 2425)</param>
     /// <param name="page">Page number</param>
     /// <param name="pageSize">Number of items per page</param>
-    /// <returns>GetLearningsByAcademicYearResponse</returns>
-    [HttpGet("{ukprn:long}/academicyears/{academicYear:int}/learnings")]
-    [ProducesResponseType(typeof(GetLearningsByAcademicYearResponse), 200)]
+    /// <returns>GetApprenticeshipLearnersByAcademicYearResponse</returns>
+    [HttpGet("{ukprn:long}/academicyears/{academicYear:int}/learners")]
+    [ProducesResponseType(typeof(GetApprenticeshipLearnersByAcademicYearResponse), 200)]
     public async Task<IActionResult> GetByAcademicYear(long ukprn, int academicYear, [FromQuery] int page = 1, [FromQuery] int? pageSize = 20)
     {
         pageSize = pageSize.HasValue ? Math.Clamp(pageSize.Value, 1, 100) : pageSize;
         
-        var request = new GetLearningsByAcademicYearRequest(ukprn, academicYear, page, pageSize);
-        var response = await _queryDispatcher.Send<GetLearningsByAcademicYearRequest, GetLearningsByAcademicYearResponse>(request);
+        var request = new GetApprenticeshipLearnersByAcademicYearRequest(ukprn, academicYear, page, pageSize);
+        var response = await _queryDispatcher.Send<GetApprenticeshipLearnersByAcademicYearRequest, GetApprenticeshipLearnersByAcademicYearResponse>(request);
 
         var pageLinks = _pagedLinkHeaderService.GetPageLinks(request, response);
         

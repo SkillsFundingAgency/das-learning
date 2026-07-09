@@ -5,10 +5,10 @@ using SFA.DAS.Learning.Domain;
 
 namespace SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 
-public class GetLearningsByAcademicYearQueryHandler(LearningDataContext dbContext)
-    : IQueryHandler<GetLearningsByAcademicYearRequest, GetLearningsByAcademicYearResponse>
+public class GetApprenticeshipLearnersByAcademicYearQueryHandler(LearningDataContext dbContext)
+    : IQueryHandler<GetApprenticeshipLearnersByAcademicYearRequest, GetApprenticeshipLearnersByAcademicYearResponse>
 {
-    public async Task<GetLearningsByAcademicYearResponse> Handle(GetLearningsByAcademicYearRequest query, CancellationToken cancellationToken = default)
+    public async Task<GetApprenticeshipLearnersByAcademicYearResponse> Handle(GetApprenticeshipLearnersByAcademicYearRequest query, CancellationToken cancellationToken = default)
     {
         var dates = AcademicYearParser.ParseFrom(query.AcademicYear);
 
@@ -27,14 +27,14 @@ public class GetLearningsByAcademicYearQueryHandler(LearningDataContext dbContex
                 dbContext.LearnersDbSet.AsNoTracking(),
                 learning => learning.LearnerKey,
                 learner => learner.Key,
-                (learning, learner) => new GetLearningsByDatesResponseItem
+                (learning, learner) => new GetApprenticeshipLearnersByAcademicYearResponseItem
                 {
                     Uln = learner.Uln,
                     Key = learner.Key
                 })
             .ToListAsync(cancellationToken);
 
-        return new GetLearningsByAcademicYearResponse
+        return new GetApprenticeshipLearnersByAcademicYearResponse
         {
             Items = items,
             PageSize = query.Limit,
