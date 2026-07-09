@@ -84,7 +84,7 @@ public class GetLearnersStepDefinitions
         int startYearOfCurrentAcademicYear = System.DateTime.Now.Month > 7 ? System.DateTime.Now.Year : System.DateTime.Now.Year - 1;
         var academicYear = $"{startYearOfCurrentAcademicYear % 100:D2}{(startYearOfCurrentAcademicYear + 1) % 100:D2}";
 
-        var learners = await _testContext.TestInnerApi.Get<GetApprenticeshipLearnersByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{academicYear}/learnings");
+        var learners = await _testContext.TestInnerApi.Get<GetApprenticeshipLearnersByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{academicYear}/learners");
         _scenarioContext.Set(learners, _ActiveLearnersResponseKey);
     }
 
@@ -93,7 +93,7 @@ public class GetLearnersStepDefinitions
     {
         var collectionYear = requestedDate.AcademicYear();
 
-        var response = await _testContext.TestInnerApi.Get<GetApprenticeshipLearnersByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{collectionYear}/learnings");
+        var response = await _testContext.TestInnerApi.Get<GetApprenticeshipLearnersByAcademicYearResponse>($"{Constants.UkPrn}/academicyears/{collectionYear}/learners");
         _scenarioContext.Set(response, _ActiveLearnersResponseKey);
     }
 
