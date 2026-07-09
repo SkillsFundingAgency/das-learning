@@ -65,19 +65,3 @@ Scenario: Reinstatement via POST after a full DELETE
     When SLD POSTs ended course SC-001 and new course SC-002
     Then SC-001 is not removed
     And SC-002 is not removed
-
-#Toggle-off tests
-
-Scenario: ShortCourseProgression feature off: bundled POST for new course is ignored
-    Given an unapproved short course exists for course SC-001
-    And the ShortCourseProgression feature is toggled off
-    And the learner has completed SC-001
-    When SLD POSTs ended course SC-001 and new course SC-002
-    Then 1 short course learnings exist for the learner
-    And a learning exists for course SC-001
-
-Scenario: ShortCourseProgression feature off: second new course in a single bundled POST for a brand new learner is gated
-    Given the ShortCourseProgression feature is toggled off
-    When SLD POSTs a brand new learner with courses SC-003 and SC-004
-    Then 1 short course learnings exist for the learner
-    And a learning exists for course SC-003

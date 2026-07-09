@@ -155,7 +155,6 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     {
         // Arrange - re-POSTing the exact same, already-approved course (same provider) results in a no-op
         // A bug resulted in this no-op being treated as an omission, and the existing Episode being removed. This test ensures that does not happen.
-        _featureFlags.ShortCourseProgression = true;
         var command = CreateSingleItemCommand(out var model);
         var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
@@ -288,7 +287,6 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         // Arrange - learner already has a Learning for a *different* CourseCode (e.g. from a prior Progression POST).
         // The lookup must be scoped by CourseCode, not just LearnerKey, or this POST will incorrectly
         // find and mutate the unrelated Learning instead of creating a new one.
-        _featureFlags.ShortCourseProgression = true;
         var command = CreateSingleItemCommand(out var model);
         var learner = _fixture.Create<LearnerDomainModel>();
 
@@ -317,33 +315,9 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenIgnoresNewCourseCodeWhenProgressionFlagDisabledAndLearnerHasOtherLearnings()
-    {
-        // Arrange - mirrors PUT's IsIgnored behaviour: a CourseCode with no existing Learning, but the
-        // learner already has at least one other Learning, is Progression and must stay gated behind the flag.
-        _featureFlags.ShortCourseProgression = false;
-        var command = CreateSingleItemCommand(out var model);
-        var learner = _fixture.Create<LearnerDomainModel>();
-
-        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
-
-        var otherLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
-        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([otherLearning]);
-        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
-
-        // Act
-        var results = await _commandHandler.Handle(command);
-
-        // Assert
-        results.Results.Single().IsIgnored.Should().BeTrue();
-        _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
-    }
-
-    [Test]
     public async Task ThenHandlesBundledPostWithOriginalUnapprovedCourseAndNewProgressionCourse()
     {
         // Arrange - AC3/AC4 shape: SLD bundles the still-unapproved original course alongside the new one in a single POST.
-        _featureFlags.ShortCourseProgression = true;
         var originalModel = _fixture.Create<ShortCourseUpdateContext>();
         var newModel = _fixture.Create<ShortCourseUpdateContext>();
         var command = new CreateDraftShortCourseCommand(originalModel.OnProgramme.Ukprn, 2526, [originalModel, newModel]);
@@ -416,36 +390,9 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenOmittedLearningIsNotRemovedWhenFlagDisabled()
+    public async Task ThenOmittedUnapprovedLearningIsRemoved()
     {
         // Arrange
-        _featureFlags.ShortCourseProgression = false;
-        var command = CreateSingleItemCommand(out var model);
-        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
-        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
-
-        var includedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
-        var omittedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
-        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(includedLearning);
-        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([includedLearning, omittedLearning]);
-        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(includedLearning, learner, model.OnProgramme.Ukprn))
-            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
-
-        // Act
-        var results = await _commandHandler.Handle(command);
-
-        // Assert
-        results.Results.Should().NotContain(r => r.IsRemoved);
-        omittedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
-        includedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
-        _learningRepository.Verify(x => x.Update(omittedLearning), Times.Never);
-    }
-
-    [Test]
-    public async Task ThenOmittedUnapprovedLearningIsRemovedWhenFlagEnabled()
-    {
-        // Arrange
-        _featureFlags.ShortCourseProgression = true;
         var command = CreateSingleItemCommand(out var model);
         var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
@@ -468,10 +415,9 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenOmittedApprovedLearningIsRemovedWhenFlagEnabled()
+    public async Task ThenOmittedApprovedLearningIsRemoved()
     {
         // Arrange
-        _featureFlags.ShortCourseProgression = true;
         var command = CreateSingleItemCommand(out var model);
         var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
@@ -498,7 +444,6 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     {
         // Arrange: learner completed a course in AY 2425, now starts a different course in AY 2526.
         // The prior-AY learning is not in the POST payload, but must not be treated as a candidate for removal
-        _featureFlags.ShortCourseProgression = true;
         var command = CreateSingleItemCommand(out var model); // AY 2526
         var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
         _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);

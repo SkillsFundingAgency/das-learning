@@ -233,27 +233,11 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenIgnoredResultReturnedWhenLearningNotFoundAndFlagDisabled()
-    {
-        var learnerKey = Guid.NewGuid();
-        _featureFlags.ShortCourseProgression = false;
-        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync((ShortCourseLearningDomainModel?)null);
-
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext()]);
-
-        var results = await _commandHandler.Handle(command);
-
-        results.Results.Single().IsIgnored.Should().BeTrue();
-        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
-    }
-
-    [Test]
     public async Task ThenNewLearningIsCreatedWhenNoCourseCodeMatchFound()
     {
         var learnerKey = Guid.NewGuid();
         var context = CreateUpdateContext();
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [context]);
-        _featureFlags.ShortCourseProgression = true;
 
         _repository
             .Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, context.OnProgramme.CourseCode))
@@ -273,32 +257,9 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenOmittedLearningIsNotRemovedWhenFlagDisabled()
+    public async Task ThenOmittedUnapprovedLearningIsRemoved()
     {
         var learnerKey = Guid.NewGuid();
-        _featureFlags.ShortCourseProgression = false;
-
-        var includedLearning = CreateDomainModel(courseCode: "TEST01");
-        var omittedLearning = CreateDomainModel(courseCode: "TEST02", isApproved: true);
-
-        _repository
-            .Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01"))
-            .ReturnsAsync(includedLearning);
-
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext()]);
-
-        var results = await _commandHandler.Handle(command);
-
-        results.Results.Should().NotContain(r => r.IsRemoved);
-        omittedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
-        _repository.Verify(r => r.GetAllByLearnerKey(It.IsAny<Guid>()), Times.Never);
-    }
-
-    [Test]
-    public async Task ThenOmittedUnapprovedLearningIsRemovedWhenFlagEnabled()
-    {
-        var learnerKey = Guid.NewGuid();
-        _featureFlags.ShortCourseProgression = true;
 
         var includedLearning = CreateDomainModel(courseCode: "TEST01");
         var omittedLearning = CreateDomainModel(courseCode: "TEST02", isApproved: false);
@@ -320,10 +281,9 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
-    public async Task ThenOmittedApprovedLearningIsRemovedWhenFlagEnabled()
+    public async Task ThenOmittedApprovedLearningIsRemoved()
     {
         var learnerKey = Guid.NewGuid();
-        _featureFlags.ShortCourseProgression = true;
 
         var includedLearning = CreateDomainModel(courseCode: "TEST01");
         var omittedLearning = CreateDomainModel(courseCode: "TEST02", isApproved: true);
@@ -381,11 +341,9 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
-    [TestCase(true)]
-    [TestCase(false)]
-    public async Task ThenIgnoredResultReturnedWhenIsRestart(bool progressionEnabled)
+    [Test]
+    public async Task ThenIgnoredResultReturnedWhenIsRestart()
     {
-        _featureFlags.ShortCourseProgression = progressionEnabled;
         var learnerKey = Guid.NewGuid();
         var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
 
@@ -401,11 +359,9 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
-    [TestCase(true)]
-    [TestCase(false)]
-    public async Task ThenWithdrawalIsReplacedByCompletionWhenStartDateUnchanged(bool progressionEnabled)
+    [Test]
+    public async Task ThenWithdrawalIsReplacedByCompletionWhenStartDateUnchanged()
     {
-        _featureFlags.ShortCourseProgression = progressionEnabled;
         var learnerKey = Guid.NewGuid();
         var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
 
@@ -422,12 +378,10 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
     }
 
-    [TestCase(true)]
-    [TestCase(false)]
-    public async Task ThenOriginalEpisodeFollowingIgnoredRestartIsNotRemovedByOmittedLearningCleanup(bool progressionEnabled)
+    [Test]
+    public async Task ThenOriginalEpisodeFollowingIgnoredRestartIsNotRemovedByOmittedLearningCleanup()
     {
         var learnerKey = Guid.NewGuid();
-        _featureFlags.ShortCourseProgression = progressionEnabled;
 
         var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
 
@@ -465,7 +419,6 @@ public class WhenUpdateShortCourseCommandIsHandled
         // Arrange: learner completed a course in AY 2425, now a PUT arrives for a different course in AY 2526.
         // The prior-AY learning is absent from the PUT payload but must not be treated as a candidate for removal
         var learnerKey = Guid.NewGuid();
-        _featureFlags.ShortCourseProgression = true;
 
         var includedLearning = CreateDomainModel(courseCode: "TEST01");
         var priorAYLearning = CreateDomainModel(

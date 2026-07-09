@@ -35,10 +35,7 @@ public class UpdateShortCourseCommandHandler(
             }
         }
 
-        if (featureFlags.ShortCourseProgression)
-        {
-            await RemoveOmittedLearnings(command, results, processedLearningKeys);
-        }
+        await RemoveOmittedLearnings(command, results, processedLearningKeys);
 
         return new UpdateShortCourseResponse { Results = results };
     }
@@ -84,14 +81,6 @@ public class UpdateShortCourseCommandHandler(
 
         if (learning == null)
         {
-            if (!featureFlags.ShortCourseProgression)
-            {
-                logger.LogInformation(
-                    "No learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} and Short Course Progression is disabled — ignoring",
-                    learnerKey, model.OnProgramme.CourseCode);
-                return new UpdateShortCourseResult { IsIgnored = true };
-            }
-
             return await CreateNewLearning(learnerKey, model);
         }
 
