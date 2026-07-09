@@ -195,7 +195,6 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             model.OnProgramme.Ukprn,
             model.OnProgramme.EmployerId,
             model.LearnerRef,
-            model.OnProgramme.CourseCode,
             false,
             model.OnProgramme.StartDate,
             model.OnProgramme.ExpectedEndDate,
