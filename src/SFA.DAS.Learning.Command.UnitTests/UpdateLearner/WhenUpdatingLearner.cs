@@ -155,7 +155,7 @@ public class WhenUpdatingLearner
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
-        Assert.That(ex!.Message, Is.EqualTo($"Learning with key {command.LearnerKey} not found."));
+        Assert.That(ex!.Message, Is.EqualTo($"Learning for learner key {command.LearnerKey} not found."));
     }
 #pragma warning restore CS8620, CS8600
 }

@@ -17,9 +17,9 @@ public class WhenCreateDraftLearning
     private Fixture _fixture;
     private Mock<IQueryDispatcher> _mockQueryDispatcher;
     private Mock<ICommandDispatcher> _mockCommandDispatcher;
-    private Mock<ILogger<LearningController>> _mockLogger;
+    private Mock<ILogger<ApprenticeshipController>> _mockLogger;
     private Mock<IPagedLinkHeaderService> _mockPagedLinkHeaderService;
-    private LearningController _sut;
+    private ApprenticeshipController _sut;
 
     [SetUp]
     public void Arrange()
@@ -27,10 +27,10 @@ public class WhenCreateDraftLearning
         _fixture = new Fixture();
         _mockQueryDispatcher = new Mock<IQueryDispatcher>();
         _mockCommandDispatcher = new Mock<ICommandDispatcher>();
-        _mockLogger = new Mock<ILogger<LearningController>>();
+        _mockLogger = new Mock<ILogger<ApprenticeshipController>>();
         _mockPagedLinkHeaderService = new Mock<IPagedLinkHeaderService>();
 
-        _sut = new LearningController(
+        _sut = new ApprenticeshipController(
             _mockQueryDispatcher.Object,
             _mockCommandDispatcher.Object,
             _mockLogger.Object,

@@ -20,7 +20,7 @@ public class UpdateLearnerCommandHandler(
         if (learning == null)
         {
             logger.LogWarning("No learning found for learner key {LearnerKey}", command.LearnerKey);
-            throw new KeyNotFoundException($"Learning with key {command.LearnerKey} not found.");
+            throw new KeyNotFoundException($"Learning for learner key {command.LearnerKey} not found.");
         }
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
@@ -60,7 +60,7 @@ public class UpdateLearnerCommandHandler(
         await learnerRepository.Update(learner);
         await learningRepository.Update(learning);
 
-        logger.LogInformation("Successfully updated learning with Learnerkey {LearnerKey}", command.LearnerKey);
+        logger.LogInformation("Successfully updated learner with key {LearnerKey}", command.LearnerKey);
 
         return new UpdateLearnerResult
         {

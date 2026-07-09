@@ -10,12 +10,12 @@ public class RemoveLearnerCommandHandler(
 {
     public async Task Handle(RemoveLearnerCommand command, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Handling RemoveLearnerCommandHandler for Learning for Learner {learnerKey}", command.LearnerKey);
+        logger.LogInformation("Handling RemoveLearnerCommandHandler for learner key {LearnerKey}", command.LearnerKey);
 
         var learning = await learningRepository.GetByLearnerKey(command.LearnerKey);
         if (learning == null)
         {
-            throw new KeyNotFoundException($"Learning for Learner with key {command.LearnerKey} not found.");
+            throw new KeyNotFoundException($"Learning for learner key {command.LearnerKey} not found.");
         }
 
         learning.RemoveLearner();

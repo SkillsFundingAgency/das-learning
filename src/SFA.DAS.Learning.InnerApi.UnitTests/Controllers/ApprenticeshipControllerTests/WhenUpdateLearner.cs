@@ -17,19 +17,19 @@ public class WhenUpdateLearner
     private readonly Fixture _fixture;
     private readonly Mock<IQueryDispatcher> _mockQueryDispatcher;
     private readonly Mock<ICommandDispatcher> _mockCommandDispatcher;
-    private readonly Mock<ILogger<LearningController>> _mockLogger;
+    private readonly Mock<ILogger<ApprenticeshipController>> _mockLogger;
     private readonly Mock<IPagedLinkHeaderService> _mockPagedLinkHeaderService;
-    private LearningController _sut;
+    private ApprenticeshipController _sut;
 
     public WhenUpdateLearner()
     {
         _fixture = new Fixture();
         _mockQueryDispatcher = new Mock<IQueryDispatcher>();
         _mockCommandDispatcher = new Mock<ICommandDispatcher>();
-        _mockLogger = new Mock<ILogger<LearningController>>();
+        _mockLogger = new Mock<ILogger<ApprenticeshipController>>();
         _mockPagedLinkHeaderService = new Mock<IPagedLinkHeaderService>();
 
-        _sut = new LearningController(
+        _sut = new ApprenticeshipController(
             _mockQueryDispatcher.Object,
             _mockCommandDispatcher.Object,
             _mockLogger.Object,

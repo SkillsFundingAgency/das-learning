@@ -18,19 +18,19 @@ namespace SFA.DAS.Learning.InnerApi.Controllers;
 ///</summary>
 [Route("")]
 [ApiController]
-public class LearningController : ControllerBase
+public class ApprenticeshipController : ControllerBase
 {
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly ICommandDispatcher _commandDispatcher;
-    private readonly ILogger<LearningController> _logger;
+    private readonly ILogger<ApprenticeshipController> _logger;
     private readonly IPagedLinkHeaderService _pagedLinkHeaderService;
 
-    /// <summary>Initializes a new instance of the <see cref="LearningController"/> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="ApprenticeshipController"/> class.</summary>
     /// <param name="queryDispatcher">Gets data</param>
     /// <param name="commandDispatcher">updates data</param>
     /// <param name="logger">ILogger</param>
     /// <param name="pagedLinkHeaderService">IPagedQueryResultHelper</param>
-    public LearningController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, ILogger<LearningController> logger, IPagedLinkHeaderService pagedLinkHeaderService)
+    public ApprenticeshipController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, ILogger<ApprenticeshipController> logger, IPagedLinkHeaderService pagedLinkHeaderService)
     {
         _queryDispatcher = queryDispatcher;
         _commandDispatcher = commandDispatcher;
@@ -133,7 +133,7 @@ public class LearningController : ControllerBase
     [ProducesResponseType(200)]
     public async Task<IActionResult> UpdateLearning(Guid learnerKey, [FromBody] UpdateLearnerRequest request)
     {
-        _logger.LogInformation("Updating learning with key {LearnerKey}", learnerKey);
+        _logger.LogInformation("Updating Apprenticeship Learning for learner with key {LearnerKey}", learnerKey);
 
         var command = new UpdateLearnerCommand(learnerKey, request.ToUpdateModel());
 
@@ -146,12 +146,12 @@ public class LearningController : ControllerBase
     /// Removes a learner associated with a specific learner key.
     /// </summary>
     /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
-    /// <param name="learnerKey">The unique identifier for the learner record to remove.</param> -->
+    /// <param name="learnerKey">The unique identifier for the learner record to remove.</param>
     [HttpDelete("{ukprn}/{learnerKey}")]
     [ProducesResponseType(200)]
     public async Task<IActionResult> RemoveLearning(long ukprn, Guid learnerKey)
     {
-        _logger.LogInformation("Deleting learning with key {LearnerKey}", learnerKey);
+        _logger.LogInformation("Deleting learner with key {LearnerKey}", learnerKey);
 
         var command = new RemoveLearnerCommand(learnerKey);
 

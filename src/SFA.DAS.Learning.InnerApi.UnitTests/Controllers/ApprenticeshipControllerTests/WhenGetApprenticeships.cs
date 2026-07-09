@@ -15,16 +15,16 @@ public class WhenGetApprenticeships
 {
     private Fixture _fixture;
     private Mock<IQueryDispatcher> _queryDispatcher;
-    private Mock<ILogger<LearningController>> _mockLogger;
-    private LearningController _sut;
+    private Mock<ILogger<ApprenticeshipController>> _mockLogger;
+    private ApprenticeshipController _sut;
 
     [SetUp]
     public void Setup()
     {
         _fixture = new Fixture();
         _queryDispatcher = new Mock<IQueryDispatcher>();
-        _mockLogger = new Mock<ILogger<LearningController>>();
-        _sut = new LearningController(_queryDispatcher.Object, Mock.Of<ICommandDispatcher>(), Mock.Of<ILogger<LearningController>>(), Mock.Of<IPagedLinkHeaderService>());
+        _mockLogger = new Mock<ILogger<ApprenticeshipController>>();
+        _sut = new ApprenticeshipController(_queryDispatcher.Object, Mock.Of<ICommandDispatcher>(), Mock.Of<ILogger<ApprenticeshipController>>(), Mock.Of<IPagedLinkHeaderService>());
     }
 
     [Test]

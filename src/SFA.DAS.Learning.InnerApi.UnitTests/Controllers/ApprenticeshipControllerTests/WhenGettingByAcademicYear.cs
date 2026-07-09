@@ -16,8 +16,8 @@ public class WhenGettingByAcademicYear
     private Fixture _fixture;
     private Mock<IQueryDispatcher> _queryDispatcher;
     private Mock<ICommandDispatcher> _commandDispatcher;
-    private Mock<ILogger<LearningController>> _mockLogger;
-    private LearningController _sut;
+    private Mock<ILogger<ApprenticeshipController>> _mockLogger;
+    private ApprenticeshipController _sut;
 
     [SetUp]
     public void Setup()
@@ -25,8 +25,8 @@ public class WhenGettingByAcademicYear
         _fixture = new Fixture();
         _queryDispatcher = new Mock<IQueryDispatcher>();
         _commandDispatcher = new Mock<ICommandDispatcher>();
-        _mockLogger = new Mock<ILogger<LearningController>>();
-        _sut = new LearningController(_queryDispatcher.Object, _commandDispatcher.Object, _mockLogger.Object, Mock.Of<IPagedLinkHeaderService>());
+        _mockLogger = new Mock<ILogger<ApprenticeshipController>>();
+        _sut = new ApprenticeshipController(_queryDispatcher.Object, _commandDispatcher.Object, _mockLogger.Object, Mock.Of<IPagedLinkHeaderService>());
     }
 
     [Test]

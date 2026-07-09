@@ -39,7 +39,7 @@ public class TestInnerApi : IDisposable
             .ConfigureServices(services =>
             {
                 services.AddControllers()
-                    .AddApplicationPart(typeof(SFA.DAS.Learning.InnerApi.Controllers.LearningController).Assembly)
+                    .AddApplicationPart(typeof(SFA.DAS.Learning.InnerApi.Controllers.ApprenticeshipController).Assembly)
                     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
                 services.AddQueryServices().AddCommandServices(_testContext.GenerateConfiguration()).AddEventServices();
