@@ -41,6 +41,7 @@ public class UpdateLearnerCommandHandler(
             {
                 Changes = [],
                 AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
+                LearningKey = learning.Key,
                 LearningEpisodeKey = learning.LatestEpisode.Key,
                 Prices = learning.LatestEpisode.EpisodePrices
                     .Select(x => (UpdateLearnerResult.EpisodePrice)x)
@@ -66,6 +67,7 @@ public class UpdateLearnerCommandHandler(
         {
             Changes = changes.ToList(),
             AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
+            LearningKey = learning.Key,
             LearningEpisodeKey = learning.LatestEpisode.Key,
             Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
