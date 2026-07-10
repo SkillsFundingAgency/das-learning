@@ -52,10 +52,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         var results = new List<CreateDraftShortCourseCommandResult>();
         var processedLearningKeys = new HashSet<Guid>();
+        var processedCourseCodes = new HashSet<string>();
 
         foreach (var model in command.Models)
         {
-            var result = await HandleSingleItem(model, learner, personalDetailsChanged, learnerHasExistingLearnings);
+            var result = await HandleSingleItem(model, learner, personalDetailsChanged, learnerHasExistingLearnings, processedCourseCodes);
             if (result != null)
             {
                 results.Add(result);
@@ -110,9 +111,18 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
     }
 
-    private async Task<CreateDraftShortCourseCommandResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged, bool learnerHasExistingLearnings)
+    private async Task<CreateDraftShortCourseCommandResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged, bool learnerHasExistingLearnings, HashSet<string> processedCourseCodes)
     {
         var ukprn = model.OnProgramme.Ukprn;
+
+        // Silently ignore subsequent instances of the same CourseCode in one POST (until Repeats/Restarts are implemented)
+        if (!processedCourseCodes.Add(model.OnProgramme.CourseCode))
+        {
+            _logger.LogWarning(
+                "CourseCode {CourseCode} appears more than once in this request for LearnerKey {LearnerKey} — ignoring the repeat/restart",
+                model.OnProgramme.CourseCode, learner.Key);
+            return new CreateDraftShortCourseCommandResult { IsIgnored = true };
+        }
 
         var learning = await _shortCourseLearningRepository.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode);
 
