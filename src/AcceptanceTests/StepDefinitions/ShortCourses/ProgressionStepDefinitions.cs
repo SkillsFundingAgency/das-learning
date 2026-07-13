@@ -24,10 +24,21 @@ public class ProgressionStepDefinitions
 
     // --- Setup steps ---
 
-    [Given(@"an approved short course exists for course (.*)")]
+    [Given(@"^an approved short course exists for course (\S+)$")]
     public async Task GivenAnApprovedShortCourseExistsForCourse(string courseCode)
     {
-        var request = BuildRequest(courseCode);
+        await CreateApprovedShortCourse(courseCode, ProviderUkprn);
+    }
+
+    [Given(@"^an approved short course exists for course (\S+) with Provider (\d+)$")]
+    public async Task GivenAnApprovedShortCourseExistsForCourseWithProvider(string courseCode, long ukprn)
+    {
+        await CreateApprovedShortCourse(courseCode, ukprn);
+    }
+
+    private async Task CreateApprovedShortCourse(string courseCode, long ukprn)
+    {
+        var request = BuildRequest(courseCode, ukprn);
         (var responseBody, var statusCode) = await _testContext.TestInnerApi.PostWithResponseCode<CreateDraftShortCourseRequest, CreateDraftShortCourseCommandResponse>("/shortCourses", request);
         var result = responseBody?.Results.SingleOrDefault();
 
@@ -62,6 +73,8 @@ public class ProgressionStepDefinitions
     }
 
     [Given(@"the progression course (.*) is approved")]
+    [Given(@"short course (.*) is approved")]
+    [When(@"short course (.*) is approved")]
     public async Task GivenTheProgressionCourseIsApproved(string courseCode)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
@@ -184,12 +197,23 @@ public class ProgressionStepDefinitions
         learnings.Should().HaveCount(expectedCount);
     }
 
-    [Then(@"a learning exists for course (.*)")]
+    [Then(@"^a learning exists for course (\S+)$")]
     public async Task ThenALearningExistsForCourse(string courseCode)
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learnings = dbConnection.GetShortCourseLearningsForLearner(GetLearnerKey());
         learnings.Should().Contain(l => l.TrainingCode == courseCode, $"expected a learning with course code {courseCode} to exist");
+    }
+
+    [Then(@"a learning exists for course (.*) with Ukprn (\d+)")]
+    public async Task ThenALearningExistsForCourseWithUkprn(string courseCode, long ukprn)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learnings = dbConnection.GetShortCourseLearningsForLearner(GetLearnerKey());
+        var learning = learnings.SingleOrDefault(l => l.TrainingCode == courseCode);
+        learning.Should().NotBeNull($"expected a learning with course code {courseCode} to exist");
+        var fullLearning = dbConnection.GetShortCourseLearning(learning!.Key);
+        fullLearning.Episodes.Should().Contain(e => e.Ukprn == ukprn, $"expected an episode with Ukprn {ukprn} for course {courseCode}");
     }
 
     // --- Lifecycle isolation assertions ---
@@ -244,6 +268,20 @@ public class ProgressionStepDefinitions
         GetEpisodeForCourse(dbConnection, courseCode).StartDate.Should().Be(new DateTime(2025, 3, 1));
     }
 
+    [Then(@"^(\S+) is approved$")]
+    public async Task ThenCourseIsApproved(string courseCode)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        GetEpisodeForCourse(dbConnection, courseCode).IsApproved.Should().BeTrue();
+    }
+
+    [Then(@"^(\S+) remains approved and unchanged$")]
+    public async Task ThenCourseRemainsApprovedAndUnchanged(string courseCode)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        GetEpisodeForCourse(dbConnection, courseCode).IsApproved.Should().BeTrue();
+    }
+
     [Then(@"(.*) is removed")]
     public async Task ThenCourseIsRemoved(string courseCode)
     {
@@ -280,6 +318,31 @@ public class ProgressionStepDefinitions
         await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", updateRequest);
     }
 
+    [When(@"^Provider (\d+) records the 30% milestone for (\S+)$")]
+    public async Task WhenProviderRecordsThirtyPercentMilestoneFor(long ukprn, string courseCode)
+    {
+        await SubmitSingleProviderUpdate(ukprn, BuildOnProgramme(courseCode, ukprn: ukprn, milestones: [Milestone.ThirtyPercentLearningComplete]));
+    }
+
+    [When(@"^Provider (\d+) records the completion date for (\S+)$")]
+    public async Task WhenProviderRecordsCompletionDateFor(long ukprn, string courseCode)
+    {
+        await SubmitSingleProviderUpdate(ukprn, BuildOnProgramme(courseCode, ukprn: ukprn, completionDate: new DateTime(2025, 6, 1)));
+    }
+
+    private async Task SubmitSingleProviderUpdate(long ukprn, OnProgramme onProgramme)
+    {
+        var updateRequest = new UpdateShortCourseRequest
+        {
+            AcademicYear = 2425,
+            Ukprn = ukprn,
+            LearnerUpdateDetails = BuildLearnerDetails(),
+            OnProgramme = [onProgramme]
+        };
+
+        await _testContext.TestInnerApi.Put<UpdateShortCourseRequest, object>($"/shortCourses/{GetLearnerKey()}", updateRequest);
+    }
+
     private DataAccess.Entities.Learning.ShortCourseEpisode GetEpisodeForCourse(SqlConnection dbConnection, string courseCode)
     {
         var learnings = dbConnection.GetShortCourseLearningsForLearner(GetLearnerKey());
@@ -289,9 +352,9 @@ public class ProgressionStepDefinitions
 
     private Guid GetLearnerKey() => new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
 
-    private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? startDate = null) => new()
+    private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? startDate = null, long? ukprn = null) => new()
     {
-        Ukprn = ProviderUkprn,
+        Ukprn = ukprn ?? ProviderUkprn,
         CourseCode = courseCode,
         StartDate = startDate ?? new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
@@ -311,11 +374,11 @@ public class ProgressionStepDefinitions
         LearnerRef = "LR-123213"
     };
 
-    private static CreateDraftShortCourseRequest BuildRequest(string courseCode) => new()
+    private static CreateDraftShortCourseRequest BuildRequest(string courseCode, long ukprn = ProviderUkprn) => new()
     {
-        Ukprn = ProviderUkprn,
+        Ukprn = ukprn,
         AcademicYear = 2425,
-        OnProgramme = [BuildOnProgramme(courseCode)],
+        OnProgramme = [BuildOnProgramme(courseCode, ukprn: ukprn)],
         LearnerUpdateDetails = BuildLearnerDetails(),
         LearningSupport = new List<LearningSupportDetails>()
     };
