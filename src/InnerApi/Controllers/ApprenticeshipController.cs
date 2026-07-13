@@ -77,7 +77,7 @@ public class ApprenticeshipController : ControllerBase
     }   
 
     /// <summary>
-    /// Get paginated learnersfor a provider between specified dates.
+    /// Get paginated learners for a provider between specified dates.
     /// </summary>
     /// <param name="ukprn">UkPrn filter value</param>
     /// <param name="academicYear">Academic year in yyyy format (e.g. 2425)</param>
