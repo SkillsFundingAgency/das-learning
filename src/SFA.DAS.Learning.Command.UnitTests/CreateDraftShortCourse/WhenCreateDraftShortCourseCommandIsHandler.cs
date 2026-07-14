@@ -48,7 +48,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                 It.IsAny<ShortCourseLearningDomainModel>(),
                 It.IsAny<LearnerDomainModel>(),
                 It.IsAny<long>()))
-            .Returns(new CreateDraftShortCourseCommandResult());
+            .Returns((ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn) =>
+                new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, LearnerKey = learner.Key });
 
         _featureFlags = new FeatureFlags { ShortCourseChangeOfProvider = true };
 

@@ -9,7 +9,6 @@ using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
-using System.Threading.Channels;
 
 namespace SFA.DAS.Learning.Command.CreateDraftShortCourse;
 
@@ -145,7 +144,9 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
             await _shortCourseLearningRepository.Add(newLearning);
 
-            return new CreateDraftShortCourseCommandResult { LearningKey = newLearning.Key, LearnerKey = learner.Key, EpisodeKey = newLearning.Episodes.Single().Key };
+            var newResult = _mapper.Map<CreateDraftShortCourseCommandResult>(newLearning, learner, ukprn);
+            newResult.EpisodeKey = newLearning.Episodes.Single().Key;
+            return newResult;
         }
 
         if (!_featureFlags.ShortCourseChangeOfProvider)
