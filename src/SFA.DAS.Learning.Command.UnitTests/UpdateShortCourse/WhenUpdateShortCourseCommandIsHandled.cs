@@ -381,9 +381,10 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
+    //Test to cover FLP-1918: false identification of a Restart scenario
     [TestCase(true)]
     [TestCase(false)]
-    public async Task ThenIgnoredResultReturnedWhenIsRestart(bool progressionEnabled)
+    public async Task ThenWithdrawalDateAdjustmentAppliesEvenWhenStartDateChangeIgnored(bool progressionEnabled)
     {
         _featureFlags.ShortCourseProgression = progressionEnabled;
         var learnerKey = Guid.NewGuid();
@@ -395,10 +396,32 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Results.Single().IsIgnored.Should().BeTrue();
-        learning.Episodes.Single().WithdrawalDate.Should().Be(DateTime.Today.AddDays(-5));
+        results.Results.Single().IsIgnored.Should().BeFalse();
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
+        learning.Episodes.Single().WithdrawalDate.Should().BeNull();
         learning.Episodes.Single().StartDate.Should().Be(DateTime.Today.AddMonths(-1));
-        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
+    }
+
+    //Test to cover FLP-1918: false identification of a Restart scenario
+    [Test]
+    public async Task ThenCompletionDateAdjustmentAppliesEvenWhenStartDateChangeIgnored()
+    {
+        var learnerKey = Guid.NewGuid();
+        var existingStartDate = DateTime.Today.AddMonths(-6);
+        var learning = CreateDomainModel(isApproved: true, completionDate: DateTime.Today.AddDays(-5), startDate: existingStartDate);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(completionDate: null, startDate: DateTime.Today)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeFalse();
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.CompletionDate);
+        learning.Episodes.Single().CompletionDate.Should().BeNull();
+        learning.Episodes.Single().StartDate.Should().Be(existingStartDate);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
     }
 
     [TestCase(true)]
@@ -424,7 +447,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
     [TestCase(true)]
     [TestCase(false)]
-    public async Task ThenOriginalEpisodeFollowingIgnoredRestartIsNotRemovedByOmittedLearningCleanup(bool progressionEnabled)
+    public async Task ThenOriginalEpisodeFollowingStaleStartDateUpdateIsNotRemovedByOmittedLearningCleanup(bool progressionEnabled)
     {
         var learnerKey = Guid.NewGuid();
         _featureFlags.ShortCourseProgression = progressionEnabled;
@@ -433,6 +456,9 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
         _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
+        _mapper
+            .Setup(m => m.Map<UpdateShortCourseResult>(learning, It.IsAny<LearnerDomainModel>(), 12345678))
+            .Returns(new UpdateShortCourseResult { LearningKey = learning.Key, IsRemoved = false });
 
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
 
@@ -440,7 +466,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         results.Results.Should().NotContain(r => r.IsRemoved);
         learning.Episodes.Single().IsRemoved.Should().BeFalse();
-        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        _repository.Verify(r => r.Update(learning), Times.Once);
     }
 
     [Test]
