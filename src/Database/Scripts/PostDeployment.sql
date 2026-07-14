@@ -24,3 +24,18 @@ BEGIN
 	INNER JOIN [dbo].[ShortCourseLearning] AS [scl]
 	ON [scl].[Key] = [sce].[LearningKey]
 END
+
+-- FLP-1898 (todo delete this and drop the legacy columns [Price], [LearningType] from ShortCourseEpisode once all environments have migrated data to ShortCourseLearning)
+IF COL_LENGTH('[dbo].[ShortCourseLearning]', 'Price') IS NOT NULL
+   AND COL_LENGTH('[dbo].[ShortCourseLearning]', 'LearningType') IS NOT NULL
+   AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'Price') IS NOT NULL
+   AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'LearningType') IS NOT NULL
+BEGIN
+	UPDATE [scl]
+	SET [scl].[Price] = [sce].[Price],
+		[scl].[LearningType] = [sce].[LearningType]
+	FROM [dbo].[ShortCourseLearning] AS [scl]
+	INNER JOIN [dbo].[ShortCourseEpisode] AS [sce]
+	ON [sce].[LearningKey] = [scl].[Key]
+	WHERE [scl].[Price] = 0
+END
