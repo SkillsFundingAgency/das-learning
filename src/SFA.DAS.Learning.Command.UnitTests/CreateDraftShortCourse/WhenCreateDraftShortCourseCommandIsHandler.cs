@@ -81,6 +81,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var command = CreateSingleItemCommand(out var model);
         var learningEntity = _fixture.Create<ShortCourseLearning>();
         learningEntity.Episodes = new List<ShortCourseEpisode>();
+        learningEntity.LearningType = LearningType.ApprenticeshipUnit;
 
 
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
@@ -97,7 +98,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = results.Results.Single();
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == domainModel)));
         result.LearningKey.Should().Be(domainModel.Key);
-        domainModel.LearningType.Should().Be(model.OnProgramme.LearningType);
+        domainModel.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
         AssertPersonalDetailsEvent(
             domainModel,
             0, //ApprovalsApprenticeshipId not available on creation
