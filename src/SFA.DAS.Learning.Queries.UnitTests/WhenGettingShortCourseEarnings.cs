@@ -83,6 +83,7 @@ public class WhenGettingShortCourseEarnings
 
         var item = result.Items.Single();
         item.LearningKey.Should().Be(learning.Key);
+        item.LearnerKey.Should().Be(learnerKey);
         item.Learner.Uln.Should().Be(learner.Uln);
         item.Learner.FirstName.Should().Be(learner.FirstName);
         item.Learner.LastName.Should().Be(learner.LastName);

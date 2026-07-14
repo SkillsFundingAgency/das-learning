@@ -44,6 +44,7 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
                 return new GetShortCoursesForEarningsItem
                 {
                     LearningKey = l.Key,
+                    LearnerKey = l.LearnerKey,
                     Learner = new GetShortCoursesForEarningsLearner
                     {
                         Uln = learner?.Uln,
