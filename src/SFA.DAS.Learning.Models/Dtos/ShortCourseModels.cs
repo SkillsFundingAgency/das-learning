@@ -22,6 +22,7 @@ public class ShortCourseLearnerDto
 
 public class ShortCourseEpisodeDto
 {
+    public Guid EpisodeKey { get; set; }
     public long Ukprn { get; set; }
     public long EmployerAccountId { get; set; }
     public string CourseCode { get; set; } = null!;
