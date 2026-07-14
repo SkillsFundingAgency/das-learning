@@ -49,6 +49,7 @@ public class WhenGettingShortCourseEarnings
         {
             Key = Guid.NewGuid(),
             TrainingCode = "ABC123",
+            Price = 1500m,
             Episodes =
             [
                 new ShortCourseEpisode
@@ -57,7 +58,6 @@ public class WhenGettingShortCourseEarnings
                     Ukprn = ukPrn,
                     TrainingCode = "ABC123",
                     IsApproved = true,
-                    Price = 1500m,
                     StartDate = new DateTime(2024, 8, 1),
                     ExpectedEndDate = new DateTime(2025, 7, 31),
                     LearnerRef = "LRN123"
@@ -105,14 +105,13 @@ public class WhenGettingShortCourseEarnings
             Ukprn = ukPrn,
             TrainingCode = "EP999",
             IsApproved = false,
-            Price = 750m,
             StartDate = new DateTime(2024, 8, 1),
             ExpectedEndDate = new DateTime(2025, 7, 31),
             LearnerRef = "LRN123",
             EmployerType = EmployerType.Levy
         };
 
-        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "XYZ999", Episodes = [episode] };
+        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "XYZ999", Price = 750m, Episodes = [episode] };
         learning.LearnerKey = learnerKey;
 
         _dbContext.ShortCourseLearnings.Add(learning);
@@ -127,7 +126,7 @@ public class WhenGettingShortCourseEarnings
         var resultEpisode = result.Items.Single().Episodes.Single();
         resultEpisode.CourseCode.Should().Be(learning.TrainingCode);
         resultEpisode.IsApproved.Should().Be(episode.IsApproved);
-        resultEpisode.Price.Should().Be(episode.Price);
+        resultEpisode.Price.Should().Be(learning.Price);
         resultEpisode.LearnerRef.Should().Be(episode.LearnerRef);
         resultEpisode.EmployerType.Should().Be(episode.EmployerType);
     }

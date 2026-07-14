@@ -94,7 +94,6 @@ public class WhenUpdatingShortCourseWithdrawalDate
             Ukprn = _fixture.Create<long>(),
             TrainingCode = "CODE",
             LearnerRef = "LEARNER1",
-            LearningType = LearningType.Apprenticeship,
             EmployerType = EmployerType.NonLevy
         };
 
@@ -102,6 +101,8 @@ public class WhenUpdatingShortCourseWithdrawalDate
         {
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
+            Price = 1000,
+            LearningType = LearningType.Apprenticeship,
             Episodes = new List<DataAccess.Entities.Learning.ShortCourseEpisode> { episode }
         };
 
@@ -123,8 +124,8 @@ public class WhenUpdatingShortCourseWithdrawalDate
                 ExpectedEndDate = episode.ExpectedEndDate,
                 WithdrawalDate = withdrawalDate,
                 WithdrawalReasonCode = withdrawalReasonCode,
-                Price = episode.Price,
-                LearningType = episode.LearningType,
+                Price = learning.Price,
+                LearningType = learning.LearningType,
                 Milestones = new List<Milestone>()
             },
             LearningSupport = new List<LearningSupportDetails>()

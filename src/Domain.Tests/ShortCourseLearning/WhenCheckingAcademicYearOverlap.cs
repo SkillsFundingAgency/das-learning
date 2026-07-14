@@ -2,6 +2,7 @@ using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Enums;
 using System;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning;
@@ -75,7 +76,7 @@ public class WhenCheckingAcademicYearOverlap
         DateTime? completionDate = null,
         DateTime? withdrawalDate = null)
     {
-        var learning = ShortCourseLearningDomainModel.New(Guid.NewGuid(), _fixture.Create<string>());
+        var learning = ShortCourseLearningDomainModel.New(Guid.NewGuid(), _fixture.Create<string>(), 0, LearningType.ApprenticeshipUnit);
         return learning.AddEpisode(
             ukprn: _fixture.Create<long>(),
             employerAccountId: _fixture.Create<long>(),

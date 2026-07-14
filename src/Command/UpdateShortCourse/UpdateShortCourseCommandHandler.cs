@@ -170,7 +170,7 @@ public class UpdateShortCourseCommandHandler(
     {
         var op = model.OnProgramme;
 
-        var learning = factory!.CreateNew(learnerKey, op.CourseCode);
+        var learning = factory!.CreateNew(learnerKey, op.CourseCode, op.Price, op.LearningType);
 
         var episode = learning.AddEpisode(
             op.Ukprn,

@@ -30,7 +30,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
             var trainingCode = _fixture.Create<string>();
             var milestones = _fixture.CreateMany<Milestone>().ToList();
 
-            var shortCourse = ShortCourseLearningDomainModel.New(learnerKey, trainingCode);
+            var shortCourse = ShortCourseLearningDomainModel.New(learnerKey, trainingCode, 0, LearningType.ApprenticeshipUnit);
 
             // Act
             shortCourse.AddEpisode(

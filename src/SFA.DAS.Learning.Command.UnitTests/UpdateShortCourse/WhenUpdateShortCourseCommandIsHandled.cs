@@ -229,7 +229,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         await _commandHandler.Handle(command);
 
-        learning.LatestEpisodeForProvider(context.OnProgramme.Ukprn).LearningType.Should().Be(LearningType.ApprenticeshipUnit);
+        learning.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
     }
 
     [Test]
@@ -566,8 +566,6 @@ public class WhenUpdateShortCourseCommandIsHandled
             WithdrawalDate = withdrawalDate,
             WithdrawalReason = withdrawalReason,
             CompletionDate = completionDate,
-            Price = 1000,
-            LearningType = learningType,
             Milestones = new List<ShortCourseMilestone>()
         };
 
@@ -581,6 +579,8 @@ public class WhenUpdateShortCourseCommandIsHandled
             Key = learningKey,
             LearnerKey = Guid.NewGuid(),
             TrainingCode = courseCode,
+            Price = 1000,
+            LearningType = learningType,
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };

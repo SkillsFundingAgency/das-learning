@@ -97,7 +97,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var result = results.Results.Single();
         _learningRepository.Verify(x => x.Add(It.Is<ShortCourseLearningDomainModel>(y => y == domainModel)));
         result.LearningKey.Should().Be(domainModel.Key);
-        domainModel.LatestEpisodeForProvider(model.OnProgramme.Ukprn).LearningType.Should().Be(model.OnProgramme.LearningType);
+        domainModel.LearningType.Should().Be(model.OnProgramme.LearningType);
         AssertPersonalDetailsEvent(
             domainModel,
             0, //ApprovalsApprenticeshipId not available on creation
@@ -212,7 +212,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
 
         // Assert
         var result = results.Results.Single();
-        existingLearning.LatestEpisodeForProvider(model.OnProgramme.Ukprn).LearningType.Should().Be(model.OnProgramme.LearningType);
+        existingLearning.LearningType.Should().Be(model.OnProgramme.LearningType);
         result.IsReinstated.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(existingLearning), Times.Once);
     }
@@ -590,6 +590,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
             Key = learningKey,
             LearnerKey = Guid.NewGuid(),
             TrainingCode = courseCode,
+            LearningType = learningType,
+            Price = 1000,
             Episodes = new List<ShortCourseEpisode>
             {
                 new ShortCourseEpisode
@@ -605,7 +607,6 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                     StartDate = startDate ?? new DateTime(2025, 9, 1),
                     ExpectedEndDate = new DateTime(2025, 12, 31),
                     CompletionDate = completionDate,
-                    LearningType = learningType,
                     Milestones = new List<ShortCourseMilestone>(),
                     LearningSupport = new List<ShortCourseLearningSupport>()
                 }

@@ -12,15 +12,19 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
     public Guid Key => _entity.Key;
     public string TrainingCode => _entity.TrainingCode;
+    public decimal Price => _entity.Price;
+    public LearningType LearningType => _entity.LearningType;
     public IReadOnlyCollection<ShortCourseEpisodeDomainModel> Episodes => new ReadOnlyCollection<ShortCourseEpisodeDomainModel>(_episodes);
 
-    internal static ShortCourseLearningDomainModel New(Guid learnerKey, string trainingCode)
+    internal static ShortCourseLearningDomainModel New(Guid learnerKey, string trainingCode, decimal price, LearningType learningType)
     {
         return new ShortCourseLearningDomainModel(new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
             LearnerKey = learnerKey,
-            TrainingCode = trainingCode
+            TrainingCode = trainingCode,
+            LearningType = learningType,
+            Price = price
         });
     }
 
@@ -61,8 +65,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             expectedEndDate,
             withdrawalDate,
             withdrawalReasonCode,
-            price,
-            learningType,
             employerType,
             completionDate
         );
@@ -118,6 +120,13 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         var prevLearnerRef = episode.LearnerRef;
         var prevStartDate = episode.StartDate;
         var prevExpectedEndDate = episode.ExpectedEndDate;
+
+        //todo I don't think we need this
+        //if (!episode.IsApproved)
+        //{
+        //    _entity.Price = updateContext.OnProgramme.Price;
+        //    _entity.LearningType = updateContext.OnProgramme.LearningType;
+        //}
 
         episode.Update(updateContext);
 

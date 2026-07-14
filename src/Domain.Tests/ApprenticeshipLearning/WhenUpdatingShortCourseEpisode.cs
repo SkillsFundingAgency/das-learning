@@ -53,8 +53,6 @@ public class WhenUpdatingShortCourseEpisode
         episode.StartDate.Should().Be(new DateTime(2025, 1, 1));
         episode.ExpectedEndDate.Should().Be(new DateTime(2025, 12, 1));
         episode.WithdrawalDate.Should().Be(new DateTime(2025, 6, 1));
-        episode.Price.Should().Be(2000);
-        episode.LearningType.Should().Be(LearningType.ApprenticeshipUnit);
         episode.LearnerRef.Should().Be("LEARNER2");
     }
 
@@ -70,9 +68,7 @@ public class WhenUpdatingShortCourseEpisode
             isApproved: true,
             startDate: new DateTime(2024, 1, 1),
             expectedEndDate: new DateTime(2024, 6, 1),
-            withdrawalDate: null,
-            price: 1000,
-            learningType: LearningType.Apprenticeship);
+            withdrawalDate: null);
 
         var updateContext = new ShortCourseUpdateContext
         {
@@ -100,8 +96,6 @@ public class WhenUpdatingShortCourseEpisode
         episode.TrainingCode.Should().Be("OLD");
         episode.StartDate.Should().Be(new DateTime(2024, 1, 1));
         episode.ExpectedEndDate.Should().Be(new DateTime(2024, 6, 1));
-        episode.Price.Should().Be(1000);
-        episode.LearningType.Should().Be(LearningType.Apprenticeship);
         // Permitted — updated
         episode.WithdrawalDate.Should().Be(new DateTime(2025, 6, 1));
         episode.LearnerRef.Should().Be("LEARNER2");
@@ -236,8 +230,7 @@ private static ShortCourseEpisodeDomainModel CreateEpisode(LearningType learning
             true,
             DateTime.Today,
             DateTime.Today.AddMonths(3),
-            null,
-            learningType: learningType);
+            null);
     }
 
     private static ShortCourseUpdateContext CreateUpdateContext(
