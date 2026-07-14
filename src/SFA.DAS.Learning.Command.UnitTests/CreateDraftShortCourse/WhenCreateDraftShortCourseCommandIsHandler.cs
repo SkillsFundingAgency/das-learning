@@ -88,7 +88,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var domainModel = ShortCourseLearningDomainModel.Get(learningEntity);
 
         _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(),It.IsAny<DateTime>(),It.IsAny<string>(),It.IsAny<string>(), It.IsAny<string?>())).Returns(learnerDomainModel);
-        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), It.IsAny<string>())).Returns(domainModel);
+        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<LearningType>())).Returns(domainModel);
 
         // Act
         var results = await _commandHandler.Handle(command);
@@ -302,7 +302,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var newLearningEntity = _fixture.Create<ShortCourseLearning>();
         newLearningEntity.Episodes = new List<ShortCourseEpisode>();
         var newDomainModel = ShortCourseLearningDomainModel.Get(newLearningEntity);
-        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), model.OnProgramme.CourseCode)).Returns(newDomainModel);
+        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), model.OnProgramme.CourseCode, model.OnProgramme.Price, model.OnProgramme.LearningType)).Returns(newDomainModel);
 
         // Act
         var results = await _commandHandler.Handle(command);
@@ -361,7 +361,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var newLearningEntity = _fixture.Create<ShortCourseLearning>();
         newLearningEntity.Episodes = new List<ShortCourseEpisode>();
         var newDomainModel = ShortCourseLearningDomainModel.Get(newLearningEntity);
-        _learningFactory.Setup(x => x.CreateNew(learner.Key, newModel.OnProgramme.CourseCode)).Returns(newDomainModel);
+        _learningFactory.Setup(x => x.CreateNew(learner.Key, newModel.OnProgramme.CourseCode, newModel.OnProgramme.Price, newModel.OnProgramme.LearningType)).Returns(newDomainModel);
 
         // Act
         var results = await _commandHandler.Handle(command);
@@ -408,13 +408,13 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         learningEntity1.Episodes = new List<ShortCourseEpisode>();
         var domainModel1 = ShortCourseLearningDomainModel.Get(learningEntity1);
 
-        _learningFactory.Setup(x => x.CreateNew(learner.Key, model1.OnProgramme.CourseCode)).Returns(domainModel1);
+        _learningFactory.Setup(x => x.CreateNew(learner.Key, model1.OnProgramme.CourseCode, model1.OnProgramme.Price, model1.OnProgramme.LearningType)).Returns(domainModel1);
 
         // Act
         var results = await _commandHandler.Handle(command);
 
         // Assert - only one Learning is ever created for this CourseCode, and it is untouched by item 2
-        _learningFactory.Verify(x => x.CreateNew(learner.Key, model1.OnProgramme.CourseCode), Times.Once);
+        _learningFactory.Verify(x => x.CreateNew(learner.Key, model1.OnProgramme.CourseCode, model1.OnProgramme.Price, model1.OnProgramme.LearningType), Times.Once);
         _learningRepository.Verify(x => x.Add(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
         _learningRepository.Verify(x => x.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
         domainModel1.Episodes.Should().HaveCount(1);
@@ -559,7 +559,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         newLearningEntity.Episodes = new List<ShortCourseEpisode>();
         var newLearning = ShortCourseLearningDomainModel.Get(newLearningEntity);
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
-        _learningFactory.Setup(x => x.CreateNew(learner.Key, model.OnProgramme.CourseCode)).Returns(newLearning);
+        _learningFactory.Setup(x => x.CreateNew(learner.Key, model.OnProgramme.CourseCode, model.OnProgramme.Price, model.OnProgramme.LearningType)).Returns(newLearning);
 
         // Prior AY episode: completed before AY 2526 begins (i.e., CompletionDate < 2025-08-01)
         var priorAYLearning = BuildLearningWithEpisode(isApproved: true, ukprn: model.OnProgramme.Ukprn,

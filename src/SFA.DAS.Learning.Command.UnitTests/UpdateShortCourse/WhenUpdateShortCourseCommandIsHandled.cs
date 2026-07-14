@@ -261,7 +261,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var factoryMock = new Mock<IShortCourseLearningFactory>();
         factoryMock
-            .Setup(f => f.CreateNew(learnerKey, context.OnProgramme.CourseCode))
+            .Setup(f => f.CreateNew(learnerKey, context.OnProgramme.CourseCode, context.OnProgramme.Price, context.OnProgramme.LearningType))
             .Returns(CreateDomainModel());
 
         _commandHandler = new UpdateShortCourseCommandHandler(
