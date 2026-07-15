@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.Learning.Domain.Events
+﻿using SFA.DAS.Learning.Enums;
+
+namespace SFA.DAS.Learning.Domain.Events
 {
     public class LearningApprovedEvent : IDomainEvent
     {
@@ -8,6 +10,7 @@
         public long EmployerAccountId { get; set; }
         public long FundingAccountId { get; set; }
         public Guid LearnerKey { get; set; }
-        public string LearnerRef { get; set; } 
+        public string LearnerRef { get; set; }
+        public EmployerType EmployerType { get; set; }
     }
 }
