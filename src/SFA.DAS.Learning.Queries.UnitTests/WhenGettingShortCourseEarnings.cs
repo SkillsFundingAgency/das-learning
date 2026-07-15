@@ -82,11 +82,12 @@ public class WhenGettingShortCourseEarnings
         result.Items.Should().HaveCount(1);
 
         var item = result.Items.Single();
-        item.LearningKey.Should().Be(learning.Key);
+        item.LearnerKey.Should().Be(learnerKey);
         item.Learner.Uln.Should().Be(learner.Uln);
         item.Learner.FirstName.Should().Be(learner.FirstName);
         item.Learner.LastName.Should().Be(learner.LastName);
         item.Learner.DateOfBirth.Should().Be(learner.DateOfBirth);
+        item.Episodes.Single().LearningKey.Should().Be(learning.Key);
     }
 
     [Test]
@@ -214,7 +215,7 @@ public class WhenGettingShortCourseEarnings
 
         // Assert
         result.TotalItems.Should().Be(1);
-        result.Items.Single().LearningKey.Should().Be(learning.Key);
+        result.Items.Single().Episodes.Single().LearningKey.Should().Be(learning.Key);
     }
 
     [Test]
@@ -302,6 +303,95 @@ public class WhenGettingShortCourseEarnings
         result.Items.Should().HaveCount(1);
         result.Items.Single().Episodes.Should().HaveCount(1);
         result.Items.Single().Episodes.Should().NotContain(x => x.CourseCode == removedEpisode.TrainingCode);
+    }
+
+    [Test]
+    public async Task ThenALearnerWithMultipleCoursesIsReturnedAsOneItem()
+    {
+        const long ukPrn = 1000;
+        const int collectionYear = 2425;
+
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "555", FirstName = "A", LastName = "B" });
+
+        var learningOne = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            TrainingCode = "AAA111",
+            Episodes = [new ShortCourseEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "AAA111", StartDate = new DateTime(2024, 8, 1), ExpectedEndDate = new DateTime(2025, 7, 31), LearnerRef = "LRN1" }]
+        };
+        learningOne.LearnerKey = learnerKey;
+
+        var learningTwo = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            TrainingCode = "BBB222",
+            Episodes = [new ShortCourseEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "BBB222", StartDate = new DateTime(2024, 8, 1), ExpectedEndDate = new DateTime(2025, 7, 31), LearnerRef = "LRN1" }]
+        };
+        learningTwo.LearnerKey = learnerKey;
+
+        _dbContext.ShortCourseLearnings.AddRange(learningOne, learningTwo);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _sut.Handle(new GetShortCoursesForEarningsRequest(ukPrn, collectionYear, 1, 20));
+
+        result.TotalItems.Should().Be(1);
+        result.Items.Should().HaveCount(1);
+
+        var item = result.Items.Single();
+        item.LearnerKey.Should().Be(learnerKey);
+        item.Episodes.Should().HaveCount(2);
+        item.Episodes.Should().Contain(e => e.LearningKey == learningOne.Key && e.CourseCode == "AAA111");
+        item.Episodes.Should().Contain(e => e.LearningKey == learningTwo.Key && e.CourseCode == "BBB222");
+    }
+
+    [Test]
+    public async Task ThenPagingIsAppliedByLearner()
+    {
+        const long ukPrn = 1000;
+        const int collectionYear = 2425;
+
+        var splitLearnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = splitLearnerKey, Uln = "666", FirstName = "A", LastName = "B" });
+
+        var splitLearningOne = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            TrainingCode = "SPLIT1",
+            Episodes = [new ShortCourseEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "SPLIT1", StartDate = new DateTime(2024, 8, 1), ExpectedEndDate = new DateTime(2025, 7, 31), LearnerRef = "LRN1" }],
+            LearnerKey = splitLearnerKey
+        };
+
+        var splitLearningTwo = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            TrainingCode = "SPLIT2",
+            Episodes = [new ShortCourseEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "SPLIT2", StartDate = new DateTime(2024, 8, 1), ExpectedEndDate = new DateTime(2025, 7, 31), LearnerRef = "LRN1" }],
+            LearnerKey = splitLearnerKey
+        };
+
+        var otherLearnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner { Key = otherLearnerKey, Uln = "777", FirstName = "C", LastName = "D" });
+
+        var otherLearning = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            TrainingCode = "OTHER1",
+            Episodes = [new ShortCourseEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "OTHER1", StartDate = new DateTime(2024, 8, 1), ExpectedEndDate = new DateTime(2025, 7, 31), LearnerRef = "LRN2" }],
+            LearnerKey = otherLearnerKey
+        };
+
+        _dbContext.ShortCourseLearnings.AddRange(splitLearningOne, splitLearningTwo, otherLearning);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _sut.Handle(new GetShortCoursesForEarningsRequest(ukPrn, collectionYear, 1, 20));
+
+        // Two distinct learners and 3 courses in total
+        result.TotalItems.Should().Be(2);
+        result.Items.Should().HaveCount(2);
+
+        var splitLearnerItem = result.Items.Single(i => i.LearnerKey == splitLearnerKey);
+        splitLearnerItem.Episodes.Should().HaveCount(2, "both of the split learner's courses must land on the same page, not be split across pages");
     }
 
     [Test]

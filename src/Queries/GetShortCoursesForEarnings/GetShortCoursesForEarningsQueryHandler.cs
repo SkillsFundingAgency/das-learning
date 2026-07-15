@@ -22,28 +22,34 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
                 (!e.CompletionDate.HasValue || e.CompletionDate.Value >= dates.Start)))
             .AsNoTracking();
 
-        var totalItems = await baseQuery.CountAsync(cancellationToken);
+        var learnerKeysQuery = baseQuery.Select(x => x.LearnerKey).Distinct();
 
-        var learnings = await baseQuery
-            .OrderBy(x => x.Key)
+        var totalItems = await learnerKeysQuery.CountAsync(cancellationToken);
+
+        var pagedLearnerKeys = await learnerKeysQuery
+            .OrderBy(k => k)
             .Skip(query.Offset)
             .Take(query.Limit)
             .ToListAsync(cancellationToken);
 
-        var learnerKeys = learnings.Select(x => x.LearnerKey).ToList();
+        var learnings = await baseQuery
+            .Where(x => pagedLearnerKeys.Contains(x.LearnerKey))
+            .ToListAsync(cancellationToken);
+
         var learners = await dbContext.LearnersDbSet
-            .Where(l => learnerKeys.Contains(l.Key))
+            .Where(l => pagedLearnerKeys.Contains(l.Key))
             .AsNoTracking()
             .ToDictionaryAsync(l => l.Key, cancellationToken);
 
         return new GetShortCoursesForEarningsResponse
         {
-            Items = learnings.Select(l =>
+            Items = pagedLearnerKeys.Select(learnerKey =>
             {
-                learners.TryGetValue(l.LearnerKey, out var learner);
+                learners.TryGetValue(learnerKey, out var learner);
+                var learnerLearnings = learnings.Where(l => l.LearnerKey == learnerKey);
                 return new GetShortCoursesForEarningsItem
                 {
-                    LearningKey = l.Key,
+                    LearnerKey = learnerKey,
                     Learner = new GetShortCoursesForEarningsLearner
                     {
                         Uln = learner?.Uln,
@@ -51,14 +57,17 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
                         LastName = learner?.LastName,
                         DateOfBirth = learner?.DateOfBirth ?? default
                     },
-                    Episodes = l.Episodes.Where(e => !e.IsRemoved && e.Ukprn == query.UkPrn).Select(e => new GetShortCoursesForEarningsEpisode
-                    {
-                        CourseCode = l.TrainingCode,
-                        IsApproved = e.IsApproved,
-                        Price = l.Price,
-                        LearnerRef = e.LearnerRef,
-                        EmployerType = e.EmployerType
-                    })
+                    Episodes = learnerLearnings.SelectMany(l => l.Episodes
+                        .Where(e => !e.IsRemoved && e.Ukprn == query.UkPrn)
+                        .Select(e => new GetShortCoursesForEarningsEpisode
+                        {
+                            LearningKey = l.Key,
+                            CourseCode = l.TrainingCode,
+                            IsApproved = e.IsApproved,
+                            Price = l.Price,
+                            LearnerRef = e.LearnerRef,
+                            EmployerType = e.EmployerType
+                        }))
                 };
             }),
             PageSize = query.Limit,

@@ -26,6 +26,7 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
             },
             Episodes = learning.Episodes.Where(e => e.Ukprn == ukprn).Select(e => new ShortCourseEpisodeDto
             {
+                EpisodeKey = e.Key,
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId,
                 CourseCode = learning.TrainingCode,
