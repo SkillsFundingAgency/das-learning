@@ -179,7 +179,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
                                 && e.EmployerAccountId == command.EmployerAccountId
                                 && e.FundingAccountId == (command.TransferSenderId ?? command.EmployerAccountId)
                                 && e.LearnerKey == shortCourseLearning.LearnerKey
-                                && e.LearnerRef == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).LearnerRef);
+                                && e.LearnerRef == shortCourseLearning.LatestEpisodeForProvider(command.UKPRN).LearnerRef
+                                && e.EmployerType == command.EmployerType);
     }
 
     [Test]
