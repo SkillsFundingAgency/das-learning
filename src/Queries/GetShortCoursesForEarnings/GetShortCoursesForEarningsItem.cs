@@ -5,7 +5,7 @@ namespace SFA.DAS.Learning.Queries.GetShortCoursesForEarnings;
 
 public class GetShortCoursesForEarningsItem
 {
-    public Guid LearningKey { get; set; }
+    public Guid LearnerKey { get; set; }
     public GetShortCoursesForEarningsLearner Learner { get; set; }
     public IEnumerable<GetShortCoursesForEarningsEpisode> Episodes { get; set; }
 }
@@ -20,6 +20,7 @@ public class GetShortCoursesForEarningsLearner
 
 public class GetShortCoursesForEarningsEpisode
 {
+    public Guid LearningKey { get; set; }
     public string CourseCode { get; set; }
     public bool IsApproved { get; set; }
     public decimal Price { get; set; }
