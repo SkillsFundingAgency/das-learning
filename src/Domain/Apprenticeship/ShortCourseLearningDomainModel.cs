@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataAccess.Entities.Learning.ShortCourseLearning>
+public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLearning>
 {
     private readonly List<ShortCourseEpisodeDomainModel> _episodes;
 
@@ -33,7 +33,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return new ShortCourseLearningDomainModel(entity);
     }
 
-    public Learning.DataAccess.Entities.Learning.ShortCourseLearning GetEntity()
+    public ShortCourseLearning GetEntity()
     {
         return _entity;
     }
@@ -120,13 +120,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         var prevLearnerRef = episode.LearnerRef;
         var prevStartDate = episode.StartDate;
         var prevExpectedEndDate = episode.ExpectedEndDate;
-
-        //todo I don't think we need this
-        //if (!episode.IsApproved)
-        //{
-        //    _entity.Price = updateContext.OnProgramme.Price;
-        //    _entity.LearningType = updateContext.OnProgramme.LearningType;
-        //}
 
         episode.Update(updateContext);
 
