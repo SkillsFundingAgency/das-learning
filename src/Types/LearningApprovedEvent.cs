@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.Learning.Types
+﻿using SFA.DAS.Learning.Enums;
+
+namespace SFA.DAS.Learning.Types
 {
     public class LearningApprovedEvent
     {
@@ -9,5 +11,6 @@
         public long FundingAccountId { get; set; }
         public Guid LearnerKey { get; set; }
         public string LearnerRef { get; set; }
+        public EmployerType EmployerType { get; set; }
     }
 }
