@@ -6,8 +6,9 @@ public interface IApprenticeshipLearningRepository : ILearningRepository
 {
     Task Add(ApprenticeshipLearningDomainModel learning);
     Task<ApprenticeshipLearningDomainModel> Get(Guid key);
+    Task<List<ApprenticeshipLearningDomainModel>> GetAllByLearnerKey(Guid key);
     Task<ApprenticeshipLearningDomainModel?> GetByUln(string uln);
     Task<ApprenticeshipLearningDomainModel?> Get(string uln, long approvalsApprenticeshipId);
-    Task<ApprenticeshipLearningDomainModel?> GetByLearnerKey(Guid key);
+    Task<ApprenticeshipLearningDomainModel?> GetSingleByLearnerKey(Guid key);
     Task Update(ApprenticeshipLearningDomainModel learning);
 }

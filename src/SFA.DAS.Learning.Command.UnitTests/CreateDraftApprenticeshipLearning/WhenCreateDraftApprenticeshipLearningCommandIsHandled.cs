@@ -71,7 +71,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .Returns(Task.FromResult<LearnerDomainModel?>(learner));
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
+            .Setup(x => x.GetSingleByLearnerKey(learner.Key))
             .Returns(Task.FromResult<ApprenticeshipLearningDomainModel?>(null));
 
         // Act
@@ -96,7 +96,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
+            .Setup(x => x.GetSingleByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
         // Act
@@ -119,7 +119,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
+            .Setup(x => x.GetSingleByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
         // Act
@@ -143,7 +143,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
+            .Setup(x => x.GetSingleByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
         // Act
@@ -168,7 +168,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
+            .Setup(x => x.GetSingleByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
         // Act

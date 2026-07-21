@@ -48,8 +48,8 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
-                           .ReturnsAsync(domainModel);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey))
+                   .ReturnsAsync([domainModel]);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
 
@@ -58,13 +58,14 @@ public class WhenRemovingLearner
             .Callback<ApprenticeshipLearningDomainModel>(m => updatedModel = m);
 
         // Act
-        await _commandHandler.Handle(command);
+        var removedLearningKeys = await _commandHandler.Handle(command);
 
         // Assert
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
         updatedModel.Should().NotBeNull();
         updatedModel!.LatestEpisode.IsRemoved.Should().BeTrue();
         updatedModel.FlushEvents().OfType<LearningRemovedEvent>().Should().ContainSingle();
+        removedLearningKeys.Should().ContainSingle().Which.Should().Be(domainModel.Key);
     }
 
     [Test]
@@ -78,8 +79,8 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
-            .ReturnsAsync(domainModel);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey))
+            .ReturnsAsync([domainModel]);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
 
@@ -108,8 +109,8 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
-            .ReturnsAsync(domainModel);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey))
+            .ReturnsAsync([domainModel]);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
 
@@ -138,8 +139,8 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
-            .ReturnsAsync(domainModel);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey))
+            .ReturnsAsync([domainModel]);
 
         ApprenticeshipLearningDomainModel? updatedModel = null;
 
@@ -162,8 +163,8 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
-                           .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey))
+                           .ReturnsAsync([]);
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
@@ -181,8 +182,8 @@ public class WhenRemovingLearner
 
         TestHelper.SetEpisode(domainModel, latestEpisode);
 
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
-                           .ReturnsAsync(domainModel);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey))
+                   .ReturnsAsync([domainModel]);
 
         // Act
         await _commandHandler.Handle(command);
@@ -191,5 +192,30 @@ public class WhenRemovingLearner
         var domainEvent = domainModel.FlushEvents().OfType<LearningRemovedEvent>().Single();
         domainEvent.LearningKey.Should().Be(domainModel.Key);
         domainEvent.ApprenticeshipId.Should().Be(domainModel.LatestEpisode.ApprovalsApprenticeshipId);
+    }
+
+    [Test]
+    public async Task ThenAllLearningsForTheLearnerAreRemovedAndReturned()
+    {
+        // Arrange
+        var command = _fixture.Create<RemoveLearnerCommand.RemoveLearnerCommand>();
+        var firstLearning = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var secondLearning = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        TestHelper.SetEpisode(firstLearning, _fixture.CreateEpisodeDomainModel());
+        TestHelper.SetEpisode(secondLearning, _fixture.CreateEpisodeDomainModel());
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(command.LearnerKey))
+            .ReturnsAsync([firstLearning, secondLearning]);
+
+        // Act
+        var removedLearningKeys = await _commandHandler.Handle(command);
+
+        // Assert
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Exactly(2));
+        removedLearningKeys.Should().BeEquivalentTo([firstLearning.Key, secondLearning.Key]);
+        firstLearning.LatestEpisode.IsRemoved.Should().BeTrue();
+        secondLearning.LatestEpisode.IsRemoved.Should().BeTrue();
     }
 }

@@ -15,7 +15,7 @@ public class UpdateLearnerCommandHandler(
     {
         logger.LogInformation("Handling UpdateLearnerCommand for learner with key {LearnerKey}", command.LearnerKey);
         
-        var learning = await learningRepository.GetByLearnerKey(command.LearnerKey);
+        var learning = await learningRepository.GetSingleByLearnerKey(command.LearnerKey);
 
         if (learning == null)
         {

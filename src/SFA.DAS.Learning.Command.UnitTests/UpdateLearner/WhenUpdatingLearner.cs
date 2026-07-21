@@ -44,7 +44,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetSingleByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         // Act
@@ -77,7 +77,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetSingleByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         _ = learningDomainModel.Update(command.UpdateModel);
@@ -105,7 +105,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetSingleByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         // Act
@@ -132,7 +132,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetSingleByLearnerKey(command.LearnerKey))
             .ReturnsAsync(learningDomainModel);
 
         // Act
@@ -150,7 +150,7 @@ public class WhenUpdatingLearner
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
 
-        _learningRepository.Setup(x => x.GetByLearnerKey(command.LearnerKey))
+        _learningRepository.Setup(x => x.GetSingleByLearnerKey(command.LearnerKey))
                            .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
 
         // Act & Assert
