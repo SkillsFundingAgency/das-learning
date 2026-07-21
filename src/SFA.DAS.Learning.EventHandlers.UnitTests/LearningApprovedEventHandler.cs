@@ -40,7 +40,8 @@ public class LearningApprovedEventHandlerTests
                     e.EmployerAccountId == domainEvent.EmployerAccountId &&
                     e.FundingAccountId == domainEvent.FundingAccountId &&
                     e.LearnerKey == domainEvent.LearnerKey &&
-                    e.LearnerRef == domainEvent.LearnerRef),
+                    e.LearnerRef == domainEvent.LearnerRef &&
+                    e.EmployerType == domainEvent.EmployerType),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
