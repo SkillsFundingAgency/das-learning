@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
-using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -24,10 +23,11 @@ public class UpdateShortCourseCommandHandler(
 
         var results = new List<UpdateShortCourseResult>();
         var processedLearningKeys = new HashSet<Guid>();
+        var processedCourseCodes = new HashSet<string>();
 
         foreach (var model in command.Models)
         {
-            var result = await HandleSingleItem(command.LearnerKey, model);
+            var result = await HandleSingleItem(command.LearnerKey, model, processedCourseCodes);
             results.Add(result);
             if (!result.IsIgnored || result.LearningKey != Guid.Empty)
             {
@@ -75,8 +75,17 @@ public class UpdateShortCourseCommandHandler(
         }
     }
 
-    private async Task<UpdateShortCourseResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model)
+    private async Task<UpdateShortCourseResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model, HashSet<string> processedCourseCodes)
     {
+        // Silently ignore subsequent instances of the same CourseCode in one PUT (until Repeats/Restarts are implemented)
+        if (!processedCourseCodes.Add(model.OnProgramme.CourseCode))
+        {
+            logger.LogWarning(
+                "CourseCode {CourseCode} appears more than once in this request for LearnerKey {LearnerKey} — ignoring the repeat/restart",
+                model.OnProgramme.CourseCode, learnerKey);
+            return new UpdateShortCourseResult { IsIgnored = true };
+        }
+
         var learning = await repository.GetByLearnerKeyAndCourseCode(learnerKey, model.OnProgramme.CourseCode);
 
         if (learning == null)
@@ -98,16 +107,6 @@ public class UpdateShortCourseCommandHandler(
             }
 
             return await AddEpisodeToExistingLearning(learning, model);
-        }
-
-        var episodeForProvider = learning.Episodes.Single(x => x.Ukprn == ukprn);
-        var isRestartAttempt = episodeForProvider.HasActualEndDate && episodeForProvider.StartDate != model.OnProgramme.StartDate;
-        if (isRestartAttempt)
-        {
-            logger.LogInformation(
-                "Episode for LearnerKey {LearnerKey} / CourseCode {CourseCode} / Provider {Ukprn} has actual end date (withdrawn or completed) and Restarts are not supported - ignoring",
-                learnerKey, model.OnProgramme.CourseCode, ukprn);
-            return new UpdateShortCourseResult { IsIgnored = true, LearningKey = learning.Key };
         }
 
         var updateResult = learning.Update(model);

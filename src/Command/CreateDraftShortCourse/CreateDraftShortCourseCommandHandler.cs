@@ -49,10 +49,11 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         var results = new List<CreateDraftShortCourseCommandResult>();
         var processedLearningKeys = new HashSet<Guid>();
+        var processedCourseCodes = new HashSet<string>();
 
         foreach (var model in command.Models)
         {
-            var result = await HandleSingleItem(model, learner, personalDetailsChanged);
+            var result = await HandleSingleItem(model, learner, personalDetailsChanged, processedCourseCodes);
             if (result != null)
             {
                 results.Add(result);
@@ -103,9 +104,18 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
     }
 
-    private async Task<CreateDraftShortCourseCommandResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged)
+    private async Task<CreateDraftShortCourseCommandResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged, HashSet<string> processedCourseCodes)
     {
         var ukprn = model.OnProgramme.Ukprn;
+
+        // Silently ignore subsequent instances of the same CourseCode in one POST (until Repeats/Restarts are implemented)
+        if (!processedCourseCodes.Add(model.OnProgramme.CourseCode))
+        {
+            _logger.LogWarning(
+                "CourseCode {CourseCode} appears more than once in this request for LearnerKey {LearnerKey} — ignoring the repeat/restart",
+                model.OnProgramme.CourseCode, learner.Key);
+            return new CreateDraftShortCourseCommandResult { IsIgnored = true };
+        }
 
         var learning = await _shortCourseLearningRepository.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode);
 
@@ -119,7 +129,9 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
             await _shortCourseLearningRepository.Add(newLearning);
 
-            return new CreateDraftShortCourseCommandResult { LearningKey = newLearning.Key, LearnerKey = learner.Key, EpisodeKey = newLearning.Episodes.Single().Key };
+            var newResult = _mapper.Map<CreateDraftShortCourseCommandResult>(newLearning, learner, ukprn);
+            newResult.EpisodeKey = newLearning.Episodes.Single().Key;
+            return newResult;
         }
 
         if (!_featureFlags.ShortCourseChangeOfProvider)

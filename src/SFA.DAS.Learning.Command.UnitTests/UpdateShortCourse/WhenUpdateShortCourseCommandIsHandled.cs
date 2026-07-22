@@ -55,7 +55,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         _mapper.Setup(x => x.Map<UpdateShortCourseResult>(
             It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
             )
-            .Returns(() => _fixture.Build<UpdateShortCourseResult>().With(x => x.IsRemoved, false).Create());
+            .Returns(() => _fixture.Build<UpdateShortCourseResult>().With(x => x.IsRemoved, false).With(x => x.IsIgnored, false).Create());
 
         _repository
             .Setup(r => r.GetAllByLearnerKey(It.IsAny<Guid>()))
@@ -341,8 +341,9 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
     }
 
+    //Test to cover FLP-1918: false identification of a Restart scenario
     [Test]
-    public async Task ThenIgnoredResultReturnedWhenIsRestart()
+    public async Task ThenWithdrawalDateAdjustmentAppliesEvenWhenStartDateChangeIgnored()
     {
         var learnerKey = Guid.NewGuid();
         var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
@@ -353,10 +354,32 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Results.Single().IsIgnored.Should().BeTrue();
-        learning.Episodes.Single().WithdrawalDate.Should().Be(DateTime.Today.AddDays(-5));
+        results.Results.Single().IsIgnored.Should().BeFalse();
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
+        learning.Episodes.Single().WithdrawalDate.Should().BeNull();
         learning.Episodes.Single().StartDate.Should().Be(DateTime.Today.AddMonths(-1));
-        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
+    }
+
+    //Test to cover FLP-1918: false identification of a Restart scenario
+    [Test]
+    public async Task ThenCompletionDateAdjustmentAppliesEvenWhenStartDateChangeIgnored()
+    {
+        var learnerKey = Guid.NewGuid();
+        var existingStartDate = DateTime.Today.AddMonths(-6);
+        var learning = CreateDomainModel(isApproved: true, completionDate: DateTime.Today.AddDays(-5), startDate: existingStartDate);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(completionDate: null, startDate: DateTime.Today)]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().IsIgnored.Should().BeFalse();
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.CompletionDate);
+        learning.Episodes.Single().CompletionDate.Should().BeNull();
+        learning.Episodes.Single().StartDate.Should().Be(existingStartDate);
+        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
     }
 
     [Test]
@@ -378,8 +401,9 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
     }
 
-    [Test]
-    public async Task ThenOriginalEpisodeFollowingIgnoredRestartIsNotRemovedByOmittedLearningCleanup()
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenOriginalEpisodeFollowingStaleStartDateUpdateIsNotRemovedByOmittedLearningCleanup(bool progressionEnabled)
     {
         var learnerKey = Guid.NewGuid();
 
@@ -387,6 +411,9 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
         _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
+        _mapper
+            .Setup(m => m.Map<UpdateShortCourseResult>(learning, It.IsAny<LearnerDomainModel>(), 12345678))
+            .Returns(new UpdateShortCourseResult { LearningKey = learning.Key, IsRemoved = false });
 
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
 
@@ -394,7 +421,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         results.Results.Should().NotContain(r => r.IsRemoved);
         learning.Episodes.Single().IsRemoved.Should().BeFalse();
-        _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Never);
+        _repository.Verify(r => r.Update(learning), Times.Once);
     }
 
     [Test]
@@ -411,6 +438,35 @@ public class WhenUpdateShortCourseCommandIsHandled
         learning.Episodes.Single().IsRemoved.Should().BeFalse();
         results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.Reinstated);
         learning.FlushEvents().Should().NotContain(e => e is LearningReinstatedEvent);
+    }
+
+    [Test]
+    public async Task ThenIgnoresSecondItemWithSameCourseCodeWithinABundledPut()
+    {
+        // Arrange - a single bundled PUT contains two items for the same CourseCode and provider
+        // The second must be ignored, until Restarts and Repeats are implemented
+        var learnerKey = Guid.NewGuid();
+        var existingCompletionDate = DateTime.Today.AddDays(-10);
+        var existingStartDate = DateTime.Today.AddMonths(-6);
+        var learning = CreateDomainModel(completionDate: existingCompletionDate, startDate: existingStartDate, isApproved: false);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var item1 = CreateUpdateContext(completionDate: existingCompletionDate, startDate: existingStartDate);
+        var item2 = CreateUpdateContext(completionDate: null, startDate: DateTime.Today.AddDays(-1));
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [item1, item2]);
+
+        // Act
+        var results = await _commandHandler.Handle(command);
+
+        // Assert - item 1's data survives untouched, item 2 is ignored rather than silently overwriting it
+        learning.Episodes.Single().CompletionDate.Should().Be(existingCompletionDate);
+        learning.Episodes.Single().StartDate.Should().Be(existingStartDate);
+        _repository.Verify(r => r.Update(learning), Times.Once);
+
+        results.Results.Should().HaveCount(2);
+        results.Results.Should().Contain(r => r.IsIgnored);
     }
 
     [Test]
