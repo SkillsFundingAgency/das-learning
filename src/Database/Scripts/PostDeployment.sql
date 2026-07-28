@@ -30,7 +30,6 @@ IF COL_LENGTH('[dbo].[ShortCourseLearning]', 'Price') IS NOT NULL
    AND COL_LENGTH('[dbo].[ShortCourseLearning]', 'LearningType') IS NOT NULL
    AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'Price') IS NOT NULL
    AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'LearningType') IS NOT NULL
-   AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'StartDate') IS NOT NULL
 BEGIN
 	;WITH [LatestEpisodePerLearning] AS
 	(
