@@ -30,12 +30,26 @@ IF COL_LENGTH('[dbo].[ShortCourseLearning]', 'Price') IS NOT NULL
    AND COL_LENGTH('[dbo].[ShortCourseLearning]', 'LearningType') IS NOT NULL
    AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'Price') IS NOT NULL
    AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'LearningType') IS NOT NULL
+   AND COL_LENGTH('[dbo].[ShortCourseEpisode]', 'StartDate') IS NOT NULL
 BEGIN
+	;WITH [LatestEpisodePerLearning] AS
+	(
+		SELECT
+			[sce].[LearningKey],
+			[sce].[Price],
+			[sce].[LearningType],
+			ROW_NUMBER() OVER (
+				PARTITION BY [sce].[LearningKey]
+				ORDER BY [sce].[StartDate] DESC, [sce].[Key] DESC
+			) AS [RowNumber]
+		FROM [dbo].[ShortCourseEpisode] AS [sce]
+	)
 	UPDATE [scl]
-	SET [scl].[Price] = [sce].[Price],
-		[scl].[LearningType] = [sce].[LearningType]
+	SET [scl].[Price] = [le].[Price],
+		[scl].[LearningType] = [le].[LearningType]
 	FROM [dbo].[ShortCourseLearning] AS [scl]
-	INNER JOIN [dbo].[ShortCourseEpisode] AS [sce]
-	ON [sce].[LearningKey] = [scl].[Key]
+	INNER JOIN [LatestEpisodePerLearning] AS [le]
+	ON [le].[LearningKey] = [scl].[Key]
+	AND [le].[RowNumber] = 1
 	WHERE [scl].[Price] = 0
 END
