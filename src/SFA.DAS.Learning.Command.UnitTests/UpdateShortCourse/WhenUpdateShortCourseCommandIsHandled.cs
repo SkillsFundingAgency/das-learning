@@ -200,6 +200,36 @@ public class WhenUpdateShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenForceEarningsSyncChangeIsDetectedWhenSet()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(forceEarningsSync: true);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.ForceEarningsSync);
+    }
+
+    [Test]
+    public async Task ThenForceEarningsSyncChangeIsNotDetectedWhenUnset()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learning = CreateDomainModel(forceEarningsSync: false);
+
+        _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
+
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext()]);
+
+        var results = await _commandHandler.Handle(command);
+
+        results.Results.Single().Changes.Should().NotContain(ShortCourseUpdateChanges.ForceEarningsSync);
+    }
+
+    [Test]
     public async Task ThenNoChangesReturnedWhenNothingChanged()
     {
         var learnerKey = Guid.NewGuid();
@@ -547,7 +577,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Verify(r => r.Update(priorAYLearning), Times.Never);
     }
 
-    private static ShortCourseLearningDomainModel CreateDomainModel(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, bool isRemoved = false, LearningType learningType = LearningType.Apprenticeship, string courseCode = "TEST01", long ukprn = 12345678, short? withdrawalReason = null, DateTime? startDate = null)
+    private static ShortCourseLearningDomainModel CreateDomainModel(DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? completionDate = null, bool isApproved = false, bool isRemoved = false, LearningType learningType = LearningType.Apprenticeship, string courseCode = "TEST01", long ukprn = 12345678, short? withdrawalReason = null, DateTime? startDate = null, bool forceEarningsSync = false)
     {
         var learningKey = Guid.NewGuid();
         var episodeKey = Guid.NewGuid();
@@ -568,6 +598,7 @@ public class WhenUpdateShortCourseCommandIsHandled
             CompletionDate = completionDate,
             Price = 1000,
             LearningType = learningType,
+            ForceEarningsSync = forceEarningsSync,
             Milestones = new List<ShortCourseMilestone>()
         };
 
