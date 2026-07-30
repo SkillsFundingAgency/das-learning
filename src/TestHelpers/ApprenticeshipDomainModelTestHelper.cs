@@ -1,6 +1,7 @@
 using AutoFixture;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Extensions;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 using System.Reflection;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
@@ -72,6 +73,7 @@ public static class ApprenticeshipDomainModelTestHelper
             e.Episode.Prices.Count == expectedNumberOfPrices &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.TotalPrice == episodePrice.TotalPrice &&
             e.Episode.FundingType == episode.FundingType &&
+            e.Episode.EmployerType == (episode.FundingType == FundingType.NonLevy ? EmployerType.NonLevy : EmployerType.Levy) &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.StartDate == episodePrice.StartDate &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.EndDate == episodePrice.EndDate &&
             e.Episode.FundingPlatform == episode.FundingPlatform;

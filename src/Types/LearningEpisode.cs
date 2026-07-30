@@ -6,6 +6,7 @@ public class LearningEpisode
     public Guid Key { get; set; }
     public long Ukprn { get; set; }
     public long EmployerAccountId { get; set; }
+    public Enums.EmployerType EmployerType { get; set; }
 	public Enums.FundingType FundingType { get; set; }
 	public Enums.FundingPlatform? FundingPlatform { get; set; }
 	public long? FundingEmployerAccountId { get; set; }
