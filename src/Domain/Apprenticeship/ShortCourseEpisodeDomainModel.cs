@@ -17,7 +17,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public string LearnerRef => _entity.LearnerRef;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
-    public string TrainingCode => _entity.TrainingCode;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public short? WithdrawalReason => _entity.WithdrawalReason;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
@@ -27,6 +26,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public bool HasActualEndDate => IsApproved && (WithdrawalDate.HasValue || CompletionDate.HasValue);
+    public bool ForceEarningsSync => _entity.ForceEarningsSync;
 
     public bool OverlapsAcademicYear(int academicYear)
     {
@@ -46,7 +46,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         Guid learningKey,
         long ukprn,
         long employerAccountId,
-        string trainingCode,
         string learnerRef,
         bool isApproved,
         DateTime startDate,
@@ -62,7 +61,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             LearningKey = learningKey,
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
-            TrainingCode = trainingCode,
             LearnerRef = learnerRef,
             IsApproved = isApproved,
             StartDate = startDate,

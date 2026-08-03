@@ -42,7 +42,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
         long ukprn,
         long employerAccountId,
         string learnerRef,
-        string trainingCode,
         bool isApproved,
         DateTime startDate,
         DateTime expectedEndDate,
@@ -58,7 +57,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
             _entity.Key,
             ukprn,
             employerAccountId,
-            trainingCode,
             learnerRef,
             isApproved,
             startDate,
@@ -155,6 +153,9 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
 
         if (!episode.LearnerRef.Equals(prevLearnerRef, StringComparison.OrdinalIgnoreCase))
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
+
+        if(episode.ForceEarningsSync)
+            changes.Add(ShortCourseUpdateChanges.ForceEarningsSync);
     }
 
     public Guid? Remove(long ukprn)

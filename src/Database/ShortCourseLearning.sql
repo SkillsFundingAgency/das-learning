@@ -4,8 +4,7 @@
     [LearnerKey] UNIQUEIDENTIFIER NOT NULL,
     [TrainingCode] VARCHAR(8) NOT NULL DEFAULT '',
     [Price] MONEY NOT NULL DEFAULT 0,
-    [LearningType] TINYINT NOT NULL DEFAULT 0,
-    [CompletionDate] DATETIME NULL
+    [LearningType] TINYINT NOT NULL DEFAULT 0
 )
 GO
 

@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
+namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning;
 
 [TestFixture]
 public class WhenUpdatingShortCourseEpisode
@@ -20,7 +20,6 @@ public class WhenUpdatingShortCourseEpisode
             Guid.NewGuid(),
             ukprn: 11111111,
             employerAccountId: 123,
-            trainingCode: "OLD",
             learnerRef: "LEARNER1",
             isApproved: false,
             startDate: new DateTime(2024, 1, 1),
@@ -49,7 +48,6 @@ public class WhenUpdatingShortCourseEpisode
 
         episode.Ukprn.Should().Be(99999999);
         episode.EmployerAccountId.Should().Be(456);
-        episode.TrainingCode.Should().Be("OLD");
         episode.StartDate.Should().Be(new DateTime(2025, 1, 1));
         episode.ExpectedEndDate.Should().Be(new DateTime(2025, 12, 1));
         episode.WithdrawalDate.Should().Be(new DateTime(2025, 6, 1));
@@ -63,7 +61,6 @@ public class WhenUpdatingShortCourseEpisode
             Guid.NewGuid(),
             ukprn: 11111111,
             employerAccountId: 123,
-            trainingCode: "OLD",
             learnerRef: "LEARNER1",
             isApproved: true,
             startDate: new DateTime(2024, 1, 1),
@@ -93,7 +90,6 @@ public class WhenUpdatingShortCourseEpisode
         // Restricted — unchanged
         episode.Ukprn.Should().Be(11111111);
         episode.EmployerAccountId.Should().Be(123);
-        episode.TrainingCode.Should().Be("OLD");
         episode.StartDate.Should().Be(new DateTime(2024, 1, 1));
         episode.ExpectedEndDate.Should().Be(new DateTime(2024, 6, 1));
         // Permitted — updated
@@ -225,7 +221,6 @@ private static ShortCourseEpisodeDomainModel CreateEpisode(LearningType learning
             Guid.NewGuid(),
             11111111,
             123,
-            "CODE",
             "LEARNER1",
             true,
             DateTime.Today,

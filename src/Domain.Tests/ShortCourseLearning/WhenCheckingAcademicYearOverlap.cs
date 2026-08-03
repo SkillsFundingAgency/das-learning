@@ -81,7 +81,6 @@ public class WhenCheckingAcademicYearOverlap
             ukprn: _fixture.Create<long>(),
             employerAccountId: _fixture.Create<long>(),
             learnerRef: _fixture.Create<string>(),
-            trainingCode: _fixture.Create<string>(),
             isApproved: false,
             startDate: startDate,
             expectedEndDate: expectedEndDate,

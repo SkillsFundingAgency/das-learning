@@ -37,7 +37,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
                 ukprn,
                 employerAccountId,
                 learnerRef,
-                trainingCode,
                 false,
                 DateTime.UtcNow.AddMonths(-2),
                 DateTime.UtcNow.AddMonths(6),
@@ -49,7 +48,6 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning
             var episode = shortCourse.Episodes.Single();
             episode.Ukprn.Should().Be(ukprn);
             episode.EmployerAccountId.Should().Be(employerAccountId);
-            episode.TrainingCode.Should().Be(trainingCode);
 
             shortCourse.TrainingCode.Should().Be(trainingCode);
 

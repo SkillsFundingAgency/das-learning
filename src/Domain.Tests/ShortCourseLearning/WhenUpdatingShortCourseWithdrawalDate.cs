@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
+namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning;
 
 [TestFixture]
 public class WhenUpdatingShortCourseWithdrawalDate
@@ -119,7 +119,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
             {
                 Ukprn = episode.Ukprn,
                 EmployerId = episode.EmployerAccountId,
-                CourseCode = episode.TrainingCode,
+                CourseCode = learning.TrainingCode,
                 StartDate = episode.StartDate,
                 ExpectedEndDate = episode.ExpectedEndDate,
                 WithdrawalDate = withdrawalDate,
