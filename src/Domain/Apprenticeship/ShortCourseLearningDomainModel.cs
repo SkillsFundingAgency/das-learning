@@ -153,6 +153,9 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
 
         if (!episode.LearnerRef.Equals(prevLearnerRef, StringComparison.OrdinalIgnoreCase))
             changes.Add(ShortCourseUpdateChanges.LearnerRef);
+
+        if(episode.ForceEarningsSync)
+            changes.Add(ShortCourseUpdateChanges.ForceEarningsSync);
     }
 
     public Guid? Remove(long ukprn)
