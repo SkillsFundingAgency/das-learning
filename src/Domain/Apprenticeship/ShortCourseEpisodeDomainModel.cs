@@ -26,6 +26,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public bool HasActualEndDate => IsApproved && (WithdrawalDate.HasValue || CompletionDate.HasValue);
+    public bool ForceEarningsSync => _entity.ForceEarningsSync;
 
     public bool OverlapsAcademicYear(int academicYear)
     {

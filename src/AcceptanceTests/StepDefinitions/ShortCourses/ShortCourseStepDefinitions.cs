@@ -441,6 +441,28 @@ public class ShortCourseStepDefinitions
         await CallUpdateShortCourseEndpoint(request);
     }
 
+    [Given(@"the short course episode ForceEarningsSync is set to (True|False)")]
+    [When(@"the short course episode ForceEarningsSync is set to (True|False)")]
+    [Then(@"the short course episode ForceEarningsSync is set to (True|False)")]
+    public async Task TheShortCourseEpisodeForceEarningsSyncIsSetTo(bool forceEarningsSync)
+    {
+        var shortCourseLearningKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearning].ToString()!);
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        await dbConnection.OpenAsync();
+
+        await using var command = new SqlCommand(
+            "UPDATE dbo.ShortCourseEpisode SET ForceEarningsSync = @ForceEarningsSync WHERE LearningKey = @LearningKey;",
+            dbConnection);
+        command.Parameters.AddWithValue("@ForceEarningsSync", forceEarningsSync);
+        command.Parameters.AddWithValue("@LearningKey", shortCourseLearningKey);
+
+        await command.ExecuteNonQueryAsync();
+
+        var shortCourse = dbConnection.GetShortCourseLearning(shortCourseLearningKey);
+        shortCourse.Episodes.Single().ForceEarningsSync.Should().Be(forceEarningsSync);
+    }
+
     [Then(@"the short course episode IsRemoved is set to (True|False)")]
     public async Task ThenTheShortCourseEpisodeIsRemovedIsSetTo(bool isRemoved)
     {
