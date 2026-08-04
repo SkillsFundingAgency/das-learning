@@ -235,7 +235,6 @@ public class WhenRemoveShortCourseCommandIsHandled
             ExpectedEndDate = startDate.Value.AddMonths(6),
             CompletionDate = completionDate,
             WithdrawalDate = withdrawalDate,
-            Price = 1000,
             Milestones = new List<ShortCourseMilestone>()
         };
 
@@ -246,6 +245,8 @@ public class WhenRemoveShortCourseCommandIsHandled
         {
             Key = learningKey,
             TrainingCode = "SC001",
+            Price = 1000,
+            LearningType = LearningType.ApprenticeshipUnit,
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };

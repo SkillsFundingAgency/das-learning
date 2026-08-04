@@ -231,7 +231,7 @@ public class WhenGettingShortCoursesByAcademicYear
         var learner = new Learner { Key = learnerKey, Uln = Guid.NewGuid().ToString()[..10], FirstName = "A", LastName = "B" };
         _dbContext.LearnersDbSet.Add(learner);
 
-        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "SC001" };
+        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "SC001", Price = 1000m };
         learning.LearnerKey = learnerKey;
         learning.Episodes.Add(new ShortCourseEpisode
         {
@@ -244,7 +244,6 @@ public class WhenGettingShortCoursesByAcademicYear
             ExpectedEndDate = expectedEndDate,
             WithdrawalDate = withdrawalDate,
             CompletionDate = completionDate,
-            Price = 1000m,
             LearnerRef = "LRN123"
         });
         _dbContext.ShortCourseLearnings.Add(learning);
@@ -261,7 +260,7 @@ public class WhenGettingShortCoursesByAcademicYear
         DateTime? withdrawalDate = null,
         DateTime? completionDate = null)
     {
-        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "SC002" };
+        var learning = new ShortCourseLearning { Key = Guid.NewGuid(), TrainingCode = "SC002", Price = 1000m };
         learning.LearnerKey = learner.Key;
         learning.Episodes.Add(new ShortCourseEpisode
         {
@@ -274,7 +273,6 @@ public class WhenGettingShortCoursesByAcademicYear
             ExpectedEndDate = expectedEndDate,
             WithdrawalDate = withdrawalDate,
             CompletionDate = completionDate,
-            Price = 1000m,
             LearnerRef = "LRN123"
         });
         _dbContext.ShortCourseLearnings.Add(learning);

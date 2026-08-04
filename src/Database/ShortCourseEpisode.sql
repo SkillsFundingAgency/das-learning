@@ -8,16 +8,17 @@ CREATE TABLE [dbo].[ShortCourseEpisode]
     [ExpectedEndDate] DATETIME NOT NULL,
     [WithdrawalDate] DATETIME NULL,
     [WithdrawalReason] SMALLINT NULL,
-    [TrainingCode] VARCHAR(8) NOT NULL DEFAULT '',
     [ApprovalsApprenticeshipId] BIGINT NOT NULL DEFAULT 0,
     [IsApproved] BIT NOT NULL DEFAULT 0,
+    -- TODO FLP-1898: remove legacy columns once all environments have migrated data to ShortCourseLearning.
     [Price] MONEY NOT NULL DEFAULT 0,
     [LearnerRef] VARCHAR(128) NOT NULL DEFAULT '',
     [LearningType] TINYINT NOT NULL DEFAULT 0,
     [EmployerType] TINYINT NOT NULL DEFAULT 0,
     [TransferSenderId] BIGINT NULL,
     [IsRemoved] BIT NOT NULL DEFAULT 0,
-    [CompletionDate] DATETIME NULL
+    [CompletionDate] DATETIME NULL,
+    [ForceEarningsSync] BIT NOT NULL DEFAULT 0
 )
 GO
 

@@ -109,6 +109,10 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .WithMany(l => l.Episodes)
             .HasForeignKey(e => e.LearningKey);
 
+        // TrainingCode moved to ShortCourseLearning (FLP-1898) - inherited Episode.TrainingCode no longer maps here
+        modelBuilder.Entity<ShortCourseEpisode>()
+            .Ignore(x => x.TrainingCode);
+
         // EpisodePrice
         modelBuilder.Entity<EpisodePrice>()
             .HasKey(x => x.Key);

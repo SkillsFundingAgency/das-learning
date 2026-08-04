@@ -35,10 +35,7 @@ public class UpdateShortCourseCommandHandler(
             }
         }
 
-        if (featureFlags.ShortCourseProgression)
-        {
-            await RemoveOmittedLearnings(command, results, processedLearningKeys);
-        }
+        await RemoveOmittedLearnings(command, results, processedLearningKeys);
 
         return new UpdateShortCourseResponse { Results = results };
     }
@@ -93,14 +90,6 @@ public class UpdateShortCourseCommandHandler(
 
         if (learning == null)
         {
-            if (!featureFlags.ShortCourseProgression)
-            {
-                logger.LogInformation(
-                    "No learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} and Short Course Progression is disabled — ignoring",
-                    learnerKey, model.OnProgramme.CourseCode);
-                return new UpdateShortCourseResult { IsIgnored = true };
-            }
-
             return await CreateNewLearning(learnerKey, model);
         }
 
@@ -141,7 +130,6 @@ public class UpdateShortCourseCommandHandler(
             op.Ukprn,
             op.EmployerId,
             model.LearnerRef,
-            op.CourseCode,
             false,
             op.StartDate,
             op.ExpectedEndDate,
@@ -170,13 +158,12 @@ public class UpdateShortCourseCommandHandler(
     {
         var op = model.OnProgramme;
 
-        var learning = factory!.CreateNew(learnerKey, op.CourseCode);
+        var learning = factory!.CreateNew(learnerKey, op.CourseCode, op.Price, op.LearningType);
 
         var episode = learning.AddEpisode(
             op.Ukprn,
             op.EmployerId,
             model.LearnerRef,
-            op.CourseCode,
             false,
             op.StartDate,
             op.ExpectedEndDate,

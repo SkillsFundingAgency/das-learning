@@ -17,7 +17,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public string LearnerRef => _entity.LearnerRef;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
-    public string TrainingCode => _entity.TrainingCode;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public short? WithdrawalReason => _entity.WithdrawalReason;
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
@@ -27,6 +26,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public bool HasActualEndDate => IsApproved && (WithdrawalDate.HasValue || CompletionDate.HasValue);
+    public bool ForceEarningsSync => _entity.ForceEarningsSync;
 
     public bool OverlapsAcademicYear(int academicYear)
     {
@@ -35,8 +35,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
                (!WithdrawalDate.HasValue || WithdrawalDate.Value >= dates.Start) &&
                (!CompletionDate.HasValue || CompletionDate.Value >= dates.Start);
     }
-    public decimal Price => _entity.Price;
-    public LearningType LearningType => _entity.LearningType;
     public EmployerType EmployerType => _entity.EmployerType;
     public long? TransferSenderId => _entity.TransferSenderId;
     public IReadOnlyCollection<ShortCourseMilestoneDomainModel> Milestones =>
@@ -48,15 +46,12 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         Guid learningKey,
         long ukprn,
         long employerAccountId,
-        string trainingCode,
         string learnerRef,
         bool isApproved,
         DateTime startDate,
         DateTime expectedEndDate,
         DateTime? withdrawalDate,
         short? withdrawalReasonCode = null,
-        decimal price = 0,
-        LearningType learningType = LearningType.Apprenticeship,
         EmployerType employerType = EmployerType.NonLevy,
         DateTime? completionDate = null)
     {
@@ -66,15 +61,12 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             LearningKey = learningKey,
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
-            TrainingCode = trainingCode,
             LearnerRef = learnerRef,
             IsApproved = isApproved,
             StartDate = startDate,
             ExpectedEndDate = expectedEndDate,
             WithdrawalDate = withdrawalDate,
             WithdrawalReason = withdrawalReasonCode,
-            Price = price,
-            LearningType = learningType,
             EmployerType = employerType,
             CompletionDate = completionDate
         });
@@ -133,8 +125,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
             _entity.EmployerAccountId = updateContext.OnProgramme.EmployerId;
             _entity.StartDate = updateContext.OnProgramme.StartDate;
             _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
-            _entity.Price = updateContext.OnProgramme.Price;
-            _entity.LearningType = updateContext.OnProgramme.LearningType;
         }
 
         _entity.WithdrawalDate = updateContext.OnProgramme.WithdrawalDate;
