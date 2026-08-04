@@ -20,9 +20,7 @@ public class ShortCourseEpisode : Episode
     public DateTime ExpectedEndDate { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }
     public bool IsApproved { get; set; }
-    public decimal Price { get; set; }
     public string LearnerRef { get; set; }
-    public LearningType LearningType { get; set; }
     public EmployerType EmployerType { get; set; }
     public long? TransferSenderId { get; set; }
     public bool IsRemoved { get; set; }

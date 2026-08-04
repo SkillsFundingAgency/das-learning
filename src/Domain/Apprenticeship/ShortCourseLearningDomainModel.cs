@@ -6,21 +6,25 @@ using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
-public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataAccess.Entities.Learning.ShortCourseLearning>
+public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLearning>
 {
     private readonly List<ShortCourseEpisodeDomainModel> _episodes;
 
     public Guid Key => _entity.Key;
     public string TrainingCode => _entity.TrainingCode;
+    public decimal Price => _entity.Price;
+    public LearningType LearningType => _entity.LearningType;
     public IReadOnlyCollection<ShortCourseEpisodeDomainModel> Episodes => new ReadOnlyCollection<ShortCourseEpisodeDomainModel>(_episodes);
 
-    internal static ShortCourseLearningDomainModel New(Guid learnerKey, string trainingCode)
+    internal static ShortCourseLearningDomainModel New(Guid learnerKey, string trainingCode, decimal price, LearningType learningType)
     {
         return new ShortCourseLearningDomainModel(new ShortCourseLearning
         {
             Key = Guid.NewGuid(),
             LearnerKey = learnerKey,
-            TrainingCode = trainingCode
+            TrainingCode = trainingCode,
+            LearningType = learningType,
+            Price = price
         });
     }
 
@@ -29,7 +33,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
         return new ShortCourseLearningDomainModel(entity);
     }
 
-    public Learning.DataAccess.Entities.Learning.ShortCourseLearning GetEntity()
+    public ShortCourseLearning GetEntity()
     {
         return _entity;
     }
@@ -59,8 +63,6 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<Learning.DataA
             expectedEndDate,
             withdrawalDate,
             withdrawalReasonCode,
-            price,
-            learningType,
             employerType,
             completionDate
         );

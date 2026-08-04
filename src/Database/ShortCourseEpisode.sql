@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[ShortCourseEpisode]
     [WithdrawalReason] SMALLINT NULL,
     [ApprovalsApprenticeshipId] BIGINT NOT NULL DEFAULT 0,
     [IsApproved] BIT NOT NULL DEFAULT 0,
+    -- TODO FLP-1898: remove legacy columns once all environments have migrated data to ShortCourseLearning.
     [Price] MONEY NOT NULL DEFAULT 0,
     [LearnerRef] VARCHAR(128) NOT NULL DEFAULT '',
     [LearningType] TINYINT NOT NULL DEFAULT 0,

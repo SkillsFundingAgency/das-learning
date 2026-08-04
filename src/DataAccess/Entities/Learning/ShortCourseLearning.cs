@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
+﻿using SFA.DAS.Learning.Enums;
+
+namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
 [Table("dbo.ShortCourseLearning")]
 [System.ComponentModel.DataAnnotations.Schema.Table("ShortCourseLearning")]
@@ -10,6 +12,8 @@ public class ShortCourseLearning : Learning
     }
 
     public string TrainingCode { get; set; } = null!;
+    public decimal Price { get; set; }
+    public LearningType LearningType { get; set; }
 
     public List<ShortCourseEpisode> Episodes { get; set; }
 }

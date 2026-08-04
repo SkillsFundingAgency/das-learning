@@ -209,7 +209,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
     private ShortCourseLearningDomainModel CreateNewLearning(ShortCourseUpdateContext model, LearnerDomainModel learner)
     {
-        var learning = _shortCourseLearningFactory.CreateNew(learner.Key, model.OnProgramme.CourseCode);
+        var learning = _shortCourseLearningFactory.CreateNew(learner.Key, model.OnProgramme.CourseCode, model.OnProgramme.Price, model.OnProgramme.LearningType);
 
         AddEpisode(learning, model);
 
