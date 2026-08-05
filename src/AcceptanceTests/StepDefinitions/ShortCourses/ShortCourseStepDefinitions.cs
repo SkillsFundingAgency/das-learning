@@ -500,7 +500,7 @@ public class ShortCourseStepDefinitions
     public void ThenTheUpdateShortCourseResponseHasACompletionDateOf(DateTime completionDate)
     {
         var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
-        result.Episodes.Single().CompletionDate.Should().Be(completionDate);
+        result.Episode!.CompletionDate.Should().Be(completionDate);
     }
 
     [Then(@"the update short course response includes the following learner details")]
@@ -527,8 +527,8 @@ public class ShortCourseStepDefinitions
         var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
         var row = table.Rows[0];
 
-        result.Episodes.Should().NotBeEmpty();
-        var episode = result.Episodes.First();
+        result.Episode.Should().NotBeNull();
+        var episode = result.Episode!;
 
         if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
             episode.Ukprn.Should().Be(parsedUkprn);
@@ -576,7 +576,7 @@ public class ShortCourseStepDefinitions
         public Guid LearningKey { get; set; }
         public string[] Changes { get; set; } = [];
         public UpdateShortCourseTestResultLearner Learner { get; set; } = null!;
-        public UpdateShortCourseTestResultEpisode[] Episodes { get; set; } = [];
+        public UpdateShortCourseTestResultEpisode? Episode { get; set; }
     }
 
     private class UpdateShortCourseTestResultLearner
