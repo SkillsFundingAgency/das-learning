@@ -1,7 +1,7 @@
 using SFA.DAS.Learning.Enums;
 using System.Text.Json.Serialization;
 
-namespace SFA.DAS.Learning.Models.Dtos;
+namespace SFA.DAS.Learning.Command.Shared;
 
 #pragma warning disable CS8618
 public abstract class ShortCourseLearningDto

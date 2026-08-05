@@ -1,5 +1,5 @@
+using SFA.DAS.Learning.Command.Shared;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Command.Mappers;
 

@@ -21,7 +21,7 @@ public class UpdateShortCourseCommandHandler(
     {
         logger.LogInformation("Handling UpdateShortCourseCommand for LearnerKey {LearnerKey}", command.LearnerKey);
 
-        var results = new List<UpdateShortCourseResult>();
+        var results = new List<UpdateShortCourseItemResult>();
         var processedLearningKeys = new HashSet<Guid>();
         var processedCourseCodes = new HashSet<string>();
 
@@ -40,7 +40,7 @@ public class UpdateShortCourseCommandHandler(
         return new UpdateShortCourseResponse { Results = results };
     }
 
-    private async Task RemoveOmittedLearnings(UpdateShortCourseCommand command, List<UpdateShortCourseResult> results, HashSet<Guid> processedLearningKeys)
+    private async Task RemoveOmittedLearnings(UpdateShortCourseCommand command, List<UpdateShortCourseItemResult> results, HashSet<Guid> processedLearningKeys)
     {
         var allLearnings = await repository.GetAllByLearnerKey(command.LearnerKey);
 
@@ -66,13 +66,13 @@ public class UpdateShortCourseCommandHandler(
                 learning.Key, learning.TrainingCode, command.LearnerKey);
 
             var learner = await learnerRepository.Get(command.LearnerKey);
-            var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, command.Ukprn);
+            var result = mapper.Map<UpdateShortCourseItemResult>(learning, learner!, command.Ukprn);
             result.IsRemoved = true;
             results.Add(result);
         }
     }
 
-    private async Task<UpdateShortCourseResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model, HashSet<string> processedCourseCodes)
+    private async Task<UpdateShortCourseItemResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model, HashSet<string> processedCourseCodes)
     {
         // Silently ignore subsequent instances of the same CourseCode in one PUT (until Repeats/Restarts are implemented)
         if (!processedCourseCodes.Add(model.OnProgramme.CourseCode))
@@ -80,7 +80,7 @@ public class UpdateShortCourseCommandHandler(
             logger.LogWarning(
                 "CourseCode {CourseCode} appears more than once in this request for LearnerKey {LearnerKey} — ignoring the repeat/restart",
                 model.OnProgramme.CourseCode, learnerKey);
-            return new UpdateShortCourseResult { IsIgnored = true };
+            return new UpdateShortCourseItemResult { IsIgnored = true };
         }
 
         var learning = await repository.GetByLearnerKeyAndCourseCode(learnerKey, model.OnProgramme.CourseCode);
@@ -100,7 +100,7 @@ public class UpdateShortCourseCommandHandler(
                 logger.LogInformation(
                     "Learning found for LearnerKey {LearnerKey} / CourseCode {CourseCode} but the existing episode belongs to a different provider; Short Course Change of Provider is disabled — ignoring",
                     learnerKey, model.OnProgramme.CourseCode);
-                return new UpdateShortCourseResult { IsIgnored = true };
+                return new UpdateShortCourseItemResult { IsIgnored = true };
             }
 
             return await AddEpisodeToExistingLearning(learning, model);
@@ -112,12 +112,12 @@ public class UpdateShortCourseCommandHandler(
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
-        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, ukprn);
+        var result = mapper.Map<UpdateShortCourseItemResult>(learning, learner!, ukprn);
         result.Changes = updateResult.Changes;
         return result;
     }
 
-    private async Task<UpdateShortCourseResult> AddEpisodeToExistingLearning(ShortCourseLearningDomainModel learning, ShortCourseUpdateContext model)
+    private async Task<UpdateShortCourseItemResult> AddEpisodeToExistingLearning(ShortCourseLearningDomainModel learning, ShortCourseUpdateContext model)
     {
         var op = model.OnProgramme;
 
@@ -142,12 +142,12 @@ public class UpdateShortCourseCommandHandler(
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
-        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, op.Ukprn);
+        var result = mapper.Map<UpdateShortCourseItemResult>(learning, learner!, op.Ukprn);
         result.IsNewEpisode = true;
         return result;
     }
 
-    private async Task<UpdateShortCourseResult> CreateNewLearning(Guid learnerKey, ShortCourseUpdateContext model)
+    private async Task<UpdateShortCourseItemResult> CreateNewLearning(Guid learnerKey, ShortCourseUpdateContext model)
     {
         var op = model.OnProgramme;
 
@@ -174,7 +174,7 @@ public class UpdateShortCourseCommandHandler(
 
         var learner = await learnerRepository.Get(learnerKey);
 
-        var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, op.Ukprn);
+        var result = mapper.Map<UpdateShortCourseItemResult>(learning, learner!, op.Ukprn);
         result.IsNewLearning = true;
         return result;
     }

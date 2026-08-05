@@ -12,7 +12,7 @@ using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Infrastructure.Configuration;
-using SFA.DAS.Learning.Models.Dtos;
+using SFA.DAS.Learning.Command.Shared;
 using SFA.DAS.Learning.Models.UpdateModels;
 using System;
 using System.Collections.Generic;
@@ -44,12 +44,12 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _mapper = new Mock<IShortCourseLearningDomainModelMapper>();
         _logger = new Mock<ILogger<CreateDraftShortCourseCommandHandler>>();
 
-        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseItemResult>(
                 It.IsAny<ShortCourseLearningDomainModel>(),
                 It.IsAny<LearnerDomainModel>(),
                 It.IsAny<long>()))
             .Returns((ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn) =>
-                new CreateDraftShortCourseCommandResult
+                new CreateDraftShortCourseItemResult
                 {
                     LearningKey = learning.Key,
                     LearnerKey = learner.Key,
@@ -237,8 +237,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
 
         var mappedLearner = new ShortCourseLearnerDto { Uln = "1234567890", FirstName = "Jane", LastName = "Smith" };
         var mappedEpisode = new ShortCourseEpisodeDto { CourseCode = "SC-001" };
-        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(existingLearning, learner, model.OnProgramme.Ukprn))
-            .Returns(new CreateDraftShortCourseCommandResult
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseItemResult>(existingLearning, learner, model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseItemResult
             {
                 LearnerKey = learner.Key,
                 Learner = mappedLearner,
@@ -336,8 +336,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, originalModel.OnProgramme.CourseCode)).ReturnsAsync(originalLearning);
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, newModel.OnProgramme.CourseCode)).ReturnsAsync((ShortCourseLearningDomainModel?)null);
         _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([originalLearning]);
-        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(originalLearning, learner, originalModel.OnProgramme.Ukprn))
-            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = originalLearning.Key, LearnerKey = learner.Key });
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseItemResult>(originalLearning, learner, originalModel.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseItemResult { LearningKey = originalLearning.Key, LearnerKey = learner.Key });
 
         var newLearningEntity = _fixture.Create<ShortCourseLearning>();
         newLearningEntity.Episodes = new List<ShortCourseEpisode>();
@@ -459,8 +459,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var omittedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(includedLearning);
         _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([includedLearning, omittedLearning]);
-        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(includedLearning, learner, model.OnProgramme.Ukprn))
-            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseItemResult>(includedLearning, learner, model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseItemResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
 
         // Act
         var results = await _commandHandler.Handle(command);
@@ -484,8 +484,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var omittedLearning = BuildLearningWithEpisode(isApproved: true, ukprn: model.OnProgramme.Ukprn);
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(includedLearning);
         _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([includedLearning, omittedLearning]);
-        _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(includedLearning, learner, model.OnProgramme.Ukprn))
-            .Returns(new CreateDraftShortCourseCommandResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseItemResult>(includedLearning, learner, model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseItemResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
 
         // Act
         var results = await _commandHandler.Handle(command);

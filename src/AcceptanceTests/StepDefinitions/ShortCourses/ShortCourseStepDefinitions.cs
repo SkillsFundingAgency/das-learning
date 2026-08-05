@@ -19,7 +19,7 @@ public class ShortCourseStepDefinitions
     private readonly ScenarioContext _scenarioContext;
     private readonly TestContext _testContext;
 
-    private const string UpdateShortCourseResultKey = "UpdateShortCourseResult";
+    private const string UpdateShortCourseResultKey = "UpdateShortCourseItemResult";
     private const string ExpectedShortCourseWithdrawalDateKey = "ExpectedShortCourseWithdrawalDate";
     private const string ExpectedShortCourseWithdrawalReasonCodeKey = "ExpectedShortCourseWithdrawalReasonCode";
 
@@ -476,7 +476,7 @@ public class ShortCourseStepDefinitions
     [Then(@"the create short course response indicates it was reinstated")]
     public void ThenTheCreateShortCourseResponseIndicatesItWasReinstated()
     {
-        var response = _scenarioContext.Get<CreateDraftShortCourseCommandResult>();
+        var response = _scenarioContext.Get<CreateDraftShortCourseItemResult>();
         response.IsReinstated.Should().BeTrue();
     }
 

@@ -1,4 +1,4 @@
-using SFA.DAS.Learning.Models.Dtos;
+using SFA.DAS.Learning.Command.Shared;
 
 namespace SFA.DAS.Learning.Command.RemoveShortCourse;
 

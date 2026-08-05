@@ -49,14 +49,14 @@ public class WhenMappingShortCourseLearningToResult
     }
 
     [Test]
-    public void Map_ShouldMapToUpdateShortCourseResult()
+    public void Map_ShouldMapToUpdateShortCourseItemResult()
     {
         var learning = CreateLearning();
         var learner = CreateLearner();
 
-        var result = _mapper.Map<UpdateShortCourseResult>(learning, learner, 123);
+        var result = _mapper.Map<UpdateShortCourseItemResult>(learning, learner, 123);
 
-        result.Should().BeOfType<UpdateShortCourseResult>();
+        result.Should().BeOfType<UpdateShortCourseItemResult>();
     }
 
     [Test]

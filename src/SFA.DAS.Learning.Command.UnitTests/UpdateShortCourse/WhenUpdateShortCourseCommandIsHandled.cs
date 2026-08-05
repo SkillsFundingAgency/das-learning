@@ -12,7 +12,7 @@ using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Infrastructure.Configuration;
-using SFA.DAS.Learning.Models.Dtos;
+using SFA.DAS.Learning.Command.Shared;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System;
@@ -53,11 +53,11 @@ public class WhenUpdateShortCourseCommandIsHandled
                 DateOfBirth = DateTime.Today.AddYears(-20)
             }));
 
-        _mapper.Setup(x => x.Map<UpdateShortCourseResult>(
+        _mapper.Setup(x => x.Map<UpdateShortCourseItemResult>(
             It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
             )
             .Returns((ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn) =>
-                _fixture.Build<UpdateShortCourseResult>()
+                _fixture.Build<UpdateShortCourseItemResult>()
                     .With(x => x.LearningKey, learning.Key)
                     .With(x => x.LearnerKey, learner.Key)
                     .With(x => x.Episode, learning.Episodes.Where(e => e.Ukprn == ukprn)
@@ -455,8 +455,8 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
         _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
         _mapper
-            .Setup(m => m.Map<UpdateShortCourseResult>(learning, It.IsAny<LearnerDomainModel>(), 12345678))
-            .Returns(new UpdateShortCourseResult { LearningKey = learning.Key, IsRemoved = false });
+            .Setup(m => m.Map<UpdateShortCourseItemResult>(learning, It.IsAny<LearnerDomainModel>(), 12345678))
+            .Returns(new UpdateShortCourseItemResult { LearningKey = learning.Key, IsRemoved = false });
 
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
 
@@ -533,8 +533,8 @@ public class WhenUpdateShortCourseCommandIsHandled
             .Setup(r => r.GetAllByLearnerKey(learnerKey))
             .ReturnsAsync([includedLearning, priorAYLearning]);
         _mapper
-            .Setup(m => m.Map<UpdateShortCourseResult>(includedLearning, It.IsAny<LearnerDomainModel>(), 12345678))
-            .Returns(new UpdateShortCourseResult { LearningKey = includedLearning.Key, IsRemoved = false });
+            .Setup(m => m.Map<UpdateShortCourseItemResult>(includedLearning, It.IsAny<LearnerDomainModel>(), 12345678))
+            .Returns(new UpdateShortCourseItemResult { LearningKey = includedLearning.Key, IsRemoved = false });
 
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext()]);
 
