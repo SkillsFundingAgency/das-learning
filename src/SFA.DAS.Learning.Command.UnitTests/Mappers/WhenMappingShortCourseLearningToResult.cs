@@ -37,7 +37,7 @@ public class WhenMappingShortCourseLearningToResult
         result.Should().BeOfType<RemoveShortCourseItemResult>();
         result.LearningKey.Should().Be(learning.Key);
         result.LearnerKey.Should().Be(learning.LearnerKey);
-        result.Episodes.Single().CompletionDate.Should().Be(learning.Episodes.Single().CompletionDate);
+        result.Episode!.CompletionDate.Should().Be(learning.Episodes.Single().CompletionDate);
 
         result.Learner.Should().BeEquivalentTo(new
         {
@@ -60,15 +60,26 @@ public class WhenMappingShortCourseLearningToResult
     }
 
     [Test]
-    public void Map_ShouldOnlyIncludeEpisodesMatchingUkprn()
+    public void Map_ShouldOnlyResolveEpisodeMatchingUkprn()
     {
         var learning = CreateLearning();
         var learner = CreateLearner();
 
         var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 123);
 
-        result.Episodes.Should().HaveCount(1);
-        result.Episodes.Single().Ukprn.Should().Be(123);
+        result.Episode.Should().NotBeNull();
+        result.Episode!.Ukprn.Should().Be(123);
+    }
+
+    [Test]
+    public void Map_ShouldReturnNullEpisodeWhenNoEpisodeMatchesUkprn()
+    {
+        var learning = CreateLearning();
+        var learner = CreateLearner();
+
+        var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 999);
+
+        result.Episode.Should().BeNull();
     }
 
     [Test]
@@ -78,7 +89,7 @@ public class WhenMappingShortCourseLearningToResult
         var learner = CreateLearner();
 
         var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 123);
-        var episode = result.Episodes.Single();
+        var episode = result.Episode!;
 
         var source = learning.Episodes.Single(e => e.Ukprn == 123);
 
@@ -112,7 +123,7 @@ public class WhenMappingShortCourseLearningToResult
 
         var result = _mapper.Map<RemoveShortCourseItemResult>(learning, learner, 123);
 
-        result.Episodes.Single().AgeAtStart.Should().Be(expectedAge);
+        result.Episode!.AgeAtStart.Should().Be(expectedAge);
     }
 
     private static ShortCourseLearningDomainModel CreateLearning()

@@ -23,9 +23,7 @@ public class UpdateShortCourseCommand : ICommand
 
 public class UpdateShortCourseResult : ShortCourseLearningDto
 {
-    public string CourseCode { get; set; } = "";
     public ShortCourseUpdateChanges[] Changes { get; set; } = [];
-    public Guid UpdatedEpisodeKey { get; set; }
     public bool IsNewLearning { get; set; }
     public bool IsNewEpisode { get; set; }
     public bool IsIgnored { get; set; }

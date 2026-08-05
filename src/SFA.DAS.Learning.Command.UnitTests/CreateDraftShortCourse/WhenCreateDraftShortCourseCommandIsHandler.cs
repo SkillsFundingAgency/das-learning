@@ -49,7 +49,12 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                 It.IsAny<LearnerDomainModel>(),
                 It.IsAny<long>()))
             .Returns((ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn) =>
-                new CreateDraftShortCourseCommandResult { LearningKey = learning.Key, LearnerKey = learner.Key });
+                new CreateDraftShortCourseCommandResult
+                {
+                    LearningKey = learning.Key,
+                    LearnerKey = learner.Key,
+                    Episode = new ShortCourseEpisodeDto { CourseCode = learning.TrainingCode }
+                });
 
         _featureFlags = new FeatureFlags { ShortCourseChangeOfProvider = true };
 
@@ -231,13 +236,13 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
         var mappedLearner = new ShortCourseLearnerDto { Uln = "1234567890", FirstName = "Jane", LastName = "Smith" };
-        var mappedEpisodes = new[] { new ShortCourseEpisodeDto { CourseCode = "SC-001" } };
+        var mappedEpisode = new ShortCourseEpisodeDto { CourseCode = "SC-001" };
         _mapper.Setup(x => x.Map<CreateDraftShortCourseCommandResult>(existingLearning, learner, model.OnProgramme.Ukprn))
             .Returns(new CreateDraftShortCourseCommandResult
             {
                 LearnerKey = learner.Key,
                 Learner = mappedLearner,
-                Episodes = mappedEpisodes
+                Episode = mappedEpisode
             });
 
         // Act
@@ -248,7 +253,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         result.IsReinstated.Should().BeTrue();
         result.LearnerKey.Should().Be(learner.Key);
         result.Learner.Should().Be(mappedLearner);
-        result.Episodes.Should().BeEquivalentTo(mappedEpisodes);
+        result.Episode.Should().BeEquivalentTo(mappedEpisode);
         existingLearning.LatestEpisodeForProvider(model.OnProgramme.Ukprn).IsRemoved.Should().BeFalse();
 
         var reinstatedEvent = existingLearning.FlushEvents().OfType<Domain.Events.LearningReinstatedEvent>().SingleOrDefault();
@@ -461,7 +466,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var results = await _commandHandler.Handle(command);
 
         // Assert
-        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == omittedLearning.TrainingCode);
+        results.Results.Should().Contain(r => r.IsRemoved && r.Episode!.CourseCode == omittedLearning.TrainingCode);
         omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
         includedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(omittedLearning), Times.Once);
@@ -486,7 +491,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var results = await _commandHandler.Handle(command);
 
         // Assert
-        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == omittedLearning.TrainingCode);
+        results.Results.Should().Contain(r => r.IsRemoved && r.Episode!.CourseCode == omittedLearning.TrainingCode);
         omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
         includedLearning.Episodes.Single().IsRemoved.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(omittedLearning), Times.Once);

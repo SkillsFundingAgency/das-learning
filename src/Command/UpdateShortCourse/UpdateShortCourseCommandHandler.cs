@@ -65,13 +65,10 @@ public class UpdateShortCourseCommandHandler(
             logger.LogInformation("Removed omitted Learning {LearningKey} / {CourseCode} for LearnerKey {LearnerKey}",
                 learning.Key, learning.TrainingCode, command.LearnerKey);
 
-            results.Add(new UpdateShortCourseResult
-            {
-                IsRemoved = true,
-                LearningKey = learning.Key,
-                CourseCode = learning.TrainingCode,
-                UpdatedEpisodeKey = removedEpisodeKey.Value
-            });
+            var learner = await learnerRepository.Get(command.LearnerKey);
+            var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, command.Ukprn);
+            result.IsRemoved = true;
+            results.Add(result);
         }
     }
 
@@ -116,9 +113,7 @@ public class UpdateShortCourseCommandHandler(
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
         var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, ukprn);
-        result.CourseCode = model.OnProgramme.CourseCode;
         result.Changes = updateResult.Changes;
-        result.UpdatedEpisodeKey = updateResult.EpisodeKey;
         return result;
     }
 
@@ -148,8 +143,6 @@ public class UpdateShortCourseCommandHandler(
         var learner = await learnerRepository.Get(learning.LearnerKey);
 
         var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, op.Ukprn);
-        result.CourseCode = op.CourseCode;
-        result.UpdatedEpisodeKey = episode.Key;
         result.IsNewEpisode = true;
         return result;
     }
@@ -182,8 +175,6 @@ public class UpdateShortCourseCommandHandler(
         var learner = await learnerRepository.Get(learnerKey);
 
         var result = mapper.Map<UpdateShortCourseResult>(learning, learner!, op.Ukprn);
-        result.CourseCode = op.CourseCode;
-        result.UpdatedEpisodeKey = episode.Key;
         result.IsNewLearning = true;
         return result;
     }

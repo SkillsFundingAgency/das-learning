@@ -24,7 +24,7 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
                 LastName = learner.LastName,
                 DateOfBirth = learner.DateOfBirth
             },
-            Episodes = learning.Episodes.Where(e => e.Ukprn == ukprn).Select(e => new ShortCourseEpisodeDto
+            Episode = learning.Episodes.Where(e => e.Ukprn == ukprn).Select(e => new ShortCourseEpisodeDto
             {
                 EpisodeKey = e.Key,
                 Ukprn = e.Ukprn,
@@ -44,7 +44,7 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
                 IsRemoved = e.IsRemoved,
                 TransferSenderId = e.TransferSenderId,
                 CompletionDate = e.CompletionDate
-            }).ToArray()
+            }).SingleOrDefault()
         };
     }
 }

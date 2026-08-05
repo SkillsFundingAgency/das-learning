@@ -9,7 +9,7 @@ public abstract class ShortCourseLearningDto
     public Guid LearningKey { get; set; }
     public Guid LearnerKey { get; set; }
     public ShortCourseLearnerDto Learner { get; set; }
-    public ShortCourseEpisodeDto[] Episodes { get; set; } = [];
+    public ShortCourseEpisodeDto? Episode { get; set; }
 }
 
 public class ShortCourseLearnerDto

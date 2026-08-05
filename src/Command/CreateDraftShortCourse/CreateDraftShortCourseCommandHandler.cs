@@ -65,12 +65,12 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
 
         var requestedCourseCodes = command.Models.Select(m => m.OnProgramme.CourseCode).ToHashSet();
-        await RemoveOmittedLearnings(command, existingLearnings, results, processedLearningKeys, requestedCourseCodes);
+        await RemoveOmittedLearnings(command, learner, existingLearnings, results, processedLearningKeys, requestedCourseCodes);
 
         return new CreateDraftShortCourseCommandResponse { Results = results };
     }
 
-    private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys, HashSet<string> requestedCourseCodes)
+    private async Task RemoveOmittedLearnings(CreateDraftShortCourseCommand command, LearnerDomainModel learner, List<ShortCourseLearningDomainModel> existingLearnings, List<CreateDraftShortCourseCommandResult> results, HashSet<Guid> processedLearningKeys, HashSet<string> requestedCourseCodes)
     {
         foreach (var learning in existingLearnings.Where(l =>
             !processedLearningKeys.Contains(l.Key) &&
@@ -94,13 +94,9 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             _logger.LogInformation("Removed omitted Learning {LearningKey} / {CourseCode} for LearnerKey {LearnerKey}",
                 learning.Key, learning.TrainingCode, learning.LearnerKey);
 
-            results.Add(new CreateDraftShortCourseCommandResult
-            {
-                IsRemoved = true,
-                LearningKey = learning.Key,
-                CourseCode = learning.TrainingCode,
-                EpisodeKey = removedEpisodeKey.Value
-            });
+            var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, command.Ukprn);
+            result.IsRemoved = true;
+            results.Add(result);
         }
     }
 
@@ -129,9 +125,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
             await _shortCourseLearningRepository.Add(newLearning);
 
-            var newResult = _mapper.Map<CreateDraftShortCourseCommandResult>(newLearning, learner, ukprn);
-            newResult.EpisodeKey = newLearning.Episodes.Single().Key;
-            return newResult;
+            return _mapper.Map<CreateDraftShortCourseCommandResult>(newLearning, learner, ukprn);
         }
 
         if (!_featureFlags.ShortCourseChangeOfProvider)
@@ -179,7 +173,6 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         await _shortCourseLearningRepository.Update(learning);
 
         var result = _mapper.Map<CreateDraftShortCourseCommandResult>(learning, learner, ukprn);
-        result.EpisodeKey = learning.Episodes.Single(x => x.Ukprn == ukprn).Key;
         if (updateResult != null) result.IsReinstated = updateResult.Changes.Any(x => x == ShortCourseUpdateChanges.Reinstated);
 
         return result;
