@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
-using SFA.DAS.Learning.Models.Dtos;
+using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 using System.Text.Json;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;

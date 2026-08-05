@@ -4,9 +4,6 @@ using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Extensions;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.Models.Dtos;
-using System.Linq.Expressions;
-using ApprenticeshipLearningEntity = SFA.DAS.Learning.DataAccess.Entities.Learning.ApprenticeshipLearning;
 
 namespace SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 
@@ -55,8 +52,8 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
                     apprenticeship.GetStartDate(),
                     apprenticeship.GetPlannedEndDate(),
                     apprenticeship.Episodes.Select(ep =>
-                            new Episode(ep.Key, ep.TrainingCode, ep.WithdrawalDate, ep.Prices.Select(p =>
-                                new EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
+                            new LearningWithEpisodes.Episode(ep.Key, ep.TrainingCode, ep.WithdrawalDate, ep.Prices.Select(p =>
+                                new LearningWithEpisodes.EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
                         .ToList(),
                     apprenticeship.GetAgeAtStartOfApprenticeship(learner.DateOfBirth),
                     apprenticeship.GetWithdrawalDate(),
