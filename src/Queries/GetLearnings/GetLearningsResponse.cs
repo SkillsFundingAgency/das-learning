@@ -1,6 +1,16 @@
-﻿namespace SFA.DAS.Learning.Queries.GetLearnings;
+using System.Diagnostics.CodeAnalysis;
 
-public class GetLearningsResponse(IEnumerable<Models.Dtos.Learning> learnings)
+namespace SFA.DAS.Learning.Queries.GetLearnings;
+
+public class GetLearningsResponse(IEnumerable<LearnerSummary> learnings)
 {
-    public IEnumerable<Models.Dtos.Learning> Learnings { get; set; } = learnings;
+    public IEnumerable<LearnerSummary> Learnings { get; set; } = learnings;
+}
+
+[ExcludeFromCodeCoverage]
+public class LearnerSummary
+{
+    public string Uln { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }

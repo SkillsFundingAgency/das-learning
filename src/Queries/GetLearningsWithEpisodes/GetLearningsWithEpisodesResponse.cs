@@ -6,74 +6,52 @@ namespace SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 public class GetLearningsWithEpisodesResponse : PagedQueryResult<LearningWithEpisodes> {}
 
 [ExcludeFromCodeCoverage]
-public class LearningWithEpisodes
+public class LearningWithEpisodes(
+    Guid key,
+    string uln,
+    DateTime startDate,
+    DateTime plannedEndDate,
+    List<LearningWithEpisodes.Episode> episodes,
+    int ageAtStartOfLearning,
+    DateTime? lastDayOfLearning,
+    DateTime? completionDate)
 {
-    public LearningWithEpisodes(
-        Guid key,
-        string uln,
-        DateTime startDate,
-        DateTime plannedEndDate,
-        List<Episode> episodes,
-        int ageAtStartOfLearning,
-        DateTime? lastDayOfLearning,
-        DateTime? completionDate)
-    {
-        Key = key;
-        Uln = uln;
-        StartDate = startDate;
-        PlannedEndDate = plannedEndDate;
-        Episodes = episodes;
-        AgeAtStartOfLearning = ageAtStartOfLearning;
-        LastDayOfLearning = lastDayOfLearning;
-        CompletionDate = completionDate;
-    }
-
-    public Guid Key { get; set; }
-    public string Uln { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime PlannedEndDate { get; set; }
-    public List<Episode> Episodes { get; set; }
+    public Guid Key { get; set; } = key;
+    public string Uln { get; set; } = uln;
+    public DateTime StartDate { get; set; } = startDate;
+    public DateTime PlannedEndDate { get; set; } = plannedEndDate;
+    public List<Episode> Episodes { get; set; } = episodes;
     public int AgeAtStartOfApprenticeship => AgeAtStartOfLearning;
-    public int AgeAtStartOfLearning { get; set; }
+    public int AgeAtStartOfLearning { get; set; } = ageAtStartOfLearning;
+
     [JsonPropertyName("WithdrawnDate")]// Because of multiple inflight tickets, we will need to manage the switch over
-    public DateTime? LastDayOfLearning { get; set; }
-    public DateTime? CompletionDate { get; set; }
+    public DateTime? LastDayOfLearning { get; set; } = lastDayOfLearning;
+
+    public DateTime? CompletionDate { get; set; } = completionDate;
 
     [ExcludeFromCodeCoverage]
-    public class Episode
+    public class Episode(Guid key, string trainingCode, DateTime? lastDayOfLearning, List<EpisodePrice> prices)
     {
-        public Episode(Guid key, string trainingCode, DateTime? lastDayOfLearning, List<EpisodePrice> prices)
-        {
-            Key = key;
-            TrainingCode = trainingCode;
-            LastDayOfLearning = lastDayOfLearning;
-            Prices = prices;
-        }
-
-        public Guid Key { get; set; }
-        public string TrainingCode { get; set; }
-        public DateTime? LastDayOfLearning { get; set; }
-        public List<EpisodePrice> Prices { get; set; }
+        public Guid Key { get; set; } = key;
+        public string TrainingCode { get; set; } = trainingCode;
+        public DateTime? LastDayOfLearning { get; set; } = lastDayOfLearning;
+        public List<EpisodePrice> Prices { get; set; } = prices;
     }
 
     [ExcludeFromCodeCoverage]
-    public class EpisodePrice
+    public class EpisodePrice(
+        Guid key,
+        DateTime startDate,
+        DateTime endDate,
+        decimal? trainingPrice,
+        decimal? endPointAssessmentPrice,
+        decimal totalPrice)
     {
-        public EpisodePrice(Guid key, DateTime startDate, DateTime endDate, decimal? trainingPrice, decimal? endPointAssessmentPrice, decimal totalPrice)
-        {
-            Key = key;
-            StartDate = startDate;
-            EndDate = endDate;
-            TrainingPrice = trainingPrice;
-            EndPointAssessmentPrice = endPointAssessmentPrice;
-            TotalPrice = totalPrice;
-        }
-
-        public Guid Key { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal? TrainingPrice { get; set; }
-        public decimal? EndPointAssessmentPrice { get; set; }
-        public decimal TotalPrice { get; set; }
+        public Guid Key { get; set; } = key;
+        public DateTime StartDate { get; set; } = startDate;
+        public DateTime EndDate { get; set; } = endDate;
+        public decimal? TrainingPrice { get; set; } = trainingPrice;
+        public decimal? EndPointAssessmentPrice { get; set; } = endPointAssessmentPrice;
+        public decimal TotalPrice { get; set; } = totalPrice;
     }
 }
