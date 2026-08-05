@@ -53,7 +53,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                 {
                     LearningKey = learning.Key,
                     LearnerKey = learner.Key,
-                    Episode = new ShortCourseEpisodeDto { CourseCode = learning.TrainingCode }
+                    Episode = new ShortCourseCommandEpisode { CourseCode = learning.TrainingCode }
                 });
 
         _featureFlags = new FeatureFlags { ShortCourseChangeOfProvider = true };
@@ -235,8 +235,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: model.OnProgramme.Ukprn, isRemoved: true);
         _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
 
-        var mappedLearner = new ShortCourseLearnerDto { Uln = "1234567890", FirstName = "Jane", LastName = "Smith" };
-        var mappedEpisode = new ShortCourseEpisodeDto { CourseCode = "SC-001" };
+        var mappedLearner = new ShortCourseLearner { Uln = "1234567890", FirstName = "Jane", LastName = "Smith" };
+        var mappedEpisode = new ShortCourseCommandEpisode { CourseCode = "SC-001" };
         _mapper.Setup(x => x.Map<CreateDraftShortCourseItemResult>(existingLearning, learner, model.OnProgramme.Ukprn))
             .Returns(new CreateDraftShortCourseItemResult
             {

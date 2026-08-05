@@ -7,7 +7,7 @@ public class CreateDraftShortCourseCommandResponse
     public List<CreateDraftShortCourseItemResult> Results { get; set; } = new();
 }
 
-public class CreateDraftShortCourseItemResult : ShortCourseLearningDto
+public class CreateDraftShortCourseItemResult : ShortCourseCommandResult
 {
     public bool IsReinstated { get; set; }
     public bool IsIgnored { get; set; }

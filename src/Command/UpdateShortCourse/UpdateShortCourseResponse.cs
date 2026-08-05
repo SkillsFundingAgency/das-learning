@@ -8,7 +8,7 @@ public class UpdateShortCourseResponse
     public List<UpdateShortCourseItemResult> Results { get; set; } = [];
 }
 
-public class UpdateShortCourseItemResult : ShortCourseLearningDto
+public class UpdateShortCourseItemResult : ShortCourseCommandResult
 {
     public ShortCourseUpdateChanges[] Changes { get; set; } = [];
     public bool IsNewLearning { get; set; }

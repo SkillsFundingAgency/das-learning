@@ -61,7 +61,7 @@ public class WhenUpdateShortCourseCommandIsHandled
                     .With(x => x.LearningKey, learning.Key)
                     .With(x => x.LearnerKey, learner.Key)
                     .With(x => x.Episode, learning.Episodes.Where(e => e.Ukprn == ukprn)
-                        .Select(e => _fixture.Build<ShortCourseEpisodeDto>()
+                        .Select(e => _fixture.Build<ShortCourseCommandEpisode>()
                             .With(ep => ep.EpisodeKey, e.Key)
                             .With(ep => ep.CourseCode, learning.TrainingCode)
                             .Create())

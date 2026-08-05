@@ -48,7 +48,7 @@ public class WhenCreatingDraftShortCourse
         var expectedLearningKey = _fixture.Create<Guid>();
         var expectedEpisodeKey = _fixture.Create<Guid>();
         var isReinstated = _fixture.Create<bool>();
-        var commandResult = new CreateDraftShortCourseItemResult { LearningKey = expectedLearningKey, Episode = new ShortCourseEpisodeDto { EpisodeKey = expectedEpisodeKey }, IsReinstated = isReinstated };
+        var commandResult = new CreateDraftShortCourseItemResult { LearningKey = expectedLearningKey, Episode = new ShortCourseCommandEpisode { EpisodeKey = expectedEpisodeKey }, IsReinstated = isReinstated };
 
         _mockCommandDispatcher
             .Setup(x => x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>(
@@ -62,7 +62,7 @@ public class WhenCreatingDraftShortCourse
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
-        okResult.Value.Should().BeEquivalentTo(new CreateDraftShortCourseCommandResponse { Results = [new() { LearningKey = expectedLearningKey, Episode = new ShortCourseEpisodeDto { EpisodeKey = expectedEpisodeKey }, IsReinstated = isReinstated }] });
+        okResult.Value.Should().BeEquivalentTo(new CreateDraftShortCourseCommandResponse { Results = [new() { LearningKey = expectedLearningKey, Episode = new ShortCourseCommandEpisode { EpisodeKey = expectedEpisodeKey }, IsReinstated = isReinstated }] });
 
         _mockCommandDispatcher.Verify(x =>
             x.Send<CreateDraftShortCourseCommand, CreateDraftShortCourseCommandResponse>(

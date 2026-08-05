@@ -7,7 +7,7 @@ public class RemoveShortCourseResult
     public List<RemoveShortCourseItemResult> Results { get; set; } = [];
 }
 
-public class RemoveShortCourseItemResult : ShortCourseLearningDto
+public class RemoveShortCourseItemResult : ShortCourseCommandResult
 {
     public Guid RemovedEpisodeKey { get; set; }
 }
