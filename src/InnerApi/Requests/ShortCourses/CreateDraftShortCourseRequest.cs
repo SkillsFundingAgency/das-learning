@@ -54,11 +54,6 @@ public class OnProgramme
     public long EmployerId { get; set; }
 
     /// <summary>
-    /// Provider UKPRN
-    /// </summary>
-    public long Ukprn { get; set; }
-
-    /// <summary>
     /// Start date of the short course
     /// </summary>
     public DateTime StartDate { get; set; }

@@ -197,7 +197,6 @@ public class ChangeOfProviderStepDefinitions
         {
             new OnProgramme
             {
-                Ukprn = ukprn,
                 StartDate = new DateTime(2024, 1, 1),
                 ExpectedEndDate = new DateTime(2024, 12, 1),
                 WithdrawalDate = null,
