@@ -120,44 +120,6 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return _learningFactory.GetExisting(shortCourseLearning);
     }
 
-    public async Task<PagedResult<Models.Dtos.Learning>> GetApprovedByDates(long ukPrn, DateRange dates, int limit, int offset, CancellationToken cancellationToken)
-    {
-        var baseQuery = DbContext.ShortCourseLearnings
-            .Include(x => x.Episodes)
-            .Where(x => x.Episodes.Any(e => 
-                e.Ukprn == ukPrn &&
-                e.IsApproved &&
-                e.StartDate <= dates.End &&
-                e.ExpectedEndDate >= dates.Start &&
-                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start)))
-            .AsNoTracking();
-
-        var totalItems = await baseQuery.CountAsync(cancellationToken);
-        var totalPages = (int)Math.Ceiling((double)totalItems / limit);
-
-        var result = await baseQuery
-            .OrderBy(x => x.Key)
-            .Skip(offset)
-            .Take(limit)
-            .Join(
-                DbContext.LearnersDbSet.AsNoTracking(),
-                learning => learning.LearnerKey,
-                learner => learner.Key,
-                (learning, learner) => new Models.Dtos.Learning
-                {
-                    Uln = learner.Uln,
-                    Key = learning.Key
-                })
-            .ToListAsync(cancellationToken);
-
-        return new PagedResult<Models.Dtos.Learning>
-        {
-            Data = result,
-            TotalItems = totalItems,
-            TotalPages = totalPages
-        };
-    }
-
     public Task AddLearning(LearningDomainModel model)
     {
         if (model is not ShortCourseLearningDomainModel domainModel) throw new InvalidOperationException();
