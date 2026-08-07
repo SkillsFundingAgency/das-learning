@@ -59,8 +59,8 @@ Scenario: Update short course response includes learner and episode details
         | Uln    | FirstName | LastName   |
         | 123213 | Frank     | Frankinson |
     And the update short course response includes the following episode details
-        | Ukprn    | EmployerAccountId | CourseCode | CourseType  | IsApproved | Price | AgeAtStart |
-        | 10005001 | 99999999          | SC-ART1    | ShortCourse | true       | 1000  | 24         |
+        | Ukprn    | CourseCode | CourseType  | IsApproved | Price | AgeAtStart |
+        | 10005001 | SC-ART1    | ShortCourse | true       | 1000  | 24         |
 
 Scenario: Update short course includes ForceEarningsSync when set and excludes it when unset
     Given SLD has informed the system that a new short course has been created
