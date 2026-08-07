@@ -124,7 +124,6 @@ public class ProgressionPreApprovalStepDefinitions
 
     private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, List<Milestone>? milestones = null) => new()
     {
-        Ukprn = ProviderUkprn,
         CourseCode = courseCode,
         StartDate = new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
@@ -141,7 +140,6 @@ public class ProgressionPreApprovalStepDefinitions
         [
             new OnProgramme
             {
-                Ukprn = ProviderUkprn,
                 CourseCode = courseCode,
                 StartDate = new DateTime(2025, 1, 1),
                 ExpectedEndDate = new DateTime(2025, 6, 30),

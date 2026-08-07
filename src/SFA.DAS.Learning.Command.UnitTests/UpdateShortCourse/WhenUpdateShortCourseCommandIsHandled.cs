@@ -12,6 +12,7 @@ using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Infrastructure.Configuration;
+using SFA.DAS.Learning.Command.Shared;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System;
@@ -52,10 +53,22 @@ public class WhenUpdateShortCourseCommandIsHandled
                 DateOfBirth = DateTime.Today.AddYears(-20)
             }));
 
-        _mapper.Setup(x => x.Map<UpdateShortCourseResult>(
+        _mapper.Setup(x => x.Map<UpdateShortCourseItemResult>(
             It.IsAny<ShortCourseLearningDomainModel>(), It.IsAny<LearnerDomainModel>(), It.IsAny<long>())
             )
-            .Returns(() => _fixture.Build<UpdateShortCourseResult>().With(x => x.IsRemoved, false).With(x => x.IsIgnored, false).Create());
+            .Returns((ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn) =>
+                _fixture.Build<UpdateShortCourseItemResult>()
+                    .With(x => x.LearningKey, learning.Key)
+                    .With(x => x.LearnerKey, learner.Key)
+                    .With(x => x.Episode, learning.Episodes.Where(e => e.Ukprn == ukprn)
+                        .Select(e => _fixture.Build<ShortCourseCommandEpisode>()
+                            .With(ep => ep.EpisodeKey, e.Key)
+                            .With(ep => ep.CourseCode, learning.TrainingCode)
+                            .Create())
+                        .SingleOrDefault())
+                    .With(x => x.IsRemoved, false)
+                    .With(x => x.IsIgnored, false)
+                    .Create());
 
         _repository
             .Setup(r => r.GetAllByLearnerKey(It.IsAny<Guid>()))
@@ -76,7 +89,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Results.Single().UpdatedEpisodeKey.Should().Be(learning.Episodes.Single().Key);
+        results.Results.Single().Episode!.EpisodeKey.Should().Be(learning.Episodes.Single().Key);
     }
 
     [Test]
@@ -276,7 +289,7 @@ public class WhenUpdateShortCourseCommandIsHandled
         var factoryMock = new Mock<IShortCourseLearningFactory>();
         factoryMock
             .Setup(f => f.CreateNew(learnerKey, context.OnProgramme.CourseCode, context.OnProgramme.Price, context.OnProgramme.LearningType))
-            .Returns(CreateDomainModel());
+            .Returns(CreateEmptyDomainModel(context.OnProgramme.CourseCode));
 
         _commandHandler = new UpdateShortCourseCommandHandler(
             _logger.Object, _repository.Object, _learnerRepository.Object, _mapper.Object, _featureFlags, factoryMock.Object);
@@ -305,7 +318,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
+        results.Results.Should().Contain(r => r.IsRemoved && r.Episode!.CourseCode == "TEST02");
         omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
         _repository.Verify(r => r.Update(omittedLearning), Times.Once);
     }
@@ -329,7 +342,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         var results = await _commandHandler.Handle(command);
 
-        results.Results.Should().Contain(r => r.IsRemoved && r.CourseCode == "TEST02");
+        results.Results.Should().Contain(r => r.IsRemoved && r.Episode!.CourseCode == "TEST02");
         omittedLearning.Episodes.Single().IsRemoved.Should().BeTrue();
         _repository.Verify(r => r.Update(omittedLearning), Times.Once);
     }
@@ -442,8 +455,8 @@ public class WhenUpdateShortCourseCommandIsHandled
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
         _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
         _mapper
-            .Setup(m => m.Map<UpdateShortCourseResult>(learning, It.IsAny<LearnerDomainModel>(), 12345678))
-            .Returns(new UpdateShortCourseResult { LearningKey = learning.Key, IsRemoved = false });
+            .Setup(m => m.Map<UpdateShortCourseItemResult>(learning, It.IsAny<LearnerDomainModel>(), 12345678))
+            .Returns(new UpdateShortCourseItemResult { LearningKey = learning.Key, IsRemoved = false });
 
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
 
@@ -520,8 +533,8 @@ public class WhenUpdateShortCourseCommandIsHandled
             .Setup(r => r.GetAllByLearnerKey(learnerKey))
             .ReturnsAsync([includedLearning, priorAYLearning]);
         _mapper
-            .Setup(m => m.Map<UpdateShortCourseResult>(includedLearning, It.IsAny<LearnerDomainModel>(), 12345678))
-            .Returns(new UpdateShortCourseResult { LearningKey = includedLearning.Key, IsRemoved = false });
+            .Setup(m => m.Map<UpdateShortCourseItemResult>(includedLearning, It.IsAny<LearnerDomainModel>(), 12345678))
+            .Returns(new UpdateShortCourseItemResult { LearningKey = includedLearning.Key, IsRemoved = false });
 
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext()]);
 
@@ -568,6 +581,21 @@ public class WhenUpdateShortCourseCommandIsHandled
             LearningType = learningType,
             CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
+        };
+
+        return ShortCourseLearningDomainModel.Get(entity);
+    }
+
+    private static ShortCourseLearningDomainModel CreateEmptyDomainModel(string courseCode)
+    {
+        var entity = new ShortCourseLearning
+        {
+            Key = Guid.NewGuid(),
+            LearnerKey = Guid.NewGuid(),
+            TrainingCode = courseCode,
+            Price = 1000,
+            LearningType = LearningType.Apprenticeship,
+            Episodes = new List<ShortCourseEpisode>()
         };
 
         return ShortCourseLearningDomainModel.Get(entity);

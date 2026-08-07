@@ -116,7 +116,6 @@ public class ProgressionInSubsequentAYStepDefinitions
         DateTime? withdrawalDate = null,
         List<Milestone>? milestones = null) => new()
     {
-        Ukprn = ProviderUkprn,
         CourseCode = courseCode,
         StartDate = new DateTime(2024, 9, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
@@ -128,7 +127,6 @@ public class ProgressionInSubsequentAYStepDefinitions
 
     private static OnProgramme BuildSubsequentAYOnProgramme(string courseCode, long ukprn = ProviderUkprn) => new()
     {
-        Ukprn = ukprn,
         CourseCode = courseCode,
         StartDate = new DateTime(2025, 9, 1),
         ExpectedEndDate = new DateTime(2026, 6, 30),

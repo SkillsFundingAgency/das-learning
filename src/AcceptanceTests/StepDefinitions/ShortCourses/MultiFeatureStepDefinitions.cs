@@ -93,7 +93,6 @@ public class MultiFeatureStepDefinitions
 
     private static OnProgramme BuildOnProgramme(string courseCode, long ukprn, DateTime? withdrawalDate = null) => new()
     {
-        Ukprn = ukprn,
         CourseCode = courseCode,
         StartDate = new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),

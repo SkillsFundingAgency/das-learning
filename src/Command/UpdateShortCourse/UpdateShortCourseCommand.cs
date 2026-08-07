@@ -1,6 +1,3 @@
-using System.Text.Json.Serialization;
-using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.Models.Dtos;
 using SFA.DAS.Learning.Models.UpdateModels;
 
 namespace SFA.DAS.Learning.Command.UpdateShortCourse;
@@ -19,20 +16,4 @@ public class UpdateShortCourseCommand : ICommand
         AcademicYear = academicYear;
         Models = models;
     }
-}
-
-public class UpdateShortCourseResult : ShortCourseLearningDto
-{
-    public string CourseCode { get; set; } = "";
-    public ShortCourseUpdateChanges[] Changes { get; set; } = [];
-    public Guid UpdatedEpisodeKey { get; set; }
-    public bool IsNewLearning { get; set; }
-    public bool IsNewEpisode { get; set; }
-    public bool IsIgnored { get; set; }
-    public bool IsRemoved { get; set; }
-}
-
-public class UpdateShortCourseResponse
-{
-    public List<UpdateShortCourseResult> Results { get; set; } = [];
 }
