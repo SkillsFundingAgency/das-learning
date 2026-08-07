@@ -85,10 +85,10 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         modelBuilder.Entity<ApprenticeshipEpisode>()
             .HasKey(a => new { a.Key });
         modelBuilder.Entity<ApprenticeshipEpisode>()
-            .Property(p => p.FundingType)
+            .Property(p => p.EmployerType)
             .HasConversion(
                 v => v.ToString(),
-                v => (FundingType)Enum.Parse(typeof(FundingType), v));
+                v => (EmployerType)Enum.Parse(typeof(EmployerType), v));
         modelBuilder.Entity<ApprenticeshipEpisode>()
             .Property(p => p.FundingPlatform)
             .HasConversion(

@@ -5,7 +5,6 @@ using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 using System.Reflection;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
-using FundingType = SFA.DAS.Learning.Enums.FundingType;
 
 namespace SFA.DAS.Learning.TestHelpers;
 
@@ -49,7 +48,6 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<decimal>(),
             _fixture.Create<decimal>(),
             _fixture.Create<decimal>(),
-            _fixture.Create<FundingType>(),
             fundingPlatform,
             _fixture.Create<long?>(),
             _fixture.Create<string>(),
@@ -72,8 +70,7 @@ public static class ApprenticeshipDomainModelTestHelper
             e.Episode.AgeAtStartOfLearning == learning.AgeAtStartOfLearning(learnerDomainModel.ToModel()) &&
             e.Episode.Prices.Count == expectedNumberOfPrices &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.TotalPrice == episodePrice.TotalPrice &&
-            e.Episode.FundingType == episode.FundingType &&
-            e.Episode.EmployerType == (episode.FundingType == FundingType.NonLevy ? EmployerType.NonLevy : EmployerType.Levy) &&
+            e.Episode.EmployerType == episode.EmployerType &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.StartDate == episodePrice.StartDate &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.EndDate == episodePrice.EndDate &&
             e.Episode.FundingPlatform == episode.FundingPlatform;

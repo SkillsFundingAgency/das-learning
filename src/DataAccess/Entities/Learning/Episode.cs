@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
+﻿using SFA.DAS.Learning.Enums;
+
+namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
 [System.ComponentModel.DataAnnotations.Schema.NotMapped]
 public abstract class Episode
@@ -14,4 +16,5 @@ public abstract class Episode
     public long EmployerAccountId { get; set; }
 
     public string TrainingCode { get; set; } = null!;
+    public EmployerType EmployerType { get; set; }
 }

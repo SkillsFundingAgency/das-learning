@@ -76,7 +76,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TotalPrice,
             command.TrainingPrice,
             command.EndPointAssessmentPrice,
-            command.FundingType,
             command.FundingPlatform,
             command.TransferSenderId,
             command.LegalEntityName,

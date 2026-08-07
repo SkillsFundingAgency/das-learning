@@ -80,7 +80,6 @@ public class WhenAddingAnApprenticeship
             episodePrice.TotalPrice,
             episodePrice.TrainingPrice,
             episodePrice.EndPointAssessmentPrice,
-            episode.FundingType,
             episode.FundingPlatform,
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
