@@ -128,7 +128,7 @@ public class UpdateShortCourseCommandHandler(
 
         var episode = learning.AddEpisode(
             op.Ukprn,
-            op.EmployerId,
+            0,
             model.LearnerRef,
             false,
             op.StartDate,
@@ -162,7 +162,7 @@ public class UpdateShortCourseCommandHandler(
 
         var episode = learning.AddEpisode(
             op.Ukprn,
-            op.EmployerId,
+            0,
             model.LearnerRef,
             false,
             op.StartDate,

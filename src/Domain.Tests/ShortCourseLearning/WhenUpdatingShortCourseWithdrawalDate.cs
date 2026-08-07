@@ -118,7 +118,6 @@ public class WhenUpdatingShortCourseWithdrawalDate
             OnProgramme = new OnProgramme
             {
                 Ukprn = episode.Ukprn,
-                EmployerId = episode.EmployerAccountId,
                 CourseCode = learning.TrainingCode,
                 StartDate = episode.StartDate,
                 ExpectedEndDate = episode.ExpectedEndDate,

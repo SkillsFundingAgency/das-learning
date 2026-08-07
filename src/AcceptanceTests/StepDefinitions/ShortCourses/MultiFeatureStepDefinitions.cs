@@ -98,7 +98,6 @@ public class MultiFeatureStepDefinitions
         StartDate = new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
         WithdrawalDate = withdrawalDate,
-        EmployerId = 99999999,
         Price = 1000,
         Milestones = []
     };

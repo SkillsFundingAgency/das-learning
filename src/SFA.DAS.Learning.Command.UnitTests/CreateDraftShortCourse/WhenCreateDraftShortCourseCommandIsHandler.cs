@@ -361,7 +361,6 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         {
             CourseCode = model1.OnProgramme.CourseCode,
             Ukprn = model1.OnProgramme.Ukprn,
-            EmployerId = model1.OnProgramme.EmployerId,
             StartDate = model1.OnProgramme.StartDate.AddMonths(6),
             ExpectedEndDate = model1.OnProgramme.ExpectedEndDate.AddMonths(6),
             WithdrawalDate = null,

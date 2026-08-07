@@ -360,7 +360,6 @@ public class ProgressionStepDefinitions
         ExpectedEndDate = new DateTime(2025, 6, 30),
         CompletionDate = completionDate,
         WithdrawalDate = withdrawalDate,
-        EmployerId = 99999999,
         Price = 1000,
         Milestones = milestones ?? new List<Milestone>()
     };
