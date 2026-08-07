@@ -24,7 +24,7 @@ public static class IntegrationEventExtensions
         {
             Key = latestEpisode.Key,
             Ukprn = latestEpisode.Ukprn,
-            EmployerAccountId = latestEpisode.EmployerAccountId,
+            EmployerAccountId = latestEpisode.EmployerAccountId ?? 0,
             FundingType = latestEpisode.FundingType,
             FundingPlatform = latestEpisode.FundingPlatform,
             FundingEmployerAccountId = latestEpisode.FundingEmployerAccountId,

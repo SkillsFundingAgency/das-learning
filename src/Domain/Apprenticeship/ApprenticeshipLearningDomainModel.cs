@@ -87,7 +87,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public void AddEpisode(
         long approvalsApprenticeshipId,
         long ukprn,
-        long employerAccountId,
+        long? employerAccountId,
         DateTime startDate,
         DateTime endDate,
         decimal totalPrice,
@@ -99,7 +99,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion)
+        string? trainingCourseVersion,
+        bool isApproved = true)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
             approvalsApprenticeshipId,
@@ -111,7 +112,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             legalEntityName,
             accountLegalEntityId,
             trainingCode,
-            trainingCourseVersion);
+            trainingCourseVersion,
+            isApproved);
 
         episode.AddEpisodePrice(
             startDate,
@@ -309,7 +311,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
                 WithdrawalReasonCode = 0, //to be populated in a future story (FLP-1881)
                 Created = DateTime.UtcNow,
-                EmployerAccountId = LatestEpisode.EmployerAccountId
+                EmployerAccountId = LatestEpisode.EmployerAccountId ?? 0
             };
 
             AddEvent(@event);

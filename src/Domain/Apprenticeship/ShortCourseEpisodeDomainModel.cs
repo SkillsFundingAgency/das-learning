@@ -22,7 +22,7 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
     public DateTime ExpectedEndDate => _entity.ExpectedEndDate;
     public DateTime StartDate => _entity.StartDate;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
-    public bool IsApproved => _entity.IsApproved;
+    public override bool IsApproved => _entity.IsApproved;
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public bool HasActualEndDate => IsApproved && (WithdrawalDate.HasValue || CompletionDate.HasValue);

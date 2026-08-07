@@ -24,7 +24,7 @@ public class LearnerUpdatedEvent : IDomainEvent
             {
                 Key = e.Key,
                 Ukprn = e.Ukprn,
-                EmployerAccountId = e.EmployerAccountId,
+                EmployerAccountId = e.EmployerAccountId ?? 0,
                 FundingType = e.FundingType,
                 FundingPlatform = e.FundingPlatform,
                 FundingEmployerAccountId = e.FundingEmployerAccountId,

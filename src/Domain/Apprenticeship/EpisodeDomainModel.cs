@@ -10,6 +10,7 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship;
 public abstract class EpisodeDomainModel
 {
     public abstract Guid Key { get; }
+    public abstract bool IsApproved { get; }
 }
 
 public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
@@ -20,7 +21,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public override Guid Key => _entity.Key;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public long Ukprn => _entity.Ukprn;
-    public long EmployerAccountId => _entity.EmployerAccountId;
+    public long? EmployerAccountId => _entity.EmployerAccountId;
     public FundingType FundingType => _entity.FundingType;
     public FundingPlatform? FundingPlatform => _entity.FundingPlatform;
     public long? FundingEmployerAccountId => _entity.FundingEmployerAccountId;
@@ -28,6 +29,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public long? AccountLegalEntityId => _entity.AccountLegalEntityId;
     public string TrainingCode => _entity.TrainingCode;
     public string TrainingCourseVersion => _entity.TrainingCourseVersion;
+    public override bool IsApproved => _entity.IsApproved;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
@@ -68,14 +70,15 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     internal static ApprenticeshipEpisodeDomainModel New(
         long approvalsApprenticeshipId,
         long ukprn,
-        long employerAccountId,
+        long? employerAccountId,
         FundingType fundingType,
         FundingPlatform? fundingPlatform,
         long? fundingEmployerAccountId,
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion)
+        string? trainingCourseVersion,
+        bool isApproved = true)
     {
         return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
         {
@@ -90,8 +93,14 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             AccountLegalEntityId = accountLegalEntityId,
             TrainingCode = trainingCode,
             TrainingCourseVersion = trainingCourseVersion,
+            IsApproved = isApproved,
             PaymentsFrozen = false
         });
+    }
+
+    public void SetApprovalStatus(bool isApproved)
+    {
+        _entity.IsApproved = isApproved;
     }
 
     internal void AddEpisodePrice(
