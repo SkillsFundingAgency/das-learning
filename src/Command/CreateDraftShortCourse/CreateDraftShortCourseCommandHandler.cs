@@ -182,7 +182,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
     {
         var episode = learning.AddEpisode(
             model.OnProgramme.Ukprn,
-            model.OnProgramme.EmployerId,
+            0,
             model.LearnerRef,
             false,
             model.OnProgramme.StartDate,

@@ -327,7 +327,7 @@ public class ShortCourseStepDefinitions
                     ExpectedEndDate = new DateTime(2024, 12, 1),
                     StartDate = new DateTime(2024, 1, 1),
                     CompletionDate = null,
-                    EmployerId = 99999999,
+                    Ukprn = 10005001,
                     CourseCode = "SC-ART1",
                     Milestones = new List<Milestone>
                     {

@@ -618,7 +618,6 @@ public class WhenUpdateShortCourseCommandIsHandled
             OnProgramme = new Models.UpdateModels.OnProgramme
             {
                 CourseCode = "TEST01",
-                EmployerId = 1,
                 Ukprn = 12345678,
                 StartDate = startDate ?? DateTime.Today.AddMonths(-1),
                 ExpectedEndDate = expectedEndDate ?? DateTime.Today.AddMonths(6),

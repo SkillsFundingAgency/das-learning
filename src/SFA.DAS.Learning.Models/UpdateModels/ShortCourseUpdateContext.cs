@@ -15,7 +15,6 @@ public class ShortCourseUpdateContext
 public class OnProgramme
 {
     public string CourseCode { get; init; } = null!;
-    public long EmployerId { get; init; }
     public long Ukprn { get; init; }
     public DateTime StartDate { get; init; }
     public DateTime? WithdrawalDate { get; init; }

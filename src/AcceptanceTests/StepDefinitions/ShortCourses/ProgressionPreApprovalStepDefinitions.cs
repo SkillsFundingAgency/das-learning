@@ -128,7 +128,6 @@ public class ProgressionPreApprovalStepDefinitions
         StartDate = new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
         CompletionDate = completionDate,
-        EmployerId = 99999999,
         Price = 1000,
         Milestones = milestones ?? new List<Milestone>()
     };
@@ -144,7 +143,6 @@ public class ProgressionPreApprovalStepDefinitions
                 CourseCode = courseCode,
                 StartDate = new DateTime(2025, 1, 1),
                 ExpectedEndDate = new DateTime(2025, 6, 30),
-                EmployerId = 99999999,
                 Price = 1000,
                 Milestones = []
             }

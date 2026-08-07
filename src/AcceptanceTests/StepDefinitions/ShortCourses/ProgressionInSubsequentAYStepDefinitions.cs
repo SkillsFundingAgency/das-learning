@@ -121,7 +121,6 @@ public class ProgressionInSubsequentAYStepDefinitions
         ExpectedEndDate = new DateTime(2025, 6, 30),
         CompletionDate = completionDate,
         WithdrawalDate = withdrawalDate,
-        EmployerId = 99999999,
         Price = 1000,
         Milestones = milestones ?? []
     };
@@ -131,7 +130,6 @@ public class ProgressionInSubsequentAYStepDefinitions
         CourseCode = courseCode,
         StartDate = new DateTime(2025, 9, 1),
         ExpectedEndDate = new DateTime(2026, 6, 30),
-        EmployerId = 99999999,
         Price = 1000,
         Milestones = []
     };

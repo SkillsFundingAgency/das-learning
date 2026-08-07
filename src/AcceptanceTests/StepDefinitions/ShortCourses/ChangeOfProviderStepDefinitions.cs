@@ -202,7 +202,6 @@ public class ChangeOfProviderStepDefinitions
                 WithdrawalDate = null,
                 CompletionDate = null,
                 CourseCode = "SC-ART1",
-                EmployerId = 99999999,
                 Price = 1000,
                 Milestones = new List<Milestone>()
             }
