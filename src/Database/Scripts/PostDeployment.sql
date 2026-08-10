@@ -30,3 +30,12 @@ BEGIN
 	AND [le].[RowNumber] = 1
 	WHERE [scl].[Price] = 0
 END
+
+-- FLP-1938 Backfill EmployerType from FundingType for existing apprenticeship episode rows.
+IF COL_LENGTH('[dbo].[ApprenticeshipEpisode]', 'FundingType') IS NOT NULL
+   AND COL_LENGTH('[dbo].[ApprenticeshipEpisode]', 'EmployerType') IS NOT NULL
+BEGIN
+	UPDATE [dbo].[ApprenticeshipEpisode]
+	SET [EmployerType] = [FundingType]
+	WHERE [EmployerType] IS NULL
+END
