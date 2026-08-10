@@ -22,7 +22,7 @@ SET NOCOUNT ON;
 -- Sanity check: number of non-levy apprenticeship episodes to update in Earnings.
 SELECT COUNT(*) AS NonLevyEpisodeCount
 FROM dbo.ApprenticeshipEpisode
-WHERE FundingType = 1; -- 1 = NonLevy
+WHERE EmployerType = 'NonLevy'
 
 -- Generate the Earnings UPDATE statement, keyed on EpisodeKey.
 SELECT
@@ -33,5 +33,5 @@ SELECT
         WITHIN GROUP (ORDER BY [Key]) +
     CHAR(13) + CHAR(10) + ');' AS GeneratedUpdateScript
 FROM dbo.ApprenticeshipEpisode
-WHERE FundingType = 1 -- 1 = NonLevy
+WHERE EmployerType = 'NonLevy'
 ;
