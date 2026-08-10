@@ -7,7 +7,7 @@
     [Ukprn] BIGINT NOT NULL,
     [EmployerAccountId] BIGINT NOT NULL,
     [FundingType] NVARCHAR(50) NULL,
-    [EmployerType] NVARCHAR(50) NOT NULL,
+    [EmployerType] NVARCHAR(50) NULL,
     [FundingPlatform] INT NULL,
     [FundingEmployerAccountId] BIGINT NULL,
     [LegalEntityName] NVARCHAR(255) NOT NULL,
