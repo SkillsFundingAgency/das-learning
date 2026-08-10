@@ -19,19 +19,19 @@
 
 SET NOCOUNT ON;
 
--- Sanity check: number of non-levy apprenticeship episodes to update in Earnings.
-SELECT COUNT(*) AS NonLevyEpisodeCount
+-- Sanity check: number of levy apprenticeship episodes to update in Earnings.
+SELECT COUNT(*) AS LevyEpisodeCount
 FROM dbo.ApprenticeshipEpisode
-WHERE EmployerType = 'NonLevy'
+WHERE EmployerType = 'Levy'
 
 -- Generate the Earnings UPDATE statement, keyed on EpisodeKey.
 SELECT
     'UPDATE Domain.ApprenticeshipEpisode' + CHAR(13) + CHAR(10) +
-    'SET EmployerType = 0' + CHAR(13) + CHAR(10) +
+    'SET EmployerType = 1' + CHAR(13) + CHAR(10) +
     'WHERE [Key] IN (' + CHAR(13) + CHAR(10) +
     STRING_AGG(CAST(QUOTENAME(CAST([Key] AS NVARCHAR(36)), '''') AS NVARCHAR(MAX)), ',' + CHAR(13) + CHAR(10))
         WITHIN GROUP (ORDER BY [Key]) +
     CHAR(13) + CHAR(10) + ');' AS GeneratedUpdateScript
 FROM dbo.ApprenticeshipEpisode
-WHERE EmployerType = 'NonLevy'
+WHERE EmployerType = 'Levy'
 ;
