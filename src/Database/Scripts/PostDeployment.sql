@@ -31,11 +31,11 @@ BEGIN
 	WHERE [scl].[Price] = 0
 END
 
--- FLP-1938 Backfill EmployerType from FundingType for existing apprenticeship episode rows.
+-- FLP-1938 Backfill EmployerType from FundingType for existing apprenticeship episode rows. (todo delete this and drop legacy column [FundingType] from ApprenticeshipEpisode once all environments have migrated data to EmployerType)
 IF COL_LENGTH('[dbo].[ApprenticeshipEpisode]', 'FundingType') IS NOT NULL
    AND COL_LENGTH('[dbo].[ApprenticeshipEpisode]', 'EmployerType') IS NOT NULL
 BEGIN
 	UPDATE [dbo].[ApprenticeshipEpisode]
 	SET [EmployerType] = [FundingType]
-	WHERE [EmployerType] IS NULL
+	WHERE [EmployerType] IS NULL AND [FundingType] IS NOT NULL
 END

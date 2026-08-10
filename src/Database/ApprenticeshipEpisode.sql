@@ -6,7 +6,7 @@
     [IsDeleted] BIT NOT NULL DEFAULT(0),
     [Ukprn] BIGINT NOT NULL,
     [EmployerAccountId] BIGINT NOT NULL,
-    [FundingType] NVARCHAR(50) NOT NULL,
+    [FundingType] NVARCHAR(50) NULL,
     [EmployerType] NVARCHAR(50) NOT NULL,
     [FundingPlatform] INT NULL,
     [FundingEmployerAccountId] BIGINT NULL,
