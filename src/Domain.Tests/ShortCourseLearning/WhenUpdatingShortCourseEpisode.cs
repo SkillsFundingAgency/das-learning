@@ -32,7 +32,6 @@ public class WhenUpdatingShortCourseEpisode
             OnProgramme = new OnProgramme
             {
                 Ukprn = 99999999,
-                EmployerId = 456,
                 CourseCode = "NEW",
                 StartDate = new DateTime(2025, 1, 1),
                 ExpectedEndDate = new DateTime(2025, 12, 1),
@@ -47,7 +46,7 @@ public class WhenUpdatingShortCourseEpisode
         episode.Update(updateContext);
 
         episode.Ukprn.Should().Be(99999999);
-        episode.EmployerAccountId.Should().Be(456);
+        episode.EmployerAccountId.Should().Be(123);
         episode.StartDate.Should().Be(new DateTime(2025, 1, 1));
         episode.ExpectedEndDate.Should().Be(new DateTime(2025, 12, 1));
         episode.WithdrawalDate.Should().Be(new DateTime(2025, 6, 1));
@@ -73,7 +72,6 @@ public class WhenUpdatingShortCourseEpisode
             OnProgramme = new OnProgramme
             {
                 Ukprn = 99999999,
-                EmployerId = 456,
                 CourseCode = "NEW",
                 StartDate = new DateTime(2025, 1, 1),
                 ExpectedEndDate = new DateTime(2025, 12, 1),
@@ -238,7 +236,6 @@ private static ShortCourseEpisodeDomainModel CreateEpisode(LearningType learning
             OnProgramme = new OnProgramme
             {
                 Ukprn = 1,
-                EmployerId = 1,
                 CourseCode = "CODE",
                 StartDate = DateTime.Today,
                 ExpectedEndDate = DateTime.Today.AddMonths(3),

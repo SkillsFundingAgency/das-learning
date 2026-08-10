@@ -19,7 +19,7 @@ public class ShortCourseStepDefinitions
     private readonly ScenarioContext _scenarioContext;
     private readonly TestContext _testContext;
 
-    private const string UpdateShortCourseResultKey = "UpdateShortCourseResult";
+    private const string UpdateShortCourseResultKey = "UpdateShortCourseItemResult";
     private const string ExpectedShortCourseWithdrawalDateKey = "ExpectedShortCourseWithdrawalDate";
     private const string ExpectedShortCourseWithdrawalReasonCodeKey = "ExpectedShortCourseWithdrawalReasonCode";
 
@@ -89,7 +89,6 @@ public class ShortCourseStepDefinitions
         if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
         {
             request.Ukprn = parsedUkprn;
-            onProgramme.Ukprn = parsedUkprn;
         }
 
         if (row.TryGetValue("FirstName", out var firstName))
@@ -165,7 +164,7 @@ public class ShortCourseStepDefinitions
     [When("SLD requests the list of short courses for academic year (.*)")]
     public async Task WhenSLDRequestsTheListOfShortCoursesForAcademicYear(int academicYear)
     {
-        var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
+        var ukprn = GetDefaultShortCourse().Ukprn;
         var response = await _testContext.TestInnerApi.Get<GetShortCoursesByAcademicYearResponse>($"/{ukprn}/academicyears/{academicYear}/shortCourses");
         _scenarioContext.Set<GetShortCoursesByAcademicYearResponse>(response);
     }
@@ -256,7 +255,7 @@ public class ShortCourseStepDefinitions
     [When("SLD requests short courses for earnings for collection year (.*)")]
     public async Task WhenSLDRequestsShortCoursesForEarningsForCollectionYear(int collectionYear)
     {
-        var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
+        var ukprn = GetDefaultShortCourse().Ukprn;
         var response = await _testContext.TestInnerApi.Get<GetShortCoursesForEarningsResponse>($"/{ukprn}/{collectionYear}/shortCourses");
         _scenarioContext.Set<GetShortCoursesForEarningsResponse>(response);
     }
@@ -329,7 +328,6 @@ public class ShortCourseStepDefinitions
                     StartDate = new DateTime(2024, 1, 1),
                     CompletionDate = null,
                     Ukprn = 10005001,
-                    EmployerId = 99999999,
                     CourseCode = "SC-ART1",
                     Milestones = new List<Milestone>
                     {
@@ -429,7 +427,7 @@ public class ShortCourseStepDefinitions
     public async Task WhenSLDCallsTheRemoveShortCourseEndpoint()
     {
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
-        var ukprn = GetDefaultShortCourse().OnProgramme.Single().Ukprn;
+        var ukprn = GetDefaultShortCourse().Ukprn;
         await _testContext.TestInnerApi.Delete($"/{ukprn}/shortCourses/{learnerKey}?academicYear=2425");
     }
 
@@ -476,7 +474,7 @@ public class ShortCourseStepDefinitions
     [Then(@"the create short course response indicates it was reinstated")]
     public void ThenTheCreateShortCourseResponseIndicatesItWasReinstated()
     {
-        var response = _scenarioContext.Get<CreateDraftShortCourseCommandResult>();
+        var response = _scenarioContext.Get<CreateDraftShortCourseItemResult>();
         response.IsReinstated.Should().BeTrue();
     }
 
@@ -500,7 +498,7 @@ public class ShortCourseStepDefinitions
     public void ThenTheUpdateShortCourseResponseHasACompletionDateOf(DateTime completionDate)
     {
         var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
-        result.Episodes.Single().CompletionDate.Should().Be(completionDate);
+        result.Episode!.CompletionDate.Should().Be(completionDate);
     }
 
     [Then(@"the update short course response includes the following learner details")]
@@ -527,8 +525,8 @@ public class ShortCourseStepDefinitions
         var result = (UpdateShortCourseTestResult)_scenarioContext[UpdateShortCourseResultKey];
         var row = table.Rows[0];
 
-        result.Episodes.Should().NotBeEmpty();
-        var episode = result.Episodes.First();
+        result.Episode.Should().NotBeNull();
+        var episode = result.Episode!;
 
         if (row.TryGetValue("Ukprn", out var ukprn) && long.TryParse(ukprn, out var parsedUkprn))
             episode.Ukprn.Should().Be(parsedUkprn);
@@ -557,7 +555,7 @@ public class ShortCourseStepDefinitions
         var learnerKey = new Guid(_scenarioContext[ShortCourseTestKeys.ShortCourseLearner].ToString()!);
         var updateRequest = new UpdateShortCourseRequest
         {
-            Ukprn = request.OnProgramme.Single().Ukprn,
+            Ukprn = request.Ukprn,
             AcademicYear = 2425,
             LearnerUpdateDetails = request.LearnerUpdateDetails,
             OnProgramme = request.OnProgramme
@@ -576,7 +574,7 @@ public class ShortCourseStepDefinitions
         public Guid LearningKey { get; set; }
         public string[] Changes { get; set; } = [];
         public UpdateShortCourseTestResultLearner Learner { get; set; } = null!;
-        public UpdateShortCourseTestResultEpisode[] Episodes { get; set; } = [];
+        public UpdateShortCourseTestResultEpisode? Episode { get; set; }
     }
 
     private class UpdateShortCourseTestResultLearner

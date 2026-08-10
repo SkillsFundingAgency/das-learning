@@ -5,7 +5,6 @@ using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
-using SFA.DAS.Learning.Models.Dtos;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;

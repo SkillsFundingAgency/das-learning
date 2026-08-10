@@ -1,18 +1,18 @@
 using SFA.DAS.Learning.Enums;
 using System.Text.Json.Serialization;
 
-namespace SFA.DAS.Learning.Models.Dtos;
+namespace SFA.DAS.Learning.Command.Shared;
 
 #pragma warning disable CS8618
-public abstract class ShortCourseLearningDto
+public abstract class ShortCourseCommandResult
 {
     public Guid LearningKey { get; set; }
     public Guid LearnerKey { get; set; }
-    public ShortCourseLearnerDto Learner { get; set; }
-    public ShortCourseEpisodeDto[] Episodes { get; set; } = [];
+    public ShortCourseLearner Learner { get; set; }
+    public ShortCourseCommandEpisode? Episode { get; set; }
 }
 
-public class ShortCourseLearnerDto
+public class ShortCourseLearner
 {
     public string Uln { get; set; }
     public string FirstName { get; set; }
@@ -20,7 +20,7 @@ public class ShortCourseLearnerDto
     public DateTime DateOfBirth { get; set; }
 }
 
-public class ShortCourseEpisodeDto
+public class ShortCourseCommandEpisode
 {
     public Guid EpisodeKey { get; set; }
     public long Ukprn { get; set; }

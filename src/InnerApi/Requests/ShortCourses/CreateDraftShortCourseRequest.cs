@@ -49,11 +49,6 @@ public class OnProgramme
     public string CourseCode { get; set; } = null!;
 
     /// <summary>
-    /// Employer identifier
-    /// </summary>
-    public long EmployerId { get; set; }
-
-    /// <summary>
     /// Provider UKPRN
     /// </summary>
     public long Ukprn { get; set; }
@@ -129,7 +124,6 @@ public static class UpdateShortCourseRequestExtensions
             OnProgramme = new Learning.Models.UpdateModels.OnProgramme
             {
                 CourseCode = op.CourseCode,
-                EmployerId = op.EmployerId,
                 Ukprn = request.Ukprn,
                 StartDate = op.StartDate,
                 WithdrawalDate = op.WithdrawalDate,
@@ -176,7 +170,6 @@ public static class CreateDraftShortCourseRequestExtensions
             OnProgramme = new Learning.Models.UpdateModels.OnProgramme
             {
                 CourseCode = op.CourseCode,
-                EmployerId = op.EmployerId,
                 Ukprn = request.Ukprn,
                 StartDate = op.StartDate,
                 WithdrawalDate = op.WithdrawalDate,

@@ -1,4 +1,4 @@
-using SFA.DAS.Learning.Models.Dtos;
+using SFA.DAS.Learning.Command.Shared;
 
 namespace SFA.DAS.Learning.Command.RemoveShortCourse;
 
@@ -7,7 +7,7 @@ public class RemoveShortCourseResult
     public List<RemoveShortCourseItemResult> Results { get; set; } = [];
 }
 
-public class RemoveShortCourseItemResult : ShortCourseLearningDto
+public class RemoveShortCourseItemResult : ShortCourseCommandResult
 {
     public Guid RemovedEpisodeKey { get; set; }
 }
