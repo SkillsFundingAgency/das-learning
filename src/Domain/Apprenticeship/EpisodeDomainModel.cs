@@ -74,7 +74,8 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion)
+        string? trainingCourseVersion,
+        EmployerType employerType)
     {
         return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
         {
@@ -88,7 +89,8 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             AccountLegalEntityId = accountLegalEntityId,
             TrainingCode = trainingCode,
             TrainingCourseVersion = trainingCourseVersion,
-            PaymentsFrozen = false
+            PaymentsFrozen = false,
+            EmployerType = employerType
         });
     }
 

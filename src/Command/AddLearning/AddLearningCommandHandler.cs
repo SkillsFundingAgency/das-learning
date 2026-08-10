@@ -81,7 +81,8 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.LegalEntityName,
             command.AccountLegalEntityId,
             command.TrainingCode,
-            command.TrainingCourseVersion);
+            command.TrainingCourseVersion,
+            command.EmployerType);
 
         learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
 

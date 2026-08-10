@@ -98,7 +98,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion)
+        string? trainingCourseVersion,
+        EmployerType employerType)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
             approvalsApprenticeshipId,
@@ -109,7 +110,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             legalEntityName,
             accountLegalEntityId,
             trainingCode,
-            trainingCourseVersion);
+            trainingCourseVersion,
+            employerType);
 
         episode.AddEpisodePrice(
             startDate,

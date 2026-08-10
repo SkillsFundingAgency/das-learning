@@ -53,7 +53,8 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<string>(),
             _fixture.Create<long>(),
             _fixture.Create<int>().ToString(),
-            _fixture.Create<string?>());
+            _fixture.Create<string?>(),
+            _fixture.Create<EmployerType>());
     }
 
     public static bool DoEpisodeDetailsMatchDomainModel(LearningEvent e, ApprenticeshipLearningDomainModel learning, LearnerDomainModel learnerDomainModel)
@@ -73,6 +74,7 @@ public static class ApprenticeshipDomainModelTestHelper
             e.Episode.EmployerType == episode.EmployerType &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.StartDate == episodePrice.StartDate &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.EndDate == episodePrice.EndDate &&
-            e.Episode.FundingPlatform == episode.FundingPlatform;
+            e.Episode.FundingPlatform == episode.FundingPlatform &&
+            e.Episode.EmployerType == episode.EmployerType;
     }
 }

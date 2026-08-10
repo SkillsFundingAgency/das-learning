@@ -49,7 +49,8 @@ public class WhenAnEpisodeIsAdded
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
             episode.TrainingCode,
-            episode.TrainingCourseVersion);
+            episode.TrainingCourseVersion,
+            episode.EmployerType);
 
         //Assert
         apprenticeship.LatestEpisode.Should().BeEquivalentTo(episode, x => x

@@ -8,7 +8,6 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -85,7 +84,8 @@ public class WhenAddingAnApprenticeship
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
             episode.TrainingCode,
-            episode.TrainingCourseVersion);
+            episode.TrainingCourseVersion,
+            episode.EmployerType);
 
         // Act
         await _sut.Add(apprenticeship);
