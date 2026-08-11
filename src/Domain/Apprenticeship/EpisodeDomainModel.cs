@@ -21,7 +21,6 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public long Ukprn => _entity.Ukprn;
     public long EmployerAccountId => _entity.EmployerAccountId;
-    public FundingType FundingType => _entity.FundingType;
     public FundingPlatform? FundingPlatform => _entity.FundingPlatform;
     public long? FundingEmployerAccountId => _entity.FundingEmployerAccountId;
     public string LegalEntityName => _entity.LegalEntityName;
@@ -37,6 +36,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
     public List<EpisodePriceDomainModel> ActiveEpisodePrices => _episodePrices.ToList();
     public bool IsWithdrawnBackToStart => _entity.WithdrawalDate == FirstPrice.StartDate;
+    public EmployerType EmployerType => _entity.EmployerType;
     public EpisodePriceDomainModel LatestPrice
     {
         get
@@ -69,13 +69,13 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         long approvalsApprenticeshipId,
         long ukprn,
         long employerAccountId,
-        FundingType fundingType,
         FundingPlatform? fundingPlatform,
         long? fundingEmployerAccountId,
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion)
+        string? trainingCourseVersion,
+        EmployerType employerType)
     {
         return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
         {
@@ -83,14 +83,14 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             ApprovalsApprenticeshipId = approvalsApprenticeshipId,
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
-            FundingType = fundingType,
             FundingPlatform = fundingPlatform,
             FundingEmployerAccountId = fundingEmployerAccountId,
             LegalEntityName = legalEntityName,
             AccountLegalEntityId = accountLegalEntityId,
             TrainingCode = trainingCode,
             TrainingCourseVersion = trainingCourseVersion,
-            PaymentsFrozen = false
+            PaymentsFrozen = false,
+            EmployerType = employerType
         });
     }
 

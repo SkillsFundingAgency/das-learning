@@ -21,7 +21,6 @@ public class ShortCourseEpisode : Episode
     public long ApprovalsApprenticeshipId { get; set; }
     public bool IsApproved { get; set; }
     public string LearnerRef { get; set; }
-    public EmployerType EmployerType { get; set; }
     public long? TransferSenderId { get; set; }
     public bool IsRemoved { get; set; }
     public DateTime? CompletionDate { get; set; }

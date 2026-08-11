@@ -1,10 +1,10 @@
 using AutoFixture;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Extensions;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 using System.Reflection;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
-using FundingType = SFA.DAS.Learning.Enums.FundingType;
 
 namespace SFA.DAS.Learning.TestHelpers;
 
@@ -48,13 +48,13 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<decimal>(),
             _fixture.Create<decimal>(),
             _fixture.Create<decimal>(),
-            _fixture.Create<FundingType>(),
             fundingPlatform,
             _fixture.Create<long?>(),
             _fixture.Create<string>(),
             _fixture.Create<long>(),
             _fixture.Create<int>().ToString(),
-            _fixture.Create<string?>());
+            _fixture.Create<string?>(),
+            _fixture.Create<EmployerType>());
     }
 
     public static bool DoEpisodeDetailsMatchDomainModel(LearningEvent e, ApprenticeshipLearningDomainModel learning, LearnerDomainModel learnerDomainModel)
@@ -71,9 +71,10 @@ public static class ApprenticeshipDomainModelTestHelper
             e.Episode.AgeAtStartOfLearning == learning.AgeAtStartOfLearning(learnerDomainModel.ToModel()) &&
             e.Episode.Prices.Count == expectedNumberOfPrices &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.TotalPrice == episodePrice.TotalPrice &&
-            e.Episode.FundingType == episode.FundingType &&
+            e.Episode.EmployerType == episode.EmployerType &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.StartDate == episodePrice.StartDate &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.EndDate == episodePrice.EndDate &&
-            e.Episode.FundingPlatform == episode.FundingPlatform;
+            e.Episode.FundingPlatform == episode.FundingPlatform &&
+            e.Episode.EmployerType == episode.EmployerType;
     }
 }

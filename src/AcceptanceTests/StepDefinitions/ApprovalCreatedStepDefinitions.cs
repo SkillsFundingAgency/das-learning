@@ -4,7 +4,6 @@ using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Types;
-using System.Data.Common;
 using SFA.DAS.CommitmentsV2.Messages.Events;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -196,7 +195,7 @@ public class ApprovalCreatedStepDefinitions
         publishedEvent.ApprovalsApprenticeshipId.Should().Be(LatestEpisode.ApprovalsApprenticeshipId);
         publishedEvent.Episode.EmployerAccountId.Should().Be(LatestEpisode.EmployerAccountId);
         publishedEvent.Episode.FundingEmployerAccountId.Should().Be(LatestEpisode.FundingEmployerAccountId);
-        publishedEvent.Episode.FundingType.ToString().Should().Be(LatestEpisode.FundingType.ToString());
+        publishedEvent.Episode.EmployerType.Should().Be(LatestEpisode.EmployerType);
         publishedEvent.Episode.LegalEntityName.Should().Be(LatestEpisode.LegalEntityName);
         publishedEvent.Episode.Ukprn.Should().Be(LatestEpisode.Ukprn);
         publishedEvent.FirstName.Should().Be(learner.FirstName);

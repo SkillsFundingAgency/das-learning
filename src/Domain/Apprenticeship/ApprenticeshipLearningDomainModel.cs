@@ -93,25 +93,25 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         decimal totalPrice,
         decimal? trainingPrice,
         decimal? endpointAssessmentPrice,
-        FundingType fundingType,
         FundingPlatform? fundingPlatform,
         long? transferSenderId,
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
-        string? trainingCourseVersion)
+        string? trainingCourseVersion,
+        EmployerType employerType)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
             approvalsApprenticeshipId,
             ukprn,
             employerAccountId,
-            fundingType,
             fundingPlatform,
             transferSenderId,
             legalEntityName,
             accountLegalEntityId,
             trainingCode,
-            trainingCourseVersion);
+            trainingCourseVersion,
+            employerType);
 
         episode.AddEpisodePrice(
             startDate,

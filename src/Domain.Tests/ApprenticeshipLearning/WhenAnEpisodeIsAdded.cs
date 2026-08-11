@@ -44,13 +44,13 @@ public class WhenAnEpisodeIsAdded
             episodePrice.TotalPrice,
             episodePrice.TrainingPrice,
             episodePrice.EndPointAssessmentPrice,
-            episode.FundingType,
             episode.FundingPlatform,
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
             episode.TrainingCode,
-            episode.TrainingCourseVersion);
+            episode.TrainingCourseVersion,
+            episode.EmployerType);
 
         //Assert
         apprenticeship.LatestEpisode.Should().BeEquivalentTo(episode, x => x
