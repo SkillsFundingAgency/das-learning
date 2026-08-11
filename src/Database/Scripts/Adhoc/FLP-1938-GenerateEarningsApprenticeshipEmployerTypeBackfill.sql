@@ -11,8 +11,8 @@
  *   which matches Learning's NonLevy rows, so nothing needs to change for them.
  *
  * Output:
- *   A single UPDATE statement as text. Copy it from the output column and run it against the
- *   Earnings DB.
+ *   One UPDATE statement per Levy episode as text. Copy all rows from the output column and run
+ *   them against the Earnings DB.
  *
  * Review before running generated script against Earnings: LevyEpisodeCount indicates the expected number of updated rows in Earnings.
   */
@@ -24,14 +24,12 @@ SELECT COUNT(*) AS LevyEpisodeCount
 FROM dbo.ApprenticeshipEpisode
 WHERE EmployerType = 'Levy'
 
--- Generate the Earnings UPDATE statement, keyed on EpisodeKey.
+-- Generate one Earnings UPDATE statement per EpisodeKey to avoid cell-size truncation in output.
 SELECT
-    'UPDATE Domain.ApprenticeshipEpisode' + CHAR(13) + CHAR(10) +
-    'SET EmployerType = 1' + CHAR(13) + CHAR(10) +
-    'WHERE [Key] IN (' + CHAR(13) + CHAR(10) +
-    STRING_AGG(CAST(QUOTENAME(CAST([Key] AS NVARCHAR(36)), '''') AS NVARCHAR(MAX)), ',' + CHAR(13) + CHAR(10))
-        WITHIN GROUP (ORDER BY [Key]) +
-    CHAR(13) + CHAR(10) + ');' AS GeneratedUpdateScript
+    'UPDATE Domain.ApprenticeshipEpisode SET EmployerType = 1 WHERE [Key] = ' +
+    QUOTENAME(CAST([Key] AS NVARCHAR(36)), '''') +
+    ';' AS GeneratedUpdateScript
 FROM dbo.ApprenticeshipEpisode
 WHERE EmployerType = 'Levy'
+ORDER BY [Key]
 ;
