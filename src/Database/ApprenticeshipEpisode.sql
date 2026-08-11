@@ -16,7 +16,8 @@
     [PaymentsFrozen] BIT NOT NULL DEFAULT (0),
     [IsRemoved] BIT NOT NULL DEFAULT(0),
     [WithdrawalDate] DATETIME NULL,
-    [PauseDate] DATETIME NULL
+    [PauseDate] DATETIME NULL,
+    [IsApproved] BIT NOT NULL DEFAULT 0
 )
 GO
 ALTER TABLE dbo.ApprenticeshipEpisode
