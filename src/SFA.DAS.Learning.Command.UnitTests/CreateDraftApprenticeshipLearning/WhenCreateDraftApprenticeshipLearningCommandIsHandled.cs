@@ -80,7 +80,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         addedLearning.Should().NotBeNull();
         addedLearning!.LatestEpisode.IsApproved.Should().BeFalse();
         addedLearning.LatestEpisode.EmployerAccountId.Should().BeNull();
-        addedLearning.LatestEpisode.FundingType.Should().Be(FundingType.Levy);
+        addedLearning.LatestEpisode.EmployerType.Should().Be(EmployerType.Levy);
     }
 
     [Test]
@@ -345,7 +345,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             ApprovalsApprenticeshipId = _fixture.Create<long>(),
             Ukprn = Ukprn,
             EmployerAccountId = 100,
-            FundingType = FundingType.Levy,
+            EmployerType = EmployerType.Levy,
             FundingPlatform = FundingPlatform.SLD,
             LegalEntityName = "Test",
             TrainingCode = "ST0001",
