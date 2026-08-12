@@ -86,7 +86,8 @@ public class WhenAddingAnApprenticeship
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
             episode.TrainingCode,
-            episode.TrainingCourseVersion);
+            episode.TrainingCourseVersion,
+            episode.IsApproved);
 
         // Act
         await _sut.Add(apprenticeship);
