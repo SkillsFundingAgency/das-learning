@@ -122,7 +122,6 @@ public class ShortCourseEpisodeDomainModel : EpisodeDomainModel
         if (!_entity.IsApproved)
         {
             _entity.Ukprn = updateContext.OnProgramme.Ukprn;
-            _entity.EmployerAccountId = updateContext.OnProgramme.EmployerId;
             _entity.StartDate = updateContext.OnProgramme.StartDate;
             _entity.ExpectedEndDate = updateContext.OnProgramme.ExpectedEndDate;
         }

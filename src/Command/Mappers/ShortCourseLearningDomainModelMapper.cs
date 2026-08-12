@@ -1,30 +1,30 @@
+using SFA.DAS.Learning.Command.Shared;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Models.Dtos;
 
 namespace SFA.DAS.Learning.Command.Mappers;
 
 public interface IShortCourseLearningDomainModelMapper
 {
-    T Map<T>(ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn) where T : ShortCourseLearningDto, new();
+    T Map<T>(ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn) where T : ShortCourseCommandResult, new();
 }
 
 public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainModelMapper
 {
     public T Map<T>(ShortCourseLearningDomainModel learning, LearnerDomainModel learner, long ukprn)
-        where T : ShortCourseLearningDto, new()
+        where T : ShortCourseCommandResult, new()
     {
         return new T
         {
             LearningKey = learning.Key,
             LearnerKey = learning.LearnerKey,
-            Learner = new ShortCourseLearnerDto
+            Learner = new ShortCourseLearner
             {
                 Uln = learner.Uln,
                 FirstName = learner.FirstName,
                 LastName = learner.LastName,
                 DateOfBirth = learner.DateOfBirth
             },
-            Episodes = learning.Episodes.Where(e => e.Ukprn == ukprn).Select(e => new ShortCourseEpisodeDto
+            Episode = learning.Episodes.Where(e => e.Ukprn == ukprn).Select(e => new ShortCourseCommandEpisode
             {
                 EpisodeKey = e.Key,
                 Ukprn = e.Ukprn,
@@ -44,7 +44,7 @@ public class ShortCourseLearningDomainModelMapper : IShortCourseLearningDomainMo
                 IsRemoved = e.IsRemoved,
                 TransferSenderId = e.TransferSenderId,
                 CompletionDate = e.CompletionDate
-            }).ToArray()
+            }).SingleOrDefault()
         };
     }
 }

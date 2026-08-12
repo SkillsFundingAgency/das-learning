@@ -17,7 +17,6 @@ namespace SFA.DAS.Learning.Command.AddLearning
         public decimal? TrainingPrice { get; set; } 
         public decimal? EndPointAssessmentPrice { get; set; }
         public long? TransferSenderId { get; set; }
-        public FundingType FundingType { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; }

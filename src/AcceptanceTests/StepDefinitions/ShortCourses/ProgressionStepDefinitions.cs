@@ -354,13 +354,11 @@ public class ProgressionStepDefinitions
 
     private static OnProgramme BuildOnProgramme(string courseCode, DateTime? completionDate = null, DateTime? withdrawalDate = null, List<Milestone>? milestones = null, DateTime? startDate = null, long? ukprn = null) => new()
     {
-        Ukprn = ukprn ?? ProviderUkprn,
         CourseCode = courseCode,
         StartDate = startDate ?? new DateTime(2025, 1, 1),
         ExpectedEndDate = new DateTime(2025, 6, 30),
         CompletionDate = completionDate,
         WithdrawalDate = withdrawalDate,
-        EmployerId = 99999999,
         Price = 1000,
         Milestones = milestones ?? new List<Milestone>()
     };

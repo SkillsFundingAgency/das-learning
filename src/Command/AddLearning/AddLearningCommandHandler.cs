@@ -76,13 +76,13 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TotalPrice,
             command.TrainingPrice,
             command.EndPointAssessmentPrice,
-            command.FundingType,
             command.FundingPlatform,
             command.TransferSenderId,
             command.LegalEntityName,
             command.AccountLegalEntityId,
             command.TrainingCode,
-            command.TrainingCourseVersion);
+            command.TrainingCourseVersion,
+            command.EmployerType);
 
         learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
 

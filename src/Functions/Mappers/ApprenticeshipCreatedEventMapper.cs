@@ -19,7 +19,6 @@ public static class ApprenticeshipCreatedEventMapper
             ApprovalsApprenticeshipId = e.ApprenticeshipId,
             EmployerAccountId = e.AccountId,
             TransferSenderId = e.TransferSenderId,
-            FundingType = GetFundingType(e),
             LegalEntityName = e.LegalEntityName,
             PlannedEndDate = e.EndDate,
             UKPRN = e.ProviderId,
@@ -45,16 +44,5 @@ public static class ApprenticeshipCreatedEventMapper
             return EmployerType.Levy;
 
         return EmployerType.NonLevy;
-    }
-
-    private static FundingType GetFundingType(ApprenticeshipCreatedEvent e)
-    {
-        if (e.TransferSenderId.HasValue)
-            return FundingType.Transfer;
-
-        if (e.ApprenticeshipEmployerTypeOnApproval == ApprenticeshipEmployerType.NonLevy)
-            return FundingType.NonLevy;
-
-        return FundingType.Levy;
     }
 }

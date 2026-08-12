@@ -17,7 +17,7 @@ public class GetLearningsQueryHandler(LearningDataContext dbContext)
                 dbContext.LearnersDbSet,
                 al => al.LearnerKey,
                 learner => learner.Key,
-                (al, learner) => new Models.Dtos.Learning
+                (al, learner) => new LearnerSummary
                 {
                     Uln = learner.Uln,
                     FirstName = learner.FirstName,

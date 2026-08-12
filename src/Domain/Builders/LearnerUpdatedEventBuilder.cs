@@ -31,7 +31,6 @@ public class LearnerUpdatedEventBuilder
                 Key = e.Key,
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId ?? 0,
-                FundingType = e.FundingType,
                 FundingPlatform = e.FundingPlatform,
                 FundingEmployerAccountId = e.FundingEmployerAccountId,
                 LegalEntityName = e.LegalEntityName,

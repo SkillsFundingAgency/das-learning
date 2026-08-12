@@ -8,7 +8,6 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Domain;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
@@ -80,13 +79,13 @@ public class WhenAddingAnApprenticeship
             episodePrice.TotalPrice,
             episodePrice.TrainingPrice,
             episodePrice.EndPointAssessmentPrice,
-            episode.FundingType,
             episode.FundingPlatform,
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
             episode.TrainingCode,
             episode.TrainingCourseVersion,
+            episode.EmployerType,
             episode.IsApproved);
 
         // Act

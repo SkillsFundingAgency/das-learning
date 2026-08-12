@@ -42,7 +42,6 @@ namespace SFA.DAS.Learning.Functions.UnitTests
                         c.ApprovalsApprenticeshipId == @event.ApprenticeshipId &&
                         c.EmployerAccountId == @event.AccountId &&
                         c.TransferSenderId == @event.TransferSenderId &&
-                        c.FundingType == FundingType.Transfer &&
                         c.LegalEntityName == @event.LegalEntityName &&
                         c.PlannedEndDate == @event.EndDate &&
                         c.UKPRN == @event.ProviderId &&
@@ -54,13 +53,14 @@ namespace SFA.DAS.Learning.Functions.UnitTests
                         c.FundingPlatform == (@event.IsOnFlexiPaymentPilot.HasValue ? (@event.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null) &&
                         c.AccountLegalEntityId == @event.AccountLegalEntityId &&
                         c.TrainingCourseVersion == @event.TrainingCourseVersion &&
-                        c.PlannedStartDate == @event.StartDate
+                        c.PlannedStartDate == @event.StartDate &&
+                        c.EmployerType == (@event.ApprenticeshipEmployerTypeOnApproval == ApprenticeshipEmployerType.Levy ? EmployerType.Levy : EmployerType.NonLevy)
                     ),
                     It.IsAny<CancellationToken>()));
         }
 
         [Test]
-        public async Task WhenEmployerIsLevyThenFundingTypeIsLevy()
+        public async Task WhenEmployerIsLevyThenEmployerTypeIsLevy()
         {
             var @event = _fixture.Build<ApprenticeshipCreatedEvent>().With(x => x.TransferSenderId, (long?)null).With(x => x.ApprenticeshipEmployerTypeOnApproval, ApprenticeshipEmployerType.Levy).Create();
             var commandDispatcher = new Mock<ICommandDispatcher>();
@@ -68,12 +68,12 @@ namespace SFA.DAS.Learning.Functions.UnitTests
             await handler.Handle(@event, new TestableMessageHandlerContext());
 
             commandDispatcher.Verify(x =>
-                x.Send(It.Is<AddLearningCommand>(c => c.FundingType == FundingType.Levy),
+                x.Send(It.Is<AddLearningCommand>(c => c.EmployerType == EmployerType.Levy),
                     It.IsAny<CancellationToken>()));
         }
 
         [Test]
-        public async Task WhenEmployerIsNonLevyThenFundingTypeIsNonLevy()
+        public async Task WhenEmployerIsNonLevyThenEmployerTypeIsNonLevy()
         {
             var @event = _fixture.Build<ApprenticeshipCreatedEvent>().With(x => x.TransferSenderId, (long?)null).With(x => x.ApprenticeshipEmployerTypeOnApproval, ApprenticeshipEmployerType.NonLevy).Create();
             var commandDispatcher = new Mock<ICommandDispatcher>();
@@ -81,20 +81,7 @@ namespace SFA.DAS.Learning.Functions.UnitTests
             await handler.Handle(@event, new TestableMessageHandlerContext());
 
             commandDispatcher.Verify(x =>
-                x.Send(It.Is<AddLearningCommand>(c => c.FundingType == FundingType.NonLevy),
-                    It.IsAny<CancellationToken>()));
-        }
-
-        [Test]
-        public async Task WhenHasTransferSenderThenFundingTypeIsTransfer()
-        {
-            var @event = _fixture.Build<ApprenticeshipCreatedEvent>().With(x => x.TransferSenderId, 1234).Create();
-            var commandDispatcher = new Mock<ICommandDispatcher>();
-            var handler = new ApprenticeshipCreatedEventHandler(commandDispatcher.Object, new Mock<ILogger<ApprenticeshipCreatedEventHandler>>().Object);
-            await handler.Handle(@event, new TestableMessageHandlerContext());
-
-            commandDispatcher.Verify(x =>
-                x.Send(It.Is<AddLearningCommand>(c => c.FundingType == FundingType.Transfer),
+                x.Send(It.Is<AddLearningCommand>(c => c.EmployerType == EmployerType.NonLevy),
                     It.IsAny<CancellationToken>()));
         }
     }
