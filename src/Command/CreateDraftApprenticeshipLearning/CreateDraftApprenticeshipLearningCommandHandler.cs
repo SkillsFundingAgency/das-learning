@@ -51,7 +51,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var updateModel = command.LearningUpdateContext;
 
-        _logger.LogInformation("Reinstating learning with key {LearningKey}", learning.Key); //todo is this just the reinstate journey still at this point?
+        _logger.LogInformation("Reinstating learning with key {LearningKey}", learning.Key);
 
         var learningChanges = learning.Update(updateModel);
         learning.LatestEpisode.SetApprovalStatus(false);
@@ -61,7 +61,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", learning.Key, changes);
 
         learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
-        if (changes.Any(x => x == Enums.LearningUpdateChanges.PersonalDetails))
+        if (changes.Any(x => x == LearningUpdateChanges.PersonalDetails))
         {
             var episode = learning.Episodes.Single(x => x.Ukprn == command.Ukprn);
             learner.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, episode));
@@ -112,7 +112,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         LearnerDomainModel learner)
     {
         var updateModel = command.LearningUpdateContext;
-        var cost = updateModel.OnProgrammeDetails.Costs.Single(); //todo assume single cost at draft point
+        var cost = updateModel.OnProgrammeDetails.Costs.Single(); //assume single cost at draft point
 
         var trainingCode = updateModel.EnglishAndMathsCourses.FirstOrDefault()?.Course ?? string.Empty;
 

@@ -21,7 +21,7 @@ namespace SFA.DAS.Learning.Command.UnitTests.CreateDraftApprenticeshipLearning;
 [TestFixture]
 public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 {
-    private const long _Ukprn = 12345678;
+    private const long Ukprn = 12345678;
     private Fixture _fixture = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<IApprenticeshipLearningRepository> _learningRepository = null!;
@@ -52,6 +52,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     [Test]
     public async Task Then_New_Learner_And_Learning_Are_Created_When_Learner_Does_Not_Exist()
     {
+        // Arrange
         var command = CreateCommand();
         ApprenticeshipLearningDomainModel? addedLearning = null;
 
@@ -68,8 +69,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
             .Returns(Task.CompletedTask);
 
+        // Act
         var result = await _handler.Handle(command);
 
+        // Assert
         result.Should().NotBeNull();
         _learnerRepository.Verify(x => x.Add(It.IsAny<LearnerDomainModel>()), Times.Once);
         _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
@@ -83,6 +86,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     [Test]
     public async Task Then_New_Learning_Is_Created_When_Learner_Exists_But_Learning_Does_Not_Exist()
     {
+        // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
         ApprenticeshipLearningDomainModel? addedLearning = null;
@@ -100,8 +104,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
             .Returns(Task.CompletedTask);
 
+        // Act
         var result = await _handler.Handle(command);
 
+        // Assert
         result.Should().NotBeNull();
         _learnerRepository.Verify(x => x.Add(It.IsAny<LearnerDomainModel>()), Times.Never);
         _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
@@ -113,6 +119,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     [Test]
     public async Task Then_Null_Is_Returned_When_Latest_Episode_Is_Not_Removed()
     {
+        // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
         var learning = CreateLearning(EpisodeStatus.Active);
@@ -126,8 +133,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .Setup(x => x.GetByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
+        // Act
         var result = await _handler.Handle(command);
 
+        // Assert
         result.Should().BeNull();
         _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
@@ -136,6 +145,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     [Test]
     public async Task Then_Learning_And_Learner_Are_Updated_When_Reinstating()
     {
+        // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
         var learning = CreateLearning(EpisodeStatus.Removed);
@@ -148,8 +158,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .Setup(x => x.GetByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
+        // Act
         var result = await _handler.Handle(command);
 
+        // Assert
         result.Should().NotBeNull();
         _learnerRepository.Verify(x => x.Update(learner), Times.Once);
         _learningRepository.Verify(x => x.Update(learning), Times.Once);
@@ -160,6 +172,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     [Test]
     public async Task Then_Result_Is_Returned_When_Reinstating_Learning()
     {
+        // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
         var learning = CreateLearning(EpisodeStatus.Removed);
@@ -172,8 +185,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .Setup(x => x.GetByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
+        // Act
         var result = await _handler.Handle(command);
 
+        // Assert
         result.Should().NotBeNull();
         result!.LearningKey.Should().Be(learning.Key);
         result.LearningEpisodeKey.Should().Be(learning.LatestEpisode.Key);
@@ -182,6 +197,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     [Test]
     public async Task Then_PersonalDetailsChangedEvent_Is_Added_When_Personal_Details_Have_Changed()
     {
+        // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
         var learning = CreateLearning(EpisodeStatus.Removed);
@@ -194,8 +210,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .Setup(x => x.GetByLearnerKey(learner.Key))
             .ReturnsAsync(learning);
 
+        // Act
         await _handler.Handle(command);
 
+        // Assert
         AssertPersonalDetailsEvent(learner, learning.LatestEpisode.ApprovalsApprenticeshipId, learning.Key, command.LearningUpdateContext.Learner.FirstName, command.LearningUpdateContext.Learner.LastName);
     }
 
@@ -206,7 +224,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         string firstName,
         string lastName)
     {
-        var domainEvent = domainModel.FlushEvents().OfType<SFA.DAS.Learning.Domain.Events.PersonalDetailsChangedEvent>().SingleOrDefault();
+        var domainEvent = domainModel.FlushEvents().OfType<Domain.Events.PersonalDetailsChangedEvent>().SingleOrDefault();
 
         domainEvent.Should().NotBeNull();
 
@@ -234,7 +252,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
                 DateOfBirth = dateOfBirth,
                 EmailAddress = "test@example.com"
             },
-            Care = new Models.UpdateModels.Shared.CareDetails
+            Care = new CareDetails
             {
                 HasEHCP = true,
                 IsCareLeaver = true,
@@ -262,7 +280,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             ],
             LearningSupport =
             [
-                new Models.UpdateModels.Shared.LearningSupportDetails
+                new LearningSupportDetails
                 {
                     StartDate = new DateTime(2025, 8, 1),
                     EndDate = new DateTime(2026, 7, 31)
@@ -286,7 +304,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             }
         };
 
-        return new CreateDraftApprenticeshipLearningCommand(_Ukprn, model);
+        return new CreateDraftApprenticeshipLearningCommand(Ukprn, model);
     }
 
     private LearnerDomainModel CreateLearner()
@@ -309,7 +327,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 
     private ApprenticeshipLearningDomainModel CreateLearning(EpisodeStatus episodeStatus)
     {
-        var price = new SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodePrice
+        var price = new EpisodePrice
         {
             Key = Guid.NewGuid(),
             EpisodeKey = Guid.NewGuid(),
@@ -325,7 +343,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             Key = Guid.NewGuid(),
             LearningKey = Guid.NewGuid(),
             ApprovalsApprenticeshipId = _fixture.Create<long>(),
-            Ukprn = _Ukprn,
+            Ukprn = Ukprn,
             EmployerAccountId = 100,
             FundingType = FundingType.Levy,
             FundingPlatform = FundingPlatform.SLD,
@@ -333,9 +351,9 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             TrainingCode = "ST0001",
             IsApproved = true,
             IsRemoved = episodeStatus == EpisodeStatus.Removed,
-            Prices = new List<SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodePrice> { price },
+            Prices = new List<EpisodePrice> { price },
             LearningSupport = new List<ApprenticeshipLearningSupport>(),
-            BreaksInLearning = new List<SFA.DAS.Learning.DataAccess.Entities.Learning.EpisodeBreakInLearning>()
+            BreaksInLearning = new List<EpisodeBreakInLearning>()
         };
 
         price.EpisodeKey = episode.Key;
@@ -345,7 +363,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
             Episodes = new List<ApprenticeshipEpisode> { episode },
-            EnglishAndMathsCourses = new List<SFA.DAS.Learning.DataAccess.Entities.Learning.EnglishAndMaths>()
+            EnglishAndMathsCourses = new List<EnglishAndMaths>()
         };
 
         episode.LearningKey = entity.Key;
