@@ -36,13 +36,18 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learner = await GetOrCreateLearner(command);
         var learning = await _apprenticeshipLearningRepository.GetByLearnerKey(learner.Key);
-        if (learning != null && !learning.LatestEpisode.IsRemoved)
-        {
-            _logger.LogInformation("Active apprenticeship already exists for learner with ULN {Uln}", learner.Uln);
-            return null;
-        }
+        //if (learning != null && !learning.LatestEpisode.IsRemoved)
+        //{
+        //    _logger.LogInformation("Active apprenticeship already exists for learner with ULN {Uln}", learner.Uln);
+        //    return null;
+        //}
 
-        if (learning == null)
+        //todo handle multiple apps, we need to pull more than one out of db
+
+        
+        //todo if approved apprenticeship exists then create new draft (FLP-1537 AC1)
+        //todo if no apprenticeship exists then create new draft (FLP-1527 AC1)
+        if (learning == null || learning.LatestEpisode.IsApproved)
         {
             var createResult = await CreateDraftLearning(command, learner);
             _logger.LogInformation("Successfully created draft learning with key {LearningKey}", createResult.LearningKey);
@@ -51,12 +56,22 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var updateModel = command.LearningUpdateContext;
 
+        //todo if unapproved apprenticeship exists then update (FLP-1537 AC2/AC3)
+        if (learning.LatestEpisode.IsApproved == false)
+        {
+            //do update
+        }
+
+        //todo actually remove reinstatement
+        //todo if removed (LatestEpisode.IsRemoved) apprenticeship exists then re-instate and update (existing re-instatement functionality)
         _logger.LogInformation("Reinstating learning with key {LearningKey}", learning.Key);
 
         var learningChanges = learning.Update(updateModel);
         learning.LatestEpisode.SetApprovalStatus(false);
         var learnerChanges = learner.Update(updateModel);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
+
+        //everything below this line happens at the end regardless
 
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", learning.Key, changes);
 
