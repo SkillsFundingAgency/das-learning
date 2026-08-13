@@ -1,8 +1,10 @@
+using SFA.DAS.Learning.Models.UpdateModels;
+
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
 
 public abstract class LearningDomainModel : AggregateRoot
 {
-    public abstract void Approve(long ukprn, long employerAccountId);
+    public abstract void Approve(ApproveLearningContext context);
 }
 
 public abstract class LearningDomainModel<T> : LearningDomainModel where T : Learning.DataAccess.Entities.Learning.Learning

@@ -191,9 +191,25 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         changes.Add(LearningUpdateChanges.Reinstated);
     }
 
-    public override void Approve(long ukprn, long employerAccountId)
+    public override void Approve(ApproveLearningContext context)
+        => Approve(context.EmployerAccountId, context.EmployerType, context.TransferSenderId, context.LegalEntityName, context.ApprovalsApprenticeshipId);
+
+    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId)
     {
-        throw new NotImplementedException("Learning approval is not yet implemented");
+        var episode = LatestEpisode;
+        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId);
+
+        AddEvent(new LearningApprovedEvent
+        {
+            LearningKey = Key,
+            EpisodeKey = episode.Key,
+            ApprovalsApprenticeshipId = approvalsApprenticeshipId,
+            EmployerAccountId = employerAccountId,
+            FundingAccountId = fundingEmployerAccountId ?? employerAccountId,
+            LearnerKey = _entity.LearnerKey,
+            LearnerRef = string.Empty,
+            EmployerType = employerType
+        });
     }
 
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
