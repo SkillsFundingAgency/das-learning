@@ -48,6 +48,11 @@ public class Delivery
     /// Withdrawal during learning date
     /// </summary>
     public DateTime? WithdrawalDate { get; set; }
+
+    /// <summary>
+    /// Training code for the apprenticeship's course
+    /// </summary>
+    public string TrainingCode { get; set; }
 }
 
 /// <summary>

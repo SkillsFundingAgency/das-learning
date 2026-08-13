@@ -35,68 +35,59 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         _logger.LogInformation("Handling CreateDraftApprenticeshipLearningCommand");
 
         var learner = await GetOrCreateLearner(command);
-        var learning = await _apprenticeshipLearningRepository.GetByLearnerKey(learner.Key);
-        //if (learning != null && !learning.LatestEpisode.IsRemoved)
-        //{
-        //    _logger.LogInformation("Active apprenticeship already exists for learner with ULN {Uln}", learner.Uln);
-        //    return null;
-        //}
-
-        //todo handle multiple apps, we need to pull more than one out of db
+        var learnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key, ukprn: command.Ukprn, courseCode: command.TrainingCode);
 
         
-        //todo if approved apprenticeship exists then create new draft (FLP-1537 AC1)
-        //todo if no apprenticeship exists then create new draft (FLP-1527 AC1)
-        if (learning == null || learning.LatestEpisode.IsApproved)
+        // if no unapproved apprenticeships exist then create a new one
+        if (learnings.All(l => l.LatestEpisode.IsApproved))
         {
             var createResult = await CreateDraftLearning(command, learner);
             _logger.LogInformation("Successfully created draft learning with key {LearningKey}", createResult.LearningKey);
             return createResult;
         }
 
+        // otherwise update the (single) existing unapproved apprenticeship with new details
+        var existingUnapprovedLearning = learnings.Single(x => x.LatestEpisode.IsApproved == false);
+        
         var updateModel = command.LearningUpdateContext;
 
-        //todo if unapproved apprenticeship exists then update (FLP-1537 AC2/AC3)
-        if (learning.LatestEpisode.IsApproved == false)
-        {
-            //do update
-        }
-
-        //todo actually remove reinstatement
-        //todo if removed (LatestEpisode.IsRemoved) apprenticeship exists then re-instate and update (existing re-instatement functionality)
-        _logger.LogInformation("Reinstating learning with key {LearningKey}", learning.Key);
-
-        var learningChanges = learning.Update(updateModel);
-        learning.LatestEpisode.SetApprovalStatus(false);
+        var learningChanges = existingUnapprovedLearning.Update(updateModel);
+        existingUnapprovedLearning.LatestEpisode.SetApprovalStatus(false);
         var learnerChanges = learner.Update(updateModel);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
 
-        //everything below this line happens at the end regardless
+        _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingUnapprovedLearning.Key, changes);
 
-        _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", learning.Key, changes);
-
-        learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
+        existingUnapprovedLearning.AddEvent(LearnerUpdatedEvent.From(learner, existingUnapprovedLearning));
         if (changes.Any(x => x == LearningUpdateChanges.PersonalDetails))
         {
-            var episode = learning.Episodes.Single(x => x.Ukprn == command.Ukprn);
-            learner.AddEvent(PersonalDetailsChangedEvent.From(learner, learning, episode));
+            var episode = existingUnapprovedLearning.Episodes.Single(x => x.Ukprn == command.Ukprn);
+            learner.AddEvent(PersonalDetailsChangedEvent.From(learner, existingUnapprovedLearning, episode));
         }
 
         await _learnerRepository.Update(learner);
-        await _apprenticeshipLearningRepository.Update(learning);
+        await _apprenticeshipLearningRepository.Update(existingUnapprovedLearning);
 
-        _logger.LogInformation("Successfully updated learning with key {LearningKey}", learning.Key);
+        _logger.LogInformation("Successfully updated learning with key {LearningKey}", existingUnapprovedLearning.Key);
 
         return new CreateDraftApprenticeshipLearningCommandResult
         {
             Changes = changes.ToList(),
-            LearningKey = learning.Key,
-            LearningEpisodeKey = learning.LatestEpisode.Key,
-            Prices = learning.LatestEpisode.EpisodePrices
+            LearningKey = existingUnapprovedLearning.Key,
+            LearningEpisodeKey = existingUnapprovedLearning.LatestEpisode.Key,
+            Prices = existingUnapprovedLearning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                 .ToList()
         };
+        
 
+        //old reinstatement functionality below, will need revisiting
+
+        //_logger.LogInformation("Reinstating learning with key {LearningKey}", learning.Key);
+        //var learningChanges = learning.Update(updateModel);
+        //learning.LatestEpisode.SetApprovalStatus(false);
+        //var learnerChanges = learner.Update(updateModel);
+        //var changes = learningChanges.Concat(learnerChanges).ToArray();
     }
 
     private async Task<LearnerDomainModel> GetOrCreateLearner(CreateDraftApprenticeshipLearningCommand command)
@@ -129,7 +120,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         var updateModel = command.LearningUpdateContext;
         var cost = updateModel.OnProgrammeDetails.Costs.Single(); //assume single cost at draft point
 
-        var trainingCode = updateModel.EnglishAndMathsCourses.FirstOrDefault()?.Course ?? string.Empty;
+        var trainingCode = command.TrainingCode;
 
         var learning = _learningFactory.CreateNew(learner.Key);
         learning.AddEpisode(

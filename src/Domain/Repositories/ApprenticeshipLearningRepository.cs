@@ -54,15 +54,22 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         return _learningFactory.GetExisting(apprenticeship);
     }
 
-    public async Task<List<ApprenticeshipLearningDomainModel>> GetAllByLearnerKey(Guid learnerKey)
+    public async Task<List<ApprenticeshipLearningDomainModel>> GetAllByLearnerKey(Guid learnerKey, long? ukprn = null, string? courseCode = null)
     {
-        var apprenticeships = await DbContext.ApprenticeshipLearningDbSet
+        var query = DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
-            .Where(x => x.LearnerKey == learnerKey)
-            .ToListAsync();
+            .Where(x => x.LearnerKey == learnerKey);
+
+        if (ukprn.HasValue)
+            query = query.Where(x => x.Episodes.Any(e => e.Ukprn == ukprn.Value));
+
+        if (courseCode != null)
+            query = query.Where(x => x.Episodes.Any(e => e.TrainingCode == courseCode));
+
+        var apprenticeships = await query.ToListAsync();
 
         return apprenticeships.Select(_learningFactory.GetExisting).ToList();
     }
