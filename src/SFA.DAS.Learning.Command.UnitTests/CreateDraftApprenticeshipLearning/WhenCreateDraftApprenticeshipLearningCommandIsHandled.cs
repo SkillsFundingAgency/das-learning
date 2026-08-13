@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -22,6 +22,7 @@ namespace SFA.DAS.Learning.Command.UnitTests.CreateDraftApprenticeshipLearning;
 public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 {
     private const long Ukprn = 12345678;
+    private const string TrainingCode = "ST0001";
     private Fixture _fixture = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<IApprenticeshipLearningRepository> _learningRepository = null!;
@@ -58,11 +59,11 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))
-            .Returns(Task.FromResult<LearnerDomainModel?>(null));
+            .ReturnsAsync((LearnerDomainModel?)null);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(It.IsAny<Guid>()))
-            .ReturnsAsync((ApprenticeshipLearningDomainModel?)null);
+            .Setup(x => x.GetAllByLearnerKey(It.IsAny<Guid>(), It.IsAny<long?>(), It.IsAny<string?>()))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
 
         _learningRepository
             .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
@@ -84,7 +85,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
-    public async Task Then_New_Learning_Is_Created_When_Learner_Exists_But_Learning_Does_Not_Exist()
+    public async Task Then_New_Learning_Is_Created_When_Learner_Exists_But_No_Learnings_Exist()
     {
         // Arrange
         var command = CreateCommand();
@@ -93,11 +94,11 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))
-            .Returns(Task.FromResult<LearnerDomainModel?>(learner));
+            .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
-            .Returns(Task.FromResult<ApprenticeshipLearningDomainModel?>(null));
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
 
         _learningRepository
             .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
@@ -117,46 +118,45 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
-    public async Task Then_Null_Is_Returned_When_Latest_Episode_Is_Not_Removed()
+    public async Task Then_New_Learning_Is_Created_When_All_Existing_Learnings_Are_Approved()
     {
         // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
-        var learning = CreateLearning(EpisodeStatus.Active);
-
+        var approvedLearning = CreateLearning(isApproved: true);
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
-            .ReturnsAsync(learning);
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { approvedLearning });
 
         // Act
         var result = await _handler.Handle(command);
 
         // Assert
-        result.Should().BeNull();
-        _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
+        result.Should().NotBeNull();
+        _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
     }
 
     [Test]
-    public async Task Then_Learning_And_Learner_Are_Updated_When_Reinstating()
+    public async Task Then_Existing_Unapproved_Learning_Is_Updated_When_A_Single_Unapproved_Learning_Exists()
     {
         // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
-        var learning = CreateLearning(EpisodeStatus.Removed);
+        var unapprovedLearning = CreateLearning(isApproved: false);
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
-            .ReturnsAsync(learning);
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
 
         // Act
         var result = await _handler.Handle(command);
@@ -164,34 +164,34 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         // Assert
         result.Should().NotBeNull();
         _learnerRepository.Verify(x => x.Update(learner), Times.Once);
-        _learningRepository.Verify(x => x.Update(learning), Times.Once);
+        _learningRepository.Verify(x => x.Update(unapprovedLearning), Times.Once);
         _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
-        learning.LatestEpisode.IsApproved.Should().BeFalse();
+        unapprovedLearning.LatestEpisode.IsApproved.Should().BeFalse();
     }
 
     [Test]
-    public async Task Then_Result_Is_Returned_When_Reinstating_Learning()
+    public async Task Then_Result_Reflects_Updated_Learning_When_Unapproved_Learning_Exists()
     {
         // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
-        var learning = CreateLearning(EpisodeStatus.Removed);
+        var unapprovedLearning = CreateLearning(isApproved: false);
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
-            .ReturnsAsync(learning);
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
 
         // Act
         var result = await _handler.Handle(command);
 
         // Assert
         result.Should().NotBeNull();
-        result!.LearningKey.Should().Be(learning.Key);
-        result.LearningEpisodeKey.Should().Be(learning.LatestEpisode.Key);
+        result!.LearningKey.Should().Be(unapprovedLearning.Key);
+        result.LearningEpisodeKey.Should().Be(unapprovedLearning.LatestEpisode.Key);
     }
 
     [Test]
@@ -200,21 +200,67 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
-        var learning = CreateLearning(EpisodeStatus.Removed);
+        var unapprovedLearning = CreateLearning(isApproved: false);
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))
             .ReturnsAsync(learner);
 
         _learningRepository
-            .Setup(x => x.GetByLearnerKey(learner.Key))
-            .ReturnsAsync(learning);
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
 
         // Act
         await _handler.Handle(command);
 
         // Assert
-        AssertPersonalDetailsEvent(learner, learning.LatestEpisode.ApprovalsApprenticeshipId, learning.Key, command.LearningUpdateContext.Learner.FirstName, command.LearningUpdateContext.Learner.LastName);
+        AssertPersonalDetailsEvent(learner, unapprovedLearning.LatestEpisode.ApprovalsApprenticeshipId, unapprovedLearning.Key, command.LearningUpdateContext.Learner.FirstName, command.LearningUpdateContext.Learner.LastName);
+    }
+
+    [Test]
+    public async Task Then_GetAllByLearnerKey_Is_Called_With_Ukprn_And_TrainingCode_Filters()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        _learningRepository.Verify(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode), Times.Once);
+    }
+
+    [Test]
+    public async Task Then_Exception_Is_Thrown_When_Multiple_Unapproved_Learnings_Exist()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var firstUnapprovedLearning = CreateLearning(isApproved: false);
+        var secondUnapprovedLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { firstUnapprovedLearning, secondUnapprovedLearning });
+
+        // Act
+        Func<Task> act = () => _handler.Handle(command);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>();
     }
 
     private void AssertPersonalDetailsEvent(
@@ -304,7 +350,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             }
         };
 
-        return new CreateDraftApprenticeshipLearningCommand(Ukprn, model);
+        return new CreateDraftApprenticeshipLearningCommand(Ukprn, model, TrainingCode);
     }
 
     private LearnerDomainModel CreateLearner()
@@ -319,13 +365,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         return LearnerDomainModel.Get(entity);
     }
 
-    private enum EpisodeStatus
-    {
-        Active,
-        Removed
-    }
-
-    private ApprenticeshipLearningDomainModel CreateLearning(EpisodeStatus episodeStatus)
+    private ApprenticeshipLearningDomainModel CreateLearning(bool isApproved, bool isRemoved = false)
     {
         var price = new EpisodePrice
         {
@@ -348,9 +388,9 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             EmployerType = EmployerType.Levy,
             FundingPlatform = FundingPlatform.SLD,
             LegalEntityName = "Test",
-            TrainingCode = "ST0001",
-            IsApproved = true,
-            IsRemoved = episodeStatus == EpisodeStatus.Removed,
+            TrainingCode = TrainingCode,
+            IsApproved = isApproved,
+            IsRemoved = isRemoved,
             Prices = new List<EpisodePrice> { price },
             LearningSupport = new List<ApprenticeshipLearningSupport>(),
             BreaksInLearning = new List<EpisodeBreakInLearning>()
