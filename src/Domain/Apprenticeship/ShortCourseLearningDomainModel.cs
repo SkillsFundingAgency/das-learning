@@ -178,15 +178,10 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
         changes = [];
         var changed = false;
 
-        if (episode.WithdrawalDate != prevWithdrawalDate)
+        if (episode.WithdrawalDate != prevWithdrawalDate ||
+            episode.WithdrawalReason != prevWithdrawalReasonCode)
         {
             changes.Add(ShortCourseUpdateChanges.WithdrawalDate);
-            changed = true;
-        }
-
-        if (episode.WithdrawalReason != prevWithdrawalReasonCode)
-        {
-            changes.Add(ShortCourseUpdateChanges.WithdrawalReason);
             changed = true;
         }
 

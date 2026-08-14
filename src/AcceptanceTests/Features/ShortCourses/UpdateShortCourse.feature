@@ -19,7 +19,6 @@ Scenario: Update approved short course withdrawal date
     Then the update short course response includes changes
         | Change           |
         | WithdrawalDate   |
-        | WithdrawalReason |
     And the correct learning withdrawn event is emitted
 
 Scenario: Update short course completion date
