@@ -37,7 +37,7 @@ public class WhenGetLearnings
 
         var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
         learning.LearnerKey = learnerKey;
-        learning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1 });
+        learning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsApproved = true });
         _dbContext.ApprenticeshipLearningDbSet.Add(learning);
         await _dbContext.SaveChangesAsync();
 
@@ -55,6 +55,39 @@ public class WhenGetLearnings
     }
 
     [Test]
+    public async Task ThenDraftApprenticeshipsAreExcluded()
+    {
+        // Arrange
+        const long ukPrn = 1000;
+
+        var approvedLearnerKey = Guid.NewGuid();
+        var draftLearnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.AddRange(
+            new Learner { Key = approvedLearnerKey, Uln = "111", FirstName = "Approved", LastName = "Learner" },
+            new Learner { Key = draftLearnerKey, Uln = "222", FirstName = "Draft", LastName = "Learner" });
+
+        var approvedLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        approvedLearning.LearnerKey = approvedLearnerKey;
+        approvedLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A1", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsApproved = true });
+
+        var draftLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        draftLearning.LearnerKey = draftLearnerKey;
+        draftLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A2", LegalEntityName = "Test", ApprovalsApprenticeshipId = 0, IsApproved = false });
+
+        _dbContext.ApprenticeshipLearningDbSet.AddRange(approvedLearning, draftLearning);
+        await _dbContext.SaveChangesAsync();
+
+        var query = new GetLearningsRequest(ukPrn, null);
+
+        // Act
+        var result = await _sut.Handle(query);
+
+        // Assert
+        result.Learnings.Should().HaveCount(1);
+        result.Learnings.Single().Uln.Should().Be("111");
+    }
+
+    [Test]
     public async Task ThenApprenticeshipsAreFilteredByFundingPlatform()
     {
         // Arrange
@@ -68,11 +101,11 @@ public class WhenGetLearnings
 
         var dasLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
         dasLearning.LearnerKey = learnerKey1;
-        dasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A1", FundingPlatform = FundingPlatform.DAS, LegalEntityName = "Test", ApprovalsApprenticeshipId = 1 });
+        dasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A1", FundingPlatform = FundingPlatform.DAS, LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsApproved = true });
 
         var nonDasLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
         nonDasLearning.LearnerKey = learnerKey2;
-        nonDasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A2", FundingPlatform = FundingPlatform.SLD, LegalEntityName = "Test", ApprovalsApprenticeshipId = 2 });
+        nonDasLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A2", FundingPlatform = FundingPlatform.SLD, LegalEntityName = "Test", ApprovalsApprenticeshipId = 2, IsApproved = true });
 
         _dbContext.ApprenticeshipLearningDbSet.AddRange(dasLearning, nonDasLearning);
         await _dbContext.SaveChangesAsync();
