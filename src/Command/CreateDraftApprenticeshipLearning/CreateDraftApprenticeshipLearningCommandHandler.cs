@@ -37,57 +37,62 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         var learner = await GetOrCreateLearner(command);
         var learnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key, ukprn: command.Ukprn, courseCode: command.TrainingCode);
 
-        
-        // if no unapproved apprenticeships exist then create a new one
-        if (learnings.All(l => l.LatestEpisode.IsApproved))
+        var existingLearning = SelectExistingLearningToUpdate(learnings);
+
+        // no unapproved draft and no single unambiguous reinstatement candidate - create a new one
+        if (existingLearning == null)
         {
             var createResult = await CreateDraftLearning(command, learner);
             _logger.LogInformation("Successfully created draft learning with key {LearningKey}", createResult.LearningKey);
             return createResult;
         }
 
-        // otherwise update the (single) existing unapproved apprenticeship with new details
-        var existingUnapprovedLearning = learnings.Single(x => x.LatestEpisode.IsApproved == false);
-        
+        // otherwise update the existing unapproved (or reinstated) apprenticeship with new details
         var updateModel = command.LearningUpdateContext;
 
-        var learningChanges = existingUnapprovedLearning.Update(updateModel);
-        existingUnapprovedLearning.LatestEpisode.SetApprovalStatus(false);
+        var learningChanges = existingLearning.Update(updateModel);
         var learnerChanges = learner.Update(updateModel);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
 
-        _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingUnapprovedLearning.Key, changes);
+        _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingLearning.Key, changes);
 
-        existingUnapprovedLearning.AddEvent(LearnerUpdatedEvent.From(learner, existingUnapprovedLearning));
+        existingLearning.AddEvent(LearnerUpdatedEvent.From(learner, existingLearning));
         if (changes.Any(x => x == LearningUpdateChanges.PersonalDetails))
         {
-            var episode = existingUnapprovedLearning.Episodes.Single(x => x.Ukprn == command.Ukprn);
-            learner.AddEvent(PersonalDetailsChangedEvent.From(learner, existingUnapprovedLearning, episode));
+            var episode = existingLearning.Episodes.Single(x => x.Ukprn == command.Ukprn);
+            learner.AddEvent(PersonalDetailsChangedEvent.From(learner, existingLearning, episode));
         }
 
         await _learnerRepository.Update(learner);
-        await _apprenticeshipLearningRepository.Update(existingUnapprovedLearning);
+        await _apprenticeshipLearningRepository.Update(existingLearning);
 
-        _logger.LogInformation("Successfully updated learning with key {LearningKey}", existingUnapprovedLearning.Key);
+        _logger.LogInformation("Successfully updated learning with key {LearningKey}", existingLearning.Key);
 
         return new CreateDraftApprenticeshipLearningCommandResult
         {
             Changes = changes.ToList(),
-            LearningKey = existingUnapprovedLearning.Key,
-            LearningEpisodeKey = existingUnapprovedLearning.LatestEpisode.Key,
-            Prices = existingUnapprovedLearning.LatestEpisode.EpisodePrices
+            LearningKey = existingLearning.Key,
+            LearningEpisodeKey = existingLearning.LatestEpisode.Key,
+            Prices = existingLearning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                 .ToList()
         };
-        
+    }
 
-        //old reinstatement functionality below, will need revisiting
+    private static ApprenticeshipLearningDomainModel? SelectExistingLearningToUpdate(List<ApprenticeshipLearningDomainModel> learnings)
+    {
+        // an unapproved draft can't legitimately pile up - if it ever does, that's an invariant break worth surfacing, not silently resolving
+        var unapprovedCandidate = learnings.SingleOrDefault(l => !l.LatestEpisode.IsApproved);
+        if (unapprovedCandidate != null)
+        {
+            return unapprovedCandidate;
+        }
 
-        //_logger.LogInformation("Reinstating learning with key {LearningKey}", learning.Key);
-        //var learningChanges = learning.Update(updateModel);
-        //learning.LatestEpisode.SetApprovalStatus(false);
-        //var learnerChanges = learner.Update(updateModel);
-        //var changes = learningChanges.Concat(learnerChanges).ToArray();
+        // reinstatement candidates are always approved-and-removed - drafts are never returned by GET, so SLD can never DELETE one
+        var reinstatementCandidates = learnings.Where(l => l.LatestEpisode.IsApproved && l.LatestEpisode.IsRemoved).ToList();
+
+        // exactly one unambiguous candidate: reinstate it. Zero, or more than one (can't tell which is the "right" one to resume): create a fresh row instead of guessing
+        return reinstatementCandidates.Count == 1 ? reinstatementCandidates.Single() : null;
     }
 
     private async Task<LearnerDomainModel> GetOrCreateLearner(CreateDraftApprenticeshipLearningCommand command)
@@ -133,7 +138,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             trainingPrice: cost.TrainingPrice,
             endpointAssessmentPrice: cost.EpaoPrice,
             employerType: EmployerType.Levy,
-            fundingPlatform: FundingPlatform.DAS,
+            fundingPlatform: FundingPlatform.SLD,
             transferSenderId: null,
             legalEntityName: string.Empty,
             accountLegalEntityId: null,

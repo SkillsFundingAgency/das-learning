@@ -100,7 +100,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         string trainingCode,
         string? trainingCourseVersion,
         EmployerType employerType,
-        bool isApproved = true)
+        bool isApproved = false)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
             approvalsApprenticeshipId,

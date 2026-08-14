@@ -82,6 +82,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         addedLearning!.LatestEpisode.IsApproved.Should().BeFalse();
         addedLearning.LatestEpisode.EmployerAccountId.Should().BeNull();
         addedLearning.LatestEpisode.EmployerType.Should().Be(EmployerType.Levy);
+        addedLearning.LatestEpisode.FundingPlatform.Should().Be(FundingPlatform.SLD);
     }
 
     [Test]
@@ -132,6 +133,60 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         _learningRepository
             .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
             .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { approvedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result.Should().NotBeNull();
+        _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task Then_Existing_Learning_Is_Reinstated_When_A_Single_Removed_And_Approved_Learning_Exists()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var removedLearning = CreateLearning(isApproved: true, isRemoved: true);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { removedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result.Should().NotBeNull();
+        _learningRepository.Verify(x => x.Update(removedLearning), Times.Once);
+        _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
+        removedLearning.LatestEpisode.IsRemoved.Should().BeFalse();
+        removedLearning.LatestEpisode.IsApproved.Should().BeTrue();
+        result!.Changes.Should().Contain(LearningUpdateChanges.Reinstated);
+    }
+
+    [Test]
+    public async Task Then_New_Learning_Is_Created_When_Multiple_Removed_And_Approved_Learnings_Exist()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var firstRemovedLearning = CreateLearning(isApproved: true, isRemoved: true);
+        var secondRemovedLearning = CreateLearning(isApproved: true, isRemoved: true);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { firstRemovedLearning, secondRemovedLearning });
 
         // Act
         var result = await _handler.Handle(command);
