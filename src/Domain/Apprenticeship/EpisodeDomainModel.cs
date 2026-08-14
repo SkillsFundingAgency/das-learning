@@ -103,7 +103,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         _entity.IsApproved = isApproved;
     }
 
-    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId)
+    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId, long? accountLegalEntityId = null)
     {
         _entity.IsApproved = true;
         _entity.EmployerAccountId = employerAccountId;
@@ -111,6 +111,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         _entity.FundingEmployerAccountId = fundingEmployerAccountId;
         _entity.LegalEntityName = legalEntityName;
         _entity.ApprovalsApprenticeshipId = approvalsApprenticeshipId;
+        _entity.AccountLegalEntityId = accountLegalEntityId;
     }
 
     internal void AddEpisodePrice(

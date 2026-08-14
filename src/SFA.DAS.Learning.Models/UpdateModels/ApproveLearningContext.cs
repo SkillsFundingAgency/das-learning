@@ -11,5 +11,6 @@ public class ApproveLearningContext
     public long ApprovalsApprenticeshipId { get; set; }
     public long? TransferSenderId { get; set; }
     public string LegalEntityName { get; set; } = string.Empty;
+    public long? AccountLegalEntityId { get; set; }
 }
 #pragma warning restore CS8618

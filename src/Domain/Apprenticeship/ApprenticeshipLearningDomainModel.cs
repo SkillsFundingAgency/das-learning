@@ -192,12 +192,12 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     }
 
     public override void Approve(ApproveLearningContext context)
-        => Approve(context.EmployerAccountId, context.EmployerType, context.TransferSenderId, context.LegalEntityName, context.ApprovalsApprenticeshipId);
+        => Approve(context.EmployerAccountId, context.EmployerType, context.TransferSenderId, context.LegalEntityName, context.ApprovalsApprenticeshipId, context.AccountLegalEntityId);
 
-    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId)
+    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId, long? accountLegalEntityId = null)
     {
         var episode = LatestEpisode;
-        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId);
+        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId, accountLegalEntityId);
 
         AddEvent(new LearningApprovedEvent
         {

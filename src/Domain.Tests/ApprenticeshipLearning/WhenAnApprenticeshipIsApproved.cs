@@ -34,9 +34,10 @@ public class WhenAnApprenticeshipIsApproved
         var fundingEmployerAccountId = _fixture.Create<long?>();
         var legalEntityName = _fixture.Create<string>();
         var approvalsApprenticeshipId = _fixture.Create<long>();
+        var accountLegalEntityId = _fixture.Create<long?>();
 
         //Act
-        learning.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId);
+        learning.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId, accountLegalEntityId);
 
         //Assert
         learning.LatestEpisode.IsApproved.Should().BeTrue();
@@ -45,6 +46,7 @@ public class WhenAnApprenticeshipIsApproved
         learning.LatestEpisode.FundingEmployerAccountId.Should().Be(fundingEmployerAccountId);
         learning.LatestEpisode.LegalEntityName.Should().Be(legalEntityName);
         learning.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(approvalsApprenticeshipId);
+        learning.LatestEpisode.AccountLegalEntityId.Should().Be(accountLegalEntityId);
 
         var events = learning.FlushEvents();
         events.Should().ContainSingle().Which.Should().BeOfType<LearningApprovedEvent>();
@@ -88,7 +90,8 @@ public class WhenAnApprenticeshipIsApproved
             EmployerType = EmployerType.NonLevy,
             ApprovalsApprenticeshipId = _fixture.Create<long>(),
             TransferSenderId = _fixture.Create<long?>(),
-            LegalEntityName = _fixture.Create<string>()
+            LegalEntityName = _fixture.Create<string>(),
+            AccountLegalEntityId = _fixture.Create<long?>()
         };
 
         //Act
@@ -101,5 +104,6 @@ public class WhenAnApprenticeshipIsApproved
         learning.LatestEpisode.FundingEmployerAccountId.Should().Be(context.TransferSenderId);
         learning.LatestEpisode.LegalEntityName.Should().Be(context.LegalEntityName);
         learning.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(context.ApprovalsApprenticeshipId);
+        learning.LatestEpisode.AccountLegalEntityId.Should().Be(context.AccountLegalEntityId);
     }
 }

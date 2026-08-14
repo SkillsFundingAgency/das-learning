@@ -74,6 +74,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         apprenticeship.LatestEpisode.FundingEmployerAccountId.Should().Be(command.TransferSenderId);
         apprenticeship.LatestEpisode.LegalEntityName.Should().Be(command.LegalEntityName);
         apprenticeship.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(command.ApprovalsApprenticeshipId);
+        apprenticeship.LatestEpisode.AccountLegalEntityId.Should().Be(command.AccountLegalEntityId);
 
         apprenticeship
             .FlushEvents()
