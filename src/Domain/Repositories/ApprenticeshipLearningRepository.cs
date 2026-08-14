@@ -146,8 +146,31 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
 
     async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null)
     {
-        //Nb, currently all ApprenticeshipLearning is regarded as being "unapproved"
-        return await Get(uln, apprenticeshipId);
+        // Nb, cannot look this up by apprenticeshipId - a draft's ApprovalsApprenticeshipId is hard-coded to 0
+        // until approval, so the real (incoming) apprenticeshipId never matches the draft it's meant to approve.
+        var learnerKey = await DbContext.LearnersDbSet
+            .Where(l => l.Uln == uln)
+            .Select(l => l.Key)
+            .SingleOrDefaultAsync();
+
+        if (learnerKey == default)
+            return null;
+
+        // Nb, not AsNoTracking - UnitOfWork.Track() just queues this aggregate for event dispatch,
+        // it doesn't attach/re-track the entity. Persisting a later Approve() call depends on this
+        // query leaving EF's change tracker holding the entity, same as ShortCourseLearningRepository.Get.
+        var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
+            .Where(x => x.LearnerKey == learnerKey &&
+                        x.Episodes.Any(e => e.TrainingCode == trainingCode && !e.IsApproved))
+            .Include(x => x.EnglishAndMathsCourses)
+            .Include(x => x.Episodes)
+                .ThenInclude(e => e.Prices)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync();
+
+        return apprenticeship == null
+            ? null
+            : _learningFactory.GetExisting(apprenticeship);
     }
 
 }
