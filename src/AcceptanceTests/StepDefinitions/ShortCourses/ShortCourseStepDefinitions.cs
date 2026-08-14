@@ -43,6 +43,7 @@ public class ShortCourseStepDefinitions
     {
         var request = GetDefaultShortCourse();
         request.OnProgramme.Single().WithdrawalDate = null;
+        request.OnProgramme.Single().WithdrawalReasonCode = null;
         await CallCreateShortCourseEndpoint(request);
     }
 

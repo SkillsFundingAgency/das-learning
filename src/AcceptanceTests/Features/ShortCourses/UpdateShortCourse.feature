@@ -6,8 +6,9 @@ Scenario: Update unapproved short course withdrawal date
         | WithdrawalDate | WithdrawalReasonCode |
         | 2025-01-01     | 2                    |
     Then the update short course response includes changes
-        | Change         |
-        | WithdrawalDate |
+        | Change           |
+        | WithdrawalDate   |
+        | WithdrawalReason |
 
 Scenario: Update approved short course withdrawal date
     Given SLD has informed the system that a new short course has been created
@@ -16,8 +17,9 @@ Scenario: Update approved short course withdrawal date
         | WithdrawalDate | WithdrawalReasonCode |
         | 2025-01-01     | 2                    |
     Then the update short course response includes changes
-        | Change         |
-        | WithdrawalDate |
+        | Change           |
+        | WithdrawalDate   |
+        | WithdrawalReason |
     And the correct learning withdrawn event is emitted
 
 Scenario: Update short course completion date

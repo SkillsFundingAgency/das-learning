@@ -12,5 +12,6 @@ public enum ShortCourseUpdateChanges
     Reinstated = 4,
     StartDate = 5,
     ExpectedEndDate = 6,
-    ForceEarningsSync = 7
+    ForceEarningsSync = 7,
+    WithdrawalReason = 8,
 }
