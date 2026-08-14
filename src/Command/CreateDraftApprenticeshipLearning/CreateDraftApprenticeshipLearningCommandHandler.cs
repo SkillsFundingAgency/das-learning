@@ -51,7 +51,6 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         var updateModel = command.LearningUpdateContext;
 
         var learningChanges = existingLearning.Update(updateModel);
-        existingLearning.LatestEpisode.SetApprovalStatus(false);
         var learnerChanges = learner.Update(updateModel);
         var changes = learningChanges.Concat(learnerChanges).ToArray();
 

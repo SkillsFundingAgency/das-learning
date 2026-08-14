@@ -78,7 +78,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         string trainingCode,
         string? trainingCourseVersion,
         EmployerType employerType,
-        bool isApproved = true)
+        bool isApproved = false)
     {
         return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
         {

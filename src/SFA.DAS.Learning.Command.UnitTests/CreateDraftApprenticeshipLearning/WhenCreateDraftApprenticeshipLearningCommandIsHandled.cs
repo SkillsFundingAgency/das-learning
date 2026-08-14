@@ -167,7 +167,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         _learningRepository.Verify(x => x.Update(removedLearning), Times.Once);
         _learningRepository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
         removedLearning.LatestEpisode.IsRemoved.Should().BeFalse();
-        removedLearning.LatestEpisode.IsApproved.Should().BeFalse();
+        removedLearning.LatestEpisode.IsApproved.Should().BeTrue();
         result!.Changes.Should().Contain(LearningUpdateChanges.Reinstated);
     }
 
