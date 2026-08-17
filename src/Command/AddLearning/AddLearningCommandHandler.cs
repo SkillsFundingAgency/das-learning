@@ -53,7 +53,8 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
                 ApprovalsApprenticeshipId = command.ApprovalsApprenticeshipId,
                 TransferSenderId = command.TransferSenderId,
                 LegalEntityName = command.LegalEntityName,
-                AccountLegalEntityId = command.AccountLegalEntityId
+                AccountLegalEntityId = command.AccountLegalEntityId,
+                TrainingCourseVersion = command.TrainingCourseVersion
             });
             await _learningService.UpdateLearning(existingLearning);
             return;
