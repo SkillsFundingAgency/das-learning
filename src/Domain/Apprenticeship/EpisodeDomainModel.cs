@@ -19,6 +19,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     private readonly List<EpisodePriceDomainModel> _episodePrices;
     private readonly List<EpisodeBreakInLearningDomainModel> _episodeBreaksInLearning;
     public override Guid Key => _entity.Key;
+    public Guid LearningKey => _entity.LearningKey;
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public long Ukprn => _entity.Ukprn;
     public long? EmployerAccountId => _entity.EmployerAccountId;
@@ -68,6 +69,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     }
 
     internal static ApprenticeshipEpisodeDomainModel New(
+        Guid learningKey,
         long approvalsApprenticeshipId,
         long ukprn,
         long? employerAccountId,
@@ -83,6 +85,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
         {
             Key = Guid.NewGuid(),
+            LearningKey = learningKey,
             ApprovalsApprenticeshipId = approvalsApprenticeshipId,
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
