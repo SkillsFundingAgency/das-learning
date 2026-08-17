@@ -36,7 +36,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learner = await GetOrCreateLearner(command);
 
-        await RemoveMissingCourseIfUnambiguous(command, learner);
+        var removedLearningKey = await RemoveMissingCourseIfUnambiguous(command, learner);
 
         var learnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key, ukprn: command.Ukprn, courseCode: command.TrainingCode);
 
@@ -46,6 +46,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         if (existingLearning == null)
         {
             var createResult = await CreateDraftLearning(command, learner);
+            createResult.RemovedLearningKey = removedLearningKey;
             _logger.LogInformation("Successfully created draft learning with key {LearningKey}", createResult.LearningKey);
             return createResult;
         }
@@ -78,7 +79,8 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             LearningEpisodeKey = existingLearning.LatestEpisode.Key,
             Prices = existingLearning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
-                .ToList()
+                .ToList(),
+            RemovedLearningKey = removedLearningKey
         };
     }
 
@@ -102,7 +104,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
     // course draft for this UKPRN, this POST implies they've switched away from it - safe to mark it removed.
     // Nb. if there are multiple other unapproved courses, we can't tell which (if any) is the one to remove, so we leave them all alone.
     // Nb. also, this will change when we can deal with >1 item in the payload, but for now we only ever POST one course at a time.
-    private async Task RemoveMissingCourseIfUnambiguous(CreateDraftApprenticeshipLearningCommand command, LearnerDomainModel learner)
+    private async Task<Guid?> RemoveMissingCourseIfUnambiguous(CreateDraftApprenticeshipLearningCommand command, LearnerDomainModel learner)
     {
         var otherUnapprovedLearnings = await _apprenticeshipLearningRepository.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode);
 
@@ -115,7 +117,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
                     learner.Key, otherUnapprovedLearnings.Count);
             }
 
-            return;
+            return null;
         }
 
         var missingLearning = otherUnapprovedLearnings.Single();
@@ -127,6 +129,8 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         missingLearning.RemoveLearner();
 
         await _apprenticeshipLearningRepository.Update(missingLearning);
+
+        return missingLearning.Key;
     }
 
     private async Task<LearnerDomainModel> GetOrCreateLearner(CreateDraftApprenticeshipLearningCommand command)

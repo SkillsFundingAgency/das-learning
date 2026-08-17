@@ -343,11 +343,12 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { missingLearning });
 
         // Act
-        await _handler.Handle(command);
+        var result = await _handler.Handle(command);
 
         // Assert
         missingLearning.LatestEpisode.IsRemoved.Should().BeTrue();
         _learningRepository.Verify(x => x.Update(missingLearning), Times.Once);
+        result!.RemovedLearningKey.Should().Be(missingLearning.Key);
     }
 
     [Test]
@@ -372,13 +373,14 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { firstOtherLearning, secondOtherLearning });
 
         // Act
-        await _handler.Handle(command);
+        var result = await _handler.Handle(command);
 
         // Assert
         firstOtherLearning.LatestEpisode.IsRemoved.Should().BeFalse();
         secondOtherLearning.LatestEpisode.IsRemoved.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(firstOtherLearning), Times.Never);
         _learningRepository.Verify(x => x.Update(secondOtherLearning), Times.Never);
+        result!.RemovedLearningKey.Should().BeNull();
     }
 
     [Test]
@@ -401,6 +403,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 
         // Assert
         result.Should().NotBeNull();
+        result!.RemovedLearningKey.Should().BeNull();
     }
 
     private void AssertPersonalDetailsEvent(
