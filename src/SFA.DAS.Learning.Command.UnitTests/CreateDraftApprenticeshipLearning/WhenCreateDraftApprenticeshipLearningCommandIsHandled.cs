@@ -48,6 +48,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             _learnerRepository.Object,
             _learningRepository.Object,
             _logger.Object);
+
+        _learningRepository
+            .Setup(x => x.GetOtherUnapprovedCourseLearnings(It.IsAny<Guid>(), It.IsAny<long>(), It.IsAny<string>()))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
     }
 
     [Test]
@@ -316,6 +320,90 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Then_The_Other_Unapproved_Course_Is_Marked_Removed_When_Exactly_One_Exists()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var missingLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { missingLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        missingLearning.LatestEpisode.IsRemoved.Should().BeTrue();
+        _learningRepository.Verify(x => x.Update(missingLearning), Times.Once);
+        result!.RemovedLearningKey.Should().Be(missingLearning.Key);
+    }
+
+    [Test]
+    public async Task Then_Other_Unapproved_Courses_Are_Left_Alone_When_More_Than_One_Exists()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var firstOtherLearning = CreateLearning(isApproved: false);
+        var secondOtherLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { firstOtherLearning, secondOtherLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        firstOtherLearning.LatestEpisode.IsRemoved.Should().BeFalse();
+        secondOtherLearning.LatestEpisode.IsRemoved.Should().BeFalse();
+        _learningRepository.Verify(x => x.Update(firstOtherLearning), Times.Never);
+        _learningRepository.Verify(x => x.Update(secondOtherLearning), Times.Never);
+        result!.RemovedLearningKey.Should().BeNull();
+    }
+
+    [Test]
+    public async Task Then_Nothing_Happens_When_No_Other_Unapproved_Courses_Exist()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.RemovedLearningKey.Should().BeNull();
     }
 
     private void AssertPersonalDetailsEvent(
