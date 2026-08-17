@@ -35,6 +35,9 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         _logger.LogInformation("Handling CreateDraftApprenticeshipLearningCommand");
 
         var learner = await GetOrCreateLearner(command);
+
+        await RemoveMissingCourseIfUnambiguous(command, learner);
+
         var learnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key, ukprn: command.Ukprn, courseCode: command.TrainingCode);
 
         var existingLearning = SelectExistingLearningToUpdate(learnings);
@@ -93,6 +96,37 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         // exactly one unambiguous candidate: reinstate it. Zero, or more than one (can't tell which is the "right" one to resume): create a fresh row instead of guessing
         return reinstatementCandidates.Count == 1 ? reinstatementCandidates.Single() : null;
+    }
+
+    // Draft Removal-by-omission due to course change: if the learner has exactly one other unapproved (not-removed)
+    // course draft for this UKPRN, this POST implies they've switched away from it - safe to mark it removed.
+    // Nb. if there are multiple other unapproved courses, we can't tell which (if any) is the one to remove, so we leave them all alone.
+    // Nb. also, this will change when we can deal with >1 item in the payload, but for now we only ever POST one course at a time.
+    private async Task RemoveMissingCourseIfUnambiguous(CreateDraftApprenticeshipLearningCommand command, LearnerDomainModel learner)
+    {
+        var otherUnapprovedLearnings = await _apprenticeshipLearningRepository.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode);
+
+        if (otherUnapprovedLearnings.Count != 1)
+        {
+            if (otherUnapprovedLearnings.Count > 1)
+            {
+                _logger.LogInformation(
+                    "Not removing any unapproved apprenticeship course for learner {LearnerKey} - {Count} other unapproved courses found, ambiguous which (if any) is missing",
+                    learner.Key, otherUnapprovedLearnings.Count);
+            }
+
+            return;
+        }
+
+        var missingLearning = otherUnapprovedLearnings.Single();
+
+        _logger.LogInformation(
+            "Marking missing apprenticeship course as removed for learner {LearnerKey}: learning {LearningKey}, TrainingCode {TrainingCode} - learner switched to TrainingCode {NewTrainingCode}",
+            learner.Key, missingLearning.Key, missingLearning.LatestEpisode.TrainingCode, command.TrainingCode);
+
+        missingLearning.RemoveLearner();
+
+        await _apprenticeshipLearningRepository.Update(missingLearning);
     }
 
     private async Task<LearnerDomainModel> GetOrCreateLearner(CreateDraftApprenticeshipLearningCommand command)
