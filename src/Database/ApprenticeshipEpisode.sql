@@ -18,7 +18,7 @@
     [IsRemoved] BIT NOT NULL DEFAULT(0),
     [WithdrawalDate] DATETIME NULL,
     [PauseDate] DATETIME NULL,
-    [IsApproved] BIT NOT NULL DEFAULT 0
+    [IsApproved] BIT NOT NULL DEFAULT 1
 )
 GO
 ALTER TABLE dbo.ApprenticeshipEpisode
