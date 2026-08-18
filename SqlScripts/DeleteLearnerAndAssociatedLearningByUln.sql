@@ -7,7 +7,7 @@ WHERE Uln = @Uln;
 
 IF @LearnerKey IS NULL
 BEGIN
-    RAISERROR('No learner found for the supplied ULN.', 16, 1);
+    PRINT CONCAT('No learner found for ULN ', @Uln, '. Nothing to delete.');
     RETURN;
 END
 
