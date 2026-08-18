@@ -74,6 +74,24 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         return apprenticeships.Select(_learningFactory.GetExisting).ToList();
     }
 
+    public async Task<List<ApprenticeshipLearningDomainModel>> GetOtherUnapprovedCourseLearnings(Guid learnerKey, long ukprn, string excludingCourseCode)
+    {
+        var apprenticeships = await DbContext.ApprenticeshipLearningDbSet
+            .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
+            .Include(x => x.Episodes).ThenInclude(y => y.Prices)
+            .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
+            .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
+            .Where(x => x.LearnerKey == learnerKey &&
+                        x.Episodes.Any(e =>
+                            e.Ukprn == ukprn &&
+                            e.TrainingCode != excludingCourseCode &&
+                            !e.IsApproved &&
+                            !e.IsRemoved))
+            .ToListAsync();
+
+        return apprenticeships.Select(_learningFactory.GetExisting).ToList();
+    }
+
     public async Task<ApprenticeshipLearningDomainModel?> Get(
         string uln,
         long approvalsApprenticeshipId)

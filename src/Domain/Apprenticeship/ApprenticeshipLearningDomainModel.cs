@@ -103,6 +103,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         bool isApproved = false)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
+            _entity.Key,
             approvalsApprenticeshipId,
             ukprn,
             employerAccountId,
