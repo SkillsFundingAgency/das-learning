@@ -65,7 +65,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
-        var learning = _learningFactory.CreateNew(learner.Key, command.LearningType); //todo FLP-1692 story doesn't mention this route but seems sensible to set the learning type here as well since we already have it from the ApprenticeshipCreatedEvent
+        var learning = _learningFactory.CreateNew(learner.Key, command.LearningType);
 
         learning.AddEpisode(
             command.ApprovalsApprenticeshipId,
