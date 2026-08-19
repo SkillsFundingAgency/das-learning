@@ -165,7 +165,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var trainingCode = command.TrainingCode;
 
-        var learning = _learningFactory.CreateNew(learner.Key);
+        var learning = _learningFactory.CreateNew(learner.Key, updateModel.Delivery.LearningType);
         learning.AddEpisode(
             updateModel.ApprovalsApprenticeshipId,
             command.Ukprn,

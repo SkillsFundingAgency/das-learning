@@ -65,7 +65,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
-        var learning = _learningFactory.CreateNew(learner.Key);
+        var learning = _learningFactory.CreateNew(learner.Key, command.LearningType);
 
         learning.AddEpisode(
             command.ApprovalsApprenticeshipId,

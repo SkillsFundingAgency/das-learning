@@ -16,6 +16,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public Guid Key => _entity.Key;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public DateTime? AchievementDate => _entity.AchievementDate;
+    public LearningType LearningType => _entity.LearningType;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
     public DateTime StartDate
@@ -64,12 +65,13 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     public int AgeAtStartOfLearning(LearnerModel learnerModel) => learnerModel.DateOfBirth.CalculateAgeAtDate(StartDate);
 
-    internal static ApprenticeshipLearningDomainModel New(Guid learnerKey)
+    internal static ApprenticeshipLearningDomainModel New(Guid learnerKey, LearningType learningType = LearningType.Apprenticeship)
     {
         return new ApprenticeshipLearningDomainModel(new ApprenticeshipLearningEntity
         {
             Key = Guid.NewGuid(),
-            LearnerKey = learnerKey
+            LearnerKey = learnerKey,
+            LearningType = learningType
         });
     }
 
@@ -139,6 +141,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         ReinstateIfRemoved(changes);
 
+        UpdateLearningType(updateContext);
+
         UpdateLearningDetails(updateContext, changes);
 
         UpdateEnglishAndMathsDetails(updateContext, changes);
@@ -195,6 +199,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public override void Approve(long ukprn, long employerAccountId)
     {
         throw new NotImplementedException("Learning approval is not yet implemented");
+    }
+
+    private void UpdateLearningType(LearningUpdateContext updateModel)
+    {
+        _entity.LearningType = updateModel.Delivery.LearningType;
     }
 
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
