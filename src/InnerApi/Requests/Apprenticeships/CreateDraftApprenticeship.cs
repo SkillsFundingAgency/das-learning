@@ -252,7 +252,8 @@ public static class CreateDraftApprenticeshipExtensions
             },
             Delivery = new DeliveryDetails
             {
-                WithdrawalDate = request.Delivery.WithdrawalDate
+                WithdrawalDate = request.Delivery.WithdrawalDate,
+                LearningType = request.Delivery.LearningType
             },
             Learning = new LearningUpdateDetails
             {

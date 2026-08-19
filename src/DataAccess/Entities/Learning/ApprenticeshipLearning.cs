@@ -1,3 +1,5 @@
+using SFA.DAS.Learning.Enums;
+
 namespace SFA.DAS.Learning.DataAccess.Entities.Learning;
 
 [Table("dbo.ApprenticeshipLearning")]
@@ -12,4 +14,5 @@ public class ApprenticeshipLearning : Learning
     public List<ApprenticeshipEpisode> Episodes { get; set; }
     public List<EnglishAndMaths> EnglishAndMathsCourses { get; set; }
     public DateTime? AchievementDate { get; set; }
+    public LearningType LearningType { get; set; }
 }
