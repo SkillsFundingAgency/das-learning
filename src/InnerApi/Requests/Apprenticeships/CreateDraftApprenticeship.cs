@@ -13,6 +13,11 @@ namespace SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 /// </summary>
 public class CreateDraftApprenticeship
 {
+    /// <summary>
+    /// Academic year (e.g. 2526)
+    /// </summary>
+    public int AcademicYear { get; set; }
+
     ///<summary>
     /// Delivery details
     /// </summary>

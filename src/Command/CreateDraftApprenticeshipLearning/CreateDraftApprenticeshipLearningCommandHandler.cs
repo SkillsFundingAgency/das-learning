@@ -101,12 +101,15 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
     }
 
     // Draft Removal-by-omission due to course change: if the learner has exactly one other unapproved (not-removed)
-    // course draft for this UKPRN, this POST implies they've switched away from it - safe to mark it removed.
-    // Nb. if there are multiple other unapproved courses, we can't tell which (if any) is the one to remove, so we leave them all alone.
+    // course draft for this UKPRN then mark it as removed. This only applies to the given AY - drafts in other AYs are not
+    // removal candidates.
+    // Nb. if there are multiple other unapproved courses overlapping this AY, we can't tell which (if any) is the one to remove, so we leave them all alone.
     // Nb. also, this will change when we can deal with >1 item in the payload, but for now we only ever POST one course at a time.
     private async Task<Guid?> RemoveMissingCourseIfUnambiguous(CreateDraftApprenticeshipLearningCommand command, LearnerDomainModel learner)
     {
-        var otherUnapprovedLearnings = await _apprenticeshipLearningRepository.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode);
+        var otherUnapprovedLearnings = (await _apprenticeshipLearningRepository.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode))
+            .Where(l => l.OverlapsAcademicYear(command.AcademicYear))
+            .ToList();
 
         if (otherUnapprovedLearnings.Count != 1)
         {

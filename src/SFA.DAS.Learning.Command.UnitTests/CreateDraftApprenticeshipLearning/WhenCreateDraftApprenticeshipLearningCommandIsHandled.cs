@@ -23,6 +23,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 {
     private const long Ukprn = 12345678;
     private const string TrainingCode = "ST0001";
+    private const int AcademicYear = 2526;
     private Fixture _fixture = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
     private Mock<IApprenticeshipLearningRepository> _learningRepository = null!;
@@ -384,6 +385,39 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_An_Other_Unapproved_Course_From_A_Different_Academic_Year_Is_Left_Alone()
+    {
+        // Arrange - candidate is an unapproved draft from AY 24/25, already completed before AY 25/26 starts,
+        // so it doesn't overlap the AY the incoming POST is submitted for and must not be treated as "switched away from"
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var priorYearLearning = CreateLearning(isApproved: false,
+            startDate: new DateTime(2024, 8, 1),
+            endDate: new DateTime(2025, 7, 31),
+            completionDate: new DateTime(2025, 6, 1));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { priorYearLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        priorYearLearning.LatestEpisode.IsRemoved.Should().BeFalse();
+        _learningRepository.Verify(x => x.Update(priorYearLearning), Times.Never);
+        result!.RemovedLearningKey.Should().BeNull();
+    }
+
+    [Test]
     public async Task Then_Nothing_Happens_When_No_Other_Unapproved_Courses_Exist()
     {
         // Arrange
@@ -493,7 +527,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             }
         };
 
-        return new CreateDraftApprenticeshipLearningCommand(Ukprn, model, TrainingCode);
+        return new CreateDraftApprenticeshipLearningCommand(Ukprn, model, TrainingCode, AcademicYear);
     }
 
     private LearnerDomainModel CreateLearner()
@@ -508,14 +542,14 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         return LearnerDomainModel.Get(entity);
     }
 
-    private ApprenticeshipLearningDomainModel CreateLearning(bool isApproved, bool isRemoved = false)
+    private ApprenticeshipLearningDomainModel CreateLearning(bool isApproved, bool isRemoved = false, DateTime? startDate = null, DateTime? endDate = null, DateTime? completionDate = null)
     {
         var price = new EpisodePrice
         {
             Key = Guid.NewGuid(),
             EpisodeKey = Guid.NewGuid(),
-            StartDate = new DateTime(2025, 8, 1),
-            EndDate = new DateTime(2026, 7, 31),
+            StartDate = startDate ?? new DateTime(2025, 8, 1),
+            EndDate = endDate ?? new DateTime(2026, 7, 31),
             TrainingPrice = 1000,
             EndPointAssessmentPrice = 200,
             TotalPrice = 1200
@@ -545,6 +579,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         {
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
+            CompletionDate = completionDate,
             Episodes = new List<ApprenticeshipEpisode> { episode },
             EnglishAndMathsCourses = new List<EnglishAndMaths>()
         };

@@ -64,6 +64,14 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     public int AgeAtStartOfLearning(LearnerModel learnerModel) => learnerModel.DateOfBirth.CalculateAgeAtDate(StartDate);
 
+    public bool OverlapsAcademicYear(int academicYear)
+    {
+        var dates = AcademicYearParser.ParseFrom(academicYear);
+        return StartDate <= dates.End &&
+               (!LatestEpisode.WithdrawalDate.HasValue || LatestEpisode.WithdrawalDate.Value >= dates.Start) &&
+               (!CompletionDate.HasValue || CompletionDate.Value >= dates.Start);
+    }
+
     internal static ApprenticeshipLearningDomainModel New(Guid learnerKey)
     {
         return new ApprenticeshipLearningDomainModel(new ApprenticeshipLearningEntity
