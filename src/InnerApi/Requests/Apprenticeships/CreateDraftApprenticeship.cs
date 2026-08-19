@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.Learning.Domain.Extensions;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Shared;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
@@ -53,6 +54,12 @@ public class Delivery
     /// Training code for the apprenticeship's course
     /// </summary>
     public string TrainingCode { get; set; }
+
+
+    /// <summary>
+    /// Learning type for the apprenticeship
+    /// </summary>
+    public LearningType LearningType { get; set; }
 }
 
 /// <summary>
