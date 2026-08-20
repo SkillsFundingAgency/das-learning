@@ -50,11 +50,13 @@ public class WhenAnEpisodeIsAdded
             episode.AccountLegalEntityId,
             episode.TrainingCode,
             episode.TrainingCourseVersion,
-            episode.EmployerType);
+            episode.EmployerType,
+            episode.IsApproved);
 
         //Assert
         apprenticeship.LatestEpisode.Should().BeEquivalentTo(episode, x => x
             .Excluding(y => y.Key)
+            .Excluding(y => y.LearningKey)
             .Excluding(y => y.LatestPrice)
             .Excluding(y => y.EpisodePrices)
             .Excluding(y => y.FirstPrice)
@@ -65,5 +67,6 @@ public class WhenAnEpisodeIsAdded
         apprenticeship.LatestEpisode.LatestPrice.Should().BeEquivalentTo(episode.LatestPrice, x => x
             .ExcludingNestedObjects()
             .Excluding(y => y.Key));
+        apprenticeship.LatestEpisode.LearningKey.Should().Be(apprenticeship.Key);
     }
 }

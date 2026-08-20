@@ -46,6 +46,7 @@ public class LearningDomainModelBuilder
         episode.LearningKey = entity.Key;
         episode.Prices.Clear();
         episode.LearningSupport.Clear();
+        episode.IsRemoved = false;
 
         for (int i = 0; i < orderedCosts.Count; i++)
         {

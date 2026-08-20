@@ -109,6 +109,7 @@ public class WhenUpdatingLearningSupport
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = learningEntity.Key;
         episode.PauseDate = null;
+        episode.IsRemoved = false;
 
         episode.LearningSupport = learningSupport.ConvertAll(x => new DataAccess.Entities.Learning.ApprenticeshipLearningSupport
         {

@@ -10,5 +10,6 @@ public class CreateDraftApprenticeshipLearningCommandResult
     public Guid LearningKey { get; internal set; }
     public Guid LearningEpisodeKey { get; internal set; }
     public List<UpdateLearnerResult.EpisodePrice> Prices { get; internal set; }
+    public Guid? RemovedLearningKey { get; internal set; }
 }
 #pragma warning restore CS8618 // Required properties must be set in the constructor

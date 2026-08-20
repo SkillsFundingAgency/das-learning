@@ -85,7 +85,8 @@ public class WhenAddingAnApprenticeship
             episode.AccountLegalEntityId,
             episode.TrainingCode,
             episode.TrainingCourseVersion,
-            episode.EmployerType);
+            episode.EmployerType,
+            episode.IsApproved);
 
         // Act
         await _sut.Add(apprenticeship);
@@ -96,6 +97,7 @@ public class WhenAddingAnApprenticeship
         var storedEpisode = _dbContext.Episodes.Single();
         storedEpisode.Should().BeEquivalentTo(episode, x => x
             .Excluding(y => y.Key)
+            .Excluding(y => y.LearningKey)
             .Excluding(y => y.LatestPrice)
             .Excluding(y => y.EpisodePrices)
             .Excluding(y => y.FirstPrice)
@@ -104,6 +106,7 @@ public class WhenAddingAnApprenticeship
             .Excluding(y => y.LearningSupport)
             .Excluding(y => y.IsRemoved)
             .Excluding(y => y.EpisodeBreaksInLearning));
+        storedEpisode.LearningKey.Should().Be(apprenticeship.Key);
     }
 
     private void SetUpApprenticeshipRepository()
