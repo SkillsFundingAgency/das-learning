@@ -6,20 +6,30 @@ namespace SFA.DAS.Learning.Command.RemoveLearnerCommand;
 public class RemoveLearnerCommandHandler(
     IApprenticeshipLearningRepository learningRepository,
     ILogger<RemoveLearnerCommandHandler> logger)
-    : ICommandHandler<RemoveLearnerCommand>
+    : ICommandHandler<RemoveLearnerCommand, List<Guid>>
 {
-    public async Task Handle(RemoveLearnerCommand command, CancellationToken cancellationToken = default)
+    public async Task<List<Guid>> Handle(RemoveLearnerCommand command, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Handling RemoveLearnerCommandHandler for Learning {learningKey}", command.LearnerKey);
+        logger.LogInformation("Handling RemoveLearnerCommandHandler for learner key {LearnerKey}", command.LearnerKey);
 
-        var learning = await learningRepository.Get(command.LearnerKey);
-        if (learning == null)
+        var learnings = await learningRepository.GetAllByLearnerKey(command.LearnerKey, command.Ukprn);
+
+        var learningsInScope = learnings.Where(x => x.OverlapsAcademicYear(command.AcademicYear)).ToList();
+
+        if (learningsInScope.Count == 0)
         {
-            throw new KeyNotFoundException($"Learning with key {command.LearnerKey} not found.");
+            throw new KeyNotFoundException($"Learning for learner key {command.LearnerKey} in {command.AcademicYear} AY not found.");
         }
 
-        learning.RemoveLearner();
+        var removedLearningKeys = new List<Guid>();
 
-        await learningRepository.Update(learning);
+        foreach (var learning in learningsInScope)
+        {
+            learning.RemoveLearner();
+            await learningRepository.Update(learning);
+            removedLearningKeys.Add(learning.Key);
+        }
+
+        return removedLearningKeys;
     }
 }

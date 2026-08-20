@@ -174,20 +174,22 @@ public class GetLearnersStepDefinitions
     private async Task<List<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>> CreateRemovedLearners(int numberToCreate, string startDate, string endDate)
     {
         var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
-        var learningKeys = new List<Guid>();
+        var learnerKeys = new List<Guid>();
 
         await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
         {
             foreach (var createdEvent in createdEvents)
             {
-                learningKeys.Add(dbConnection.GetLearningKey(createdEvent.Uln));
+                learnerKeys.Add(dbConnection.GetLearner(createdEvent.Uln).Key);
             }
         }
 
-        foreach (var learningKey in learningKeys)
+        var academicYear = TokenisableDateTime.FromString(startDate).AcademicYear();
+
+        foreach (var learnerKey in learnerKeys)
         {
             var ukprn = Constants.UkPrn;
-            await _testContext.TestInnerApi.Delete($"/{ukprn}/{learningKey}");
+            await _testContext.TestInnerApi.Delete($"/{ukprn}/{learnerKey}?academicYear={academicYear}");
         }
 
         return createdEvents;

@@ -143,20 +143,22 @@ public class LearningController : ControllerBase
     }
 
     /// <summary>
-    /// Removes a learner associated with a specific learning key.
+    /// Removes a learner associated with a specific learner key.
     /// </summary>
-    /// <param name="ukprn">UK provider reference number. Present in the route for future requirements; currently unused.</param>
-    /// <param name="learningKey">The unique identifier for the learner record to remove.</param> -->
-    [HttpDelete("{ukprn}/{learningKey}")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> RemoveLearning(long ukprn, Guid learningKey)
+    /// <param name="ukprn">UK provider reference number. Scopes removal to learnings at this provider.</param>
+    /// <param name="learnerKey">The unique identifier for the learner record to remove.</param>
+    /// <param name="academicYear">Academic year in yyyy format (e.g. 2425). Scopes removal to learnings overlapping this academic year.</param>
+    /// <returns>The learning keys that were removed for the learner.</returns>
+    [HttpDelete("{ukprn}/{learnerKey}")]
+    [ProducesResponseType(typeof(List<Guid>), 200)]
+    public async Task<IActionResult> RemoveLearning(long ukprn, Guid learnerKey, [FromQuery] int academicYear)
     {
-        _logger.LogInformation("Deleting learning with key {LearningKey}", learningKey);
+        _logger.LogInformation("Deleting learner with key {LearnerKey}", learnerKey);
 
-        var command = new RemoveLearnerCommand(learningKey);
+        var command = new RemoveLearnerCommand(learnerKey, ukprn, academicYear);
 
-        await _commandDispatcher.Send(command);
+        var removedLearningKeys = await _commandDispatcher.Send<RemoveLearnerCommand, List<Guid>>(command);
 
-        return new OkResult();
+        return new OkObjectResult(removedLearningKeys);
     }
 }

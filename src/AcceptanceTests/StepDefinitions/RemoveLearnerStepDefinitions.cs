@@ -24,8 +24,10 @@ public class RemoveLearnerStepDefinitions
     {
         var learning = await GetCurrentApprenticeshipLearning();
         var ukprn = learning.Episodes.First().Ukprn;
-        var learningKey = learning.Key;
-        await _testContext.TestInnerApi.Delete($"/{ukprn}/{learningKey}");
+        var learnerKey = learning.LearnerKey;
+        var startDate = learning.Episodes.SelectMany(e => e.Prices).Min(p => p.StartDate);
+        var academicYear = new TokenisableDateTime(startDate).AcademicYear();
+        await _testContext.TestInnerApi.Delete($"/{ukprn}/{learnerKey}?academicYear={academicYear}");
 
     }
 
