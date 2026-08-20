@@ -13,8 +13,7 @@ public abstract class Episode
 
     public long Ukprn { get; set; }
 
-    public long EmployerAccountId { get; set; }
-
     public string TrainingCode { get; set; } = null!;
     public EmployerType EmployerType { get; set; }
+    public bool IsApproved { get; set; }
 }

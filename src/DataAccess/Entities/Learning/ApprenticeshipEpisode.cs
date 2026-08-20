@@ -14,6 +14,7 @@ public class ApprenticeshipEpisode : Episode
     }
 
     public long ApprovalsApprenticeshipId { get; set; }
+    public long? EmployerAccountId { get; set; }
     public FundingPlatform? FundingPlatform { get; set; }
     public long? FundingEmployerAccountId { get; set; }
     public string LegalEntityName { get; set; }
