@@ -117,8 +117,9 @@ public class ApprovalCreatedStepDefinitions
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
 
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var learnerKey = dbConnection.GetLearningKey(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        _scenarioContext.SetLearningKey(learnerKey);
+        var createdUln = _scenarioContext.GetApprenticeshipCreatedEvent().Uln;
+        _scenarioContext.SetLearningKey(dbConnection.GetLearningKey(createdUln));
+        _scenarioContext.SetLearnerKey(dbConnection.GetLearner(createdUln).Key);
     }
 
     [Then(@"an Apprenticeship record is created")]

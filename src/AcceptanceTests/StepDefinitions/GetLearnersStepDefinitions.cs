@@ -146,22 +146,22 @@ public class GetLearnersStepDefinitions
     {
         var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
 
-        var learningKeys = new List<(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent Event, Guid Key)>();
+        var learnerKeys = new List<(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent Event, Guid Key)>();
         await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
         {
             foreach (var createdEvent in createdEvents)
             {
-                learningKeys.Add((createdEvent, dbConnection.GetLearningKey(createdEvent.Uln)));
+                learnerKeys.Add((createdEvent, dbConnection.GetLearner(createdEvent.Uln).Key));
             }
         }
 
-        foreach (var item in learningKeys)
+        foreach (var item in learnerKeys)
         {
             var updateRequest = item.Event.BuildUpdateLearnerRequest();
 
             updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(withdrawnDate).DateTime!.Value;
-            var updateResponse = await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{item.Key}", updateRequest);
-            
+            var updateResponse = await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{Constants.UkPrn}/{item.Key}", updateRequest);
+
             if (!updateResponse.Changes.Contains(LearningUpdateChanges.Withdrawal))
             {
                 throw new Exception($"Failed to withdraw learner with Uln {item.Event.Uln}");
