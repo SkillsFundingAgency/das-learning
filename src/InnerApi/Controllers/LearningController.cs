@@ -124,18 +124,19 @@ public class LearningController : ControllerBase
     }
 
     /// <summary>
-    /// Updates the details of a learner associated with a specific learning key.
+    /// Updates the details of a learner associated with a specific learner key.
     /// </summary>
-    /// <param name="learningKey">The unique identifier for the learner record to update.</param>
+    /// <param name="ukprn">UK provider reference number.</param>
+    /// <param name="learnerKey">The unique identifier for the learner record to update.</param>
     /// <param name="request">The updated learner details.</param>
     /// <returns>An array of <see cref="LearningUpdateChanges"/> values indicating the fields that were modified.</returns>
-    [HttpPut("{learningKey}")]
+    [HttpPut("{ukprn}/{learnerKey}")]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> UpdateLearning(Guid learningKey, [FromBody] UpdateLearnerRequest request)
+    public async Task<IActionResult> UpdateLearning(long ukprn, Guid learnerKey, [FromBody] UpdateLearnerRequest request)
     {
-        _logger.LogInformation("Updating learning with key {LearningKey}", learningKey);
+        _logger.LogInformation("Updating learning for learner with key {LearnerKey}", learnerKey);
 
-        var command = new UpdateLearnerCommand(learningKey, request.ToUpdateModel());
+        var command = new UpdateLearnerCommand(learnerKey, ukprn, request.Delivery.TrainingCode, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<UpdateLearnerCommand, UpdateLearnerResult>(command);
 

@@ -1,4 +1,4 @@
-﻿using AutoFixture;
+using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -8,6 +8,7 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +35,13 @@ public class WhenUpdatingLearner
         _fixture = new Fixture();
     }
 
+    private void SetupLearningLookup(UpdateLearnerCommand command, ApprenticeshipLearningDomainModel? learningDomainModel)
+    {
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(learningDomainModel == null ? [] : [learningDomainModel]);
+    }
+
     [Test]
     public async Task ThenTheLearnerIsUpdatedWithChanges()
     {
@@ -44,14 +52,14 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
-            .ReturnsAsync(learningDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
 
         // Act
         var result = await _commandHandler.Handle(command);
 
         // Assert
         result.Changes.Should().NotBeEmpty();
+        result.LearningKey.Should().Be(learningDomainModel.Key);
         _learnerRepository.Verify(x => x.Update(learnerDomainModel), Times.Once);
         _learningRepository.Verify(x => x.Update(learningDomainModel), Times.Once);
 
@@ -77,8 +85,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
-            .ReturnsAsync(learningDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
 
         _ = learningDomainModel.Update(command.UpdateModel);
         _ = learnerDomainModel.Update(command.UpdateModel);
@@ -105,8 +112,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
-            .ReturnsAsync(learningDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -132,8 +138,7 @@ public class WhenUpdatingLearner
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
             .ReturnsAsync(learnerDomainModel);
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
-            .ReturnsAsync(learningDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
 
         // Act
         var result = await _commandHandler.Handle(command);
@@ -143,19 +148,35 @@ public class WhenUpdatingLearner
         learningDomainModel.FlushEvents().OfType<LearningReinstatedEvent>().Should().BeEmpty();
     }
 
-#pragma warning disable CS8620, CS8600
     [Test]
     public void ThenAnExceptionIsThrownIfTheLearnerIsNotFound()
     {
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
-
-        _learningRepository.Setup(x => x.Get(command.LearningKey))
-                           .ReturnsAsync((ApprenticeshipLearningDomainModel)null);
+        SetupLearningLookup(command, null);
 
         // Act & Assert
         var ex = Assert.ThrowsAsync<KeyNotFoundException>(() => _commandHandler.Handle(command));
-        Assert.That(ex!.Message, Is.EqualTo($"Learning with key {command.LearningKey} not found."));
+        Assert.That(ex!.Message, Is.EqualTo($"Learning for learner key {command.LearnerKey} not found."));
     }
-#pragma warning restore CS8620, CS8600
+
+    [Test]
+    public void ThenAnExceptionIsThrownIfMoreThanOneMatchingLearningIsFound()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var firstLearning = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var secondLearning = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync([firstLearning, secondLearning]);
+
+        // Act & Assert
+        // Deliberately unhandled: apprenticeships can legitimately have more than one row for the
+        // same (LearnerKey, Ukprn, TrainingCode) once repeats/restarts are involved. Disambiguating
+        // that case is deferred to the Change of Circumstances work; for now this surfaces as an
+        // unhandled InvalidOperationException rather than silently guessing.
+        Assert.ThrowsAsync<InvalidOperationException>(() => _commandHandler.Handle(command));
+    }
 }
