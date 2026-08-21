@@ -40,7 +40,8 @@ public class WhenUpdateLearner
     public async Task ThenReturnsListOfChanges()
     {
         // Arrange
-        var learningKey = _fixture.Create<Guid>();
+        var ukprn = _fixture.Create<long>();
+        var learnerKey = _fixture.Create<Guid>();
         var expectedResponse = _fixture.Create<UpdateLearnerResult>();
         var request = _fixture.Create<UpdateLearnerRequest>();
 
@@ -49,11 +50,36 @@ public class WhenUpdateLearner
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _sut.UpdateLearning(learningKey, request);
+        var result = await _sut.UpdateLearning(ukprn, learnerKey, request);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
         okResult.Value.Should().Be(expectedResponse);
+    }
+
+    [Test]
+    public async Task ThenDispatchesUpdateLearnerCommandWithLearnerKeyUkprnAndTrainingCode()
+    {
+        // Arrange
+        var ukprn = _fixture.Create<long>();
+        var learnerKey = _fixture.Create<Guid>();
+        var expectedResponse = _fixture.Create<UpdateLearnerResult>();
+        var request = _fixture.Create<UpdateLearnerRequest>();
+
+        _mockCommandDispatcher
+            .Setup(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(It.IsAny<UpdateLearnerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
+
+        // Act
+        await _sut.UpdateLearning(ukprn, learnerKey, request);
+
+        // Assert
+        _mockCommandDispatcher.Verify(x => x.Send<UpdateLearnerCommand, UpdateLearnerResult>(
+            It.Is<UpdateLearnerCommand>(c =>
+                c.LearnerKey == learnerKey &&
+                c.Ukprn == ukprn &&
+                c.TrainingCode == request.Delivery.TrainingCode),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 }
