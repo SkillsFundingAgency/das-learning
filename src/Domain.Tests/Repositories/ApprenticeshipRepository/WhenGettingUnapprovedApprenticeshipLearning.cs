@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Moq;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
@@ -87,5 +89,26 @@ public class WhenGettingUnapprovedApprenticeshipLearning
         var result = await repository.GetUnapprovedLearning(Uln, apprenticeshipId: 200003, trainingCode: "SOME-OTHER-CODE");
 
         result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task AndTheReturnedLearningIsApprovedAndSaved_ThenTheChangeIsPersisted()
+    {
+        ILearningRepository repository = _sut;
+        var learning = (ApprenticeshipLearningDomainModel)(await repository.GetUnapprovedLearning(Uln, apprenticeshipId: 200003, trainingCode: TrainingCode))!;
+
+        learning.Approve(employerAccountId: 1, EmployerType.NonLevy, fundingEmployerAccountId: null, legalEntityName: "Test Org", approvalsApprenticeshipId: 200003);
+
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
+
+        var persisted = await _dbContext.ApprenticeshipLearningDbSet
+            .Include(x => x.Episodes)
+            .Where(x => x.LearnerKey == learning.LearnerKey)
+            .SelectMany(x => x.Episodes)
+            .SingleAsync();
+
+        persisted.IsApproved.Should().BeTrue();
+        persisted.ApprovalsApprenticeshipId.Should().Be(200003);
     }
 }

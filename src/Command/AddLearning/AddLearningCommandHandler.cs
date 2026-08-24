@@ -6,6 +6,7 @@ using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Types;
 using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
@@ -40,11 +41,21 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
     {
         var existingLearning = await _learningService.GetUnapprovedLearning(command.Uln, command.LearningType, command.ApprovalsApprenticeshipId, command.TrainingCode);
 
-        if (existingLearning != null && command.LearningType == LearningType.ApprenticeshipUnit)
+        if (existingLearning != null)
         {
-            _logger.LogInformation("Approving unapproved ShortCourse for ULN {Uln}", command.Uln);
+            _logger.LogInformation("Approving unapproved {LearningType} Learning for ULN {Uln}", command.LearningType, command.Uln);
 
-            ((ShortCourseLearningDomainModel)existingLearning).Approve(command.UKPRN, command.EmployerAccountId, command.EmployerType, command.ApprovalsApprenticeshipId, command.TransferSenderId);
+            existingLearning.Approve(new ApproveLearningContext
+            {
+                Ukprn = command.UKPRN,
+                EmployerAccountId = command.EmployerAccountId,
+                EmployerType = command.EmployerType,
+                ApprovalsApprenticeshipId = command.ApprovalsApprenticeshipId,
+                TransferSenderId = command.TransferSenderId,
+                LegalEntityName = command.LegalEntityName,
+                AccountLegalEntityId = command.AccountLegalEntityId,
+                TrainingCourseVersion = command.TrainingCourseVersion
+            });
             await _learningService.UpdateLearning(existingLearning);
             return;
         }
@@ -52,12 +63,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         if (command.LearningType == LearningType.ApprenticeshipUnit)
         {
             _logger.LogWarning("Unable to approve ShortCourse for ULN {Uln} - no ShortCourse was found", command.Uln);
-            return;
-        }
-
-        if (existingLearning != null)
-        {
-            _logger.LogWarning("Learning not created as a record already exists with given ULN and ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.", command.ApprovalsApprenticeshipId);
             return;
         }
 
