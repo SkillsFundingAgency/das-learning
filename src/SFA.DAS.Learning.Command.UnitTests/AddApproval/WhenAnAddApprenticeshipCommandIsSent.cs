@@ -54,10 +54,11 @@ public class WhenAnAddApprenticeshipCommandIsSent
     }
 
     [Test]
-	public async Task WhenAnApprenticeshipAlreadyExistsThenItIsNotCreatedAgain()
+	public async Task WhenAnUnapprovedApprenticeshipAlreadyExistsThenItIsApprovedNotCreatedAgain()
     {
         var command = _fixture.Create<AddLearningCommand>();
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        TestHelper.SetEpisode(apprenticeship, _fixture.CreateEpisodeDomainModel());
 
         _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.Apprenticeship, command.ApprovalsApprenticeshipId, It.IsAny<string>()))
             .ReturnsAsync(apprenticeship);
@@ -65,8 +66,30 @@ public class WhenAnAddApprenticeshipCommandIsSent
         await _commandHandler.Handle(command);
 
         _learningService.Verify(x => x.AddLearning(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never());
+        _learningService.Verify(x => x.UpdateLearning(apprenticeship), Times.Once);
+
+        apprenticeship.LatestEpisode.IsApproved.Should().BeTrue();
+        apprenticeship.LatestEpisode.EmployerAccountId.Should().Be(command.EmployerAccountId);
+        apprenticeship.LatestEpisode.EmployerType.Should().Be(command.EmployerType);
+        apprenticeship.LatestEpisode.FundingEmployerAccountId.Should().Be(command.TransferSenderId);
+        apprenticeship.LatestEpisode.LegalEntityName.Should().Be(command.LegalEntityName);
+        apprenticeship.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(command.ApprovalsApprenticeshipId);
+        apprenticeship.LatestEpisode.AccountLegalEntityId.Should().Be(command.AccountLegalEntityId);
+        apprenticeship.LatestEpisode.TrainingCourseVersion.Should().Be(command.TrainingCourseVersion);
+
+        apprenticeship
+            .FlushEvents()
+            .OfType<Domain.Events.LearningApprovedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == apprenticeship.Key
+                                && e.EpisodeKey == apprenticeship.LatestEpisode.Key
+                                && e.ApprovalsApprenticeshipId == command.ApprovalsApprenticeshipId
+                                && e.EmployerAccountId == command.EmployerAccountId
+                                && e.FundingAccountId == (command.TransferSenderId ?? command.EmployerAccountId)
+                                && e.LearnerKey == apprenticeship.LearnerKey
+                                && e.EmployerType == command.EmployerType);
     }
-	
+
     [Test]
     public async Task ThenAnEpisodeIsCreated()
     {

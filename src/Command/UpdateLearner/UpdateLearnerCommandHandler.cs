@@ -13,14 +13,19 @@ public class UpdateLearnerCommandHandler(
 {
     public async Task<UpdateLearnerResult> Handle(UpdateLearnerCommand command, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Handling UpdateLearnerCommand for learner with key {LearnerKey}", command.LearningKey);
-        
-        var learning = await learningRepository.Get(command.LearningKey);
+        logger.LogInformation("Handling UpdateLearnerCommand for learner with key {LearnerKey}", command.LearnerKey);
+
+        // Get all learnings for the learner key, ukprn, and training code
+        // In the case of multiple with the same course code, we throw an exception
+        // This is a temporary measure until we have a way to handle multiple learnings with the same course code, and should be fixed
+        // when "continuations" or other change of circumstance is implemented, until which time this endpoint will be toggled off
+        var candidates = await learningRepository.GetAllByLearnerKey(command.LearnerKey, command.Ukprn, command.TrainingCode);
+        var learning = candidates.SingleOrDefault();
 
         if (learning == null)
         {
-            logger.LogWarning("No learning found for learner key {LearnerKey}", command.LearningKey);
-            throw new KeyNotFoundException($"Learning with key {command.LearningKey} not found.");
+            logger.LogWarning("No learning found for learner key {LearnerKey}", command.LearnerKey);
+            throw new KeyNotFoundException($"Learning for learner key {command.LearnerKey} not found.");
         }
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
@@ -36,11 +41,12 @@ public class UpdateLearnerCommandHandler(
 
         if (changes.Length == 0)
         {
-            logger.LogInformation("No changes detected for learner with key {LearnerKey}", command.LearningKey);
+            logger.LogInformation("No changes detected for learner with key {LearnerKey}", command.LearnerKey);
             return new UpdateLearnerResult
             {
                 Changes = [],
                 AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
+                LearningKey = learning.Key,
                 LearningEpisodeKey = learning.LatestEpisode.Key,
                 Prices = learning.LatestEpisode.EpisodePrices
                     .Select(x => (UpdateLearnerResult.EpisodePrice)x)
@@ -48,7 +54,7 @@ public class UpdateLearnerCommandHandler(
             };
         }
 
-        logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearningKey, changes);
+        logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearnerKey, changes);
 
         learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
         if(changes.Any(x=>x == Enums.LearningUpdateChanges.PersonalDetails))
@@ -60,12 +66,13 @@ public class UpdateLearnerCommandHandler(
         await learnerRepository.Update(learner);
         await learningRepository.Update(learning);
 
-        logger.LogInformation("Successfully updated learning with key {LearnerKey}", command.LearningKey);
+        logger.LogInformation("Successfully updated learning for learner with key {LearnerKey}", command.LearnerKey);
 
         return new UpdateLearnerResult
         {
             Changes = changes.ToList(),
             AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
+            LearningKey = learning.Key,
             LearningEpisodeKey = learning.LatestEpisode.Key,
             Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)

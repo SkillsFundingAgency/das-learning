@@ -177,8 +177,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
         return episode.Key;
     }
 
-    public override void Approve(long ukprn, long employerAccountId)
-        => Approve(ukprn, employerAccountId, EmployerType.NonLevy, 0);
+    public override void Approve(ApproveLearningContext context)
+        => Approve(context.Ukprn, context.EmployerAccountId, context.EmployerType, context.ApprovalsApprenticeshipId, context.TransferSenderId);
 
     public void Approve(long ukprn, long employerAccountId, EmployerType employerType, long approvalsApprenticeshipId, long? transferSenderId = null)
     {
