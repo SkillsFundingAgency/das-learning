@@ -34,4 +34,47 @@ public class WhenRemoveLearning
             _mockLogger.Object,
             _mockPagedLinkHeaderService.Object);
     }
+
+    [Test]
+    public async Task ThenReturnsRemovedLearningKeys()
+    {
+        // Arrange
+        var ukprn = _fixture.Create<long>();
+        var learnerKey = _fixture.Create<Guid>();
+        var academicYear = _fixture.Create<int>();
+        var removedLearningKeys = _fixture.CreateMany<Guid>(2).ToList();
+
+        _mockCommandDispatcher
+            .Setup(x => x.Send<RemoveLearnerCommand, List<Guid>>(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(removedLearningKeys);
+
+        // Act
+        var result = await _sut.RemoveLearning(ukprn, learnerKey, academicYear);
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = (OkObjectResult)result;
+        okResult.Value.Should().BeEquivalentTo(removedLearningKeys);
+    }
+
+    [Test]
+    public async Task ThenDispatchesRemoveLearnerCommandWithLearnerKeyUkprnAndAcademicYear()
+    {
+        // Arrange
+        var ukprn = _fixture.Create<long>();
+        var learnerKey = _fixture.Create<Guid>();
+        var academicYear = _fixture.Create<int>();
+
+        _mockCommandDispatcher
+            .Setup(x => x.Send<RemoveLearnerCommand, List<Guid>>(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        // Act
+        await _sut.RemoveLearning(ukprn, learnerKey, academicYear);
+
+        // Assert
+        _mockCommandDispatcher.Verify(x => x.Send<RemoveLearnerCommand, List<Guid>>(
+            It.Is<RemoveLearnerCommand>(c => c.LearnerKey == learnerKey && c.Ukprn == ukprn && c.AcademicYear == academicYear),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
