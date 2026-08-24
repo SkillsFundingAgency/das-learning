@@ -132,7 +132,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
             changes.Add(ShortCourseUpdateChanges.CompletionDate);
 
         // We only want to send one event for a withdrawal so we check if one of the two withdrawal fields has changed and handle it as one event.
-        if (IsWithdrawn(
+        if (HasWithdrawalChanged(
                 episode, 
                 prevWithdrawalDate, 
                 prevWithdrawalReasonCode,
@@ -169,7 +169,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
             changes.Add(ShortCourseUpdateChanges.ForceEarningsSync);
     }
 
-    private static bool IsWithdrawn(
+    private static bool HasWithdrawalChanged(
         ShortCourseEpisodeDomainModel episode, 
         DateTime? prevWithdrawalDate, 
         short? prevWithdrawalReasonCode, 

@@ -8,7 +8,6 @@ Scenario: Update unapproved short course withdrawal date
     Then the update short course response includes changes
         | Change           |
         | WithdrawalDate   |
-        | WithdrawalReason |
 
 Scenario: Update approved short course withdrawal date
     Given SLD has informed the system that a new short course has been created

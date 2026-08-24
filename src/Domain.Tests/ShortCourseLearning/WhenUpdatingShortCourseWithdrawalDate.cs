@@ -71,9 +71,6 @@ public class WhenUpdatingShortCourseWithdrawalDate
         events.Should().ContainSingle();
         var @event = events.Single();
 
-        // Use BeEquivalentTo to compare all properties except Created, which is time-sensitive.
-        // We then check the DateTime separately to ensure it's close to the current time.
-        // A bit messy but provides ability for a proper full object comparison whilst still satisfying the need to check the Created property is close to now.
         @event.Should().BeEquivalentTo(expectedEvent, options => options.Excluding(x => x.Created));
         @event.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
     }
