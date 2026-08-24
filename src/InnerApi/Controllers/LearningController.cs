@@ -66,8 +66,8 @@ public class LearningController : ControllerBase
     /// <param name="ukprn">UK provider reference number.</param>
     /// <param name="uln">Unique learner number.</param>
     /// <param name="trainingCode">Training code (standard code) of the apprenticeship.</param>
-    /// <param name="startDate">Start date of the apprenticeship. Only the month and year are compared, as the day may not be reliably known.</param>
-    /// <param name="isApproved">Approval state to match against.</param>
+    /// <param name="startDate">Start date of the apprenticeship. Only month and year are used for matching.</param>
+    /// <param name="isApproved">Approval status to match against.</param>
     /// <response code="200">A matching apprenticeship record exists</response>
     /// <response code="404">No matching apprenticeship record exists</response>
     [HttpHead("{ukprn}/apprenticeships")]
