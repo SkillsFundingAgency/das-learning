@@ -146,22 +146,22 @@ public class GetLearnersStepDefinitions
     {
         var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
 
-        var learningKeys = new List<(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent Event, Guid Key)>();
+        var learnerKeys = new List<(CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent Event, Guid Key)>();
         await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
         {
             foreach (var createdEvent in createdEvents)
             {
-                learningKeys.Add((createdEvent, dbConnection.GetLearningKey(createdEvent.Uln)));
+                learnerKeys.Add((createdEvent, dbConnection.GetLearner(createdEvent.Uln).Key));
             }
         }
 
-        foreach (var item in learningKeys)
+        foreach (var item in learnerKeys)
         {
             var updateRequest = item.Event.BuildUpdateLearnerRequest();
 
             updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(withdrawnDate).DateTime!.Value;
-            var updateResponse = await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{item.Key}", updateRequest);
-            
+            var updateResponse = await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{Constants.UkPrn}/{item.Key}", updateRequest);
+
             if (!updateResponse.Changes.Contains(LearningUpdateChanges.Withdrawal))
             {
                 throw new Exception($"Failed to withdraw learner with Uln {item.Event.Uln}");
@@ -174,20 +174,22 @@ public class GetLearnersStepDefinitions
     private async Task<List<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>> CreateRemovedLearners(int numberToCreate, string startDate, string endDate)
     {
         var createdEvents = await CreateLearners(numberToCreate, startDate, endDate);
-        var learningKeys = new List<Guid>();
+        var learnerKeys = new List<Guid>();
 
         await using (var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString()))
         {
             foreach (var createdEvent in createdEvents)
             {
-                learningKeys.Add(dbConnection.GetLearningKey(createdEvent.Uln));
+                learnerKeys.Add(dbConnection.GetLearner(createdEvent.Uln).Key);
             }
         }
 
-        foreach (var learningKey in learningKeys)
+        var academicYear = TokenisableDateTime.FromString(startDate).AcademicYear();
+
+        foreach (var learnerKey in learnerKeys)
         {
             var ukprn = Constants.UkPrn;
-            await _testContext.TestInnerApi.Delete($"/{ukprn}/{learningKey}");
+            await _testContext.TestInnerApi.Delete($"/{ukprn}/{learnerKey}?academicYear={academicYear}");
         }
 
         return createdEvents;
