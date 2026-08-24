@@ -63,7 +63,7 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenReturnsExistsTrueWhenApprovedMatchFound()
+    public async Task ThenReturnsTrueWhenFound()
     {
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2025, 9, 1));
@@ -76,7 +76,7 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenReturnsExistsFalseWhenNoMatchingLearner()
+    public async Task ThenReturnsFalseWhenNoMatchingLearner()
     {
         var query = new CheckApprovedApprenticeshipExistsRequest(1000, "9999999999", "123", new DateTime(2025, 9, 15), true);
 
@@ -86,7 +86,7 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenReturnsExistsFalseWhenTrainingCodeDoesNotMatch()
+    public async Task ThenReturnsFalseWhenTrainingCodeDoesNotMatch()
     {
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2025, 9, 1));
@@ -99,7 +99,7 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenReturnsExistsFalseWhenApprovalStateDoesNotMatchRequestedIsApproved()
+    public async Task ThenReturnsFalseWhenApprovalStateDoesNotMatchRequestedIsApproved()
     {
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: false, isRemoved: false, startDate: new DateTime(2025, 9, 1));
@@ -112,7 +112,7 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenReturnsExistsTrueForUnapprovedMatchWhenRequestedIsApprovedIsFalse()
+    public async Task ThenReturnsTrueForUnapprovedMatchWhenRequestedIsApprovedIsFalse()
     {
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: false, isRemoved: false, startDate: new DateTime(2025, 9, 1));
@@ -127,7 +127,6 @@ public class WhenCheckingApprovedApprenticeshipExists
     [Test]
     public async Task ThenRemovedButApprovedEpisodeStillCountsAsExisting()
     {
-        // Scenario 10: a removed-but-approved record must still count as "exists" for dedup purposes.
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: true, startDate: new DateTime(2025, 9, 1));
 
@@ -144,7 +143,6 @@ public class WhenCheckingApprovedApprenticeshipExists
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2025, 9, 1));
 
-        // Same month/year, different day than the stored price start date
         var query = new CheckApprovedApprenticeshipExistsRequest(1000, "1111111111", "123", new DateTime(2025, 9, 28), true);
 
         var result = await _sut.Handle(query);
@@ -153,7 +151,7 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenReturnsExistsFalseWhenStartDateMonthYearDoesNotMatch()
+    public async Task ThenReturnsFalseWhenStartDateMonthYearDoesNotMatch()
     {
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2025, 9, 1));
@@ -166,11 +164,8 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenUsesStartDateOfFirstEpisodeWhenLearnerHasABreakInLearningRestart()
+    public async Task ThenMatchesEarlierEpisodeWhenLearnerHasMultipleEpisodesForSameProviderAndCourse()
     {
-        // A break-in-learning restart creates a second episode with a later start date for the
-        // same (ukprn, trainingCode). Matching must resolve back to the *original* episode's
-        // start date, not the restart's, otherwise a restart's own PUT would wrongly look "new".
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2025, 9, 1));
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2026, 1, 1));
@@ -183,7 +178,21 @@ public class WhenCheckingApprovedApprenticeshipExists
     }
 
     [Test]
-    public async Task ThenReturnsExistsFalseWhenUkprnDoesNotMatch()
+    public async Task ThenMatchesLaterEpisodeWhenLearnerHasMultipleEpisodesForSameProviderAndCourse()
+    {
+        var learningKey = await AddLearnerAndLearning("1111111111");
+        await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2025, 9, 1));
+        await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2026, 1, 1));
+
+        var query = new CheckApprovedApprenticeshipExistsRequest(1000, "1111111111", "123", new DateTime(2026, 1, 15), true);
+
+        var result = await _sut.Handle(query);
+
+        result.Exists.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task ThenReturnsFalseWhenUkprnDoesNotMatch()
     {
         var learningKey = await AddLearnerAndLearning("1111111111");
         await AddEpisode(learningKey, 1000, "123", isApproved: true, isRemoved: false, startDate: new DateTime(2025, 9, 1));
