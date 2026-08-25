@@ -64,7 +64,7 @@ public class Delivery
     /// <summary>
     /// Learning type for the apprenticeship
     /// </summary>
-    public LearningType LearningType { get; set; }
+    public LearningType? LearningType { get; set; }
 }
 
 /// <summary>

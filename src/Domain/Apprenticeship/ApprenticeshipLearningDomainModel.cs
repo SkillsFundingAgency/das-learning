@@ -226,7 +226,14 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         
     private void UpdateLearningType(LearningUpdateContext updateModel)
     {
-        _entity.LearningType = updateModel.Delivery.LearningType;
+        // Currently the LearningType is nullable from the outer api so we don't want to update 
+        // the current LearningType with a null as the PUT doesn't necessarily need to include the LearningType.
+        if (updateModel.Delivery.LearningType is null)
+        {
+            return;
+        }
+
+        _entity.LearningType = updateModel.Delivery.LearningType.Value;
     }
 
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)

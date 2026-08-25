@@ -19,7 +19,7 @@ public class LearningUpdateContext
 public class DeliveryDetails
 {
     public DateTime? WithdrawalDate { get; set; }
-    public LearningType LearningType { get; set; }
+    public LearningType? LearningType { get; set; }
 }
 
 //todo on the ShortCourses tech design the Learner object is shared between Apprenticeships and ShortCourses without any inheritance, however these two fields are not on the design but are currently required for Apprenticeships.
