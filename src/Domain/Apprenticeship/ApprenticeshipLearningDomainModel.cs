@@ -64,6 +64,14 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     public int AgeAtStartOfLearning(LearnerModel learnerModel) => learnerModel.DateOfBirth.CalculateAgeAtDate(StartDate);
 
+    public bool OverlapsAcademicYear(int academicYear)
+    {
+        var dates = AcademicYearParser.ParseFrom(academicYear);
+        return StartDate <= dates.End &&
+               (!LatestEpisode.WithdrawalDate.HasValue || LatestEpisode.WithdrawalDate.Value >= dates.Start) &&
+               (!CompletionDate.HasValue || CompletionDate.Value >= dates.Start);
+    }
+
     internal static ApprenticeshipLearningDomainModel New(Guid learnerKey)
     {
         return new ApprenticeshipLearningDomainModel(new ApprenticeshipLearningEntity
@@ -87,7 +95,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public void AddEpisode(
         long approvalsApprenticeshipId,
         long ukprn,
-        long employerAccountId,
+        long? employerAccountId,
         DateTime startDate,
         DateTime endDate,
         decimal totalPrice,
@@ -99,9 +107,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         long? accountLegalEntityId,
         string trainingCode,
         string? trainingCourseVersion,
-        EmployerType employerType)
+        EmployerType employerType,
+        bool isApproved = false)
     {
         var episode = ApprenticeshipEpisodeDomainModel.New(
+            _entity.Key,
             approvalsApprenticeshipId,
             ukprn,
             employerAccountId,
@@ -111,7 +121,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             accountLegalEntityId,
             trainingCode,
             trainingCourseVersion,
-            employerType);
+            employerType,
+            isApproved);
 
         episode.AddEpisodePrice(
             startDate,
@@ -189,9 +200,25 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         changes.Add(LearningUpdateChanges.Reinstated);
     }
 
-    public override void Approve(long ukprn, long employerAccountId)
+    public override void Approve(ApproveLearningContext context)
+        => Approve(context.EmployerAccountId, context.EmployerType, context.TransferSenderId, context.LegalEntityName, context.ApprovalsApprenticeshipId, context.AccountLegalEntityId, context.TrainingCourseVersion);
+
+    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId, long? accountLegalEntityId = null, string? trainingCourseVersion = null)
     {
-        throw new NotImplementedException("Learning approval is not yet implemented");
+        var episode = LatestEpisode;
+        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId, accountLegalEntityId, trainingCourseVersion);
+
+        AddEvent(new LearningApprovedEvent
+        {
+            LearningKey = Key,
+            EpisodeKey = episode.Key,
+            ApprovalsApprenticeshipId = approvalsApprenticeshipId,
+            EmployerAccountId = employerAccountId,
+            FundingAccountId = fundingEmployerAccountId ?? employerAccountId,
+            LearnerKey = _entity.LearnerKey,
+            LearnerRef = string.Empty,
+            EmployerType = employerType
+        });
     }
 
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
@@ -309,7 +336,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
                 WithdrawalReasonCode = 0, //to be populated in a future story (FLP-1881)
                 Created = DateTime.UtcNow,
-                EmployerAccountId = LatestEpisode.EmployerAccountId
+                EmployerAccountId = LatestEpisode.EmployerAccountId ?? 0
             };
 
             AddEvent(@event);

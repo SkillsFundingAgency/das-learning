@@ -163,6 +163,7 @@ public class WhenUpdatingBreaksInLearning
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = entity.Key;
         episode.PauseDate = null;
+        episode.IsRemoved = false;
 
         episode.BreaksInLearning = new List<EpisodeBreakInLearning>();
         foreach (var b in breaks)

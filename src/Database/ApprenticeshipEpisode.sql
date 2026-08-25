@@ -5,7 +5,7 @@
     [ApprovalsApprenticeshipId] BIGINT NOT NULL DEFAULT (0),
     [IsDeleted] BIT NOT NULL DEFAULT(0),
     [Ukprn] BIGINT NOT NULL,
-    [EmployerAccountId] BIGINT NOT NULL,
+    [EmployerAccountId] BIGINT NULL,
     [FundingType] NVARCHAR(50) NULL,
     [EmployerType] NVARCHAR(50) NULL,
     [FundingPlatform] INT NULL,
@@ -17,7 +17,8 @@
     [PaymentsFrozen] BIT NOT NULL DEFAULT (0),
     [IsRemoved] BIT NOT NULL DEFAULT(0),
     [WithdrawalDate] DATETIME NULL,
-    [PauseDate] DATETIME NULL
+    [PauseDate] DATETIME NULL,
+    [IsApproved] BIT NOT NULL DEFAULT 1
 )
 GO
 ALTER TABLE dbo.ApprenticeshipEpisode

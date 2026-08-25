@@ -14,7 +14,8 @@ internal static class ApprenticeshipCreatedEventExtensions
         {
             Delivery = new Delivery
             {
-                WithdrawalDate = null
+                WithdrawalDate = null,
+                TrainingCode = apprenticeshipCreatedEvent.TrainingCode
             },
             Learner = new ApprenticeshipLearnerUpdateDetails
             {

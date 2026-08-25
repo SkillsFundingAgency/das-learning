@@ -1,4 +1,6 @@
 ﻿using AutoFixture;
+using Dapper.Contrib.Extensions;
+using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 using SFA.DAS.Learning.Command.UpdateLearner;
@@ -39,6 +41,22 @@ public class CreateDraftApprenticeshipStepDefinitions
     {
         (var result, var statusCode) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
         statusCode.Should().Be((HttpStatusCode)expectedStatusCode);
+    }
+
+    [Then(@"the draft apprenticeship should be created")]
+    public async Task ThenTheDraftApprenticeshipShouldBeCreated()
+    {
+        var uln = _scenarioContext.GetUpdateLearnerRequest().Learner.Uln;
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var createdLearning = dbConnection.GetLearning(uln.ToString());
+
+        createdLearning.Should().NotBeNull();
+
+        var createdEpisode = createdLearning.Episodes.SingleOrDefault();
+
+        createdEpisode.Should().NotBeNull();
+        createdEpisode!.IsApproved.Should().BeFalse();
     }
 
 }

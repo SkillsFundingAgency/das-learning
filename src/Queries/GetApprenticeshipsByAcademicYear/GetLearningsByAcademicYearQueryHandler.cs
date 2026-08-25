@@ -12,25 +12,27 @@ public class GetLearningsByAcademicYearQueryHandler(LearningDataContext dbContex
     {
         var dates = AcademicYearParser.ParseFrom(query.AcademicYear);
 
-        var baseQuery = dbContext.ApprenticeshipLearningDbSet
-            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn && !e.IsRemoved))
+        var matchingLearnerKeys = dbContext.ApprenticeshipLearningDbSet
+            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn && !e.IsRemoved && e.IsApproved))
             .IsActiveInYear(dates.Start, dates.End)
-            .AsNoTracking();
+            .AsNoTracking()
+            .Select(x => x.LearnerKey)
+            .Distinct();
 
-        var totalItems = await baseQuery.CountAsync(cancellationToken);
+        var totalItems = await matchingLearnerKeys.CountAsync(cancellationToken);
 
-        var items = await baseQuery
-            .OrderBy(x => x.Episodes.Min(e => e.ApprovalsApprenticeshipId))
+        var items = await matchingLearnerKeys
+            .OrderBy(k => k)
             .Skip(query.Offset)
             .Take(query.Limit)
             .Join(
                 dbContext.LearnersDbSet.AsNoTracking(),
-                learning => learning.LearnerKey,
+                key => key,
                 learner => learner.Key,
-                (learning, learner) => new GetLearningsByDatesResponseItem
+                (key, learner) => new GetLearningsByDatesResponseItem
                 {
                     Uln = learner.Uln,
-                    Key = learning.Key
+                    Key = learner.Key
                 })
             .ToListAsync(cancellationToken);
 
