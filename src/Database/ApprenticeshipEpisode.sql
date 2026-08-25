@@ -8,7 +8,6 @@
     [EmployerAccountId] BIGINT NULL,
     [FundingType] NVARCHAR(50) NULL,
     [EmployerType] NVARCHAR(50) NULL,
-    [FundingPlatform] INT NULL,
     [FundingEmployerAccountId] BIGINT NULL,
     [LegalEntityName] NVARCHAR(255) NOT NULL,
     [AccountLegalEntityId] BIGINT NULL,

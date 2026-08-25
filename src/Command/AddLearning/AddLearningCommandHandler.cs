@@ -8,7 +8,6 @@ using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Types;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.AddLearning;
 
@@ -81,7 +80,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TotalPrice,
             command.TrainingPrice,
             command.EndPointAssessmentPrice,
-            command.FundingPlatform,
             command.TransferSenderId,
             command.LegalEntityName,
             command.AccountLegalEntityId,
@@ -93,11 +91,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
 
         await _learningService.AddLearning(learning);
-
-        if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
-        {
-            await SendEvent(learning, learner);
-        }
     }
 
     private async Task<LearnerDomainModel> GetOrCreateLearner(AddLearningCommand command)
@@ -112,25 +105,5 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         var newLearner = _learnerFactory.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName);
         await _learnerRepository.Add(newLearner);
         return newLearner;
-    }
-
-    private async Task SendEvent(ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner)
-    {
-
-        _logger.LogInformation(
-            "Sending LearningCreatedEvent for ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
-            learning.LatestEpisode.ApprovalsApprenticeshipId);
-        var learningCreatedEvent = new LearningCreatedEvent
-        {
-            LearningKey = learning.Key,
-            Uln = learner.Uln,
-            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
-            DateOfBirth = learner.DateOfBirth,
-            FirstName = learner.FirstName,
-            LastName = learner.LastName,
-            Episode = learning.BuildEpisodeForIntegrationEvent(learner)
-        };
-
-        await _messageSession.Publish(learningCreatedEvent);
     }
 }

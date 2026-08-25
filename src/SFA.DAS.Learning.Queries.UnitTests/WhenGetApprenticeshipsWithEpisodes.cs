@@ -105,7 +105,6 @@ public class WhenGetApprenticeshipsWithEpisodes
             Key = Guid.NewGuid(),
             Ukprn = DefaultQuery.Ukprn,
             TrainingCode = "ST0001",
-            FundingPlatform = FundingPlatform.DAS,
             LegalEntityName = "Test Employer",
             IsRemoved = true
         };
@@ -170,7 +169,6 @@ public class WhenGetApprenticeshipsWithEpisodes
             Key = Guid.NewGuid(),
             Ukprn = ukPrn,
             TrainingCode = "ST0001",
-            FundingPlatform = FundingPlatform.DAS,
             LegalEntityName = "Test Employer",
             ApprovalsApprenticeshipId = approvalsId
         };

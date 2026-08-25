@@ -16,7 +16,6 @@ using SFA.DAS.Learning.Types;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.UnitTests.AddApproval;
 
@@ -126,53 +125,6 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
     }
-
-    [Test]
-    public async Task ThenEventPublished()
-    {
-        // Arrange
-        var command = _fixture.Create<AddLearningCommand>();
-        command.FundingPlatform = FundingPlatform.DAS;
-        var trainingCodeInt = _fixture.Create<int>();
-        command.TrainingCode = trainingCodeInt.ToString();
-        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
-
-        var learner = _fixture.Create<LearnerDomainModel>();
-
-        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
-
-        // Act
-        await _commandHandler.Handle(command);
-
-        // Assert
-        _messageSession.Verify(x => x.Publish(It.Is<LearningCreatedEvent>(e =>
-            DoApprenticeshipDetailsMatchDomainModel(e, apprenticeship, learner)
-            && ApprenticeshipDomainModelTestHelper.DoEpisodeDetailsMatchDomainModel(e, apprenticeship, learner)), It.IsAny<PublishOptions>(),
-            It.IsAny<CancellationToken>()));
-    }
-
-    [Test]
-    public async Task AndNotFundedByDASThenEventIsNotPublished()
-    {
-        // Arrange
-        var command = _fixture.Create<AddLearningCommand>();
-        command.FundingPlatform = FundingPlatform.SLD;
-        var trainingCodeInt = _fixture.Create<int>();
-        command.TrainingCode = trainingCodeInt.ToString();
-        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
-        var learner = _fixture.Create<LearnerDomainModel>();
-
-        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
-
-        // Act
-        await _commandHandler.Handle(command);
-
-        // Assert
-        _messageSession.Verify(x => x.Publish(It.IsAny<LearningCreatedEvent>(), It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
 
     [Test]
     public async Task WhenAnUnapprovedShortCourseExistsThenItIsApproved()
@@ -310,17 +262,5 @@ public class WhenAnAddApprenticeshipCommandIsSent
         await _commandHandler.Handle(command);
 
         _learningService.Verify(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), command.TrainingCode), Times.Once);
-    }
-
-    private static bool DoApprenticeshipDetailsMatchDomainModel(
-        LearningCreatedEvent e, ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner)
-    {
-        return
-            e.LearningKey == learning.Key &&
-            e.ApprovalsApprenticeshipId == learning.LatestEpisode.ApprovalsApprenticeshipId &&
-            e.Uln == learner.Uln &&
-            e.FirstName == learner.FirstName &&
-            e.LastName == learner.LastName &&
-            e.DateOfBirth == learner.DateOfBirth;
     }
 }

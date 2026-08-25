@@ -27,9 +27,6 @@ public static class ApprenticeshipCreatedEventMapper
             FirstName = e.FirstName,
             LastName = e.LastName,
             ApprenticeshipHashedId = e.ApprenticeshipHashedId,
-            FundingPlatform = e.IsOnFlexiPaymentPilot.HasValue
-                ? (e.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD)
-                : null,
             AccountLegalEntityId = e.AccountLegalEntityId,
             TrainingCourseVersion = e.TrainingCourseVersion,
             PlannedStartDate = e.StartDate,

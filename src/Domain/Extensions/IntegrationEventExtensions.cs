@@ -26,7 +26,6 @@ public static class IntegrationEventExtensions
             Ukprn = latestEpisode.Ukprn,
             EmployerAccountId = latestEpisode.EmployerAccountId ?? 0,
             EmployerType = latestEpisode.EmployerType,
-            FundingPlatform = latestEpisode.FundingPlatform,
             FundingEmployerAccountId = latestEpisode.FundingEmployerAccountId,
             LegalEntityName = latestEpisode.LegalEntityName,
             AccountLegalEntityId = latestEpisode.AccountLegalEntityId,

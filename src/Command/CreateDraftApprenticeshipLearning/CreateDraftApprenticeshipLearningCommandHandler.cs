@@ -179,7 +179,6 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             trainingPrice: cost.TrainingPrice,
             endpointAssessmentPrice: cost.EpaoPrice,
             employerType: EmployerType.Levy,
-            fundingPlatform: FundingPlatform.SLD,
             transferSenderId: null,
             legalEntityName: string.Empty,
             accountLegalEntityId: null,

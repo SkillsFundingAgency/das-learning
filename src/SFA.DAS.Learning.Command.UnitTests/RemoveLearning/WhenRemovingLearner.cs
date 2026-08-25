@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
 
@@ -118,7 +117,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = CreateCommand();
-        var domainModel = CreateLearningInAcademicYear(x => x.FundingPlatform = FundingPlatform.SLD);
+        var domainModel = CreateLearningInAcademicYear();
 
         _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
             .ReturnsAsync([domainModel]);
@@ -144,7 +143,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = CreateCommand();
-        var domainModel = CreateLearningInAcademicYear(x => x.FundingPlatform = FundingPlatform.SLD);
+        var domainModel = CreateLearningInAcademicYear();
 
         _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
             .ReturnsAsync([domainModel]);
@@ -170,7 +169,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = CreateCommand();
-        var domainModel = CreateLearningInAcademicYear(x => x.FundingPlatform = FundingPlatform.SLD);
+        var domainModel = CreateLearningInAcademicYear();
 
         _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
             .ReturnsAsync([domainModel]);

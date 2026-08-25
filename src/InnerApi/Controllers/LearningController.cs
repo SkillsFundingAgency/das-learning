@@ -63,14 +63,13 @@ public class LearningController : ControllerBase
     /// Get learnings
     /// </summary>
     /// <param name="ukprn">Filter by training provider using the unique provider number.</param>
-    /// <param name="fundingPlatform" >Filter by the funding platform. This parameter is optional.</param>
     /// <remarks>Gets all apprenticeships. The response from this endpoint only contains summary apprenticeship information.</remarks>
     /// <response code="200">Apprenticeships retrieved</response>
     [HttpGet("{ukprn}/learnings")]
     [ProducesResponseType(typeof(IEnumerable<LearnerSummary>), 200)]
-    public async Task<IActionResult> GetAll(long ukprn, FundingPlatform? fundingPlatform)
+    public async Task<IActionResult> GetAll(long ukprn)
     {
-        var request = new GetLearningsRequest(ukprn, fundingPlatform);
+        var request = new GetLearningsRequest(ukprn);
         var response = await _queryDispatcher.Send<GetLearningsRequest, GetLearningsResponse>(request);
 
         return Ok(response.Learnings);

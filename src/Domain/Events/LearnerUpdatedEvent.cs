@@ -25,7 +25,6 @@ public class LearnerUpdatedEvent : IDomainEvent
                 Key = e.Key,
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId ?? 0,
-                FundingPlatform = e.FundingPlatform,
                 FundingEmployerAccountId = e.FundingEmployerAccountId,
                 LegalEntityName = e.LegalEntityName,
                 AccountLegalEntityId = e.AccountLegalEntityId,
@@ -96,7 +95,6 @@ public class Episode
     public Guid Key { get; set; }
     public long Ukprn { get; set; }
     public long EmployerAccountId { get; set; }
-    public FundingPlatform? FundingPlatform { get; set; }
     public long? FundingEmployerAccountId { get; set; }
     public string LegalEntityName { get; set; }
     public long? AccountLegalEntityId { get; set; }

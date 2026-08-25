@@ -23,7 +23,6 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public long ApprovalsApprenticeshipId => _entity.ApprovalsApprenticeshipId;
     public long Ukprn => _entity.Ukprn;
     public long? EmployerAccountId => _entity.EmployerAccountId;
-    public FundingPlatform? FundingPlatform => _entity.FundingPlatform;
     public long? FundingEmployerAccountId => _entity.FundingEmployerAccountId;
     public string LegalEntityName => _entity.LegalEntityName;
     public long? AccountLegalEntityId => _entity.AccountLegalEntityId;
@@ -73,7 +72,6 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         long approvalsApprenticeshipId,
         long ukprn,
         long? employerAccountId,
-        FundingPlatform? fundingPlatform,
         long? fundingEmployerAccountId,
         string legalEntityName,
         long? accountLegalEntityId,
@@ -89,7 +87,6 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             ApprovalsApprenticeshipId = approvalsApprenticeshipId,
             Ukprn = ukprn,
             EmployerAccountId = employerAccountId,
-            FundingPlatform = fundingPlatform,
             FundingEmployerAccountId = fundingEmployerAccountId,
             LegalEntityName = legalEntityName,
             AccountLegalEntityId = accountLegalEntityId,
