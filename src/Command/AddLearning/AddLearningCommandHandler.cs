@@ -1,13 +1,11 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
-using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
-using SFA.DAS.Learning.Types;
 
 namespace SFA.DAS.Learning.Command.AddLearning;
 
@@ -17,7 +15,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
     private readonly ILearnerFactory _learnerFactory;
     private readonly IApprenticeshipLearningFactory _learningFactory;
     private readonly ILearnerRepository _learnerRepository;
-    private readonly IMessageSession _messageSession;
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
     public AddLearningCommandHandler(
@@ -25,14 +22,12 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         ILearnerFactory learnerFactory,
         IApprenticeshipLearningFactory learningFactory,
         ILearnerRepository learnerRepository,
-        IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {
         _learningService = learningService;
         _learnerFactory = learnerFactory;
         _learningFactory = learningFactory;
         _learnerRepository = learnerRepository;
-        _messageSession = messageSession;
         _logger = logger;
     }
 

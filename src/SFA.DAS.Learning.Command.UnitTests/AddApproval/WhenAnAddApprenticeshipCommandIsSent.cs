@@ -2,7 +2,6 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NServiceBus;
 using NUnit.Framework;
 using SFA.DAS.Learning.Command.AddLearning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
@@ -10,11 +9,8 @@ using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
-using SFA.DAS.Learning.TestHelpers;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
-using SFA.DAS.Learning.Types;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SFA.DAS.Learning.Command.UnitTests.AddApproval;
@@ -27,7 +23,6 @@ public class WhenAnAddApprenticeshipCommandIsSent
     private Mock<ILearnerFactory> _learnerFactory = null!;
     private Mock<IApprenticeshipLearningFactory> _apprenticeshipFactory = null!;
     private Mock<ILearnerRepository> _learnerRepository = null!;
-    private Mock<IMessageSession> _messageSession = null!;
     private Mock<ILogger<AddLearningCommandHandler>> _logger = null!;
     private Fixture _fixture = null!;
 
@@ -38,14 +33,12 @@ public class WhenAnAddApprenticeshipCommandIsSent
         _learnerFactory = new Mock<ILearnerFactory>();
         _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();
         _learnerRepository = new Mock<ILearnerRepository>();
-        _messageSession = new Mock<IMessageSession>();
         _logger = new Mock<ILogger<AddLearningCommandHandler>>();
         _commandHandler = new AddLearningCommandHandler(
             _learningService.Object,
             _learnerFactory.Object,
             _apprenticeshipFactory.Object, 
             _learnerRepository.Object,
-            _messageSession.Object,
             _logger.Object);
 
         _fixture = new Fixture();
