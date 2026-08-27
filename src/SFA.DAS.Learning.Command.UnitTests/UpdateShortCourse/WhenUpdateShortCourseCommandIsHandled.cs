@@ -579,7 +579,6 @@ public class WhenUpdateShortCourseCommandIsHandled
             TrainingCode = courseCode,
             Price = 1000,
             LearningType = learningType,
-            CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };
 
