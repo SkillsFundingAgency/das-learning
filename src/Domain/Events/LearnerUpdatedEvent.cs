@@ -101,7 +101,7 @@ public class Episode
     public string LegalEntityName { get; set; }
     public long? AccountLegalEntityId { get; set; }
     public string TrainingCode { get; set; }
-    public string TrainingCourseVersion { get; set; }
+    public string? TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }
