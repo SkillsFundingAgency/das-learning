@@ -67,7 +67,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
             query = query.Where(x => x.Episodes.Any(e => e.Ukprn == ukprn.Value));
 
         if (courseCode != null)
-            query = query.Where(x => x.Episodes.Any(e => e.TrainingCode == courseCode));
+            query = query.Where(x => x.TrainingCode == courseCode);
 
         var apprenticeships = await query.ToListAsync();
 
@@ -82,9 +82,9 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
             .Where(x => x.LearnerKey == learnerKey &&
+                        x.TrainingCode != excludingCourseCode &&
                         x.Episodes.Any(e =>
                             e.Ukprn == ukprn &&
-                            e.TrainingCode != excludingCourseCode &&
                             !e.IsApproved &&
                             !e.IsRemoved))
             .ToListAsync();
@@ -179,7 +179,8 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         // query leaving EF's change tracker holding the entity, same as ShortCourseLearningRepository.Get.
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.LearnerKey == learnerKey &&
-                        x.Episodes.Any(e => e.TrainingCode == trainingCode && !e.IsApproved))
+                        x.TrainingCode == trainingCode &&
+                        x.Episodes.Any(e => !e.IsApproved))
             .Include(x => x.EnglishAndMathsCourses)
             .Include(x => x.Episodes)
                 .ThenInclude(e => e.Prices)

@@ -46,12 +46,11 @@ public class WhenGettingOtherUnapprovedCourseLearnings
     private void AddLearning(string trainingCode, bool isApproved, bool isRemoved, long ukprn = Ukprn)
     {
         var episodeKey = Guid.NewGuid();
-        var learning = new DataAccess.Entities.Learning.ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = _learnerKey };
+        var learning = new DataAccess.Entities.Learning.ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = _learnerKey, TrainingCode = trainingCode };
         learning.Episodes.Add(new ApprenticeshipEpisode
         {
             Key = episodeKey,
             Ukprn = ukprn,
-            TrainingCode = trainingCode,
             IsApproved = isApproved,
             IsRemoved = isRemoved,
             ApprovalsApprenticeshipId = 0,

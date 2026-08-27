@@ -15,4 +15,6 @@ public class ApprenticeshipLearning : Learning
     public List<EnglishAndMaths> EnglishAndMathsCourses { get; set; }
     public DateTime? AchievementDate { get; set; }
     public LearningType LearningType { get; set; }
+    public string TrainingCode { get; set; } = null!;
+    public string? TrainingCourseVersion { get; set; }
 }

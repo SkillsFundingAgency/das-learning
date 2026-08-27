@@ -31,7 +31,7 @@ public static class LearningUpdateModelHelper
             },
             Learning = new LearningUpdateDetails
             {
-                CompletionDate = learning.CompletionDate
+                CompletionDate = learning.GetEpisode().CompletionDate
             },
             EnglishAndMathsCourses = learning.EnglishAndMathsCourses.Select(x => new EnglishAndMathsUpdateDetails
             {

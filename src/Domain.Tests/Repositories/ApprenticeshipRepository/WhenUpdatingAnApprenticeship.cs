@@ -50,14 +50,14 @@ public class WhenUpdatingAnApprenticeship
             .SingleAsync(x => x.Key == apprenticeshipKey);
         var domainModel = ApprenticeshipLearningDomainModel.Get(apprenticeship);
         var newCompletionDate = _fixture.Create<DateTime>();
-        domainModel.GetEntity().CompletionDate = newCompletionDate;
+        domainModel.LatestEpisode.GetEntity().CompletionDate = newCompletionDate;
 
         // Act
         await _sut.Update(domainModel);
-        
+
         // Assert
         _dbContext.ApprenticeshipLearningDbSet.Count().Should().Be(1);
-        _dbContext.ApprenticeshipLearningDbSet.Single().CompletionDate.Should().Be(newCompletionDate);
+        _dbContext.Episodes.Single().CompletionDate.Should().Be(newCompletionDate);
     }
 
     [Test]

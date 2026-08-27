@@ -101,6 +101,14 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasForeignKey(e => e.LearningKey)
             .HasPrincipalKey(a => a.Key);
 
+        // Legacy field to be removed: TrainingCode moved to ApprenticeshipLearning
+        modelBuilder.Entity<ApprenticeshipEpisode>()
+            .Ignore(x => x.TrainingCode);
+
+        // Legacy field to be removed: CompletionDate moved to ApprenticeshipEpisode
+        modelBuilder.Entity<ApprenticeshipLearning>()
+            .Ignore(x => x.CompletionDate);
+
         modelBuilder.Entity<ShortCourseEpisode>()
             .HasKey(a => new { a.Key });
 

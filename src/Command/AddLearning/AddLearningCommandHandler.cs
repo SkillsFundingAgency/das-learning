@@ -70,7 +70,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         _logger.LogInformation("Handling AddLearningCommand for Approvals Learning Id: {ApprovalsApprenticeshipId}", command.ApprovalsApprenticeshipId);
 
-        var learning = _learningFactory.CreateNew(learner.Key, command.LearningType);
+        var learning = _learningFactory.CreateNew(learner.Key, command.TrainingCode, command.TrainingCourseVersion, command.LearningType);
 
         learning.AddEpisode(
             command.ApprovalsApprenticeshipId,
@@ -85,8 +85,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TransferSenderId,
             command.LegalEntityName,
             command.AccountLegalEntityId,
-            command.TrainingCode,
-            command.TrainingCourseVersion,
             command.EmployerType,
             isApproved: true);
 

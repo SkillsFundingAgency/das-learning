@@ -27,9 +27,9 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public long? FundingEmployerAccountId => _entity.FundingEmployerAccountId;
     public string LegalEntityName => _entity.LegalEntityName;
     public long? AccountLegalEntityId => _entity.AccountLegalEntityId;
-    public string TrainingCode => _entity.TrainingCode;
-    public string TrainingCourseVersion => _entity.TrainingCourseVersion;
     public override bool IsApproved => _entity.IsApproved;
+    public DateTime? CompletionDate => _entity.CompletionDate;
+    public DateTime? AchievementDate => _entity.AchievementDate;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public bool IsRemoved => _entity.IsRemoved;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
@@ -77,8 +77,6 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         long? fundingEmployerAccountId,
         string legalEntityName,
         long? accountLegalEntityId,
-        string trainingCode,
-        string? trainingCourseVersion,
         EmployerType employerType,
         bool isApproved = false)
     {
@@ -93,8 +91,6 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             FundingEmployerAccountId = fundingEmployerAccountId,
             LegalEntityName = legalEntityName,
             AccountLegalEntityId = accountLegalEntityId,
-            TrainingCode = trainingCode,
-            TrainingCourseVersion = trainingCourseVersion,
             PaymentsFrozen = false,
             EmployerType = employerType,
             IsApproved = isApproved
@@ -106,7 +102,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         _entity.IsApproved = isApproved;
     }
 
-    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId, long? accountLegalEntityId = null, string? trainingCourseVersion = null)
+    public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId, long? accountLegalEntityId = null)
     {
         _entity.IsApproved = true;
         _entity.EmployerAccountId = employerAccountId;
@@ -115,7 +111,16 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         _entity.LegalEntityName = legalEntityName;
         _entity.ApprovalsApprenticeshipId = approvalsApprenticeshipId;
         _entity.AccountLegalEntityId = accountLegalEntityId;
-        _entity.TrainingCourseVersion = trainingCourseVersion;
+    }
+
+    internal void UpdateCompletionDate(DateTime? completionDate)
+    {
+        _entity.CompletionDate = completionDate;
+    }
+
+    internal void UpdateAchievementDate(DateTime? achievementDate)
+    {
+        _entity.AchievementDate = achievementDate;
     }
 
     internal void AddEpisodePrice(
