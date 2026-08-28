@@ -121,6 +121,13 @@ public class TestInnerApi : IDisposable
         return JsonConvert.DeserializeObject<T2>(await response.Content.ReadAsStringAsync())!;
     }
 
+    internal async Task<HttpStatusCode> Head(string route)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Head, route);
+        var response = await _httpClient.SendAsync(request);
+        return response.StatusCode;
+    }
+
     internal async Task Delete(string route)
     {
         var response = await _httpClient.DeleteAsync(route);
