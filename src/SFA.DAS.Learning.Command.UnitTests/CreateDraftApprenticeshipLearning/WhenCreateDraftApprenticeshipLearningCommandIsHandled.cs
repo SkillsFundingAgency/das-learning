@@ -53,6 +53,10 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         _learningRepository
             .Setup(x => x.GetOtherUnapprovedCourseLearnings(It.IsAny<Guid>(), It.IsAny<long>(), It.IsAny<string>()))
             .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(It.IsAny<Guid>(), null, null))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
     }
 
     [Test]
@@ -120,6 +124,99 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
         addedLearning.Should().NotBeNull();
         addedLearning!.LatestEpisode.IsApproved.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Returned_When_Learner_Does_Not_Exist()
+    {
+        // Arrange
+        var command = CreateCommand();
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync((LearnerDomainModel?)null);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(It.IsAny<Guid>(), It.IsAny<long?>(), It.IsAny<string?>()))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().Contain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Returned_When_Learner_Exists_With_No_Apprenticeship_Learnings()
+    {
+        // Arrange - learner exists (for a short course), but has not apprenticeship
+        var command = CreateCommand();
+        var learner = CreateLearner();
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().Contain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Learner_Has_A_Apprenticeship_Learning_History()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var historicLearning = CreateLearning(isApproved: true);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { historicLearning });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Existing_Learning_Is_Updated()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var unapprovedLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
     }
 
     [Test]
