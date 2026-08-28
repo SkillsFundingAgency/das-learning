@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 using SFA.DAS.Learning.Command.UpdateLearner;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,15 @@ public class CreateDraftApprenticeshipStepDefinitions
 
         createdEpisode.Should().NotBeNull();
         createdEpisode!.IsApproved.Should().BeFalse();
+    }
+
+    [Then(@"the CreateDraftApprenticeship response should (not )?include a NewApprenticeshipLearner change")]
+    public void ThenTheCreateDraftApprenticeshipResponseShouldIncludeANewApprenticeshipLearnerChange(string not)
+    {
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
+
+        if (string.IsNullOrEmpty(not)) result!.Changes.Should().Contain(LearningUpdateChanges.NewApprenticeshipLearner);
+        else result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
     }
 
 }

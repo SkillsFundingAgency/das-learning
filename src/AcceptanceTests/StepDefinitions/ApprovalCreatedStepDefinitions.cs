@@ -27,10 +27,16 @@ public class ApprovalCreatedStepDefinitions
     [Given(@"No apprenticeship exists")]
     public void GivenNoApprenticeshipExists()
     {
+        GivenNoApprenticeshipExistsForLearnerWithUln(_fixture.Create<long>().ToString());
+    }
+
+    [Given(@"No apprenticeship exists for learner with Uln (.*)")]
+    public void GivenNoApprenticeshipExistsForLearnerWithUln(string uln)
+    {
         var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
             .With(_ => _.TrainingCourseVersion, "1.0")
             .With(_ => _.IsOnFlexiPaymentPilot, true)
-            .With(_ => _.Uln, _fixture.Create<long>().ToString)
+            .With(_ => _.Uln, uln)
             .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
             .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
                 new CommitmentsV2.Messages.Events.PriceEpisode
