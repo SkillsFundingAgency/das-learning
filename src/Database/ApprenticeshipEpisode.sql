@@ -33,3 +33,11 @@ CREATE NONCLUSTERED INDEX [IX_Ukprn] ON [dbo].[ApprenticeshipEpisode]
 	[Ukprn] ASC
 )
 GO
+CREATE NONCLUSTERED INDEX [IX_Ukprn_TrainingCode_IsApproved] ON [dbo].[ApprenticeshipEpisode]
+(
+	[Ukprn] ASC,
+	[TrainingCode] ASC,
+	[IsApproved] ASC
+)
+INCLUDE ([LearningKey])
+GO
