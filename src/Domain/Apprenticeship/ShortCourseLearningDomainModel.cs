@@ -118,6 +118,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
         var prevLearnerRef = episode.LearnerRef;
         var prevStartDate = episode.StartDate;
         var prevExpectedEndDate = episode.ExpectedEndDate;
+        var prevWithdrawalReasonCode = episode.WithdrawalReason;
 
         episode.Update(updateContext);
 
@@ -130,11 +131,21 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
         if (episode.CompletionDate != prevCompletionDate)
             changes.Add(ShortCourseUpdateChanges.CompletionDate);
 
-        if (episode.WithdrawalDate != prevWithdrawalDate)
+        // We only want to send one event for a withdrawal so we check if one of the two withdrawal fields has changed and handle it as one event.
+        if (HasWithdrawalChanged(
+                episode, 
+                prevWithdrawalDate, 
+                prevWithdrawalReasonCode,
+                out var withdrawalChanges))
         {
-            changes.Add(ShortCourseUpdateChanges.WithdrawalDate);
+            changes.AddRange(withdrawalChanges);
 
-            if (episode.IsApproved && episode.WithdrawalDate.HasValue)
+            if (episode is
+                {
+                    IsApproved: true,
+                    WithdrawalReason: not null,
+                    WithdrawalDate: not null
+                })
             {
                 AddEvent(new LearningWithdrawnEvent
                 {
@@ -156,6 +167,25 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
 
         if(episode.ForceEarningsSync)
             changes.Add(ShortCourseUpdateChanges.ForceEarningsSync);
+    }
+
+    private static bool HasWithdrawalChanged(
+        ShortCourseEpisodeDomainModel episode, 
+        DateTime? prevWithdrawalDate, 
+        short? prevWithdrawalReasonCode, 
+        out List<ShortCourseUpdateChanges> changes)
+    {
+        changes = [];
+        var changed = false;
+
+        if (episode.WithdrawalDate != prevWithdrawalDate ||
+            episode.WithdrawalReason != prevWithdrawalReasonCode)
+        {
+            changes.Add(ShortCourseUpdateChanges.WithdrawalDate);
+            changed = true;
+        }
+
+        return changed;
     }
 
     public Guid? Remove(long ukprn)
