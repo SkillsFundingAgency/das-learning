@@ -7,6 +7,7 @@ using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.Learning.InnerApi.Services;
 using SFA.DAS.Learning.Queries;
+using SFA.DAS.Learning.Queries.CheckApprovedApprenticeshipExists;
 using SFA.DAS.Learning.Queries.GetApprenticeshipsByAcademicYear;
 using SFA.DAS.Learning.Queries.GetLearnings;
 using SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
@@ -58,6 +59,27 @@ public class LearningController : ControllerBase
         return new OkObjectResult(result);
     }
 
+
+    /// <summary>
+    /// Checks whether an apprenticeship record already exists for the given ULN, training code and start date.
+    /// </summary>
+    /// <param name="ukprn">UK provider reference number.</param>
+    /// <param name="uln">Unique learner number.</param>
+    /// <param name="trainingCode">Training code (standard code) of the apprenticeship.</param>
+    /// <param name="startDate">Start date of the apprenticeship. Only month and year are used for matching.</param>
+    /// <param name="isApproved">Approval status to match against.</param>
+    /// <response code="200">A matching apprenticeship record exists</response>
+    /// <response code="404">No matching apprenticeship record exists</response>
+    [HttpHead("{ukprn}/apprenticeships")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> CheckApprovedApprenticeshipExists(long ukprn, string uln, string trainingCode, DateTime startDate, bool isApproved)
+    {
+        var request = new CheckApprovedApprenticeshipExistsRequest(ukprn, uln, trainingCode, startDate, isApproved);
+        var response = await _queryDispatcher.Send<CheckApprovedApprenticeshipExistsRequest, CheckApprovedApprenticeshipExistsResponse>(request);
+
+        return response.Exists ? Ok() : NotFound();
+    }
 
     /// <summary>
     /// Get learnings
