@@ -33,6 +33,9 @@ public class WhenUpdateShortCourseCommandIsHandled
     private Mock<IShortCourseLearningDomainModelMapper> _mapper = null!;
     private FeatureFlags _featureFlags = null!;
 
+    // StartDate comfortably within 2526 to avoid any rollover/AY year boundary issues
+    private static readonly DateTime MidYearStartDate = new(2026, 3, 1);
+
     [SetUp]
     public void SetUp()
     {
@@ -50,7 +53,7 @@ public class WhenUpdateShortCourseCommandIsHandled
                 Uln = "1234567890",
                 FirstName = "Test",
                 LastName = "User",
-                DateOfBirth = DateTime.Today.AddYears(-20)
+                DateOfBirth = MidYearStartDate.AddYears(-20)
             }));
 
         _mapper.Setup(x => x.Map<UpdateShortCourseItemResult>(
@@ -100,7 +103,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(withdrawalDate: DateTime.Today)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(withdrawalDate: MidYearStartDate)]);
 
         var results = await _commandHandler.Handle(command);
 
@@ -115,7 +118,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(completionDate: DateTime.Today)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(completionDate: MidYearStartDate)]);
 
         var results = await _commandHandler.Handle(command);
 
@@ -160,7 +163,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(startDate: DateTime.Today)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(startDate: MidYearStartDate)]);
 
         var results = await _commandHandler.Handle(command);
 
@@ -175,7 +178,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(startDate: DateTime.Today)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(startDate: MidYearStartDate)]);
 
         var results = await _commandHandler.Handle(command);
 
@@ -190,7 +193,7 @@ public class WhenUpdateShortCourseCommandIsHandled
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(expectedEndDate: DateTime.Today.AddMonths(12))]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 0, [CreateUpdateContext(expectedEndDate: MidYearStartDate.AddMonths(12))]);
 
         var results = await _commandHandler.Handle(command);
 
@@ -246,7 +249,7 @@ public class WhenUpdateShortCourseCommandIsHandled
     public async Task ThenNoChangesReturnedWhenNothingChanged()
     {
         var learnerKey = Guid.NewGuid();
-        var withdrawalDate = DateTime.Today;
+        var withdrawalDate = MidYearStartDate;
         var milestones = new List<Milestone> { Milestone.ThirtyPercentLearningComplete };
         var learning = CreateDomainModel(withdrawalDate: withdrawalDate, milestones: milestones);
 
@@ -389,18 +392,18 @@ public class WhenUpdateShortCourseCommandIsHandled
     public async Task ThenWithdrawalDateAdjustmentAppliesEvenWhenStartDateChangeIgnored()
     {
         var learnerKey = Guid.NewGuid();
-        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: MidYearStartDate.AddDays(-5));
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: MidYearStartDate, withdrawalDate: null)]);
 
         var results = await _commandHandler.Handle(command);
 
         results.Results.Single().IsIgnored.Should().BeFalse();
         results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
         learning.Episodes.Single().WithdrawalDate.Should().BeNull();
-        learning.Episodes.Single().StartDate.Should().Be(DateTime.Today.AddMonths(-1));
+        learning.Episodes.Single().StartDate.Should().Be(MidYearStartDate.AddMonths(-1));
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
     }
 
@@ -409,12 +412,12 @@ public class WhenUpdateShortCourseCommandIsHandled
     public async Task ThenCompletionDateAdjustmentAppliesEvenWhenStartDateChangeIgnored()
     {
         var learnerKey = Guid.NewGuid();
-        var existingStartDate = DateTime.Today.AddMonths(-6);
-        var learning = CreateDomainModel(isApproved: true, completionDate: DateTime.Today.AddDays(-5), startDate: existingStartDate);
+        var existingStartDate = MidYearStartDate.AddMonths(-6);
+        var learning = CreateDomainModel(isApproved: true, completionDate: MidYearStartDate.AddDays(-5), startDate: existingStartDate);
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(completionDate: null, startDate: DateTime.Today)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(completionDate: null, startDate: MidYearStartDate)]);
 
         var results = await _commandHandler.Handle(command);
 
@@ -429,18 +432,18 @@ public class WhenUpdateShortCourseCommandIsHandled
     public async Task ThenWithdrawalIsReplacedByCompletionWhenStartDateUnchanged()
     {
         var learnerKey = Guid.NewGuid();
-        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: MidYearStartDate.AddDays(-5));
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(withdrawalDate: null, completionDate: DateTime.Today)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(withdrawalDate: null, completionDate: MidYearStartDate)]);
 
         var results = await _commandHandler.Handle(command);
 
         results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.WithdrawalDate);
         results.Results.Single().Changes.Should().Contain(ShortCourseUpdateChanges.CompletionDate);
         learning.Episodes.Single().WithdrawalDate.Should().BeNull();
-        learning.Episodes.Single().CompletionDate.Should().Be(DateTime.Today);
+        learning.Episodes.Single().CompletionDate.Should().Be(MidYearStartDate);
         _repository.Verify(r => r.Update(It.IsAny<ShortCourseLearningDomainModel>()), Times.Once);
     }
 
@@ -450,7 +453,7 @@ public class WhenUpdateShortCourseCommandIsHandled
     {
         var learnerKey = Guid.NewGuid();
 
-        var learning = CreateDomainModel(isApproved: true, withdrawalDate: DateTime.Today.AddDays(-5));
+        var learning = CreateDomainModel(isApproved: true, withdrawalDate: MidYearStartDate.AddDays(-5));
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
         _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
@@ -458,7 +461,7 @@ public class WhenUpdateShortCourseCommandIsHandled
             .Setup(m => m.Map<UpdateShortCourseItemResult>(learning, It.IsAny<LearnerDomainModel>(), 12345678))
             .Returns(new UpdateShortCourseItemResult { LearningKey = learning.Key, IsRemoved = false });
 
-        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: DateTime.Today, withdrawalDate: null)]);
+        var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [CreateUpdateContext(startDate: MidYearStartDate, withdrawalDate: null)]);
 
         var results = await _commandHandler.Handle(command);
 
@@ -489,14 +492,14 @@ public class WhenUpdateShortCourseCommandIsHandled
         // Arrange - a single bundled PUT contains two items for the same CourseCode and provider
         // The second must be ignored, until Restarts and Repeats are implemented
         var learnerKey = Guid.NewGuid();
-        var existingCompletionDate = DateTime.Today.AddDays(-10);
-        var existingStartDate = DateTime.Today.AddMonths(-6);
+        var existingCompletionDate = MidYearStartDate.AddDays(-10);
+        var existingStartDate = MidYearStartDate.AddMonths(-6);
         var learning = CreateDomainModel(completionDate: existingCompletionDate, startDate: existingStartDate, isApproved: false);
 
         _repository.Setup(r => r.GetByLearnerKeyAndCourseCode(learnerKey, "TEST01")).ReturnsAsync(learning);
 
         var item1 = CreateUpdateContext(completionDate: existingCompletionDate, startDate: existingStartDate);
-        var item2 = CreateUpdateContext(completionDate: null, startDate: DateTime.Today.AddDays(-1));
+        var item2 = CreateUpdateContext(completionDate: null, startDate: MidYearStartDate.AddDays(-1));
 
         var command = new UpdateShortCourseCommand(learnerKey, 12345678, 2526, [item1, item2]);
 
@@ -558,8 +561,8 @@ public class WhenUpdateShortCourseCommandIsHandled
             LearnerRef = "LEARNER1",
             IsApproved = isApproved,
             IsRemoved = isRemoved,
-            StartDate = startDate ?? DateTime.Today.AddMonths(-1),
-            ExpectedEndDate = DateTime.Today.AddMonths(6),
+            StartDate = startDate ?? MidYearStartDate.AddMonths(-1),
+            ExpectedEndDate = MidYearStartDate.AddMonths(6),
             WithdrawalDate = withdrawalDate,
             WithdrawalReason = withdrawalReason,
             CompletionDate = completionDate,
@@ -613,14 +616,14 @@ public class WhenUpdateShortCourseCommandIsHandled
         return new ShortCourseUpdateContext
         {
             LearnerRef = learnerRef,
-            Learner = new LearnerModel { Uln = "1234567890", FirstName = "Test", LastName = "User", DateOfBirth = DateTime.Today.AddYears(-20) },
+            Learner = new LearnerModel { Uln = "1234567890", FirstName = "Test", LastName = "User", DateOfBirth = MidYearStartDate.AddYears(-20) },
             LearningSupport = new List<Models.UpdateModels.Shared.LearningSupportDetails>(),
             OnProgramme = new Models.UpdateModels.OnProgramme
             {
                 CourseCode = "TEST01",
                 Ukprn = 12345678,
-                StartDate = startDate ?? DateTime.Today.AddMonths(-1),
-                ExpectedEndDate = expectedEndDate ?? DateTime.Today.AddMonths(6),
+                StartDate = startDate ?? MidYearStartDate.AddMonths(-1),
+                ExpectedEndDate = expectedEndDate ?? MidYearStartDate.AddMonths(6),
                 WithdrawalDate = withdrawalDate,
                 WithdrawalReasonCode = withdrawalReasonCode,
                 CompletionDate = completionDate,
