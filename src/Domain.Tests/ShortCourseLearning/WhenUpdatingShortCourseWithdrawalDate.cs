@@ -15,7 +15,7 @@ namespace SFA.DAS.Learning.Domain.UnitTests.ShortCourseLearning;
 [TestFixture]
 public class WhenUpdatingShortCourseWithdrawalDate
 {
-    private Fixture _fixture;
+    private Fixture _fixture = null!;
 
     [SetUp]
     public void SetUp()
@@ -46,11 +46,41 @@ public class WhenUpdatingShortCourseWithdrawalDate
     }
 
     [Test]
+    public void AndWithdrawalReasonChanged_ThenNewWithdrawalReasonShouldBePickedUpAndEventRaised()
+    {
+        var created = DateTime.UtcNow;
+        var startDate = new DateTime(2024, 1, 1);
+        var withdrawalDate = new DateTime(2024, 6, 1);
+        const short updatedWithdrawalReasonCode = 10;
+        var learning = CreateLearning(isApproved: true, startDate: startDate, withdrawalDate: null);
+        var updateContext = CreateUpdateContext(learning, withdrawalDate, updatedWithdrawalReasonCode);
+
+        var expectedEvent = new LearningWithdrawnEvent
+        {
+            ApprovalsApprenticeshipId = learning.Episodes.Single().ApprovalsApprenticeshipId,
+            Created = created,
+            EmployerAccountId = learning.Episodes.Single().EmployerAccountId,
+            LastDayOfLearning = withdrawalDate,
+            LearningKey = learning.Key,
+            WithdrawalReasonCode = updatedWithdrawalReasonCode
+        };
+
+        learning.Update(updateContext);
+
+        var events = learning.FlushEvents().OfType<LearningWithdrawnEvent>().ToList();
+        events.Should().ContainSingle();
+        var @event = events.Single();
+
+        @event.Should().BeEquivalentTo(expectedEvent, options => options.Excluding(x => x.Created));
+        @event.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
+    }
+
+    [Test]
     public void AndWithdrawalDateEqualsStartDate_ThenReasonIsStillWithdrawDuringLearning()
     {
         var startDate = new DateTime(2024, 1, 1);
         var learning = CreateLearning(isApproved: true, startDate: startDate, withdrawalDate: null);
-        var updateContext = CreateUpdateContext(learning, withdrawalDate: startDate);
+        var updateContext = CreateUpdateContext(learning, withdrawalDate: startDate, withdrawalReasonCode: 10);
 
         learning.Update(updateContext);
 
@@ -105,6 +135,7 @@ public class WhenUpdatingShortCourseWithdrawalDate
             LearningType = LearningType.Apprenticeship,
             Episodes = new List<DataAccess.Entities.Learning.ShortCourseEpisode> { episode }
         };
+
 
         return ShortCourseLearningDomainModel.Get(entity);
     }

@@ -16,6 +16,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public Guid Key => _entity.Key;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public DateTime? AchievementDate => _entity.AchievementDate;
+    public LearningType LearningType => _entity.LearningType;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
     public DateTime StartDate
@@ -64,20 +65,20 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     public int AgeAtStartOfLearning(LearnerModel learnerModel) => learnerModel.DateOfBirth.CalculateAgeAtDate(StartDate);
 
-    public bool OverlapsAcademicYear(int academicYear)
-    {
-        var dates = AcademicYearParser.ParseFrom(academicYear);
-        return StartDate <= dates.End &&
-               (!LatestEpisode.WithdrawalDate.HasValue || LatestEpisode.WithdrawalDate.Value >= dates.Start) &&
-               (!CompletionDate.HasValue || CompletionDate.Value >= dates.Start);
-    }
+    public bool OverlapsAcademicYear(int academicYear){
 
-    internal static ApprenticeshipLearningDomainModel New(Guid learnerKey)
+        var dates = AcademicYearParser.ParseFrom(academicYear);
+            return StartDate <= dates.End &&
+        (!LatestEpisode.WithdrawalDate.HasValue || LatestEpisode.WithdrawalDate.Value >= dates.Start) &&
+        (!CompletionDate.HasValue || CompletionDate.Value >= dates.Start);
+    }
+    internal static ApprenticeshipLearningDomainModel New(Guid learnerKey, LearningType learningType = LearningType.Apprenticeship)
     {
         return new ApprenticeshipLearningDomainModel(new ApprenticeshipLearningEntity
         {
             Key = Guid.NewGuid(),
-            LearnerKey = learnerKey
+            LearnerKey = learnerKey,
+            LearningType = learningType
         });
     }
 
@@ -144,6 +145,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         var changes = new List<LearningUpdateChanges>();
 
         ReinstateIfRemoved(changes);
+
+        UpdateLearningType(updateContext);
 
         UpdateLearningDetails(updateContext, changes);
 
@@ -217,6 +220,18 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             LearnerRef = string.Empty,
             EmployerType = employerType
         });
+    }
+        
+    private void UpdateLearningType(LearningUpdateContext updateModel)
+    {
+        // Currently the LearningType is nullable from the outer api so we don't want to update 
+        // the current LearningType with a null as the PUT doesn't necessarily need to include the LearningType.
+        if (updateModel.Delivery.LearningType is null)
+        {
+            return;
+        }
+
+        _entity.LearningType = updateModel.Delivery.LearningType.Value;
     }
 
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)

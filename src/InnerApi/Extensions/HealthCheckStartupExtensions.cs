@@ -31,7 +31,7 @@ public static class HealthCheckStartupExtensions
     {
         services
             .AddHealthChecks()
-            .AddSqlServer(appSettings.DbConnectionString, beforeOpenConnectionConfigurer: connection =>
+            .AddSqlServer(appSettings.DbConnectionString, configure: connection =>
             {
                 {
                     var connectionStringBuilder = new SqlConnectionStringBuilder(appSettings.DbConnectionString);

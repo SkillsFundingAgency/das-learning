@@ -219,7 +219,7 @@ public class WhenRemoveShortCourseCommandIsHandled
         long employerAccountId = 1,
         long ukprn = Ukprn)
     {
-        startDate ??= DateTime.Today.AddMonths(-1);
+        startDate ??= new DateTime(2026, 2, 1);
         var episodeKey = Guid.NewGuid();
         var episode = new ShortCourseEpisode
         {

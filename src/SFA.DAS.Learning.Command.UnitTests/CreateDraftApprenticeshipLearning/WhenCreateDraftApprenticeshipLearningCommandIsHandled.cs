@@ -94,6 +94,60 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_New_Learning_Is_Created_With_LearningType_From_Command()
+    {
+        // Arrange
+        var command = CreateCommand();
+        command.LearningUpdateContext.Delivery.LearningType = LearningType.FoundationApprenticeship;
+        var learner = CreateLearner();
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        addedLearning.Should().NotBeNull();
+        addedLearning!.LearningType.Should().Be(LearningType.FoundationApprenticeship);
+    }
+
+    [Test]
+    public async Task Then_LearningType_Is_Updated_On_Existing_Unapproved_Learning()
+    {
+        // Arrange
+        var command = CreateCommand();
+        command.LearningUpdateContext.Delivery.LearningType = LearningType.FoundationApprenticeship;
+        var learner = CreateLearner();
+        var unapprovedLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        unapprovedLearning.LearningType.Should().Be(LearningType.FoundationApprenticeship);
+    }
+
+    [Test]
     public async Task Then_New_Learning_Is_Created_When_Learner_Exists_But_No_Learnings_Exist()
     {
         // Arrange
