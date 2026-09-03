@@ -35,7 +35,7 @@ public class WhenGetLearnings
         var learnerKey = Guid.NewGuid();
         _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1111111111", FirstName = "Jane", LastName = "Doe" });
 
-        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), TrainingCode = "TC" };
         learning.LearnerKey = learnerKey;
         learning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsApproved = true });
         _dbContext.ApprenticeshipLearningDbSet.Add(learning);
@@ -66,11 +66,11 @@ public class WhenGetLearnings
             new Learner { Key = approvedLearnerKey, Uln = "111", FirstName = "Approved", LastName = "Learner" },
             new Learner { Key = draftLearnerKey, Uln = "222", FirstName = "Draft", LastName = "Learner" });
 
-        var approvedLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        var approvedLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), TrainingCode = "TC" };
         approvedLearning.LearnerKey = approvedLearnerKey;
         approvedLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A1", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsApproved = true });
 
-        var draftLearning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        var draftLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), TrainingCode = "TC" };
         draftLearning.LearnerKey = draftLearnerKey;
         draftLearning.Episodes.Add(new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "A2", LegalEntityName = "Test", ApprovalsApprenticeshipId = 0, IsApproved = false });
 

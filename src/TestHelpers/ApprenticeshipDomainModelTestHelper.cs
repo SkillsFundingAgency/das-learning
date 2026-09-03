@@ -50,8 +50,6 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<long?>(),
             _fixture.Create<string>(),
             _fixture.Create<long>(),
-            _fixture.Create<int>().ToString(),
-            _fixture.Create<string?>(),
             _fixture.Create<EmployerType>());
     }
 
@@ -61,7 +59,7 @@ public static class ApprenticeshipDomainModelTestHelper
         var expectedNumberOfPrices = learning.AllPrices.Count();
         var episodePrice = learning.LatestPrice;
         return
-            e.Episode.TrainingCode == episode.TrainingCode &&
+            e.Episode.TrainingCode == learning.TrainingCode &&
             e.Episode.FundingEmployerAccountId == episode.FundingEmployerAccountId &&
             e.Episode.EmployerAccountId == episode.EmployerAccountId &&
             e.Episode.LegalEntityName == episode.LegalEntityName &&

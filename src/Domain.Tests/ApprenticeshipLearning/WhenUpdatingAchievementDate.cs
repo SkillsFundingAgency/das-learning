@@ -98,7 +98,7 @@ public class WhenUpdatingAchievementDate
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
 
-        entity.AchievementDate = achievementDate;
+        episode.AchievementDate = achievementDate;
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
         return ApprenticeshipLearningDomainModel.Get(entity);

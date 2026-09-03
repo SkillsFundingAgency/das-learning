@@ -14,9 +14,9 @@ public class CheckApprovedApprenticeshipExistsQueryHandler(LearningDataContext d
                 al => al.LearnerKey,
                 learner => learner.Key,
                 (al, learner) => new { al, learner })
-            .Where(x => x.learner.Uln == query.Uln)
+            .Where(x => x.learner.Uln == query.Uln && x.al.TrainingCode == query.TrainingCode)
             .SelectMany(x => x.al.Episodes
-                .Where(e => e.Ukprn == query.Ukprn && e.TrainingCode == query.TrainingCode && e.IsApproved == query.IsApproved)
+                .Where(e => e.Ukprn == query.Ukprn && e.IsApproved == query.IsApproved)
                 .Select(e => e.Prices.Min(p => (DateTime?)p.StartDate)))
             .Where(startDate => startDate != null)
             .ToListAsync(cancellationToken);

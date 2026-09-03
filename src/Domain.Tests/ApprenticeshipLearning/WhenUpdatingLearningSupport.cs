@@ -103,13 +103,13 @@ public class WhenUpdatingLearningSupport
     private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(List<LearningSupportDetails> learningSupport)
     {
         var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        learningEntity.CompletionDate = learningEntity.CompletionDate?.Date;
-        learningEntity.AchievementDate = null;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = learningEntity.Key;
         episode.PauseDate = null;
         episode.IsRemoved = false;
+        episode.CompletionDate = episode.CompletionDate?.Date;
+        episode.AchievementDate = null;
 
         episode.LearningSupport = learningSupport.ConvertAll(x => new DataAccess.Entities.Learning.ApprenticeshipLearningSupport
         {

@@ -14,8 +14,10 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     private readonly List<ApprenticeshipEpisodeDomainModel> _episodes;
 
     public Guid Key => _entity.Key;
-    public DateTime? CompletionDate => _entity.CompletionDate;
-    public DateTime? AchievementDate => _entity.AchievementDate;
+    public DateTime? CompletionDate => LatestEpisode.CompletionDate;
+    public DateTime? AchievementDate => LatestEpisode.AchievementDate;
+    public string TrainingCode => _entity.TrainingCode;
+    public string? TrainingCourseVersion => _entity.TrainingCourseVersion;
     public LearningType LearningType => _entity.LearningType;
     public IReadOnlyCollection<ApprenticeshipEpisodeDomainModel> Episodes => new ReadOnlyCollection<ApprenticeshipEpisodeDomainModel>(_episodes);
     public IReadOnlyCollection<EnglishAndMathsDomainModel> EnglishAndMathsCourses => new ReadOnlyCollection<EnglishAndMathsDomainModel>(_entity.EnglishAndMathsCourses.Select(EnglishAndMathsDomainModel.Get).ToList());
@@ -72,13 +74,15 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         (!LatestEpisode.WithdrawalDate.HasValue || LatestEpisode.WithdrawalDate.Value >= dates.Start) &&
         (!CompletionDate.HasValue || CompletionDate.Value >= dates.Start);
     }
-    internal static ApprenticeshipLearningDomainModel New(Guid learnerKey, LearningType learningType = LearningType.Apprenticeship)
+    internal static ApprenticeshipLearningDomainModel New(Guid learnerKey, string trainingCode, string? trainingCourseVersion = null, LearningType learningType = LearningType.Apprenticeship)
     {
         return new ApprenticeshipLearningDomainModel(new ApprenticeshipLearningEntity
         {
             Key = Guid.NewGuid(),
             LearnerKey = learnerKey,
-            LearningType = learningType
+            LearningType = learningType,
+            TrainingCode = trainingCode,
+            TrainingCourseVersion = trainingCourseVersion
         });
     }
 
@@ -105,8 +109,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         long? transferSenderId,
         string legalEntityName,
         long? accountLegalEntityId,
-        string trainingCode,
-        string? trainingCourseVersion,
         EmployerType employerType,
         bool isApproved = false)
     {
@@ -118,8 +120,6 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             transferSenderId,
             legalEntityName,
             accountLegalEntityId,
-            trainingCode,
-            trainingCourseVersion,
             employerType,
             isApproved);
 
@@ -207,7 +207,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     public void Approve(long employerAccountId, EmployerType employerType, long? fundingEmployerAccountId, string legalEntityName, long approvalsApprenticeshipId, long? accountLegalEntityId = null, string? trainingCourseVersion = null)
     {
         var episode = LatestEpisode;
-        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId, accountLegalEntityId, trainingCourseVersion);
+        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId, accountLegalEntityId);
+        _entity.TrainingCourseVersion = trainingCourseVersion;
 
         AddEvent(new LearningApprovedEvent
         {
@@ -236,9 +237,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
     {
-        if (updateModel.Learning.CompletionDate?.Date != _entity.CompletionDate?.Date)
+        var latestEpisode = LatestEpisode;
+
+        if (updateModel.Learning.CompletionDate?.Date != latestEpisode.CompletionDate?.Date)
         {
-            _entity.CompletionDate = updateModel.Learning.CompletionDate?.Date;
+            latestEpisode.UpdateCompletionDate(updateModel.Learning.CompletionDate?.Date);
             changes.Add(LearningUpdateChanges.CompletionDate);
         }
     }
@@ -400,10 +403,12 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     private void UpdateAchievementDate(LearningUpdateContext updateContext, List<LearningUpdateChanges> changes)
     {
-        if(updateContext.OnProgrammeDetails.AchievementDate == AchievementDate) return;
+        var latestEpisode = LatestEpisode;
 
-        _entity.AchievementDate = updateContext.OnProgrammeDetails.AchievementDate;
-        changes.Add(LearningUpdateChanges.AchievementDateChanged); 
+        if(updateContext.OnProgrammeDetails.AchievementDate == latestEpisode.AchievementDate) return;
+
+        latestEpisode.UpdateAchievementDate(updateContext.OnProgrammeDetails.AchievementDate);
+        changes.Add(LearningUpdateChanges.AchievementDateChanged);
     }
 
 }
