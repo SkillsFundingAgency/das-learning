@@ -48,8 +48,6 @@ public class WhenAnEpisodeIsAdded
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
-            episode.TrainingCode,
-            episode.TrainingCourseVersion,
             episode.EmployerType,
             episode.IsApproved);
 
@@ -63,6 +61,8 @@ public class WhenAnEpisodeIsAdded
             .Excluding(y => y.ActiveEpisodePrices)
             .Excluding(y => y.LearningSupport)
             .Excluding(y => y.IsRemoved)
+            .Excluding(y => y.CompletionDate)
+            .Excluding(y => y.AchievementDate)
             .Excluding(y => y.EpisodeBreaksInLearning));
         apprenticeship.LatestEpisode.LatestPrice.Should().BeEquivalentTo(episode.LatestPrice, x => x
             .ExcludingNestedObjects()

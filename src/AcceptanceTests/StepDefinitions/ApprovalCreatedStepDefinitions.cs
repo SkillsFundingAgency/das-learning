@@ -146,7 +146,7 @@ public class ApprovalCreatedStepDefinitions
         episode.FundingEmployerAccountId.Should().Be(ApprovalCreatedEvent.TransferSenderId);
         episode.LegalEntityName.Should().Be(ApprovalCreatedEvent.LegalEntityName);
         episode.FundingPlatform.Should().Be(ApprovalCreatedEvent.IsOnFlexiPaymentPilot.HasValue ? (ApprovalCreatedEvent.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null);
-        int.Parse(episode.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
+        int.Parse(apprenticeship.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
         episode.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
 
         var episodePrice = (await dbConnection.GetAllAsync<EpisodePrice>()).Last(x => x.EpisodeKey == episode.Key);
@@ -189,7 +189,7 @@ public class ApprovalCreatedStepDefinitions
 
         publishedEvent.Uln.Should().Be(learner.Uln);
         publishedEvent.LearningKey.Should().Be(Apprenticeship.Key);
-        int.Parse(publishedEvent.Episode.TrainingCode).Should().Be(int.Parse(LatestEpisode.TrainingCode));
+        int.Parse(publishedEvent.Episode.TrainingCode).Should().Be(int.Parse(Apprenticeship.TrainingCode));
         publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.StartDate.Should().BeSameDateAs(LatestEpisodePrice.StartDate);
         publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.EndDate.Should().BeSameDateAs(LatestEpisodePrice.EndDate);
         publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.TotalPrice.Should().Be(LatestEpisodePrice.TotalPrice);

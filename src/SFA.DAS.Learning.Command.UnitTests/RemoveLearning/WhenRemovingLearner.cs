@@ -55,12 +55,12 @@ public class WhenRemovingLearner
     private ApprenticeshipLearningDomainModel CreateLearningInAcademicYear(Action<ApprenticeshipEpisode>? configureEpisode = null)
     {
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
-        TestHelper.SetCompletionDate(domainModel, null);
 
         var episode = _fixture.CreateEpisodeDomainModel(x =>
         {
             x.WithdrawalDate = null;
             x.IsRemoved = false;
+            x.CompletionDate = null;
             x.Prices = [new DataAccess.Entities.Learning.EpisodePrice { Key = Guid.NewGuid(), StartDate = InAcademicYearStartDate, EndDate = InAcademicYearEndDate, TotalPrice = 1000 }];
             configureEpisode?.Invoke(x);
         });
@@ -72,12 +72,12 @@ public class WhenRemovingLearner
     private ApprenticeshipLearningDomainModel CreateLearningOutsideAcademicYear(Action<ApprenticeshipEpisode>? configureEpisode = null)
     {
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
-        TestHelper.SetCompletionDate(domainModel, null);
 
         var episode = _fixture.CreateEpisodeDomainModel(x =>
         {
             x.WithdrawalDate = null;
             x.IsRemoved = false;
+            x.CompletionDate = null;
             x.Prices = [new DataAccess.Entities.Learning.EpisodePrice { Key = Guid.NewGuid(), StartDate = OutsideAcademicYearStartDate, EndDate = OutsideAcademicYearEndDate, TotalPrice = 1000 }];
             configureEpisode?.Invoke(x);
         });

@@ -247,7 +247,6 @@ public class WhenRemoveShortCourseCommandIsHandled
             TrainingCode = "SC001",
             Price = 1000,
             LearningType = LearningType.ApprenticeshipUnit,
-            CompletionDate = completionDate,
             Episodes = new List<ShortCourseEpisode> { episode }
         };
 

@@ -15,13 +15,4 @@ internal static class TestHelper
             .GetField("_episodes", BindingFlags.Instance | BindingFlags.NonPublic)
             ?.SetValue(learning, new List<ApprenticeshipEpisodeDomainModel> { episode });
     }
-
-    internal static void SetCompletionDate(ApprenticeshipLearningDomainModel learning, DateTime? completionDate)
-    {
-        // Use reflection to control CompletionDate deterministically for academic-year-overlap assertions
-        var entityField = typeof(LearningDomainModel<ApprenticeshipLearning>)
-            .GetField("_entity", BindingFlags.Instance | BindingFlags.NonPublic);
-        var entity = (ApprenticeshipLearning)entityField!.GetValue(learning)!;
-        entity.CompletionDate = completionDate;
-    }
 }

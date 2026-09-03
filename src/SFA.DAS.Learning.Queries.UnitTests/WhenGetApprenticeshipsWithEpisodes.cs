@@ -162,14 +162,13 @@ public class WhenGetApprenticeshipsWithEpisodes
 
     private static ApprenticeshipLearning BuildActiveApprenticeship(long ukPrn, Guid learnerKey, int approvalsId)
     {
-        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), TrainingCode = "ST0001" };
         learning.LearnerKey = learnerKey;
 
         var episode = new ApprenticeshipEpisode
         {
             Key = Guid.NewGuid(),
             Ukprn = ukPrn,
-            TrainingCode = "ST0001",
             FundingPlatform = FundingPlatform.DAS,
             LegalEntityName = "Test Employer",
             ApprovalsApprenticeshipId = approvalsId

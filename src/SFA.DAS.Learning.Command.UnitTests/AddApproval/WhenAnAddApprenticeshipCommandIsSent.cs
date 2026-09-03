@@ -75,7 +75,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         apprenticeship.LatestEpisode.LegalEntityName.Should().Be(command.LegalEntityName);
         apprenticeship.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(command.ApprovalsApprenticeshipId);
         apprenticeship.LatestEpisode.AccountLegalEntityId.Should().Be(command.AccountLegalEntityId);
-        apprenticeship.LatestEpisode.TrainingCourseVersion.Should().Be(command.TrainingCourseVersion);
+        apprenticeship.TrainingCourseVersion.Should().Be(command.TrainingCourseVersion);
 
         apprenticeship
             .FlushEvents()
@@ -100,7 +100,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LearningType>())).Returns(apprenticeship);
         
         await _commandHandler.Handle(command);
 
@@ -120,7 +120,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LearningType>())).Returns(apprenticeship);
 
         await _commandHandler.Handle(command);
 
@@ -140,7 +140,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LearningType>())).Returns(apprenticeship);
 
         // Act
         await _commandHandler.Handle(command);
@@ -164,7 +164,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LearningType>())).Returns(apprenticeship);
 
         // Act
         await _commandHandler.Handle(command);

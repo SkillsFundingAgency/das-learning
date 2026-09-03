@@ -622,6 +622,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             TrainingCode = TrainingCode,
             IsApproved = isApproved,
             IsRemoved = isRemoved,
+            CompletionDate = completionDate,
             Prices = new List<EpisodePrice> { price },
             LearningSupport = new List<ApprenticeshipLearningSupport>(),
             BreaksInLearning = new List<EpisodeBreakInLearning>()
@@ -633,7 +634,6 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         {
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
-            CompletionDate = completionDate,
             Episodes = new List<ApprenticeshipEpisode> { episode },
             EnglishAndMathsCourses = new List<EnglishAndMaths>()
         };
