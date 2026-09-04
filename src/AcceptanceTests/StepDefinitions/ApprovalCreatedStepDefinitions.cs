@@ -5,7 +5,6 @@ using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Types;
 using SFA.DAS.CommitmentsV2.Messages.Events;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -145,7 +144,6 @@ public class ApprovalCreatedStepDefinitions
         episode.EmployerAccountId.Should().Be(ApprovalCreatedEvent.AccountId);
         episode.FundingEmployerAccountId.Should().Be(ApprovalCreatedEvent.TransferSenderId);
         episode.LegalEntityName.Should().Be(ApprovalCreatedEvent.LegalEntityName);
-        episode.FundingPlatform.Should().Be(ApprovalCreatedEvent.IsOnFlexiPaymentPilot.HasValue ? (ApprovalCreatedEvent.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null);
         int.Parse(apprenticeship.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
         episode.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
 
@@ -173,49 +171,6 @@ public class ApprovalCreatedStepDefinitions
         var apprenticeship = dbConnection.GetLearning(ApprovalCreatedEvent.Uln);
         
         return apprenticeship != null;
-    }
-
-    [Then(@"an ApprenticeshipCreatedEvent event is published")]
-    public async Task ThenAnApprenticeshipCreatedEventEventIsPublished()
-    {
-        await WaitHelper.WaitForIt(() => _testContext.MessageSession.ReceivedEvents<LearningCreatedEvent>().Any(EventMatchesExpectation), $"Failed to find published {nameof(LearningCreatedEvent)} event");
-
-        var publishedEvent = _testContext.MessageSession.ReceivedEvents<LearningCreatedEvent>().Single(EventMatchesExpectation);
-
-        await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
-
-        var learner = dbConnection.GetLearner(ApprovalCreatedEvent.Uln);
-        var apprenticeship = dbConnection.GetLearningByLearnerKey(learner.Key);
-
-        publishedEvent.Uln.Should().Be(learner.Uln);
-        publishedEvent.LearningKey.Should().Be(Apprenticeship.Key);
-        int.Parse(publishedEvent.Episode.TrainingCode).Should().Be(int.Parse(Apprenticeship.TrainingCode));
-        publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.StartDate.Should().BeSameDateAs(LatestEpisodePrice.StartDate);
-        publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.EndDate.Should().BeSameDateAs(LatestEpisodePrice.EndDate);
-        publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.TotalPrice.Should().Be(LatestEpisodePrice.TotalPrice);
-        publishedEvent.ApprovalsApprenticeshipId.Should().Be(LatestEpisode.ApprovalsApprenticeshipId);
-        publishedEvent.Episode.EmployerAccountId.Should().Be(LatestEpisode.EmployerAccountId);
-        publishedEvent.Episode.FundingEmployerAccountId.Should().Be(LatestEpisode.FundingEmployerAccountId);
-        publishedEvent.Episode.EmployerType.Should().Be(LatestEpisode.EmployerType);
-        publishedEvent.Episode.LegalEntityName.Should().Be(LatestEpisode.LegalEntityName);
-        publishedEvent.Episode.Ukprn.Should().Be(LatestEpisode.Ukprn);
-        publishedEvent.FirstName.Should().Be(learner.FirstName);
-        publishedEvent.LastName.Should().Be(learner.LastName);
-        publishedEvent.Episode.FundingPlatform.ToString().Should().Be(LatestEpisode.FundingPlatform.ToString());
-
-        _scenarioContext["publishedEvent"] = publishedEvent;
-    }
-
-    [Then(@"an ApprenticeshipCreatedEvent event is not published")]
-    public async Task ThenAnApprenticeshipCreatedEventEventIsNotPublished()
-    {
-        await WaitHelper.WaitForUnexpected(() => _testContext.MessageSession.ReceivedEvents<LearningCreatedEvent>().Any(EventMatchesExpectation), $"Found unexpected {nameof(LearningCreatedEvent)} event");
-    }
-
-
-    private bool EventMatchesExpectation(LearningCreatedEvent learningCreatedEvent)
-    {
-        return learningCreatedEvent.Uln == ApprovalCreatedEvent.Uln;
     }
 
     public CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent ApprovalCreatedEvent => _scenarioContext.GetApprenticeshipCreatedEvent();

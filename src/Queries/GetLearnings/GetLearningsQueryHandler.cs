@@ -12,8 +12,7 @@ public class GetLearningsQueryHandler(LearningDataContext dbContext)
         var learnings = await dbContext.ApprenticeshipLearningDbSet
             .Where(al => al.Episodes.Any(e =>
                 e.Ukprn == query.Ukprn &&
-                e.IsApproved &&
-                (!query.FundingPlatform.HasValue || e.FundingPlatform == query.FundingPlatform)))
+                e.IsApproved))
             .Join(
                 dbContext.LearnersDbSet,
                 al => al.LearnerKey,

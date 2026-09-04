@@ -1,14 +1,11 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
-using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
-using SFA.DAS.Learning.Types;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.AddLearning;
 
@@ -18,7 +15,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
     private readonly ILearnerFactory _learnerFactory;
     private readonly IApprenticeshipLearningFactory _learningFactory;
     private readonly ILearnerRepository _learnerRepository;
-    private readonly IMessageSession _messageSession;
     private readonly ILogger<AddLearningCommandHandler> _logger;
 
     public AddLearningCommandHandler(
@@ -26,14 +22,12 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         ILearnerFactory learnerFactory,
         IApprenticeshipLearningFactory learningFactory,
         ILearnerRepository learnerRepository,
-        IMessageSession messageSession,
         ILogger<AddLearningCommandHandler> logger)
     {
         _learningService = learningService;
         _learnerFactory = learnerFactory;
         _learningFactory = learningFactory;
         _learnerRepository = learnerRepository;
-        _messageSession = messageSession;
         _logger = logger;
     }
 
@@ -81,7 +75,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TotalPrice,
             command.TrainingPrice,
             command.EndPointAssessmentPrice,
-            command.FundingPlatform,
             command.TransferSenderId,
             command.LegalEntityName,
             command.AccountLegalEntityId,
@@ -91,11 +84,6 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
 
         await _learningService.AddLearning(learning);
-
-        if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
-        {
-            await SendEvent(learning, learner);
-        }
     }
 
     private async Task<LearnerDomainModel> GetOrCreateLearner(AddLearningCommand command)
@@ -110,25 +98,5 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         var newLearner = _learnerFactory.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName);
         await _learnerRepository.Add(newLearner);
         return newLearner;
-    }
-
-    private async Task SendEvent(ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner)
-    {
-
-        _logger.LogInformation(
-            "Sending LearningCreatedEvent for ApprovalsApprenticeshipId: {ApprovalsApprenticeshipId}.",
-            learning.LatestEpisode.ApprovalsApprenticeshipId);
-        var learningCreatedEvent = new LearningCreatedEvent
-        {
-            LearningKey = learning.Key,
-            Uln = learner.Uln,
-            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
-            DateOfBirth = learner.DateOfBirth,
-            FirstName = learner.FirstName,
-            LastName = learner.LastName,
-            Episode = learning.BuildEpisodeForIntegrationEvent(learner)
-        };
-
-        await _messageSession.Publish(learningCreatedEvent);
     }
 }

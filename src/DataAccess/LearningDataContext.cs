@@ -85,11 +85,6 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasConversion(
                 v => v.ToString(),
                 v => (EmployerType)Enum.Parse(typeof(EmployerType), v));
-        modelBuilder.Entity<ApprenticeshipEpisode>()
-            .Property(p => p.FundingPlatform)
-            .HasConversion(
-                v => (int?)v,
-                v => (FundingPlatform?)v);
 
         modelBuilder.Entity<ApprenticeshipEpisode>()
             .HasOne<ApprenticeshipLearning>()

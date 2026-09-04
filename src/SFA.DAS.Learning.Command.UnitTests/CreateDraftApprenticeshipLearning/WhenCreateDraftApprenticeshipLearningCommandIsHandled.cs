@@ -87,7 +87,6 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         addedLearning!.LatestEpisode.IsApproved.Should().BeFalse();
         addedLearning.LatestEpisode.EmployerAccountId.Should().BeNull();
         addedLearning.LatestEpisode.EmployerType.Should().Be(EmployerType.Levy);
-        addedLearning.LatestEpisode.FundingPlatform.Should().Be(FundingPlatform.SLD);
     }
 
     [Test]
@@ -617,7 +616,6 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             Ukprn = Ukprn,
             EmployerAccountId = 100,
             EmployerType = EmployerType.Levy,
-            FundingPlatform = FundingPlatform.SLD,
             LegalEntityName = "Test",
             TrainingCode = TrainingCode,
             IsApproved = isApproved,

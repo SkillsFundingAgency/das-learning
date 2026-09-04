@@ -50,7 +50,6 @@ namespace SFA.DAS.Learning.Functions.UnitTests
                         c.FirstName == @event.FirstName &&
                         c.LastName == @event.LastName &&
                         c.ApprenticeshipHashedId == @event.ApprenticeshipHashedId &&
-                        c.FundingPlatform == (@event.IsOnFlexiPaymentPilot.HasValue ? (@event.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null) &&
                         c.AccountLegalEntityId == @event.AccountLegalEntityId &&
                         c.TrainingCourseVersion == @event.TrainingCourseVersion &&
                         c.PlannedStartDate == @event.StartDate &&
