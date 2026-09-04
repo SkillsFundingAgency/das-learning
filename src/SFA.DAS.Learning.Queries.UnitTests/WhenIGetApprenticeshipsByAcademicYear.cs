@@ -35,7 +35,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
         var learnerKey = Guid.NewGuid();
         _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1234567890", FirstName = "A", LastName = "B" });
 
-        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), TrainingCode = "TC" };
         learning.LearnerKey = learnerKey;
         var episode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsApproved = true };
         episode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2024, 9, 1), EndDate = new DateTime(2025, 6, 30), TotalPrice = 5000 });
@@ -67,13 +67,13 @@ public class WhenIGetApprenticeshipsByAcademicYear
         var learnerKey = Guid.NewGuid();
         _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1234567890", FirstName = "A", LastName = "B" });
 
-        var firstLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = learnerKey };
+        var firstLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = learnerKey, TrainingCode = "TC" };
         var firstEpisode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsApproved = true };
         firstEpisode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2024, 9, 1), EndDate = new DateTime(2025, 6, 30), TotalPrice = 5000 });
         firstLearning.Episodes.Add(firstEpisode);
         _dbContext.ApprenticeshipLearningDbSet.Add(firstLearning);
 
-        var secondLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = learnerKey };
+        var secondLearning = new ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = learnerKey, TrainingCode = "TC" };
         var secondEpisode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "456", LegalEntityName = "Test", ApprovalsApprenticeshipId = 2, IsApproved = true };
         secondEpisode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2024, 9, 1), EndDate = new DateTime(2025, 6, 30), TotalPrice = 5000 });
         secondLearning.Episodes.Add(secondEpisode);
@@ -103,7 +103,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
         var learnerKey = Guid.NewGuid();
         _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1234567890", FirstName = "A", LastName = "B" });
 
-        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), TrainingCode = "TC" };
         learning.LearnerKey = learnerKey;
         var episode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", LegalEntityName = "Test", ApprovalsApprenticeshipId = 0, IsApproved = false };
         episode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2024, 9, 1), EndDate = new DateTime(2025, 6, 30), TotalPrice = 5000 });
@@ -131,7 +131,7 @@ public class WhenIGetApprenticeshipsByAcademicYear
         var learnerKey = Guid.NewGuid();
         _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = "1234567890", FirstName = "A", LastName = "B" });
 
-        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid() };
+        var learning = new ApprenticeshipLearning { Key = Guid.NewGuid(), TrainingCode = "TC" };
         learning.LearnerKey = learnerKey;
         var episode = new ApprenticeshipEpisode { Key = Guid.NewGuid(), Ukprn = ukPrn, TrainingCode = "123", LegalEntityName = "Test", ApprovalsApprenticeshipId = 1, IsRemoved = true, IsApproved = true };
         episode.Prices.Add(new EpisodePrice { Key = Guid.NewGuid(), StartDate = new DateTime(2024, 9, 1), EndDate = new DateTime(2025, 6, 30), TotalPrice = 5000 });

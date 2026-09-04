@@ -82,8 +82,6 @@ public class WhenAddingAnApprenticeship
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
-            episode.TrainingCode,
-            episode.TrainingCourseVersion,
             episode.EmployerType,
             episode.IsApproved);
 
@@ -104,6 +102,8 @@ public class WhenAddingAnApprenticeship
             .Excluding(y => y.IsWithdrawnBackToStart)
             .Excluding(y => y.LearningSupport)
             .Excluding(y => y.IsRemoved)
+            .Excluding(y => y.CompletionDate)
+            .Excluding(y => y.AchievementDate)
             .Excluding(y => y.EpisodeBreaksInLearning));
         storedEpisode.LearningKey.Should().Be(apprenticeship.Key);
     }

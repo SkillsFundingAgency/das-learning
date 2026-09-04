@@ -150,7 +150,7 @@ public class ApprovalCreatedStepDefinitions
         episode.EmployerAccountId.Should().Be(ApprovalCreatedEvent.AccountId);
         episode.FundingEmployerAccountId.Should().Be(ApprovalCreatedEvent.TransferSenderId);
         episode.LegalEntityName.Should().Be(ApprovalCreatedEvent.LegalEntityName);
-        int.Parse(episode.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
+        int.Parse(apprenticeship.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
         episode.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
 
         var episodePrice = (await dbConnection.GetAllAsync<EpisodePrice>()).Last(x => x.EpisodeKey == episode.Key);

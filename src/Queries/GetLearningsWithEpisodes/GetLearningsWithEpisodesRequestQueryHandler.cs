@@ -52,12 +52,12 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
                     apprenticeship.GetStartDate(),
                     apprenticeship.GetPlannedEndDate(),
                     apprenticeship.Episodes.Select(ep =>
-                            new LearningWithEpisodes.Episode(ep.Key, ep.TrainingCode, ep.WithdrawalDate, ep.Prices.Select(p =>
+                            new LearningWithEpisodes.Episode(ep.Key, apprenticeship.TrainingCode, ep.WithdrawalDate, ep.Prices.Select(p =>
                                 new LearningWithEpisodes.EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
                         .ToList(),
                     apprenticeship.GetAgeAtStartOfApprenticeship(learner.DateOfBirth),
                     apprenticeship.GetWithdrawalDate(),
-                    apprenticeship.CompletionDate);
+                    apprenticeship.GetEpisode().CompletionDate);
             }).ToList();
 
             logger.LogInformation("{numberFound} apprenticeships found for {ukprn} (Pagination Limit: {limit} Pagination Offset: {offset})", data.Count, query.Ukprn, query.Limit, query.Offset);
