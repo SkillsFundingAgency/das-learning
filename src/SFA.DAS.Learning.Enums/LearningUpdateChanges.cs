@@ -1,5 +1,8 @@
 ﻿namespace SFA.DAS.Learning.Enums;
 
+/// <summary>
+/// Apprenticeship Learning Update Changes
+/// </summary>
 public enum LearningUpdateChanges
 {
     CompletionDate = 0,
@@ -18,5 +21,6 @@ public enum LearningUpdateChanges
     Care = 13,
     EnglishAndMathsBreaksInLearningUpdated = 14,
     AchievementDateChanged = 15,
-    Reinstated = 16
+    Reinstated = 16,
+    NewApprenticeshipLearner = 17
 }
