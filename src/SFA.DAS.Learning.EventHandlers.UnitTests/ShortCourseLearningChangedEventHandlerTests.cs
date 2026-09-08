@@ -34,6 +34,7 @@ public class ShortCourseLearningChangedEventHandlerTests
         // Arrange
         var domainEvent = _fixture.Build<ShortCourseLearningChangedEvent>()
             .With(x => x.Operation, ShortCourseLearningOperation.Updated)
+            .With(x => x.Changes, [ShortCourseUpdateChanges.WithdrawalDate, ShortCourseUpdateChanges.Milestone])
             .Create();
 
         ShortCourseLearningHistory? capturedHistory = null;
@@ -52,6 +53,12 @@ public class ShortCourseLearningChangedEventHandlerTests
         Assert.That(capturedHistory!.LearningKey, Is.EqualTo(domainEvent.LearningKey));
         Assert.That(capturedHistory.AcademicYear, Is.EqualTo(domainEvent.AcademicYear));
         Assert.That(capturedHistory.Operation, Is.EqualTo(nameof(ShortCourseLearningOperation.Updated)));
-        Assert.That(capturedHistory.State, Does.Contain(domainEvent.LearningKey.ToString()));
+        Assert.That(capturedHistory.Changes, Does.Contain("WithdrawalDate").And.Contain("Milestone"));
+
+        // State is the aggregate Snapshot only — never the envelope fields (AcademicYear/Operation/Changes),
+        // so a diff across two history rows shows the short course's own evolution, not request-context noise.
+        Assert.That(capturedHistory.State, Does.Contain(domainEvent.Snapshot.LearningKey.ToString()));
+        Assert.That(capturedHistory.State, Does.Not.Contain(nameof(ShortCourseLearningChangedEvent.AcademicYear)));
+        Assert.That(capturedHistory.State, Does.Not.Contain(nameof(ShortCourseLearningChangedEvent.Operation)));
     }
 }

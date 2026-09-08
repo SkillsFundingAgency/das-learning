@@ -13,6 +13,8 @@ public class ShortCourseLearningHistory
 
     public string Operation { get; set; } = string.Empty;
 
+    public string? Changes { get; set; }
+
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
     public string State { get; set; } = string.Empty;

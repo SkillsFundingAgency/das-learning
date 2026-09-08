@@ -23,7 +23,10 @@ public class ShortCourseLearningChangedEventHandler(
             nameof(ShortCourseLearningChangedEvent),
             message.Operation);
 
-        var json = JsonSerializer.Serialize(message, new JsonSerializerOptions { WriteIndented = true });
+        // Only the Snapshot is serialized into State: it's the aggregate's own data, so a JSON diff
+        // across two rows for the same LearningKey shows the short course's actual evolution — not
+        // request-context noise like AcademicYear/Operation, which live in their own columns instead.
+        var stateJson = JsonSerializer.Serialize(message.Snapshot, new JsonSerializerOptions { WriteIndented = true });
 
         var history = new ShortCourseLearningHistory
         {
@@ -32,7 +35,10 @@ public class ShortCourseLearningChangedEventHandler(
             LearningKey = message.LearningKey,
             AcademicYear = message.AcademicYear,
             Operation = message.Operation.ToString(),
-            State = json
+            Changes = message.Changes.Count > 0
+                ? JsonSerializer.Serialize(message.Changes)
+                : null,
+            State = stateJson
         };
 
         await repository.Add(history);

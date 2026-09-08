@@ -4,6 +4,7 @@ CREATE TABLE [History].[ShortCourseLearningHistory]
     [LearningKey] UNIQUEIDENTIFIER NOT NULL,
     [AcademicYear] INT NULL,
     [Operation] NVARCHAR(20) NOT NULL,
+    [Changes] NVARCHAR(200) NULL,
     [CreatedOn] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     [State] NVARCHAR(MAX) NOT NULL
 )
