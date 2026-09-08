@@ -278,6 +278,68 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Returned_When_Learner_Only_Has_A_Historic_Learning_Withdrawn_On_Its_Start_Date()
+    {
+        // Arrange - the planned duration spans months, but the learner withdrew on day one, so it's a single day in learning
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var withdrawnBackToStartLearning = CreateLearning(
+            isApproved: true,
+            startDate: new DateTime(2024, 8, 1),
+            endDate: new DateTime(2025, 7, 31),
+            withdrawalDate: new DateTime(2024, 8, 1));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { withdrawnBackToStartLearning });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().Contain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Learner_Has_A_Historic_Learning_Withdrawn_After_Its_Start_Date()
+    {
+        // Arrange - withdrawal happened, but not on the start date, so there's genuine learning history
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var withdrawnLearning = CreateLearning(
+            isApproved: true,
+            startDate: new DateTime(2024, 8, 1),
+            endDate: new DateTime(2025, 7, 31),
+            withdrawalDate: new DateTime(2024, 9, 1));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { withdrawnLearning });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
     public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Existing_Learning_Is_Updated()
     {
         // Arrange
@@ -719,7 +781,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         return LearnerDomainModel.Get(entity);
     }
 
-    private ApprenticeshipLearningDomainModel CreateLearning(bool isApproved, bool isRemoved = false, DateTime? startDate = null, DateTime? endDate = null, DateTime? completionDate = null)
+    private ApprenticeshipLearningDomainModel CreateLearning(bool isApproved, bool isRemoved = false, DateTime? startDate = null, DateTime? endDate = null, DateTime? completionDate = null, DateTime? withdrawalDate = null)
     {
         var price = new EpisodePrice
         {
@@ -745,6 +807,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             IsApproved = isApproved,
             IsRemoved = isRemoved,
             CompletionDate = completionDate,
+            WithdrawalDate = withdrawalDate,
             Prices = new List<EpisodePrice> { price },
             LearningSupport = new List<ApprenticeshipLearningSupport>(),
             BreaksInLearning = new List<EpisodeBreakInLearning>()
