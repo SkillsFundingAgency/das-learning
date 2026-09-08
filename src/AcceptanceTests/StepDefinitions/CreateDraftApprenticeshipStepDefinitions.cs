@@ -47,10 +47,10 @@ public class CreateDraftApprenticeshipStepDefinitions
     [Then(@"the draft apprenticeship should be created")]
     public async Task ThenTheDraftApprenticeshipShouldBeCreated()
     {
-        var uln = _scenarioContext.GetUpdateLearnerRequest().Learner.Uln;
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
 
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var createdLearning = dbConnection.GetLearning(uln.ToString());
+        var createdLearning = dbConnection.GetLearningByKey(result!.LearningKey);
 
         createdLearning.Should().NotBeNull();
 

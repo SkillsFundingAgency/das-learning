@@ -97,6 +97,21 @@ public class ApprovalCreatedStepDefinitions
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
     }
 
+    [Given(@"A single day duration historic apprenticeship exists")]
+    public async Task GivenASingleDayDurationHistoricApprenticeshipExists()
+    {
+        var singleDayDate = TokenisableDateTime.FromString("previousAY-09-25").DateTime!.Value;
+
+        var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(singleDayDate, singleDayDate, 6000, 500);
+
+        _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var createdUln = _scenarioContext.GetApprenticeshipCreatedEvent().Uln;
+        _scenarioContext.SetLearningKey(dbConnection.GetLearningKey(createdUln));
+        _scenarioContext.SetLearnerKey(dbConnection.GetLearner(createdUln).Key);
+    }
+
     [Given(@"There is an apprenticeship with the following details")]
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney(Table table)
     {
