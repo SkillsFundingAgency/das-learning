@@ -253,7 +253,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     [Test]
     public async Task Then_NewApprenticeshipLearner_Change_Is_Returned_When_Learner_Only_Has_A_Single_Day_Historic_Learning()
     {
-        // Arrange - a learning that starts and finishes on the same day doesn't count as history
+        // Arrange
         var command = CreateCommand();
         var learner = CreateLearner();
         var singleDayLearning = CreateLearning(isApproved: true, startDate: new DateTime(2024, 8, 1), endDate: new DateTime(2024, 8, 1));
