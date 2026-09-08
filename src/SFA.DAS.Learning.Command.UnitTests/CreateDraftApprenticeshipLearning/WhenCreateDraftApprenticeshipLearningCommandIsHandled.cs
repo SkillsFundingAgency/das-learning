@@ -251,6 +251,33 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Returned_When_Learner_Only_Has_A_Single_Day_Historic_Learning()
+    {
+        // Arrange - a learning that starts and finishes on the same day doesn't count as history
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var singleDayLearning = CreateLearning(isApproved: true, startDate: new DateTime(2024, 8, 1), endDate: new DateTime(2024, 8, 1));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { singleDayLearning });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().Contain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
     public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Existing_Learning_Is_Updated()
     {
         // Arrange
