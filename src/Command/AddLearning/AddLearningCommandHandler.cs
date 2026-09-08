@@ -56,6 +56,15 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
                 AccountLegalEntityId = command.AccountLegalEntityId,
                 TrainingCourseVersion = command.TrainingCourseVersion
             });
+
+            if (existingLearning is ShortCourseLearningDomainModel shortCourseLearning)
+            {
+                shortCourseLearning.AddEvent(ShortCourseLearningChangedEvent.From(
+                    shortCourseLearning,
+                    academicYear: null,
+                    ShortCourseLearningOperation.Approved));
+            }
+
             await _learningService.UpdateLearning(existingLearning);
             return;
         }
