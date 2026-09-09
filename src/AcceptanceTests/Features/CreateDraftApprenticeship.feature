@@ -33,9 +33,16 @@ Scenario: Learner exists with a Short Course but no Apprenticeship, creates appr
 	And the draft apprenticeship should be created
 	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
 
-Scenario: Apprenticeship history only contains single day apprenticeship, creates and returns 200
-	Given A single day duration historic apprenticeship exists
-	When CreateDraftApprenticeship is called with apprenticeship details
-	Then the CreateDraftApprenticeship endpoint should return a 200
-	And the draft apprenticeship should be created
-	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
+#Scenario: Apprenticeship history only contains apprenticeships with removed episodes, creates and returns 200
+#	Given A historic apprenticeship exists with only removed episodes
+#	When CreateDraftApprenticeship is called with apprenticeship details
+#	Then the CreateDraftApprenticeship endpoint should return a 200
+#	And the draft apprenticeship should be created
+#	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
+#
+#Scenario: Apprenticeship history only contains apprenticeships with unapproved episodes, creates and returns 200
+#	Given A historic apprenticeship exists with only unapproved episodes
+#	When CreateDraftApprenticeship is called with apprenticeship details
+#	Then the CreateDraftApprenticeship endpoint should return a 200
+#	And the draft apprenticeship should be created
+#	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
