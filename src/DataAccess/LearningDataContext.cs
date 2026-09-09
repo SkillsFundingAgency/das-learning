@@ -21,6 +21,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     public virtual DbSet<EnglishAndMathsBreakInLearning> EnglishAndMathsBreakInLearnings { get; set; }
 
     public virtual DbSet<LearningHistory> LearningHistories { get; set; }
+    public virtual DbSet<ShortCourseLearningHistory> ShortCourseLearningHistories { get; set; }
     public virtual DbSet<ShortCourseLearning> ShortCourseLearnings { get; set; }
     public virtual DbSet<ShortCourseEpisode> ShortCourseEpisodes { get; set; }
     public virtual DbSet<ShortCourseMilestone> ShortCourseMilestones { get; set; }
@@ -175,6 +176,11 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         // LearningHistory
         modelBuilder.Entity<LearningHistory>()
             .ToTable("LearningHistory", "History")
+            .HasKey(x => x.Key);
+
+        // ShortCourseLearningHistory
+        modelBuilder.Entity<ShortCourseLearningHistory>()
+            .ToTable("ShortCourseLearningHistory", "History")
             .HasKey(x => x.Key);
 
         // ShortCourseMilestone

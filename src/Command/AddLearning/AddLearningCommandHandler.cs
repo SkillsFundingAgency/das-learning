@@ -56,6 +56,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
                 AccountLegalEntityId = command.AccountLegalEntityId,
                 TrainingCourseVersion = command.TrainingCourseVersion
             });
+
             await _learningService.UpdateLearning(existingLearning);
             return;
         }

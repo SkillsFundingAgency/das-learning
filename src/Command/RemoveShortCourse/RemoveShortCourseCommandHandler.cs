@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Command.RemoveShortCourse;
 
@@ -30,6 +32,8 @@ public class RemoveShortCourseCommandHandler(
         {
             var removedEpisodeKey = learning.Remove(command.Ukprn);
             if (removedEpisodeKey == null) continue;
+
+            learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, command.AcademicYear, ShortCourseLearningOperation.Removed));
 
             await repository.Update(learning);
 

@@ -65,12 +65,18 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         if (unapprovedOnly)
         {
             query = query
-                .Include(x => x.Episodes.Where(e => e.IsApproved == false));
+                .Include(x => x.Episodes.Where(e => e.IsApproved == false))
+                .ThenInclude(e => e.Milestones)
+                .Include(x => x.Episodes.Where(e => e.IsApproved == false))
+                .ThenInclude(e => e.LearningSupport);
         }
         else
         {
             query = query
-                .Include(x => x.Episodes);
+                .Include(x => x.Episodes)
+                .ThenInclude(e => e.Milestones)
+                .Include(x => x.Episodes)
+                .ThenInclude(e => e.LearningSupport);
         }
 
         var shortCourseLearning = await query.SingleOrDefaultAsync();

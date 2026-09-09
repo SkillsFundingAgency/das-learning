@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Command.Mappers;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Models.UpdateModels;
 
@@ -27,7 +29,7 @@ public class UpdateShortCourseCommandHandler(
 
         foreach (var model in command.Models)
         {
-            var result = await HandleSingleItem(command.LearnerKey, model, processedCourseCodes);
+            var result = await HandleSingleItem(command.LearnerKey, model, processedCourseCodes, command.AcademicYear);
             results.Add(result);
             if (!result.IsIgnored || result.LearningKey != Guid.Empty)
             {
@@ -60,6 +62,8 @@ public class UpdateShortCourseCommandHandler(
             if (!removedEpisodeKey.HasValue)
                 continue;
 
+            learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, command.AcademicYear, ShortCourseLearningOperation.Removed));
+
             await repository.Update(learning);
 
             logger.LogInformation("Removed omitted Learning {LearningKey} / {CourseCode} for LearnerKey {LearnerKey}",
@@ -72,7 +76,7 @@ public class UpdateShortCourseCommandHandler(
         }
     }
 
-    private async Task<UpdateShortCourseItemResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model, HashSet<string> processedCourseCodes)
+    private async Task<UpdateShortCourseItemResult> HandleSingleItem(Guid learnerKey, ShortCourseUpdateContext model, HashSet<string> processedCourseCodes, int academicYear)
     {
         // Silently ignore subsequent instances of the same CourseCode in one PUT (until Repeats/Restarts are implemented)
         if (!processedCourseCodes.Add(model.OnProgramme.CourseCode))
@@ -87,7 +91,7 @@ public class UpdateShortCourseCommandHandler(
 
         if (learning == null)
         {
-            return await CreateNewLearning(learnerKey, model);
+            return await CreateNewLearning(learnerKey, model, academicYear);
         }
 
         var ukprn = model.OnProgramme.Ukprn;
@@ -103,10 +107,13 @@ public class UpdateShortCourseCommandHandler(
                 return new UpdateShortCourseItemResult { IsIgnored = true };
             }
 
-            return await AddEpisodeToExistingLearning(learning, model);
+            return await AddEpisodeToExistingLearning(learning, model, academicYear);
         }
 
         var updateResult = learning.Update(model);
+
+        if (updateResult.Changes.Length > 0)
+            learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, academicYear, ShortCourseLearningOperation.Updated, updateResult.Changes));
 
         await repository.Update(learning);
 
@@ -117,7 +124,7 @@ public class UpdateShortCourseCommandHandler(
         return result;
     }
 
-    private async Task<UpdateShortCourseItemResult> AddEpisodeToExistingLearning(ShortCourseLearningDomainModel learning, ShortCourseUpdateContext model)
+    private async Task<UpdateShortCourseItemResult> AddEpisodeToExistingLearning(ShortCourseLearningDomainModel learning, ShortCourseUpdateContext model, int academicYear)
     {
         var op = model.OnProgramme;
 
@@ -138,6 +145,8 @@ public class UpdateShortCourseCommandHandler(
         foreach (var ls in model.LearningSupport)
             episode.AddLearningSupport(ls.StartDate, ls.EndDate);
 
+        learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, academicYear, ShortCourseLearningOperation.Created));
+
         await repository.Update(learning);
 
         var learner = await learnerRepository.Get(learning.LearnerKey);
@@ -147,7 +156,7 @@ public class UpdateShortCourseCommandHandler(
         return result;
     }
 
-    private async Task<UpdateShortCourseItemResult> CreateNewLearning(Guid learnerKey, ShortCourseUpdateContext model)
+    private async Task<UpdateShortCourseItemResult> CreateNewLearning(Guid learnerKey, ShortCourseUpdateContext model, int academicYear)
     {
         var op = model.OnProgramme;
 
@@ -169,6 +178,8 @@ public class UpdateShortCourseCommandHandler(
 
         foreach (var ls in model.LearningSupport)
             episode.AddLearningSupport(ls.StartDate, ls.EndDate);
+
+        learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, academicYear, ShortCourseLearningOperation.Created));
 
         await repository.Add(learning);
 
