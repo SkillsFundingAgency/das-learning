@@ -60,7 +60,7 @@ public class ShortCourseLearningSnapshot
                 TransferSenderId = e.TransferSenderId,
                 ForceEarningsSync = e.ForceEarningsSync,
 
-                Milestones = e.Milestones.Select(m => m.Milestone).ToList(),
+                Milestones = e.Milestones.OrderBy(m => m.CreatedOn).Select(m => m.Milestone).ToList(),
 
                 LearningSupport = e.LearningSupport.Select(ls => new ShortCourseLearningSupportSnapshot
                 {
