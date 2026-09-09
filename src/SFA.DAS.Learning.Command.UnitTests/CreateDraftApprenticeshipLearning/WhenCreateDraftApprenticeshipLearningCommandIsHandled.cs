@@ -251,6 +251,90 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Returned_When_Learner_Only_Has_A_Removed_Historic_Learning()
+    {
+        // Arrange - the historic learning was approved, but it's since been removed, so it doesn't count as real history
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var removedHistoricLearning = CreateLearning(isApproved: true, isRemoved: true);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { removedHistoricLearning });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().Contain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Returned_When_Learner_Only_Has_An_Unapproved_Historic_Learning()
+    {
+        // Arrange - an old, never-approved draft under a different course doesn't count as real history
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var unapprovedHistoricLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedHistoricLearning });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().Contain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
+    public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Any_Episode_Of_A_Historic_Learning_Is_Approved_And_Not_Removed()
+    {
+        // Arrange - a learning that moved between providers: an old removed episode plus a current approved, non-removed one.
+        // Even though it's not the *latest* episode that matters here, one approved-and-not-removed episode anywhere is enough to count as real history
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var historicLearningWithMultipleEpisodes = CreateLearningWithEpisodes(
+            CreateEpisode(isApproved: true, isRemoved: true, startDate: new DateTime(2019, 8, 1), endDate: new DateTime(2020, 7, 31)),
+            CreateEpisode(isApproved: true, isRemoved: false, startDate: new DateTime(2025, 8, 1), endDate: new DateTime(2026, 7, 31)));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { historicLearningWithMultipleEpisodes });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
+    }
+
+    [Test]
     public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Existing_Learning_Is_Updated()
     {
         // Arrange
@@ -692,19 +776,13 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         return LearnerDomainModel.Get(entity);
     }
 
-    private ApprenticeshipLearningDomainModel CreateLearning(bool isApproved, bool isRemoved = false, DateTime? startDate = null, DateTime? endDate = null, DateTime? completionDate = null)
+    private ApprenticeshipLearningDomainModel CreateLearning(bool isApproved, bool isRemoved = false, DateTime? startDate = null, DateTime? endDate = null, DateTime? completionDate = null, DateTime? withdrawalDate = null)
     {
-        var price = new EpisodePrice
-        {
-            Key = Guid.NewGuid(),
-            EpisodeKey = Guid.NewGuid(),
-            StartDate = startDate ?? new DateTime(2025, 8, 1),
-            EndDate = endDate ?? new DateTime(2026, 7, 31),
-            TrainingPrice = 1000,
-            EndPointAssessmentPrice = 200,
-            TotalPrice = 1200
-        };
+        return CreateLearningWithEpisodes(CreateEpisode(isApproved, isRemoved, startDate, endDate, completionDate, withdrawalDate));
+    }
 
+    private ApprenticeshipEpisode CreateEpisode(bool isApproved, bool isRemoved = false, DateTime? startDate = null, DateTime? endDate = null, DateTime? completionDate = null, DateTime? withdrawalDate = null)
+    {
         var episode = new ApprenticeshipEpisode
         {
             Key = Guid.NewGuid(),
@@ -718,22 +796,42 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             IsApproved = isApproved,
             IsRemoved = isRemoved,
             CompletionDate = completionDate,
-            Prices = new List<EpisodePrice> { price },
+            WithdrawalDate = withdrawalDate,
             LearningSupport = new List<ApprenticeshipLearningSupport>(),
             BreaksInLearning = new List<EpisodeBreakInLearning>()
         };
 
-        price.EpisodeKey = episode.Key;
+        episode.Prices = new List<EpisodePrice>
+        {
+            new EpisodePrice
+            {
+                Key = Guid.NewGuid(),
+                EpisodeKey = episode.Key,
+                StartDate = startDate ?? new DateTime(2025, 8, 1),
+                EndDate = endDate ?? new DateTime(2026, 7, 31),
+                TrainingPrice = 1000,
+                EndPointAssessmentPrice = 200,
+                TotalPrice = 1200
+            }
+        };
 
+        return episode;
+    }
+
+    private ApprenticeshipLearningDomainModel CreateLearningWithEpisodes(params ApprenticeshipEpisode[] episodes)
+    {
         var entity = new ApprenticeshipLearning
         {
             Key = Guid.NewGuid(),
             LearnerKey = Guid.NewGuid(),
-            Episodes = new List<ApprenticeshipEpisode> { episode },
+            Episodes = episodes.ToList(),
             EnglishAndMathsCourses = new List<EnglishAndMaths>()
         };
 
-        episode.LearningKey = entity.Key;
+        foreach (var episode in episodes)
+        {
+            episode.LearningKey = entity.Key;
+        }
 
         return ApprenticeshipLearningDomainModel.Get(entity);
     }

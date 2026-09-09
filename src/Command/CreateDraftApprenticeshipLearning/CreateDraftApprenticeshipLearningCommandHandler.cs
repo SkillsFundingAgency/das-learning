@@ -45,7 +45,8 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         // no unapproved draft and no single unambiguous reinstatement candidate - create a new one
         if (existingLearning == null)
         {
-            var isNewApprenticeshipLearner = !(await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key)).Any();
+            var historicLearnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key);
+            var isNewApprenticeshipLearner = historicLearnings.All(l => l.Episodes.All(e => e.IsRemoved || !e.IsApproved));
 
             var createResult = await CreateDraftLearning(command, learner);
             createResult.RemovedLearningKey = removedLearningKey;
