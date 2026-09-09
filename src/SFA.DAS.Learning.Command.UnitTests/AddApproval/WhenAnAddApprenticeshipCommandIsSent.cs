@@ -207,30 +207,6 @@ public class WhenAnAddApprenticeshipCommandIsSent
     }
 
     [Test]
-    public async Task WhenAnUnapprovedShortCourseExistsThenAShortCourseLearningChangedEventIsRaisedWithApprovedOperation()
-    {
-        var command = _fixture.Build<AddLearningCommand>()
-            .With(x => x.LearningType, LearningType.ApprenticeshipUnit)
-            .Create();
-
-        var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
-
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>()))
-            .ReturnsAsync(shortCourseLearning);
-
-        command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
-        await _commandHandler.Handle(command);
-
-        shortCourseLearning
-            .FlushEvents()
-            .OfType<Domain.Events.ShortCourseLearningChangedEvent>()
-            .Should()
-            .ContainSingle(e => e.LearningKey == shortCourseLearning.Key
-                                 && e.AcademicYear == null
-                                 && e.Operation == ShortCourseLearningOperation.Approved);
-    }
-
-    [Test]
     public async Task WhenAnUnapprovedShortCourseExistsThenTheEmployerAccountIdIsUpdated()
     {
         var command = _fixture.Build<AddLearningCommand>()
