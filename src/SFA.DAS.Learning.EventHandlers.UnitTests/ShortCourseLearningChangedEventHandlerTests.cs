@@ -44,7 +44,7 @@ public class ShortCourseLearningChangedEventHandlerTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _handler.Handle(domainEvent, default);
+        await _handler.Handle(domainEvent, CancellationToken.None);
 
         // Assert
         _repository.Verify(x => x.Add(It.IsAny<ShortCourseLearningHistory>()), Times.Once);
@@ -52,12 +52,11 @@ public class ShortCourseLearningChangedEventHandlerTests
         Assert.That(capturedHistory, Is.Not.Null);
         Assert.That(capturedHistory!.LearningKey, Is.EqualTo(domainEvent.LearningKey));
         Assert.That(capturedHistory.AcademicYear, Is.EqualTo(domainEvent.AcademicYear));
+        Assert.That(capturedHistory.State, Does.Contain(domainEvent.Snapshot.LearningKey.ToString()));
         Assert.That(capturedHistory.Operation, Is.EqualTo(nameof(ShortCourseLearningOperation.Updated)));
         Assert.That(capturedHistory.Changes, Does.Contain("WithdrawalDate").And.Contain("Milestone"));
 
-        // State is the aggregate Snapshot only — never the envelope fields (AcademicYear/Operation/Changes),
-        // so a diff across two history rows shows the short course's own evolution, not request-context noise.
-        Assert.That(capturedHistory.State, Does.Contain(domainEvent.Snapshot.LearningKey.ToString()));
+        //AcademicYear and Operation are excluded from the json state (included in the db record as separate columns)
         Assert.That(capturedHistory.State, Does.Not.Contain(nameof(ShortCourseLearningChangedEvent.AcademicYear)));
         Assert.That(capturedHistory.State, Does.Not.Contain(nameof(ShortCourseLearningChangedEvent.Operation)));
     }
