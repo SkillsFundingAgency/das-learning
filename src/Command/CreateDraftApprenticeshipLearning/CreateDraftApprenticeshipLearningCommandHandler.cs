@@ -46,7 +46,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         if (existingLearning == null)
         {
             var historicLearnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key);
-            var isNewApprenticeshipLearner = historicLearnings.All(l => l.EndDate?.Date == l.StartDate.Date || l.LatestEpisode.IsWithdrawnBackToStart); //ignore historic learnings which start and end on same day (treat withdrawn back to start as deleted)
+            var isNewApprenticeshipLearner = historicLearnings.All(l => l.Episodes.All(e => e.IsRemoved || !e.IsApproved));
 
             var createResult = await CreateDraftLearning(command, learner);
             createResult.RemovedLearningKey = removedLearningKey;
