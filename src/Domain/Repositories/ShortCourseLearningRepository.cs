@@ -66,7 +66,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         {
             query = query
                 .Include(x => x.Episodes.Where(e => e.IsApproved == false))
-                .ThenInclude(e => e.Milestones)
+                .ThenInclude(e => e.Milestones.OrderBy(m => m.CreatedOn))
                 .Include(x => x.Episodes.Where(e => e.IsApproved == false))
                 .ThenInclude(e => e.LearningSupport);
         }
@@ -74,7 +74,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         {
             query = query
                 .Include(x => x.Episodes)
-                .ThenInclude(e => e.Milestones)
+                .ThenInclude(e => e.Milestones.OrderBy(m => m.CreatedOn))
                 .Include(x => x.Episodes)
                 .ThenInclude(e => e.LearningSupport);
         }
@@ -152,6 +152,6 @@ internal static class ShortCourseDbContextExtensions
             .Include(x => x.Episodes)
             .ThenInclude(x => x.LearningSupport)
             .Include(x => x.Episodes)
-            .ThenInclude(x => x.Milestones);
+            .ThenInclude(x => x.Milestones.OrderBy(m => m.CreatedOn));
     }
 }
