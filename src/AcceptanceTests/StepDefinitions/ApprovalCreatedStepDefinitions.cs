@@ -2,8 +2,9 @@ using AutoFixture;
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
+using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Types;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.CommitmentsV2.Messages.Events;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
@@ -97,19 +98,56 @@ public class ApprovalCreatedStepDefinitions
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
     }
 
-    [Given(@"A single day duration historic apprenticeship exists")]
-    public async Task GivenASingleDayDurationHistoricApprenticeshipExists()
+    [Given(@"A historic apprenticeship exists with only unapproved episodes")]
+    public async Task GivenAHistoricApprenticeshipExistsWithOnlyUnapprovedEpisodes()
     {
-        var singleDayDate = TokenisableDateTime.FromString("previousAY-09-25").DateTime!.Value;
+        await SeedHistoricUnapprovedDraft();
+    }
 
-        var approvalCreatedEvent = await _learningDataSeeder.CreateLearner(singleDayDate, singleDayDate, 6000, 500);
+    [Given(@"A historic apprenticeship exists with only removed episodes")]
+    public async Task GivenAHistoricApprenticeshipExistsWithOnlyRemovedEpisodes()
+    {
+        var (historicEvent, learnerKey) = await SeedHistoricUnapprovedDraft();
 
-        _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
+        var startDate = historicEvent.ActualStartDate!.Value;
+        var academicYear = new TokenisableDateTime(startDate).AcademicYear();
+        await _testContext.TestInnerApi.Delete($"/{historicEvent.ProviderId}/{learnerKey}?academicYear={academicYear}");
+    }
+
+    private async Task<(ApprenticeshipCreatedEvent HistoricEvent, Guid LearnerKey)> SeedHistoricUnapprovedDraft()
+    {
+        var uln = _fixture.Create<long>().ToString();
+
+        var historicEvent = _fixture.Build<ApprenticeshipCreatedEvent>()
+            .With(_ => _.TrainingCourseVersion, "1.0")
+            .With(_ => _.IsOnFlexiPaymentPilot, true)
+            .With(_ => _.Uln, uln)
+            .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
+            .With(_ => _.ActualStartDate, TokenisableDateTime.FromString("previousAY-09-25").DateTime)
+            .With(_ => _.EndDate, TokenisableDateTime.FromString("currentAY-07-31").DateTime!.Value)
+            .With(_ => _.PriceEpisodes, new PriceEpisode[] {
+                new PriceEpisode
+                {
+                    Cost = 6500,
+                    FromDate = TokenisableDateTime.FromString("previousAY-09-25").DateTime!.Value,
+                    ToDate = TokenisableDateTime.FromString("currentAY-07-31").DateTime,
+                    EndPointAssessmentPrice = 500,
+                    TrainingPrice = 6000
+                }
+            })
+            .Create();
+
+        await _testContext.TestInnerApi.Post<CreateDraftApprenticeship, CreateDraftApprenticeshipLearningCommandResult>(
+            $"/{historicEvent.ProviderId}/apprenticeships", historicEvent.BuildUpdateLearnerRequest());
 
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
-        var createdUln = _scenarioContext.GetApprenticeshipCreatedEvent().Uln;
-        _scenarioContext.SetLearningKey(dbConnection.GetLearningKey(createdUln));
-        _scenarioContext.SetLearnerKey(dbConnection.GetLearner(createdUln).Key);
+        var learnerKey = dbConnection.GetLearner(uln).Key;
+
+        // reuses the existing "no apprenticeship" setup for the draft the "When" step will create - same learner,
+        // fresh Ukprn/TrainingCode/dates, so it's created as a separate draft rather than updating the one seeded above
+        GivenNoApprenticeshipExistsForLearnerWithUln(uln);
+
+        return (historicEvent, learnerKey);
     }
 
     [Given(@"There is an apprenticeship with the following details")]
