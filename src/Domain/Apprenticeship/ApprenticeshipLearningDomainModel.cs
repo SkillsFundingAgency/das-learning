@@ -109,6 +109,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         long? transferSenderId,
         string legalEntityName,
         long? accountLegalEntityId,
+        string learnerRef,
         EmployerType employerType,
         bool isApproved = false)
     {
@@ -120,6 +121,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             transferSenderId,
             legalEntityName,
             accountLegalEntityId,
+            learnerRef,
             employerType,
             isApproved);
 
@@ -218,7 +220,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             EmployerAccountId = employerAccountId,
             FundingAccountId = fundingEmployerAccountId ?? employerAccountId,
             LearnerKey = _entity.LearnerKey,
-            LearnerRef = string.Empty,
+            LearnerRef = episode.LearnerRef,
             EmployerType = employerType
         });
     }
