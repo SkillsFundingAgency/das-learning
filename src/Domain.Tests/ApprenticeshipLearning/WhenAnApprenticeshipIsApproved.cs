@@ -51,8 +51,8 @@ public class WhenAnApprenticeshipIsApproved
         learning.LatestEpisode.TrainingCourseVersion.Should().Be(trainingCourseVersion);
 
         var events = learning.FlushEvents();
-        events.Should().ContainSingle().Which.Should().BeOfType<LearningApprovedEvent>();
-        var approvedEvent = (LearningApprovedEvent)events.Single();
+        events.Should().HaveCount(2);
+        var approvedEvent = events.OfType<LearningApprovedEvent>().Single();
         approvedEvent.LearningKey.Should().Be(learning.Key);
         approvedEvent.EpisodeKey.Should().Be(episodeKeyBeforeApproval);
         approvedEvent.ApprovalsApprenticeshipId.Should().Be(approvalsApprenticeshipId);
@@ -60,6 +60,12 @@ public class WhenAnApprenticeshipIsApproved
         approvedEvent.FundingAccountId.Should().Be(fundingEmployerAccountId!.Value);
         approvedEvent.LearnerKey.Should().Be(learning.LearnerKey);
         approvedEvent.EmployerType.Should().Be(employerType);
+
+        events.OfType<ApprenticeshipLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == learning.Key
+                                 && e.AcademicYear == null
+                                 && e.Operation == ApprenticeshipLearningOperation.Approved);
     }
 
     [Test]
@@ -74,7 +80,7 @@ public class WhenAnApprenticeshipIsApproved
         learning.Approve(employerAccountId, EmployerType.NonLevy, null, _fixture.Create<string>(), _fixture.Create<long>());
 
         //Assert
-        var approvedEvent = (LearningApprovedEvent)learning.FlushEvents().Single();
+        var approvedEvent = learning.FlushEvents().OfType<LearningApprovedEvent>().Single();
         approvedEvent.FundingAccountId.Should().Be(employerAccountId);
     }
 

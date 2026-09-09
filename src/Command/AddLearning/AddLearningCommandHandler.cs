@@ -91,7 +91,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.EmployerType,
             isApproved: true);
 
-        learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
+        learning.AddEvent(ApprenticeshipLearningChangedEvent.From(learning, academicYear: null, ApprenticeshipLearningOperation.Created));
 
         await _learningService.AddLearning(learning);
 
