@@ -184,6 +184,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             legalEntityName: string.Empty,
             accountLegalEntityId: null,
             trainingCode: trainingCode,
+            learnerRef: updateModel.LearnerRef,
             trainingCourseVersion: null,
             isApproved: false);
 

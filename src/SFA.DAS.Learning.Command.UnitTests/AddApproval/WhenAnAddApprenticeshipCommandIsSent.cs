@@ -148,7 +148,8 @@ public class WhenAnAddApprenticeshipCommandIsSent
         // Assert
         _messageSession.Verify(x => x.Publish(It.Is<LearningCreatedEvent>(e =>
             DoApprenticeshipDetailsMatchDomainModel(e, apprenticeship, learner)
-            && ApprenticeshipDomainModelTestHelper.DoEpisodeDetailsMatchDomainModel(e, apprenticeship, learner)), It.IsAny<PublishOptions>(),
+            && ApprenticeshipDomainModelTestHelper.DoEpisodeDetailsMatchDomainModel(e, apprenticeship, learner)
+            && e.EmployerApprovedOnDate == command.EmployerApprovedOnDate), It.IsAny<PublishOptions>(),
             It.IsAny<CancellationToken>()));
     }
 

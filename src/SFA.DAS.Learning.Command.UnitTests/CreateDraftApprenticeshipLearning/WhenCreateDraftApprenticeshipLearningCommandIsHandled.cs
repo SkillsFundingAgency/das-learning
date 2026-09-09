@@ -91,6 +91,65 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_LearnerRef_From_Command_Is_Persisted_On_The_New_Episode()
+    {
+        // Arrange
+        const string learnerRef = "ABC123";
+        var command = CreateCommand(learnerRef);
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync((LearnerDomainModel?)null);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(It.IsAny<Guid>(), It.IsAny<long?>(), It.IsAny<string?>()))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        addedLearning.Should().NotBeNull();
+        addedLearning!.LatestEpisode.LearnerRef.Should().Be(learnerRef);
+    }
+
+    [Test]
+    public async Task Then_A_Null_LearnerRef_On_The_Command_Does_Not_Throw_And_Results_In_An_Empty_String_On_The_Episode()
+    {
+        // Arrange
+        var command = CreateCommand(learnerRef: null);
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync((LearnerDomainModel?)null);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(It.IsAny<Guid>(), It.IsAny<long?>(), It.IsAny<string?>()))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        Func<Task> act = async () => await _handler.Handle(command);
+
+        // Assert
+        await act.Should().NotThrowAsync();
+        addedLearning.Should().NotBeNull();
+        addedLearning!.LatestEpisode.LearnerRef.Should().NotBeNull();
+        addedLearning.LatestEpisode.LearnerRef.Should().Be(string.Empty);
+    }
+
+    [Test]
     public async Task Then_New_Learning_Is_Created_With_LearningType_From_Command()
     {
         // Arrange
@@ -512,7 +571,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
 
     }
 
-    private CreateDraftApprenticeshipLearningCommand CreateCommand()
+    private CreateDraftApprenticeshipLearningCommand CreateCommand(string? learnerRef = null)
     {
         var firstName = "UpdatedFirstName";
         var lastName = "UpdatedLastName";
@@ -521,6 +580,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         var model = new LearningUpdateContext
         {
             ApprovalsApprenticeshipId = _fixture.Create<long>(),
+            LearnerRef = learnerRef ?? string.Empty,
             Learner = new LearnerModel
             {
                 Uln = "1234567890",

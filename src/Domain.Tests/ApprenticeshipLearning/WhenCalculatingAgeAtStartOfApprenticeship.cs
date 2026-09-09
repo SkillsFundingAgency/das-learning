@@ -47,7 +47,8 @@ public class WhenCalculatingAgeAtStartOfApprenticeship
             _fixture.Create<FundingPlatform>(), 
             _fixture.Create<long?>(), 
             _fixture.Create<string>(), 
-            _fixture.Create<long?>(), 
+            _fixture.Create<long?>(),
+            _fixture.Create<string>(),
             _fixture.Create<string>(),
             _fixture.Create<string>(),
             _fixture.Create<EmployerType>());

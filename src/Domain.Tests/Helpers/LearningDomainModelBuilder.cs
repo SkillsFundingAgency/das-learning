@@ -13,10 +13,19 @@ public class LearningDomainModelBuilder
     private List<Cost> _costs;
     private int _numberOfCosts = 1;
     private DateTime _plannedEndDate;
+    private string _learnerRef;
+    private bool _learnerRefSet;
 
     public LearningDomainModelBuilder WithCosts(List<Cost> costs)
     {
         _costs = costs;
+        return this;
+    }
+
+    public LearningDomainModelBuilder WithLearnerRef(string learnerRef)
+    {
+        _learnerRef = learnerRef;
+        _learnerRefSet = true;
         return this;
     }
 
@@ -47,6 +56,11 @@ public class LearningDomainModelBuilder
         episode.Prices.Clear();
         episode.LearningSupport.Clear();
         episode.IsRemoved = false;
+
+        if (_learnerRefSet)
+        {
+            episode.LearnerRef = _learnerRef;
+        }
 
         for (int i = 0; i < orderedCosts.Count; i++)
         {

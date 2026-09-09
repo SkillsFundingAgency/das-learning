@@ -49,6 +49,7 @@ public class WhenAnEpisodeIsAdded
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
             episode.TrainingCode,
+            episode.LearnerRef,
             episode.TrainingCourseVersion,
             episode.EmployerType,
             episode.IsApproved);

@@ -86,6 +86,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.LegalEntityName,
             command.AccountLegalEntityId,
             command.TrainingCode,
+            string.Empty,
             command.TrainingCourseVersion,
             command.EmployerType,
             isApproved: true);
@@ -96,7 +97,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
         if (learning.LatestEpisode.FundingPlatform == FundingPlatform.DAS)
         {
-            await SendEvent(learning, learner);
+            await SendEvent(learning, learner, command.EmployerApprovedOnDate);
         }
     }
 
@@ -114,7 +115,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
         return newLearner;
     }
 
-    private async Task SendEvent(ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner)
+    private async Task SendEvent(ApprenticeshipLearningDomainModel learning, LearnerDomainModel learner, DateTime employerApprovedOnDate)
     {
 
         _logger.LogInformation(
@@ -128,7 +129,8 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             DateOfBirth = learner.DateOfBirth,
             FirstName = learner.FirstName,
             LastName = learner.LastName,
-            Episode = learning.BuildEpisodeForIntegrationEvent(learner)
+            Episode = learning.BuildEpisodeForIntegrationEvent(learner),
+            EmployerApprovedOnDate = employerApprovedOnDate
         };
 
         await _messageSession.Publish(learningCreatedEvent);

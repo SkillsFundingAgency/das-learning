@@ -54,7 +54,8 @@ namespace SFA.DAS.Learning.Functions.UnitTests
                         c.AccountLegalEntityId == @event.AccountLegalEntityId &&
                         c.TrainingCourseVersion == @event.TrainingCourseVersion &&
                         c.PlannedStartDate == @event.StartDate &&
-                        c.EmployerType == (@event.ApprenticeshipEmployerTypeOnApproval == ApprenticeshipEmployerType.Levy ? EmployerType.Levy : EmployerType.NonLevy)
+                        c.EmployerType == (@event.ApprenticeshipEmployerTypeOnApproval == ApprenticeshipEmployerType.Levy ? EmployerType.Levy : EmployerType.NonLevy) &&
+                        c.EmployerApprovedOnDate == @event.AgreedOn
                     ),
                     It.IsAny<CancellationToken>()));
         }

@@ -79,6 +79,36 @@ public class WhenAnApprenticeshipIsApproved
     }
 
     [Test]
+    public void AndTheEpisodeHasARealLearnerRef_ThenTheLearningApprovedEventCarriesThatLearnerRef()
+    {
+        //Arrange
+        var learnerRef = _fixture.Create<string>();
+        var (learning, _) = new LearningDomainModelBuilder().WithLearnerRef(learnerRef).Build();
+
+        //Act
+        learning.Approve(_fixture.Create<long>(), EmployerType.NonLevy, _fixture.Create<long?>(), _fixture.Create<string>(), _fixture.Create<long>());
+
+        //Assert
+        var approvedEvent = (LearningApprovedEvent)learning.FlushEvents().Single();
+        approvedEvent.LearnerRef.Should().Be(learnerRef);
+    }
+
+    [Test]
+    public void AndTheEpisodeHasNoLearnerRef_ThenTheLearningApprovedEventLearnerRefIsEmpty()
+    {
+        //Arrange - manual-add apprenticeships never have a LearnerRef on their episode
+        var (learning, _) = new LearningDomainModelBuilder().WithLearnerRef(string.Empty).Build();
+
+        //Act
+        learning.Approve(_fixture.Create<long>(), EmployerType.NonLevy, _fixture.Create<long?>(), _fixture.Create<string>(), _fixture.Create<long>());
+
+        //Assert
+        var approvedEvent = (LearningApprovedEvent)learning.FlushEvents().Single();
+        approvedEvent.LearnerRef.Should().Be(string.Empty);
+        approvedEvent.LearnerRef.Should().NotBeNull();
+    }
+
+    [Test]
     public void AndApprovedViaTheBaseLearningDomainModelType_ThenItIsStillApprovedCorrectly()
     {
         //Arrange

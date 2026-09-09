@@ -29,6 +29,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public long? AccountLegalEntityId => _entity.AccountLegalEntityId;
     public string TrainingCode => _entity.TrainingCode;
     public string TrainingCourseVersion => _entity.TrainingCourseVersion;
+    public string LearnerRef => _entity.LearnerRef;
     public override bool IsApproved => _entity.IsApproved;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public bool IsRemoved => _entity.IsRemoved;
@@ -78,6 +79,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         string legalEntityName,
         long? accountLegalEntityId,
         string trainingCode,
+        string learnerRef,
         string? trainingCourseVersion,
         EmployerType employerType,
         bool isApproved = false)
@@ -94,6 +96,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             LegalEntityName = legalEntityName,
             AccountLegalEntityId = accountLegalEntityId,
             TrainingCode = trainingCode,
+            LearnerRef = learnerRef,
             TrainingCourseVersion = trainingCourseVersion,
             PaymentsFrozen = false,
             EmployerType = employerType,

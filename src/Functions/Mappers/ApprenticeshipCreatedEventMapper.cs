@@ -34,7 +34,8 @@ public static class ApprenticeshipCreatedEventMapper
             TrainingCourseVersion = e.TrainingCourseVersion,
             PlannedStartDate = e.StartDate,
             LearningType = (Enums.LearningType) e.LearningType,
-            EmployerType = GetEmployerType(e)
+            EmployerType = GetEmployerType(e),
+            EmployerApprovedOnDate = e.AgreedOn
         };
     }
 

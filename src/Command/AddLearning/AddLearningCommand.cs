@@ -26,5 +26,6 @@ namespace SFA.DAS.Learning.Command.AddLearning
         public string TrainingCourseVersion { get; set; }
         public LearningType LearningType { get; set; }
         public EmployerType EmployerType { get; set; }
+        public DateTime EmployerApprovedOnDate { get; set; }
     }
 }
