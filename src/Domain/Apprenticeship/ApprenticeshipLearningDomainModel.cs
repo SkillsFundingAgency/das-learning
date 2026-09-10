@@ -139,6 +139,42 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         return _entity;
     }
 
+    public void AddEpisode(
+        long approvalsApprenticeshipId,
+        long ukprn,
+        long? employerAccountId,
+        DateTime endDate,
+        long? transferSenderId,
+        string legalEntityName,
+        long? accountLegalEntityId,
+        EmployerType employerType,
+        List<Cost> costs)
+    {
+        var episode = ApprenticeshipEpisodeDomainModel.New(
+            _entity.Key,
+            approvalsApprenticeshipId,
+            ukprn,
+            employerAccountId,
+            transferSenderId,
+            legalEntityName,
+            accountLegalEntityId,
+            employerType,
+            isApproved: false);
+
+        foreach (var cost in costs)
+        {
+            episode.AddEpisodePrice(
+                    cost.FromDate,
+                    endDate,
+                    cost.TotalPrice,
+                    cost.TrainingPrice,
+                    cost.EpaoPrice);
+        }
+
+
+        _episodes.Add(episode);
+        _entity.Episodes.Add(episode.GetEntity());
+    }
 
     public LearningUpdateChanges[] Update(LearningUpdateContext updateContext)
     {

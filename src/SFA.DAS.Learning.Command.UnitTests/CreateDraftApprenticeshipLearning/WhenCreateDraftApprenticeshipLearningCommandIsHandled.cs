@@ -120,6 +120,60 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_New_Learning_Is_Created_With_Multiple_Prices_When_Multiple_Costs_Are_Provided()
+    {
+        // Arrange
+        var command = CreateCommand();
+        command.LearningUpdateContext.OnProgrammeDetails.Costs =
+        [
+            new Cost
+            {
+                FromDate = new DateTime(2025, 8, 1),
+                TrainingPrice = 1000,
+                EpaoPrice = 200
+            },
+            new Cost
+            {
+                FromDate = new DateTime(2026, 1, 1),
+                TrainingPrice = 1500,
+                EpaoPrice = 300
+            }
+        ];
+
+        var learner = CreateLearner();
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result.Should().NotBeNull();
+        addedLearning.Should().NotBeNull();
+
+        var episodePrices = addedLearning!.LatestEpisode.EpisodePrices.OrderBy(x => x.StartDate).ToList();
+        episodePrices.Should().HaveCount(2);
+        episodePrices[0].StartDate.Should().Be(new DateTime(2025, 8, 1));
+        episodePrices[0].EndDate.Should().Be(new DateTime(2025, 12, 31));
+        episodePrices[1].StartDate.Should().Be(new DateTime(2026, 1, 1));
+        episodePrices[1].EndDate.Should().Be(new DateTime(2026, 7, 31));
+
+        result!.Prices.Should().HaveCount(2);
+    }
+
+    [Test]
     public async Task Then_LearningType_Is_Updated_On_Existing_Unapproved_Learning()
     {
         // Arrange

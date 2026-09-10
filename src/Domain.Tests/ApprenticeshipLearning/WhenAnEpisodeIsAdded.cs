@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoFixture;
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.TestHelpers.AutoFixture.Customizations;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
@@ -67,5 +70,55 @@ public class WhenAnEpisodeIsAdded
             .ExcludingNestedObjects()
             .Excluding(y => y.Key));
         apprenticeship.LatestEpisode.LearningKey.Should().Be(apprenticeship.Key);
+    }
+
+    [Test]
+    public void ThenAnEpisodeWithMultipleCostsAddsMultiplePrices()
+    {
+        //Arrange
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var endDate = new DateTime(2026, 07, 31);
+        var costs = new List<Cost>
+        {
+            new()
+            {
+                FromDate = new DateTime(2025, 08, 01),
+                TrainingPrice = 1000,
+                EpaoPrice = 200
+            },
+            new()
+            {
+                FromDate = new DateTime(2026, 01, 01),
+                TrainingPrice = 1500,
+                EpaoPrice = 300
+            }
+        };
+
+        //Act
+        apprenticeship.AddEpisode(
+            _fixture.Create<long>(),
+            _fixture.Create<long>(),
+            _fixture.Create<long?>(),
+            endDate,
+            _fixture.Create<long?>(),
+            _fixture.Create<string>(),
+            _fixture.Create<long?>(),
+            default,
+            costs);
+
+        //Assert
+        var prices = apprenticeship.LatestEpisode.EpisodePrices
+            .OrderBy(x => x.StartDate)
+            .ToList();
+
+        prices.Should().HaveCount(2);
+        prices[0].StartDate.Should().Be(new DateTime(2025, 08, 01));
+        prices[0].TrainingPrice.Should().Be(1000);
+        prices[0].EndPointAssessmentPrice.Should().Be(200);
+        prices[0].EndDate.Should().Be(endDate);
+        prices[1].StartDate.Should().Be(new DateTime(2026, 01, 01));
+        prices[1].TrainingPrice.Should().Be(1500);
+        prices[1].EndPointAssessmentPrice.Should().Be(300);
+        prices[1].EndDate.Should().Be(endDate);
     }
 }

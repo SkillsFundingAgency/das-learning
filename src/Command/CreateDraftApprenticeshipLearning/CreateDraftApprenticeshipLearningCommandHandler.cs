@@ -164,7 +164,6 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         LearnerDomainModel learner)
     {
         var updateModel = command.LearningUpdateContext;
-        var cost = updateModel.OnProgrammeDetails.Costs.Single(); //assume single cost at draft point
 
         var trainingCode = command.TrainingCode;
 
@@ -173,16 +172,12 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             updateModel.ApprovalsApprenticeshipId,
             command.Ukprn,
             employerAccountId: null,
-            startDate: cost.FromDate,
             endDate: updateModel.OnProgrammeDetails.ExpectedEndDate,
-            totalPrice: cost.TotalPrice,
-            trainingPrice: cost.TrainingPrice,
-            endpointAssessmentPrice: cost.EpaoPrice,
             employerType: EmployerType.Levy,
             transferSenderId: null,
             legalEntityName: string.Empty,
             accountLegalEntityId: null,
-            isApproved: false);
+            costs: updateModel.OnProgrammeDetails.Costs);
 
         var learningChanges = learning.Update(updateModel);
         var learnerChanges = learner.Update(updateModel);
