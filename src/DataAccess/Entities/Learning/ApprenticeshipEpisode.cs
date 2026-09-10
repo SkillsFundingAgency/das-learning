@@ -28,4 +28,5 @@ public class ApprenticeshipEpisode : Episode
     public DateTime? AchievementDate { get; set; }
     public List<ApprenticeshipLearningSupport> LearningSupport { get; set; }
     public List<EpisodeBreakInLearning> BreaksInLearning { get; set; }
+    public string LearnerRef { get; set; } = string.Empty;
 }

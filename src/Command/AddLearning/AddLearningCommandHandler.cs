@@ -78,6 +78,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.TransferSenderId,
             command.LegalEntityName,
             command.AccountLegalEntityId,
+            learnerRef: string.Empty,
             command.EmployerType,
             isApproved: true);
 
