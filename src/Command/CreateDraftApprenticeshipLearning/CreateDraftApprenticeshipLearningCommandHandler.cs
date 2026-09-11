@@ -164,7 +164,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         LearnerDomainModel learner)
     {
         var updateModel = command.LearningUpdateContext;
-        var cost = updateModel.OnProgrammeDetails.Costs.First(); // HACK, we could have multiple costs
+        var cost = updateModel.OnProgrammeDetails.Costs.OrderBy(c => c.FromDate).First(); // HACK, we could have multiple costs
                                                                  // Approvals will only surface one cost at initial approval
                                                                  // Once approved, on the next ILR submission the addtional costs will be added
                                                                  // which will then require further approval
