@@ -30,19 +30,17 @@ public class WhenGetAll
         _sut = new LearningController(_queryDispatcher.Object, _commandDispatcher.Object, _mockLogger.Object, Mock.Of<IPagedLinkHeaderService>());
     }
 
-    [TestCase(null)]
-    [TestCase(FundingPlatform.SLD)]
-    [TestCase(FundingPlatform.DAS)]
-    public async Task ThenLearningsAreReturned(FundingPlatform? fundingPlatform)
+    [Test]
+    public async Task ThenLearningsAreReturned()
     {
         var ukprn = _fixture.Create<long>();
         var expectedResult = _fixture.Create<GetLearningsResponse>();
 
         _queryDispatcher
-            .Setup(x => x.Send<GetLearningsRequest, GetLearningsResponse>(It.Is<GetLearningsRequest>(r => r.Ukprn == ukprn && r.FundingPlatform == fundingPlatform)))
+            .Setup(x => x.Send<GetLearningsRequest, GetLearningsResponse>(It.Is<GetLearningsRequest>(r => r.Ukprn == ukprn)))
             .ReturnsAsync(expectedResult);
 
-        var result = await _sut.GetAll(ukprn, fundingPlatform);
+        var result = await _sut.GetAll(ukprn);
 
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;

@@ -77,10 +77,6 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasForeignKey(a => a.LearnerKey)
             .IsRequired();
 
-        // CompletionDate moved to ShortCourseEpisode (FLP-1868) - inherited Learning.CompletionDate no longer maps here
-        modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
-            .Ignore(x => x.CompletionDate);
-
         // Episode
         modelBuilder.Entity<ApprenticeshipEpisode>()
             .HasKey(a => new { a.Key });
@@ -89,17 +85,16 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasConversion(
                 v => v.ToString(),
                 v => (EmployerType)Enum.Parse(typeof(EmployerType), v));
-        modelBuilder.Entity<ApprenticeshipEpisode>()
-            .Property(p => p.FundingPlatform)
-            .HasConversion(
-                v => (int?)v,
-                v => (FundingPlatform?)v);
 
         modelBuilder.Entity<ApprenticeshipEpisode>()
             .HasOne<ApprenticeshipLearning>()
             .WithMany(a => a.Episodes)
             .HasForeignKey(e => e.LearningKey)
             .HasPrincipalKey(a => a.Key);
+
+        // Legacy field to be removed: TrainingCode moved to ApprenticeshipLearning
+        modelBuilder.Entity<ApprenticeshipEpisode>()
+            .Ignore(x => x.TrainingCode);
 
         modelBuilder.Entity<ShortCourseEpisode>()
             .HasKey(a => new { a.Key });

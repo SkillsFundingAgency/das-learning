@@ -101,7 +101,6 @@ public class WhenRemovingApprenticeship
     {
         // Arrange
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        entity.CompletionDate = entity.CompletionDate?.Date;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = entity.Key;
@@ -139,7 +138,6 @@ public class WhenRemovingApprenticeship
         List<EpisodeBreakInLearning> breaks)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        entity.CompletionDate = entity.CompletionDate?.Date;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = entity.Key;

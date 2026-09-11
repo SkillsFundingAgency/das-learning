@@ -4,7 +4,6 @@ using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 using System.Reflection;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.TestHelpers;
 
@@ -33,7 +32,7 @@ public static class ApprenticeshipDomainModelTestHelper
         return apprenticeship;
     }
 
-    public static void AddEpisode(ApprenticeshipLearningDomainModel learning, DateTime? startDate = null, DateTime? endDate = null, long? ukprn = null, FundingPlatform? fundingPlatform = FundingPlatform.DAS)
+    public static void AddEpisode(ApprenticeshipLearningDomainModel learning, DateTime? startDate = null, DateTime? endDate = null, long? ukprn = null)
     {
         var start = startDate ?? _fixture.Create<DateTime>();
         var end = endDate ?? (start.AddDays(_fixture.Create<int>()));
@@ -48,12 +47,9 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<decimal>(),
             _fixture.Create<decimal>(),
             _fixture.Create<decimal>(),
-            fundingPlatform,
             _fixture.Create<long?>(),
             _fixture.Create<string>(),
             _fixture.Create<long>(),
-            _fixture.Create<int>().ToString(),
-            _fixture.Create<string?>(),
             _fixture.Create<EmployerType>());
     }
 
@@ -63,7 +59,7 @@ public static class ApprenticeshipDomainModelTestHelper
         var expectedNumberOfPrices = learning.AllPrices.Count();
         var episodePrice = learning.LatestPrice;
         return
-            e.Episode.TrainingCode == episode.TrainingCode &&
+            e.Episode.TrainingCode == learning.TrainingCode &&
             e.Episode.FundingEmployerAccountId == episode.FundingEmployerAccountId &&
             e.Episode.EmployerAccountId == episode.EmployerAccountId &&
             e.Episode.LegalEntityName == episode.LegalEntityName &&
@@ -74,7 +70,6 @@ public static class ApprenticeshipDomainModelTestHelper
             e.Episode.EmployerType == episode.EmployerType &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.StartDate == episodePrice.StartDate &&
             e.Episode.Prices.MaxBy(x => x.StartDate)!.EndDate == episodePrice.EndDate &&
-            e.Episode.FundingPlatform == episode.FundingPlatform &&
             e.Episode.EmployerType == episode.EmployerType;
     }
 }

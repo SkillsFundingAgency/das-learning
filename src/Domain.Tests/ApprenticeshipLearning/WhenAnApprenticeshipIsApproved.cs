@@ -48,7 +48,7 @@ public class WhenAnApprenticeshipIsApproved
         learning.LatestEpisode.LegalEntityName.Should().Be(legalEntityName);
         learning.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(approvalsApprenticeshipId);
         learning.LatestEpisode.AccountLegalEntityId.Should().Be(accountLegalEntityId);
-        learning.LatestEpisode.TrainingCourseVersion.Should().Be(trainingCourseVersion);
+        learning.TrainingCourseVersion.Should().Be(trainingCourseVersion);
 
         var events = learning.FlushEvents();
         events.Should().ContainSingle().Which.Should().BeOfType<LearningApprovedEvent>();
@@ -108,6 +108,6 @@ public class WhenAnApprenticeshipIsApproved
         learning.LatestEpisode.LegalEntityName.Should().Be(context.LegalEntityName);
         learning.LatestEpisode.ApprovalsApprenticeshipId.Should().Be(context.ApprovalsApprenticeshipId);
         learning.LatestEpisode.AccountLegalEntityId.Should().Be(context.AccountLegalEntityId);
-        learning.LatestEpisode.TrainingCourseVersion.Should().Be(context.TrainingCourseVersion);
+        learning.TrainingCourseVersion.Should().Be(context.TrainingCourseVersion);
     }
 }

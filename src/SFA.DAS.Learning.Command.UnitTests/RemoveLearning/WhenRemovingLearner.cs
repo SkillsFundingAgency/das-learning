@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
 
@@ -55,12 +54,12 @@ public class WhenRemovingLearner
     private ApprenticeshipLearningDomainModel CreateLearningInAcademicYear(Action<ApprenticeshipEpisode>? configureEpisode = null)
     {
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
-        TestHelper.SetCompletionDate(domainModel, null);
 
         var episode = _fixture.CreateEpisodeDomainModel(x =>
         {
             x.WithdrawalDate = null;
             x.IsRemoved = false;
+            x.CompletionDate = null;
             x.Prices = [new DataAccess.Entities.Learning.EpisodePrice { Key = Guid.NewGuid(), StartDate = InAcademicYearStartDate, EndDate = InAcademicYearEndDate, TotalPrice = 1000 }];
             configureEpisode?.Invoke(x);
         });
@@ -72,12 +71,12 @@ public class WhenRemovingLearner
     private ApprenticeshipLearningDomainModel CreateLearningOutsideAcademicYear(Action<ApprenticeshipEpisode>? configureEpisode = null)
     {
         var domainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
-        TestHelper.SetCompletionDate(domainModel, null);
 
         var episode = _fixture.CreateEpisodeDomainModel(x =>
         {
             x.WithdrawalDate = null;
             x.IsRemoved = false;
+            x.CompletionDate = null;
             x.Prices = [new DataAccess.Entities.Learning.EpisodePrice { Key = Guid.NewGuid(), StartDate = OutsideAcademicYearStartDate, EndDate = OutsideAcademicYearEndDate, TotalPrice = 1000 }];
             configureEpisode?.Invoke(x);
         });
@@ -118,7 +117,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = CreateCommand();
-        var domainModel = CreateLearningInAcademicYear(x => x.FundingPlatform = FundingPlatform.SLD);
+        var domainModel = CreateLearningInAcademicYear();
 
         _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
             .ReturnsAsync([domainModel]);
@@ -144,7 +143,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = CreateCommand();
-        var domainModel = CreateLearningInAcademicYear(x => x.FundingPlatform = FundingPlatform.SLD);
+        var domainModel = CreateLearningInAcademicYear();
 
         _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
             .ReturnsAsync([domainModel]);
@@ -170,7 +169,7 @@ public class WhenRemovingLearner
     {
         // Arrange
         var command = CreateCommand();
-        var domainModel = CreateLearningInAcademicYear(x => x.FundingPlatform = FundingPlatform.SLD);
+        var domainModel = CreateLearningInAcademicYear();
 
         _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
             .ReturnsAsync([domainModel]);
