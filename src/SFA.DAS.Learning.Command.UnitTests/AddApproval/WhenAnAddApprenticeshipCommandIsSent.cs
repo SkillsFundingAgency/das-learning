@@ -130,7 +130,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var learner = _fixture.Create<LearnerDomainModel>();
 
         _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
-        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key)).Returns(apprenticeship);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LearningType>())).Returns(apprenticeship);
 
         // Act
         await _commandHandler.Handle(command);

@@ -41,18 +41,17 @@ public class ApprenticeshipLearningSnapshot
             CompletionDate = learning.CompletionDate,
             AchievementDate = learning.AchievementDate,
             LearningType = learning.LearningType,
+            TrainingCode = learning.TrainingCode,
+            TrainingCourseVersion = learning.TrainingCourseVersion,
 
             Episodes = learning.Episodes.Select(e => new ApprenticeshipEpisodeSnapshot
             {
                 Key = e.Key,
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId,
-                FundingPlatform = e.FundingPlatform,
                 FundingEmployerAccountId = e.FundingEmployerAccountId,
                 LegalEntityName = e.LegalEntityName,
                 AccountLegalEntityId = e.AccountLegalEntityId,
-                TrainingCode = e.TrainingCode,
-                TrainingCourseVersion = e.TrainingCourseVersion,
                 IsApproved = e.IsApproved,
                 PaymentsFrozen = e.PaymentsFrozen,
                 IsRemoved = e.IsRemoved,
@@ -107,6 +106,8 @@ public class ApprenticeshipLearningSnapshot
     public DateTime? CompletionDate { get; set; }
     public DateTime? AchievementDate { get; set; }
     public LearningType LearningType { get; set; }
+    public string TrainingCode { get; set; }
+    public string? TrainingCourseVersion { get; set; }
     public List<ApprenticeshipEpisodeSnapshot> Episodes { get; set; }
     public List<EnglishAndMathsSnapshot> EnglishAndMathsCourses { get; set; }
 }
@@ -116,12 +117,9 @@ public class ApprenticeshipEpisodeSnapshot
     public Guid Key { get; set; }
     public long Ukprn { get; set; }
     public long? EmployerAccountId { get; set; }
-    public FundingPlatform? FundingPlatform { get; set; }
     public long? FundingEmployerAccountId { get; set; }
     public string LegalEntityName { get; set; }
     public long? AccountLegalEntityId { get; set; }
-    public string TrainingCode { get; set; }
-    public string TrainingCourseVersion { get; set; }
     public bool IsApproved { get; set; }
     public bool PaymentsFrozen { get; set; }
     public bool IsRemoved { get; set; }
