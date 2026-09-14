@@ -13,9 +13,7 @@ public class ApprenticeshipLearningChangedEventHandler(
     ILogger<ApprenticeshipLearningChangedEventHandler> logger)
     : IDomainEventHandler<ApprenticeshipLearningChangedEvent>
 {
-    // LearningUpdateChanges has no JsonStringEnumConverter attribute (unlike ShortCourseUpdateChanges) because it's
-    // also serialized numerically across the outer API boundary today. Applied locally here only, so the history
-    // row's Changes column is readable without changing that unrelated wire contract.
+    // Serialize Changes enum as readable
     private static readonly JsonSerializerOptions ChangesSerializerOptions = new() { Converters = { new JsonStringEnumConverter() } };
 
     public async Task Handle(
