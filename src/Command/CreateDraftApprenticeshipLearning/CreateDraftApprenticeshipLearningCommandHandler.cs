@@ -170,6 +170,10 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
                                                                  // which will then require further approval
                                                                  // This is a known limitation of the current implementation and will be addressed in future iterations
 
+        // learning.Update() below runs UpdatePricesIfChanged against ALL costs, so without this it would add a
+        // second EpisodePrice for any extra cost that doesn't match the one just created by AddEpisode
+        updateModel.OnProgrammeDetails.Costs = [cost];
+
         var trainingCode = command.TrainingCode;
 
         var learning = _learningFactory.CreateNew(learner.Key, updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship));
