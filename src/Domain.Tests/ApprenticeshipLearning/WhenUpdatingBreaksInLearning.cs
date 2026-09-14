@@ -157,13 +157,13 @@ public class WhenUpdatingBreaksInLearning
     private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(List<EpisodeBreakInLearning> breaks)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        entity.CompletionDate = entity.CompletionDate?.Date;
-        entity.AchievementDate = null;
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
         episode.LearningKey = entity.Key;
         episode.PauseDate = null;
         episode.IsRemoved = false;
+        episode.CompletionDate = episode.CompletionDate?.Date;
+        episode.AchievementDate = null;
 
         episode.BreaksInLearning = new List<EpisodeBreakInLearning>();
         foreach (var b in breaks)

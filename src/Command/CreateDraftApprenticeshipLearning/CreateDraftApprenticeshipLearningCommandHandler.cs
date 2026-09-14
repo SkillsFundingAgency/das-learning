@@ -129,7 +129,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         _logger.LogInformation(
             "Marking missing apprenticeship course as removed for learner {LearnerKey}: learning {LearningKey}, TrainingCode {TrainingCode} - learner switched to TrainingCode {NewTrainingCode}",
-            learner.Key, missingLearning.Key, missingLearning.LatestEpisode.TrainingCode, command.TrainingCode);
+            learner.Key, missingLearning.Key, missingLearning.TrainingCode, command.TrainingCode);
 
         missingLearning.RemoveLearner();
         missingLearning.AddEvent(ApprenticeshipLearningChangedEvent.From(missingLearning, command.AcademicYear, ApprenticeshipLearningOperation.Removed));
@@ -171,7 +171,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var trainingCode = command.TrainingCode;
 
-        var learning = _learningFactory.CreateNew(learner.Key, updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship));
+        var learning = _learningFactory.CreateNew(learner.Key, trainingCode, trainingCourseVersion: null, updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship));
         learning.AddEpisode(
             updateModel.ApprovalsApprenticeshipId,
             command.Ukprn,
@@ -182,12 +182,9 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             trainingPrice: cost.TrainingPrice,
             endpointAssessmentPrice: cost.EpaoPrice,
             employerType: EmployerType.Levy,
-            fundingPlatform: FundingPlatform.SLD,
             transferSenderId: null,
             legalEntityName: string.Empty,
             accountLegalEntityId: null,
-            trainingCode: trainingCode,
-            trainingCourseVersion: null,
             isApproved: false);
 
         var learningChanges = learning.Update(updateModel);
