@@ -25,12 +25,11 @@ public class LearnerUpdatedEvent : IDomainEvent
                 Key = e.Key,
                 Ukprn = e.Ukprn,
                 EmployerAccountId = e.EmployerAccountId ?? 0,
-                FundingPlatform = e.FundingPlatform,
                 FundingEmployerAccountId = e.FundingEmployerAccountId,
                 LegalEntityName = e.LegalEntityName,
                 AccountLegalEntityId = e.AccountLegalEntityId,
-                TrainingCode = e.TrainingCode,
-                TrainingCourseVersion = e.TrainingCourseVersion,
+                TrainingCode = learning.TrainingCode,
+                TrainingCourseVersion = learning.TrainingCourseVersion,
                 PaymentsFrozen = e.PaymentsFrozen,
                 WithdrawalDate = e.WithdrawalDate,
                 PauseDate = e.PauseDate,
@@ -96,12 +95,11 @@ public class Episode
     public Guid Key { get; set; }
     public long Ukprn { get; set; }
     public long EmployerAccountId { get; set; }
-    public FundingPlatform? FundingPlatform { get; set; }
     public long? FundingEmployerAccountId { get; set; }
     public string LegalEntityName { get; set; }
     public long? AccountLegalEntityId { get; set; }
     public string TrainingCode { get; set; }
-    public string TrainingCourseVersion { get; set; }
+    public string? TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }

@@ -35,12 +35,11 @@ public class WhenGettingUnapprovedApprenticeshipLearning
         _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = Uln, FirstName = "Alex", LastName = "Jones" });
 
         var episodeKey = Guid.NewGuid();
-        var learning = new DataAccess.Entities.Learning.ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = learnerKey };
+        var learning = new DataAccess.Entities.Learning.ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = learnerKey, TrainingCode = TrainingCode };
         learning.Episodes.Add(new ApprenticeshipEpisode
         {
             Key = episodeKey,
             Ukprn = 10005077,
-            TrainingCode = TrainingCode,
             IsApproved = false,
             ApprovalsApprenticeshipId = 0,
             LegalEntityName = string.Empty,

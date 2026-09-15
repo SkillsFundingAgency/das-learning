@@ -26,13 +26,12 @@ public static class IntegrationEventExtensions
             Ukprn = latestEpisode.Ukprn,
             EmployerAccountId = latestEpisode.EmployerAccountId ?? 0,
             EmployerType = latestEpisode.EmployerType,
-            FundingPlatform = latestEpisode.FundingPlatform,
             FundingEmployerAccountId = latestEpisode.FundingEmployerAccountId,
             LegalEntityName = latestEpisode.LegalEntityName,
             AccountLegalEntityId = latestEpisode.AccountLegalEntityId,
             AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
-            TrainingCode = latestEpisode.TrainingCode,
-            TrainingCourseVersion = latestEpisode.TrainingCourseVersion,
+            TrainingCode = learning.TrainingCode,
+            TrainingCourseVersion = learning.TrainingCourseVersion,
             PaymentsFrozen = latestEpisode.PaymentsFrozen,
             Prices = prices
         };

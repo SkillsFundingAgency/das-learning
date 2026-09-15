@@ -19,7 +19,6 @@ public static class ApprenticeshipDbContextTestHelper
         long? ukprn = null,
         string? initiator = null,
         long? approvalsApprenticeshipId = null,
-        FundingPlatform? fundingPlatform = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
         DateTime? withdrawalDate = null)
@@ -41,7 +40,6 @@ public static class ApprenticeshipDbContextTestHelper
             .With(x => x.LearningKey, learningKey)
             .With(x => x.Key, episodeKey)
             .With(x => x.Ukprn, ukprn ?? _fixture.Create<long>())
-            .With(x => x.FundingPlatform, fundingPlatform ?? _fixture.Create<FundingPlatform>())
             .With(x => x.Prices, new List<EpisodePrice> { episodePrice })
             .With(x => x.WithdrawalDate, withdrawalDate)
             .With(x => x.BreaksInLearning, new List<EpisodeBreakInLearning>{ episodeBreakInLearning })
