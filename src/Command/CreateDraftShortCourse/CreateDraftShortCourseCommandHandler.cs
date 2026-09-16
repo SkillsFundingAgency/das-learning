@@ -53,7 +53,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
         foreach (var model in command.Models)
         {
-            var result = await HandleSingleItem(model, learner, personalDetailsChanged, processedCourseCodes);
+            var result = await HandleSingleItem(model, learner, personalDetailsChanged, processedCourseCodes, command.AcademicYear);
             if (result != null)
             {
                 results.Add(result);
@@ -89,6 +89,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
             if (!removedEpisodeKey.HasValue)
                 continue;
 
+            learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, command.AcademicYear, ShortCourseLearningOperation.Removed));
+
             await _shortCourseLearningRepository.Update(learning);
 
             _logger.LogInformation("Removed omitted Learning {LearningKey} / {CourseCode} for LearnerKey {LearnerKey}",
@@ -100,7 +102,7 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         }
     }
 
-    private async Task<CreateDraftShortCourseItemResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged, HashSet<string> processedCourseCodes)
+    private async Task<CreateDraftShortCourseItemResult?> HandleSingleItem(ShortCourseUpdateContext model, LearnerDomainModel learner, bool personalDetailsChanged, HashSet<string> processedCourseCodes, int academicYear)
     {
         var ukprn = model.OnProgramme.Ukprn;
 
@@ -122,6 +124,8 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
 
             if (personalDetailsChanged)
                 newLearning.AddEvent(PersonalDetailsChangedEvent.From(learner, newLearning, newLearning.LatestEpisodeForProvider(ukprn)));
+
+            newLearning.AddEvent(ShortCourseLearningChangedEvent.From(newLearning, academicYear, ShortCourseLearningOperation.Created));
 
             await _shortCourseLearningRepository.Add(newLearning);
 
@@ -160,10 +164,13 @@ public class CreateDraftShortCourseCommandHandler : ICommandHandler<CreateDraftS
         if (!existingEpisode)
         {
             AddEpisode(learning, model);
+            learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, academicYear, ShortCourseLearningOperation.Created));
         }
         else
         {
             updateResult = learning.Update(model);
+            if (updateResult.Changes.Length > 0)
+                learning.AddEvent(ShortCourseLearningChangedEvent.From(learning, academicYear, ShortCourseLearningOperation.Updated, updateResult.Changes));
         }
 
         var episode = learning.Episodes.Single(e => e.Ukprn == ukprn);
