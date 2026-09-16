@@ -16,10 +16,16 @@ public class UpdateLearnerCommandHandler(
         logger.LogInformation("Handling UpdateLearnerCommand for learner with key {LearnerKey}", command.LearnerKey);
 
         // Get all learnings for the learner key, ukprn, and training code
-        // In the case of multiple with the same course code, we throw an exception
-        // This is a temporary measure until we have a way to handle multiple learnings with the same course code, and should be fixed
-        // when "continuations" or other change of circumstance is implemented, until which time this endpoint will be toggled off
+        // In the case of multiple with the same course code, we can't unambiguously identify which
+        // row the update applies to, so we silently ignore the update until CoC/Progression deals with it
         var candidates = await learningRepository.GetAllByLearnerKey(command.LearnerKey, command.Ukprn, command.TrainingCode);
+
+        if (candidates.Count > 1)
+        {
+            logger.LogWarning("More than one learning found for learner key {LearnerKey}, ukprn {Ukprn}, training code {TrainingCode}. Ignoring update.", command.LearnerKey, command.Ukprn, command.TrainingCode);
+            return new UpdateLearnerResult();
+        }
+
         var learning = candidates.SingleOrDefault();
 
         if (learning == null)

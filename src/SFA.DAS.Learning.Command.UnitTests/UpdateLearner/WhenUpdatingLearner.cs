@@ -161,7 +161,7 @@ public class WhenUpdatingLearner
     }
 
     [Test]
-    public void ThenAnExceptionIsThrownIfMoreThanOneMatchingLearningIsFound()
+    public async Task ThenTheUpdateIsSilentlyIgnoredIfMoreThanOneMatchingLearningIsFound()
     {
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
@@ -172,11 +172,14 @@ public class WhenUpdatingLearner
             .Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn, command.TrainingCode))
             .ReturnsAsync([firstLearning, secondLearning]);
 
-        // Act & Assert
-        // Deliberately unhandled: apprenticeships can legitimately have more than one row for the
-        // same (LearnerKey, Ukprn, TrainingCode) once repeats/restarts are involved. Disambiguating
-        // that case is deferred to the Change of Circumstances work; for now this surfaces as an
-        // unhandled InvalidOperationException rather than silently guessing.
-        Assert.ThrowsAsync<InvalidOperationException>(() => _commandHandler.Handle(command));
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().BeEmpty();
+        result.LearningKey.Should().Be(Guid.Empty);
+        result.LearningEpisodeKey.Should().Be(Guid.Empty);
+        _learnerRepository.Verify(x => x.Update(It.IsAny<LearnerDomainModel>()), Times.Never);
+        _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Never);
     }
 }
