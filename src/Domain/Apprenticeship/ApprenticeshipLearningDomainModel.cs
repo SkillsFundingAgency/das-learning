@@ -221,6 +221,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             LearnerRef = string.Empty,
             EmployerType = employerType
         });
+
+        AddEvent(ApprenticeshipLearningChangedEvent.From(this, academicYear: null, ApprenticeshipLearningOperation.Approved));
     }
         
     private void UpdateLearningType(LearningUpdateContext updateModel)
