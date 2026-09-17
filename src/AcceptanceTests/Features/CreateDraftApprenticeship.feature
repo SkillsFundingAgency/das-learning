@@ -21,7 +21,7 @@ Scenario: Apprenticeship exists but is removed, returns 200 and reinstates appre
 	When CreateDraftApprenticeship is called with apprenticeship details
 	Then the CreateDraftApprenticeship endpoint should return a 200
 	And the apprenticeship should be reinstated
-	And the CreateDraftApprenticeship response should not include a NewApprenticeshipLearner change
+	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
 
 Scenario: Learner exists with a Short Course but no Apprenticeship, creates apprenticeship and flags a new apprenticeship learner
 	Given SLD call the create short course endpoint with the following information

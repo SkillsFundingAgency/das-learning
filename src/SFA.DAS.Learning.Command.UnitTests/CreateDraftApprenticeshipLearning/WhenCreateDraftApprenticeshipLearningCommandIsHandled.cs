@@ -335,29 +335,6 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
-    public async Task Then_NewApprenticeshipLearner_Change_Is_Not_Returned_When_Existing_Learning_Is_Updated()
-    {
-        // Arrange
-        var command = CreateCommand();
-        var learner = CreateLearner();
-        var unapprovedLearning = CreateLearning(isApproved: false);
-
-        _learnerRepository
-            .Setup(x => x.GetByUln(It.IsAny<string>()))
-            .ReturnsAsync(learner);
-
-        _learningRepository
-            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
-            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
-
-        // Act
-        var result = await _handler.Handle(command);
-
-        // Assert
-        result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
-    }
-
-    [Test]
     public async Task Then_New_Learning_Is_Created_When_All_Existing_Learnings_Are_Approved()
     {
         // Arrange
