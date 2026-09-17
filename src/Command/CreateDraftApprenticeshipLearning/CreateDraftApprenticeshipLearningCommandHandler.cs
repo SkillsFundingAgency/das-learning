@@ -40,14 +40,15 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key, ukprn: command.Ukprn, courseCode: command.TrainingCode);
 
+        var historicLearnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key);
+        var isNewApprenticeshipLearner = historicLearnings.All(l => l.Episodes.All(e => e.IsRemoved || !e.IsApproved));
+        
+
         var existingLearning = SelectExistingLearningToUpdate(learnings);
 
         // no unapproved draft and no single unambiguous reinstatement candidate - create a new one
         if (existingLearning == null)
         {
-            var historicLearnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key);
-            var isNewApprenticeshipLearner = historicLearnings.All(l => l.Episodes.All(e => e.IsRemoved || !e.IsApproved));
-
             var createResult = await CreateDraftLearning(command, learner);
             createResult.RemovedLearningKey = removedLearningKey;
 
@@ -62,7 +63,8 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learningChanges = existingLearning.Update(updateModel);
         var learnerChanges = learner.Update(updateModel);
-        var changes = learningChanges.Concat(learnerChanges).ToArray();
+        var changes = learningChanges.Concat(learnerChanges).ToList();
+        if (isNewApprenticeshipLearner) changes.Add(LearningUpdateChanges.NewApprenticeshipLearner);
 
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingLearning.Key, changes);
 
@@ -80,7 +82,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         return new CreateDraftApprenticeshipLearningCommandResult
         {
-            Changes = changes.ToList(),
+            Changes = changes,
             LearningKey = existingLearning.Key,
             LearningEpisodeKey = existingLearning.LatestEpisode.Key,
             Prices = existingLearning.LatestEpisode.EpisodePrices
