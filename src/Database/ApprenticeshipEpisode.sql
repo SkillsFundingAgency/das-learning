@@ -19,7 +19,8 @@
     [PauseDate] DATETIME NULL,
     [IsApproved] BIT NOT NULL DEFAULT 1,
     [CompletionDate] DATETIME NULL,
-    [AchievementDate] DATETIME NULL
+    [AchievementDate] DATETIME NULL,
+    [LearnerRef] VARCHAR(12) NOT NULL DEFAULT ''
 )
 GO
 ALTER TABLE dbo.ApprenticeshipEpisode

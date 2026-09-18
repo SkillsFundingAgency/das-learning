@@ -26,6 +26,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public long? FundingEmployerAccountId => _entity.FundingEmployerAccountId;
     public string LegalEntityName => _entity.LegalEntityName;
     public long? AccountLegalEntityId => _entity.AccountLegalEntityId;
+    public string LearnerRef => _entity.LearnerRef;
     public override bool IsApproved => _entity.IsApproved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public DateTime? AchievementDate => _entity.AchievementDate;
@@ -75,6 +76,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         long? fundingEmployerAccountId,
         string legalEntityName,
         long? accountLegalEntityId,
+        string learnerRef,
         EmployerType employerType,
         bool isApproved = false)
     {
@@ -88,6 +90,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             FundingEmployerAccountId = fundingEmployerAccountId,
             LegalEntityName = legalEntityName,
             AccountLegalEntityId = accountLegalEntityId,
+            LearnerRef = learnerRef,
             PaymentsFrozen = false,
             EmployerType = employerType,
             IsApproved = isApproved

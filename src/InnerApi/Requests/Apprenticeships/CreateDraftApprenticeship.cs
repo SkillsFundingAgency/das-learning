@@ -81,6 +81,9 @@ public class ApprenticeshipLearnerUpdateDetails : LearnerUpdateDetails
     /// Date the learning completes, this will be null until completion is confirmed
     /// </summary>
     public DateTime? CompletionDate { get; set; }
+
+    /// <summary> Learner Reference </summary>
+    public string? LearnerRef { get; set; }
 }
 
 /// <summary>
@@ -241,6 +244,7 @@ public static class CreateDraftApprenticeshipExtensions
     {
         return new LearningUpdateContext
         {
+            LearnerRef = request.Learner.LearnerRef ?? string.Empty,
             Learner = new LearnerModel
             {
                 FirstName = request.Learner.FirstName,
