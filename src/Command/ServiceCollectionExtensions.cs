@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IShortCourseLearningFactory, ShortCourseLearningFactory>()
             .AddScoped<ILearningHistoryRepository, LearningHistoryRepository>()
             .AddScoped<IShortCourseLearningHistoryRepository, ShortCourseLearningHistoryRepository>()
+            .AddScoped<IApprenticeshipLearningHistoryRepository, ApprenticeshipLearningHistoryRepository>()
             .AddSingleton<ISystemClockService, SystemClockService>()
             .AddScoped<IShortCourseLearningDomainModelMapper, ShortCourseLearningDomainModelMapper>()
             .AddEncodingServices(configuration)

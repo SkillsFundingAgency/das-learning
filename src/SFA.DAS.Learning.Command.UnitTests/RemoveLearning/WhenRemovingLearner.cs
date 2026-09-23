@@ -262,6 +262,28 @@ public class WhenRemovingLearner
     }
 
     [Test]
+    public async Task ThenAnApprenticeshipLearningChangedEventIsRaisedWithRemovedOperation()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var domainModel = CreateLearningInAcademicYear();
+
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
+                   .ReturnsAsync([domainModel]);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        domainModel.FlushEvents()
+            .OfType<Domain.Events.ApprenticeshipLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == domainModel.Key
+                                 && e.AcademicYear == AcademicYear
+                                 && e.Operation == Enums.ApprenticeshipLearningOperation.Removed);
+    }
+
+    [Test]
     public async Task ThenAllLearningsForTheLearnerAreRemovedAndReturned()
     {
         // Arrange
