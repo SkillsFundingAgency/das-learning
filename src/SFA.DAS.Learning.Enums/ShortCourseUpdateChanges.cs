@@ -2,6 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace SFA.DAS.Learning.Enums;
 
+/// <summary>
+/// Short Course Learning Update Changes
+/// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ShortCourseUpdateChanges
 {
