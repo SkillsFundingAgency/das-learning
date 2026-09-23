@@ -40,6 +40,10 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key, ukprn: command.Ukprn, courseCode: command.TrainingCode);
 
+        var historicLearnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key);
+        var isNewApprenticeshipLearner = historicLearnings.All(l => l.Episodes.All(e => e.IsRemoved || !e.IsApproved));
+        
+
         var existingLearning = SelectExistingLearningToUpdate(learnings);
 
         // no unapproved draft and no single unambiguous reinstatement candidate - create a new one
@@ -47,6 +51,9 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         {
             var createResult = await CreateDraftLearning(command, learner);
             createResult.RemovedLearningKey = removedLearningKey;
+
+            if (isNewApprenticeshipLearner) createResult.Changes.Add(LearningUpdateChanges.NewApprenticeshipLearner);
+
             _logger.LogInformation("Successfully created draft learning with key {LearningKey}", createResult.LearningKey);
             return createResult;
         }
@@ -56,7 +63,8 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learningChanges = existingLearning.Update(updateModel);
         var learnerChanges = learner.Update(updateModel);
-        var changes = learningChanges.Concat(learnerChanges).ToArray();
+        var changes = learningChanges.Concat(learnerChanges).ToList();
+        if (isNewApprenticeshipLearner) changes.Add(LearningUpdateChanges.NewApprenticeshipLearner);
 
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingLearning.Key, changes);
 
@@ -76,7 +84,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         return new CreateDraftApprenticeshipLearningCommandResult
         {
-            Changes = changes.ToList(),
+            Changes = changes,
             LearningKey = existingLearning.Key,
             LearningEpisodeKey = existingLearning.LatestEpisode.Key,
             Prices = existingLearning.LatestEpisode.EpisodePrices
@@ -167,7 +175,15 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         LearnerDomainModel learner)
     {
         var updateModel = command.LearningUpdateContext;
-        var cost = updateModel.OnProgrammeDetails.Costs.Single(); //assume single cost at draft point
+        var cost = updateModel.OnProgrammeDetails.Costs.OrderBy(c => c.FromDate).First(); // HACK, we could have multiple costs
+                                                                 // Approvals will only surface one cost at initial approval
+                                                                 // Once approved, on the next ILR submission the addtional costs will be added
+                                                                 // which will then require further approval
+                                                                 // This is a known limitation of the current implementation and will be addressed in future iterations
+
+        // learning.Update() below runs UpdatePricesIfChanged against ALL costs, so without this it would add a
+        // second EpisodePrice for any extra cost that doesn't match the one just created by AddEpisode
+        updateModel.OnProgrammeDetails.Costs = [cost];
 
         var trainingCode = command.TrainingCode;
 
