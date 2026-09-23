@@ -68,7 +68,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingLearning.Key, changes);
 
-        if (changes.Length > 0)
+        if (changes.Any(x => x != LearningUpdateChanges.NewApprenticeshipLearner))
             existingLearning.AddEvent(ApprenticeshipLearningChangedEvent.From(existingLearning, command.AcademicYear, ApprenticeshipLearningOperation.Updated, changes));
 
         if (changes.Any(x => x == LearningUpdateChanges.PersonalDetails))
