@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.Repositories;
+using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Command.RemoveLearnerCommand;
 
@@ -26,6 +28,7 @@ public class RemoveLearnerCommandHandler(
         foreach (var learning in learningsInScope)
         {
             learning.RemoveLearner();
+            learning.AddEvent(ApprenticeshipLearningChangedEvent.From(learning, command.AcademicYear, ApprenticeshipLearningOperation.Removed));
             await learningRepository.Update(learning);
             removedLearningKeys.Add(learning.Key);
         }

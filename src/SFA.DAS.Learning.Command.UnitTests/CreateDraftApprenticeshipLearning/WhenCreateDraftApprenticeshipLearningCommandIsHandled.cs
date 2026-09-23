@@ -414,6 +414,72 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_A_Learning_Changed_Event_Is_Raised_With_Created_Operation_For_A_New_Learning()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        addedLearning.Should().NotBeNull();
+        addedLearning!.FlushEvents()
+            .OfType<Domain.Events.ApprenticeshipLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == addedLearning.Key
+                                 && e.AcademicYear == AcademicYear
+                                 && e.Operation == ApprenticeshipLearningOperation.Created);
+    }
+
+    [Test]
+    public async Task Then_A_Learning_Changed_Event_Is_Raised_With_Removed_Operation_For_The_Omitted_Course()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var missingLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { missingLearning });
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        missingLearning.FlushEvents()
+            .OfType<Domain.Events.ApprenticeshipLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == missingLearning.Key
+                                 && e.AcademicYear == AcademicYear
+                                 && e.Operation == ApprenticeshipLearningOperation.Removed);
+    }
+
+    [Test]
     public async Task Then_Existing_Unapproved_Learning_Is_Updated_When_A_Single_Unapproved_Learning_Exists()
     {
         // Arrange
@@ -463,6 +529,62 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         result.Should().NotBeNull();
         result!.LearningKey.Should().Be(unapprovedLearning.Key);
         result.LearningEpisodeKey.Should().Be(unapprovedLearning.LatestEpisode.Key);
+    }
+
+    [Test]
+    public async Task Then_A_Learning_Changed_Event_Is_Raised_With_Updated_Operation_When_An_Existing_Draft_Changes()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var unapprovedLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        var raisedEvent = unapprovedLearning.FlushEvents().OfType<Domain.Events.ApprenticeshipLearningChangedEvent>().SingleOrDefault();
+        raisedEvent.Should().NotBeNull();
+        raisedEvent!.LearningKey.Should().Be(unapprovedLearning.Key);
+        raisedEvent.AcademicYear.Should().Be(AcademicYear);
+        raisedEvent.Operation.Should().Be(ApprenticeshipLearningOperation.Updated);
+        raisedEvent.Changes.Should().NotBeEmpty();
+    }
+
+    [Test]
+    public async Task Then_A_Learning_Changed_Event_Is_Not_Raised_When_The_Repeat_Draft_Post_Is_A_No_Op()
+    {
+        // Arrange - re-POSTing a draft with a payload identical to the stored learning/learner must not raise
+        // a history event, since Update() detects no field-level changes.
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var unapprovedLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
+
+        // Pre-sync the domain models to the command's data so the real Update() call detects no changes
+        _ = unapprovedLearning.Update(command.LearningUpdateContext);
+        _ = learner.Update(command.LearningUpdateContext);
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        unapprovedLearning.FlushEvents().OfType<Domain.Events.ApprenticeshipLearningChangedEvent>().Should().BeEmpty();
     }
 
     [Test]

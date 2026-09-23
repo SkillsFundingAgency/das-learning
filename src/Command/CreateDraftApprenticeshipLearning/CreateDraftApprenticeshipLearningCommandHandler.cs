@@ -68,7 +68,9 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingLearning.Key, changes);
 
-        existingLearning.AddEvent(LearnerUpdatedEvent.From(learner, existingLearning));
+        if (changes.Any(x => x != LearningUpdateChanges.NewApprenticeshipLearner))
+            existingLearning.AddEvent(ApprenticeshipLearningChangedEvent.From(existingLearning, command.AcademicYear, ApprenticeshipLearningOperation.Updated, changes));
+
         if (changes.Any(x => x == LearningUpdateChanges.PersonalDetails))
         {
             var episode = existingLearning.Episodes.Single(x => x.Ukprn == command.Ukprn);
@@ -138,6 +140,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             learner.Key, missingLearning.Key, missingLearning.TrainingCode, command.TrainingCode);
 
         missingLearning.RemoveLearner();
+        missingLearning.AddEvent(ApprenticeshipLearningChangedEvent.From(missingLearning, command.AcademicYear, ApprenticeshipLearningOperation.Removed));
 
         await _apprenticeshipLearningRepository.Update(missingLearning);
 
@@ -208,6 +211,8 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         {
             await _learnerRepository.Update(learner);
         }
+
+        learning.AddEvent(ApprenticeshipLearningChangedEvent.From(learning, command.AcademicYear, ApprenticeshipLearningOperation.Created));
 
         await _apprenticeshipLearningRepository.Add(learning);
 
