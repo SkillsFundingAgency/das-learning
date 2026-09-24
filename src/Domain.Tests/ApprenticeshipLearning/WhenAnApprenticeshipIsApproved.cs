@@ -95,7 +95,7 @@ public class WhenAnApprenticeshipIsApproved
         learning.Approve(_fixture.Create<long>(), EmployerType.NonLevy, _fixture.Create<long?>(), _fixture.Create<string>(), _fixture.Create<long>());
 
         //Assert
-        var approvedEvent = (LearningApprovedEvent)learning.FlushEvents().Single();
+        var approvedEvent = learning.FlushEvents().OfType<LearningApprovedEvent>().Single();
         approvedEvent.LearnerRef.Should().Be(learnerRef);
     }
 
@@ -109,7 +109,7 @@ public class WhenAnApprenticeshipIsApproved
         learning.Approve(_fixture.Create<long>(), EmployerType.NonLevy, _fixture.Create<long?>(), _fixture.Create<string>(), _fixture.Create<long>());
 
         //Assert
-        var approvedEvent = (LearningApprovedEvent)learning.FlushEvents().Single();
+        var approvedEvent = learning.FlushEvents().OfType<LearningApprovedEvent>().Single();
         approvedEvent.LearnerRef.Should().Be(string.Empty);
         approvedEvent.LearnerRef.Should().NotBeNull();
     }
