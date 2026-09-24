@@ -17,6 +17,7 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     public virtual DbSet<EnglishAndMaths> EnglishAndMaths { get; set; }
     public virtual DbSet<ApprenticeshipLearningSupport> ApprenticeshipLearningSupport { get; set; }
     public virtual DbSet<ShortCourseLearningSupport> ShortCourseLearningSupport { get; set; }
+    public virtual DbSet<EnglishAndMathsLearningSupport> EnglishAndMathsLearningSupport { get; set; }
     public virtual DbSet<EpisodeBreakInLearning> EpisodeBreakInLearnings { get; set; }
     public virtual DbSet<EnglishAndMathsBreakInLearning> EnglishAndMathsBreakInLearnings { get; set; }
 
@@ -148,6 +149,16 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .WithMany(e => e.LearningSupport)
             .HasForeignKey(e => e.EpisodeKey)
             .HasPrincipalKey(se => se.Key);
+
+        // EnglishAndMathsLearningSupport
+        modelBuilder.Entity<EnglishAndMathsLearningSupport>()
+            .HasKey(x => x.Key);
+
+        modelBuilder.Entity<EnglishAndMathsLearningSupport>()
+            .HasOne<EnglishAndMaths>()
+            .WithMany(e => e.LearningSupport)
+            .HasForeignKey(e => e.EnglishAndMathsKey)
+            .HasPrincipalKey(em => em.Key);
 
         // EpisodeBreakInLearning
         modelBuilder.Entity<EpisodeBreakInLearning>()

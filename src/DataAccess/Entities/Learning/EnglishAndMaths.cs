@@ -7,6 +7,7 @@ public class EnglishAndMaths
     public EnglishAndMaths()
     {
         BreaksInLearning = new List<EnglishAndMathsBreakInLearning>();
+        LearningSupport = new List<EnglishAndMathsLearningSupport>();
     }
 
     [Key]
@@ -23,4 +24,5 @@ public class EnglishAndMaths
     public decimal? CombinedFundingAdjustmentPercentage { get; set; }
     public decimal Amount { get; set; }
     public List<EnglishAndMathsBreakInLearning> BreaksInLearning { get; set; }
+    public List<EnglishAndMathsLearningSupport> LearningSupport { get; set; }
 }

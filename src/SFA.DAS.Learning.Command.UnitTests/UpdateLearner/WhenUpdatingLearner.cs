@@ -72,7 +72,7 @@ public class WhenUpdatingLearner
     {
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
-        command.UpdateModel.LearningSupport.Clear();
+        command.UpdateModel.OnProgrammeDetails.LearningSupport.Clear();
         command.UpdateModel.EnglishAndMathsCourses.Clear();
 
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();

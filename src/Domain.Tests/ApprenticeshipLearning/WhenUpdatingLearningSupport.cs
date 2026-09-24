@@ -46,17 +46,17 @@ public class WhenUpdatingLearningSupport
         (var learning, var learner) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
 
-        updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)});
+        updateModel.OnProgrammeDetails.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now, EndDate = DateTime.Now.AddDays(30)});
 
         //Act
         var result = learning.Update(updateModel);
 
         //Assert
-        result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
+        result.Should().Contain(x => x == LearningUpdateChanges.OnprogrammeLearningSupport);
         learning.LatestEpisode.LearningSupport.Should().HaveCount(1);
         learning.LatestEpisode.LearningSupport.Should().Contain(x =>
-            x.StartDate == updateModel.LearningSupport[0].StartDate &&
-            x.EndDate == updateModel.LearningSupport[0].EndDate);
+            x.StartDate == updateModel.OnProgrammeDetails.LearningSupport[0].StartDate &&
+            x.EndDate == updateModel.OnProgrammeDetails.LearningSupport[0].EndDate);
 
     }
 
@@ -70,13 +70,13 @@ public class WhenUpdatingLearningSupport
         };
         (var learning, var learner) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
-        updateModel.LearningSupport.Clear();
+        updateModel.OnProgrammeDetails.LearningSupport.Clear();
 
         //Act
         var result = learning.Update(updateModel);
 
         //Assert
-        result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
+        result.Should().Contain(x => x == LearningUpdateChanges.OnprogrammeLearningSupport);
         learning.LatestEpisode.LearningSupport.Should().BeEmpty();
     }
 
@@ -90,13 +90,13 @@ public class WhenUpdatingLearningSupport
         };
         (var learning, var learner) = CreateLearner(learningSupport);
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(learning.GetEntity(), learner.GetEntity());
-        updateModel.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now.AddDays(31), EndDate = DateTime.Now.AddDays(60) });
+        updateModel.OnProgrammeDetails.LearningSupport.Add(new LearningSupportDetails { StartDate = DateTime.Now.AddDays(31), EndDate = DateTime.Now.AddDays(60) });
 
         //Act
         var result = learning.Update(updateModel);
 
         //Assert
-        result.Should().Contain(x => x == LearningUpdateChanges.LearningSupport);
+        result.Should().Contain(x => x == LearningUpdateChanges.OnprogrammeLearningSupport);
     }
 
 

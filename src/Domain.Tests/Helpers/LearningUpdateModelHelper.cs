@@ -49,12 +49,12 @@ public static class LearningUpdateModelHelper
                     StartDate = b.StartDate,
                     EndDate = b.EndDate,
                     PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+                }).ToList(),
+                LearningSupport = x.LearningSupport.Select(ls => new LearningSupportDetails
+                {
+                    StartDate = ls.StartDate,
+                    EndDate = ls.EndDate
                 }).ToList()
-            }).ToList(),
-            LearningSupport = learning.GetEpisode().LearningSupport.Select(x => new LearningSupportDetails
-            {
-                StartDate = x.StartDate,
-                EndDate = x.EndDate
             }).ToList(),
             OnProgrammeDetails = new OnProgrammeDetails
             {
@@ -71,12 +71,15 @@ public static class LearningUpdateModelHelper
                     StartDate = b.StartDate,
                     EndDate = b.EndDate,
                     PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
-                }).ToList()
-            },
-            Delivery = new DeliveryDetails
-            {
+                }).ToList(),
+                LearningSupport = learning.GetEpisode().LearningSupport.Select(x => new LearningSupportDetails
+                {
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate
+                }).ToList(),
                 WithdrawalDate = learning.GetEpisode().WithdrawalDate
-            }
+            },
+            Delivery = new DeliveryDetails()
         };
     }
 }

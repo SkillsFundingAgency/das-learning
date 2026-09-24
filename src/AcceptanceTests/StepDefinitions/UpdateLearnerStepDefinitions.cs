@@ -41,13 +41,13 @@ public class UpdateLearnerStepDefinitions
                     updateRequest.Learner.CompletionDate = TokenisableDateTime.FromString(valueString).DateTime;
                     break;
                 case "WithdrawalDate":
-                    updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(valueString).DateTime;
+                    updateRequest.OnProgramme.WithdrawalDate = TokenisableDateTime.FromString(valueString).DateTime;
                     break;
                 case "EnglishAndMaths":
                     updateRequest.EnglishAndMathsCourses = GetEnglishAndMathsFromString(valueString);
                     break;
                 case "LearningSupport":
-                    updateRequest.LearningSupport = GetLearningSupportFromString(valueString);
+                    updateRequest.OnProgramme.LearningSupport = GetLearningSupportFromString(valueString);
                     break;
                 case "Prices":
                     updateRequest.OnProgramme.Costs = GetCostsFromString(valueString);
@@ -313,7 +313,7 @@ public class UpdateLearnerStepDefinitions
     public async Task GivenTheLearnerWasPreviouslyWithdrawn(TokenisableDateTime withdrawalDate)
     {
         var updateRequest = _scenarioContext.GetUpdateLearnerRequest();
-        updateRequest.Delivery.WithdrawalDate = withdrawalDate.DateTime;
+        updateRequest.OnProgramme.WithdrawalDate = withdrawalDate.DateTime;
         var learnerKey = _scenarioContext.GetLearnerKey();
         await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{Constants.UkPrn}/{learnerKey}", updateRequest);
 
@@ -398,7 +398,8 @@ public class UpdateLearnerStepDefinitions
                 PauseDate = parsedValues.TryGetValue("PauseDate", out var parsedPauseDate)
                     ? TokenisableDateTime.FromString(parsedPauseDate).DateTime!.Value
                     : null,
-                BreaksInLearning = breaksInLearning
+                BreaksInLearning = breaksInLearning,
+                LearningSupport = []
             });
         }
 
