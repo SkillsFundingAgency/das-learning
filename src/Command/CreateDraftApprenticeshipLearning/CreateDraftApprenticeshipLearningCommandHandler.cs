@@ -201,6 +201,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             transferSenderId: null,
             legalEntityName: string.Empty,
             accountLegalEntityId: null,
+            learnerRef: updateModel.LearnerRef,
             isApproved: false);
 
         var learningChanges = learning.Update(updateModel);
