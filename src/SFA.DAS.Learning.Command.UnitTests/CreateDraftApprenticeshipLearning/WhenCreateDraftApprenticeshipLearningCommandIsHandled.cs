@@ -874,10 +874,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
                 IsCareLeaver = true,
                 CareLeaverEmployerConsentGiven = true
             },
-            Delivery = new DeliveryDetails
-            {
-                WithdrawalDate = null
-            },
+            Delivery = new DeliveryDetails(),
             Learning = new LearningUpdateDetails
             {
                 CompletionDate = null
@@ -891,15 +888,8 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
                     StartDate = new DateTime(2025, 8, 1),
                     PlannedEndDate = new DateTime(2026, 7, 31),
                     Amount = 100,
-                    BreaksInLearning = []
-                }
-            ],
-            LearningSupport =
-            [
-                new LearningSupportDetails
-                {
-                    StartDate = new DateTime(2025, 8, 1),
-                    EndDate = new DateTime(2026, 7, 31)
+                    BreaksInLearning = [],
+                    LearningSupport = []
                 }
             ],
             OnProgrammeDetails = new OnProgrammeDetails
@@ -908,6 +898,15 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
                 AchievementDate = null,
                 PauseDate = null,
                 BreaksInLearning = [],
+                WithdrawalDate = null,
+                LearningSupport =
+                [
+                    new LearningSupportDetails
+                    {
+                        StartDate = new DateTime(2025, 8, 1),
+                        EndDate = new DateTime(2026, 7, 31)
+                    }
+                ],
                 Costs =
                 [
                     new Cost

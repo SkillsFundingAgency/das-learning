@@ -14,8 +14,8 @@ Scenario: LearningSupport details are added
 		| StartDate       | EndDate      |
 		| currentAY-09-25 | nextAY-07-31 |
 	And the following changes are returned
-		| Change          |
-		| LearningSupport |
+		| Change                     |
+		| OnprogrammeLearningSupport |
 
 Scenario: LearningSupport details are added then removed
 	Given There is an apprenticeship with the following details
@@ -32,6 +32,6 @@ Scenario: LearningSupport details are added then removed
 	Then the following LearningSupport details are stored
 		| StartDate       | EndDate      |
 	And the following changes are returned
-		| Change          |
-		| LearningSupport |
+		| Change                     |
+		| OnprogrammeLearningSupport |
 	And the learning history is maintained

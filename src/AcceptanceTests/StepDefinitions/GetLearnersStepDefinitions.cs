@@ -159,7 +159,7 @@ public class GetLearnersStepDefinitions
         {
             var updateRequest = item.Event.BuildUpdateLearnerRequest();
 
-            updateRequest.Delivery.WithdrawalDate = TokenisableDateTime.FromString(withdrawnDate).DateTime!.Value;
+            updateRequest.OnProgramme.WithdrawalDate = TokenisableDateTime.FromString(withdrawnDate).DateTime!.Value;
             var updateResponse = await _testContext.TestInnerApi.Put<UpdateLearnerRequest, UpdateLearnerResult>($"/{Constants.UkPrn}/{item.Key}", updateRequest);
 
             if (!updateResponse.Changes.Contains(LearningUpdateChanges.Withdrawal))

@@ -13,13 +13,11 @@ public class LearningUpdateContext
     public DeliveryDetails Delivery { get; set; }
     public LearningUpdateDetails Learning { get; set; }
     public List<EnglishAndMathsUpdateDetails> EnglishAndMathsCourses { get; set; }
-    public List<LearningSupportDetails> LearningSupport { get; set; }
     public OnProgrammeDetails OnProgrammeDetails { get; set; }
 }
 
 public class DeliveryDetails
 {
-    public DateTime? WithdrawalDate { get; set; }
     public LearningType? LearningType { get; set; }
 }
 
@@ -42,6 +40,7 @@ public class EnglishAndMathsUpdateDetails
     public decimal? CombinedFundingAdjustmentPercentage { get; set; }
     public decimal Amount { get; set; }
     public List<BreakInLearningUpdateDetails> BreaksInLearning { get; set; }
+    public List<LearningSupportDetails> LearningSupport { get; set; }
 }
 
 public class OnProgrammeDetails
@@ -51,6 +50,8 @@ public class OnProgrammeDetails
     public List<Cost> Costs { get; set; }
     public DateTime? PauseDate { get; set; }
     public List<BreakInLearningUpdateDetails> BreaksInLearning { get; set; }
+    public List<LearningSupportDetails> LearningSupport { get; set; }
+    public DateTime? WithdrawalDate { get; set; }
 }
 
 public class Cost
