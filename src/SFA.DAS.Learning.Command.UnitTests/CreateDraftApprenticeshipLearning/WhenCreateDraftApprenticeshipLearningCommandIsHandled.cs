@@ -360,6 +360,59 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_Only_The_Earliest_Cost_Is_Used_When_Creating_Draft_Learning_With_Multiple_Costs()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        var earliestCost = new Cost
+        {
+            FromDate = new DateTime(2025, 8, 1),
+            TrainingPrice = 1000,
+            EpaoPrice = 200
+        };
+
+        var laterCost = new Cost
+        {
+            FromDate = new DateTime(2026, 8, 1),
+            TrainingPrice = 1500,
+            EpaoPrice = 300
+        };
+
+        command.LearningUpdateContext.OnProgrammeDetails.Costs = [laterCost, earliestCost];
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        command.LearningUpdateContext.OnProgrammeDetails.Costs.Should().ContainSingle();
+        command.LearningUpdateContext.OnProgrammeDetails.Costs.Single().FromDate.Should().Be(earliestCost.FromDate);
+
+        addedLearning.Should().NotBeNull();
+        addedLearning!.LatestEpisode.EpisodePrices.Should().ContainSingle();
+
+        var episodePrice = addedLearning.LatestEpisode.EpisodePrices.Single();
+        episodePrice.StartDate.Should().Be(earliestCost.FromDate);
+        episodePrice.TrainingPrice.Should().Be(earliestCost.TrainingPrice);
+        episodePrice.EndPointAssessmentPrice.Should().Be(earliestCost.EpaoPrice);
+    }
+
+    [Test]
     public async Task Then_Existing_Learning_Is_Reinstated_When_A_Single_Removed_And_Approved_Learning_Exists()
     {
         // Arrange
