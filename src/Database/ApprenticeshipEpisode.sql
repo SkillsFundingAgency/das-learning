@@ -8,17 +8,18 @@
     [EmployerAccountId] BIGINT NULL,
     [FundingType] NVARCHAR(50) NULL,
     [EmployerType] NVARCHAR(50) NULL,
-    [FundingPlatform] INT NULL,
     [FundingEmployerAccountId] BIGINT NULL,
     [LegalEntityName] NVARCHAR(255) NOT NULL,
     [AccountLegalEntityId] BIGINT NULL,
-    [TrainingCode] NCHAR(10) NOT NULL,
+    [TrainingCode] NCHAR(10) NOT NULL DEFAULT '',
     [TrainingCourseVersion] NVARCHAR(10) NULL,
     [PaymentsFrozen] BIT NOT NULL DEFAULT (0),
     [IsRemoved] BIT NOT NULL DEFAULT(0),
     [WithdrawalDate] DATETIME NULL,
     [PauseDate] DATETIME NULL,
-    [IsApproved] BIT NOT NULL DEFAULT 1
+    [IsApproved] BIT NOT NULL DEFAULT 1,
+    [CompletionDate] DATETIME NULL,
+    [AchievementDate] DATETIME NULL
 )
 GO
 ALTER TABLE dbo.ApprenticeshipEpisode

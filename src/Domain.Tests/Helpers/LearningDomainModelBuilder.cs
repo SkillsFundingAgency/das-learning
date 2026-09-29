@@ -38,8 +38,6 @@ public class LearningDomainModelBuilder
         var orderedCosts = costs.OrderBy(c => c.FromDate).ToList();
 
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        entity.CompletionDate = entity.CompletionDate?.Date;
-        entity.AchievementDate = null;
         entity.EnglishAndMathsCourses.Clear();
 
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
@@ -47,6 +45,8 @@ public class LearningDomainModelBuilder
         episode.Prices.Clear();
         episode.LearningSupport.Clear();
         episode.IsRemoved = false;
+        episode.CompletionDate = episode.CompletionDate?.Date;
+        episode.AchievementDate = null;
 
         for (int i = 0; i < orderedCosts.Count; i++)
         {

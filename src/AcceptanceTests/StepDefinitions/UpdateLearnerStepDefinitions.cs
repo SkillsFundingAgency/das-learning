@@ -154,7 +154,7 @@ public class UpdateLearnerStepDefinitions
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.CompletionDate.Should().Be(completionDate.DateTime);
+        learning.Episodes.Single().CompletionDate.Should().Be(completionDate.DateTime);
     }
 
     [Then(@"the Pause Date for the Learning is set to (.*)")]

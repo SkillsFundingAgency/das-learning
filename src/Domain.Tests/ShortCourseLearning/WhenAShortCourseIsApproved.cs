@@ -64,6 +64,25 @@ public class WhenAShortCourseIsApproved
         approvedEvent.EmployerType.Should().Be(context.EmployerType);
     }
 
+    [Test]
+    public void ThenAShortCourseLearningChangedEventIsRaisedWithApprovedOperation()
+    {
+        //Arrange
+        var ukprn = _fixture.Create<long>();
+        var learning = CreateLearning(ukprn);
+
+        //Act
+        learning.Approve(ukprn, _fixture.Create<long>(), EmployerType.NonLevy, _fixture.Create<long>(), _fixture.Create<long?>());
+
+        //Assert
+        learning.FlushEvents()
+            .OfType<ShortCourseLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == learning.Key
+                                 && e.AcademicYear == null
+                                 && e.Operation == ShortCourseLearningOperation.Approved);
+    }
+
     private ShortCourseLearningDomainModel CreateLearning(long ukprn)
     {
         var episode = new DataAccess.Entities.Learning.ShortCourseEpisode

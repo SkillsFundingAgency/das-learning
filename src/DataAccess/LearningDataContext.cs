@@ -21,6 +21,8 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
     public virtual DbSet<EnglishAndMathsBreakInLearning> EnglishAndMathsBreakInLearnings { get; set; }
 
     public virtual DbSet<LearningHistory> LearningHistories { get; set; }
+    public virtual DbSet<ShortCourseLearningHistory> ShortCourseLearningHistories { get; set; }
+    public virtual DbSet<ApprenticeshipLearningHistory> ApprenticeshipLearningHistories { get; set; }
     public virtual DbSet<ShortCourseLearning> ShortCourseLearnings { get; set; }
     public virtual DbSet<ShortCourseEpisode> ShortCourseEpisodes { get; set; }
     public virtual DbSet<ShortCourseMilestone> ShortCourseMilestones { get; set; }
@@ -77,10 +79,6 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasForeignKey(a => a.LearnerKey)
             .IsRequired();
 
-        // CompletionDate moved to ShortCourseEpisode (FLP-1868) - inherited Learning.CompletionDate no longer maps here
-        modelBuilder.Entity<Entities.Learning.ShortCourseLearning>()
-            .Ignore(x => x.CompletionDate);
-
         // Episode
         modelBuilder.Entity<ApprenticeshipEpisode>()
             .HasKey(a => new { a.Key });
@@ -89,17 +87,16 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
             .HasConversion(
                 v => v.ToString(),
                 v => (EmployerType)Enum.Parse(typeof(EmployerType), v));
-        modelBuilder.Entity<ApprenticeshipEpisode>()
-            .Property(p => p.FundingPlatform)
-            .HasConversion(
-                v => (int?)v,
-                v => (FundingPlatform?)v);
 
         modelBuilder.Entity<ApprenticeshipEpisode>()
             .HasOne<ApprenticeshipLearning>()
             .WithMany(a => a.Episodes)
             .HasForeignKey(e => e.LearningKey)
             .HasPrincipalKey(a => a.Key);
+
+        // Legacy field to be removed: TrainingCode moved to ApprenticeshipLearning
+        modelBuilder.Entity<ApprenticeshipEpisode>()
+            .Ignore(x => x.TrainingCode);
 
         modelBuilder.Entity<ShortCourseEpisode>()
             .HasKey(a => new { a.Key });
@@ -175,6 +172,16 @@ public class LearningDataContext(DbContextOptions<LearningDataContext> options) 
         // LearningHistory
         modelBuilder.Entity<LearningHistory>()
             .ToTable("LearningHistory", "History")
+            .HasKey(x => x.Key);
+
+        // ShortCourseLearningHistory
+        modelBuilder.Entity<ShortCourseLearningHistory>()
+            .ToTable("ShortCourseLearningHistory", "History")
+            .HasKey(x => x.Key);
+
+        // ApprenticeshipLearningHistory
+        modelBuilder.Entity<ApprenticeshipLearningHistory>()
+            .ToTable("ApprenticeshipLearningHistory", "History")
             .HasKey(x => x.Key);
 
         // ShortCourseMilestone

@@ -74,6 +74,7 @@ public class WhenCheckingAcademicYearOverlap
             Ukprn = 10005077,
             TrainingCode = "21",
             WithdrawalDate = withdrawalDate,
+            CompletionDate = completionDate,
             Prices = new List<EpisodePrice>
             {
                 new()
@@ -89,7 +90,6 @@ public class WhenCheckingAcademicYearOverlap
         var entity = new DataAccess.Entities.Learning.ApprenticeshipLearning
         {
             Key = Guid.NewGuid(),
-            CompletionDate = completionDate,
             Episodes = new List<ApprenticeshipEpisode> { episode }
         };
 

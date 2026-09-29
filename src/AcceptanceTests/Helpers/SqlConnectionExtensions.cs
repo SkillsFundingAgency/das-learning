@@ -16,6 +16,17 @@ internal static class SqlConnectionExtensions
     internal static DataAccess.Entities.Learning.ApprenticeshipLearning GetLearningByLearnerKey(this SqlConnection dbConnection, Guid learnerKey)
     {
         var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.LearnerKey == learnerKey);
+        return dbConnection.PopulateLearning(learning);
+    }
+
+    internal static DataAccess.Entities.Learning.ApprenticeshipLearning GetLearningByKey(this SqlConnection dbConnection, Guid learningKey)
+    {
+        var learning = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearning>().Single(x => x.Key == learningKey);
+        return dbConnection.PopulateLearning(learning);
+    }
+
+    private static DataAccess.Entities.Learning.ApprenticeshipLearning PopulateLearning(this SqlConnection dbConnection, DataAccess.Entities.Learning.ApprenticeshipLearning learning)
+    {
         learning.Episodes = dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipEpisode>().Where(x => x.LearningKey == learning.Key).ToList();
         learning.EnglishAndMathsCourses = dbConnection.GetAll<DataAccess.Entities.Learning.EnglishAndMaths>().Where(x => x.LearningKey == learning.Key).ToList();
 
@@ -41,9 +52,9 @@ internal static class SqlConnectionExtensions
         return learning;
     }
 
-    internal static List<DataAccess.Entities.Learning.LearningHistory> GetHistories(this SqlConnection dbConnection, Guid learningKey)
+    internal static List<DataAccess.Entities.Learning.ApprenticeshipLearningHistory> GetHistories(this SqlConnection dbConnection, Guid learningKey)
     {
-        return dbConnection.GetAll<DataAccess.Entities.Learning.LearningHistory>().Where(x => x.LearningId == learningKey).ToList();
+        return dbConnection.GetAll<DataAccess.Entities.Learning.ApprenticeshipLearningHistory>().Where(x => x.LearningKey == learningKey).ToList();
     }
 
     internal static Guid GetLearningKey(this SqlConnection dbConnection, string uln)

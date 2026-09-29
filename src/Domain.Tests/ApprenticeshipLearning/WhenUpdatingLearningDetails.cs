@@ -26,8 +26,11 @@ public class WhenUpdatingLearningDetails
         //Arrange
         var learnerEntity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
         var learningEntity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
-        learningEntity.CompletionDate = learningEntity.CompletionDate?.Date;
         learningEntity.LearnerKey = learnerEntity.Key;
+        foreach (var episode in learningEntity.Episodes)
+        {
+            episode.CompletionDate = episode.CompletionDate?.Date;
+        }
 
         var learner = LearnerDomainModel.Get(learnerEntity);
         var learning = ApprenticeshipLearningDomainModel.Get(learningEntity);

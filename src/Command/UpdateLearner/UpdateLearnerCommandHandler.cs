@@ -56,7 +56,7 @@ public class UpdateLearnerCommandHandler(
 
         logger.LogInformation("Updating repository for learner with key {LearnerKey} with changes: {Changes}", command.LearnerKey, changes);
 
-        learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
+        learning.AddEvent(ApprenticeshipLearningChangedEvent.From(learning, academicYear: null, Enums.ApprenticeshipLearningOperation.Updated, changes));
         if(changes.Any(x=>x == Enums.LearningUpdateChanges.PersonalDetails))
         {
             var episode = learning.LatestEpisode;

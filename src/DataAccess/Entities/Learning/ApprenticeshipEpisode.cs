@@ -15,7 +15,6 @@ public class ApprenticeshipEpisode : Episode
 
     public long ApprovalsApprenticeshipId { get; set; }
     public long? EmployerAccountId { get; set; }
-    public FundingPlatform? FundingPlatform { get; set; }
     public long? FundingEmployerAccountId { get; set; }
     public string LegalEntityName { get; set; }
     public long? AccountLegalEntityId { get; set; }
@@ -25,6 +24,8 @@ public class ApprenticeshipEpisode : Episode
     public List<EpisodePrice> Prices { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }
+    public DateTime? CompletionDate { get; set; }
+    public DateTime? AchievementDate { get; set; }
     public List<ApprenticeshipLearningSupport> LearningSupport { get; set; }
     public List<EpisodeBreakInLearning> BreaksInLearning { get; set; }
 }

@@ -20,7 +20,6 @@ namespace SFA.DAS.Learning.Command.AddLearning
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public FundingPlatform? FundingPlatform { get; set; }
         public string ApprenticeshipHashedId { get; set; }
         public long AccountLegalEntityId { get; set; }
         public string TrainingCourseVersion { get; set; }

@@ -9,12 +9,12 @@ public static class LinqExtensions
     {
         return source
                 .Where(x =>
-                    // Exclude if Completed before start of activeOnDate year
-                    !(x.CompletionDate.HasValue && x.CompletionDate.Value < startOfAcademicYear) &&
-
                     x.Episodes.Any(episode =>
                         !episode.IsRemoved &&
-                        
+
+                        // Exclude if Completed before start of activeOnDate year
+                        !(episode.CompletionDate.HasValue && episode.CompletionDate.Value < startOfAcademicYear) &&
+
                         // Include if Started on or before end of activeOnDate year
                         episode.Prices.Any(price => price.StartDate <= endOfAcademicYear) &&
 

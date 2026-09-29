@@ -36,10 +36,9 @@ public class WhenAnEpisodeIsApproved
         var legalEntityName = _fixture.Create<string>();
         var approvalsApprenticeshipId = _fixture.Create<long>();
         var accountLegalEntityId = _fixture.Create<long?>();
-        var trainingCourseVersion = _fixture.Create<string>();
 
         //Act
-        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId, accountLegalEntityId, trainingCourseVersion);
+        episode.Approve(employerAccountId, employerType, fundingEmployerAccountId, legalEntityName, approvalsApprenticeshipId, accountLegalEntityId);
 
         //Assert
         episode.IsApproved.Should().BeTrue();
@@ -49,6 +48,5 @@ public class WhenAnEpisodeIsApproved
         episode.LegalEntityName.Should().Be(legalEntityName);
         episode.ApprovalsApprenticeshipId.Should().Be(approvalsApprenticeshipId);
         episode.AccountLegalEntityId.Should().Be(accountLegalEntityId);
-        episode.TrainingCourseVersion.Should().Be(trainingCourseVersion);
     }
 }

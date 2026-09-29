@@ -2,10 +2,10 @@ using AutoFixture;
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
+using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
-using SFA.DAS.Learning.Types;
+using SFA.DAS.Learning.InnerApi.Requests.Apprenticeships;
 using SFA.DAS.CommitmentsV2.Messages.Events;
-using FundingPlatform = SFA.DAS.Learning.Enums.FundingPlatform;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -28,10 +28,16 @@ public class ApprovalCreatedStepDefinitions
     [Given(@"No apprenticeship exists")]
     public void GivenNoApprenticeshipExists()
     {
+        GivenNoApprenticeshipExistsForLearnerWithUln(_fixture.Create<long>().ToString());
+    }
+
+    [Given(@"No apprenticeship exists for learner with Uln (.*)")]
+    public void GivenNoApprenticeshipExistsForLearnerWithUln(string uln)
+    {
         var approvalCreatedEvent = _fixture.Build<CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent>()
             .With(_ => _.TrainingCourseVersion, "1.0")
             .With(_ => _.IsOnFlexiPaymentPilot, true)
-            .With(_ => _.Uln, _fixture.Create<long>().ToString)
+            .With(_ => _.Uln, uln)
             .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
             .With(_ => _.PriceEpisodes, new CommitmentsV2.Messages.Events.PriceEpisode[] {
                 new CommitmentsV2.Messages.Events.PriceEpisode
@@ -92,6 +98,58 @@ public class ApprovalCreatedStepDefinitions
         _scenarioContext.SetApprenticeshipCreatedEvent(approvalCreatedEvent);
     }
 
+    [Given(@"A historic apprenticeship exists with only unapproved episodes")]
+    public async Task GivenAHistoricApprenticeshipExistsWithOnlyUnapprovedEpisodes()
+    {
+        await SeedHistoricUnapprovedDraft();
+    }
+
+    [Given(@"A historic apprenticeship exists with only removed episodes")]
+    public async Task GivenAHistoricApprenticeshipExistsWithOnlyRemovedEpisodes()
+    {
+        var (historicEvent, learnerKey) = await SeedHistoricUnapprovedDraft();
+
+        var startDate = historicEvent.ActualStartDate!.Value;
+        var academicYear = new TokenisableDateTime(startDate).AcademicYear();
+        await _testContext.TestInnerApi.Delete($"/{historicEvent.ProviderId}/{learnerKey}?academicYear={academicYear}");
+    }
+
+    private async Task<(ApprenticeshipCreatedEvent HistoricEvent, Guid LearnerKey)> SeedHistoricUnapprovedDraft()
+    {
+        var uln = _fixture.Create<long>().ToString();
+
+        var historicEvent = _fixture.Build<ApprenticeshipCreatedEvent>()
+            .With(_ => _.TrainingCourseVersion, "1.0")
+            .With(_ => _.IsOnFlexiPaymentPilot, true)
+            .With(_ => _.Uln, uln)
+            .With(_ => _.TrainingCode, _fixture.Create<int>().ToString)
+            .With(_ => _.ActualStartDate, TokenisableDateTime.FromString("previousAY-09-25").DateTime)
+            .With(_ => _.EndDate, TokenisableDateTime.FromString("currentAY-07-31").DateTime!.Value)
+            .With(_ => _.PriceEpisodes, new PriceEpisode[] {
+                new PriceEpisode
+                {
+                    Cost = 6500,
+                    FromDate = TokenisableDateTime.FromString("previousAY-09-25").DateTime!.Value,
+                    ToDate = TokenisableDateTime.FromString("currentAY-07-31").DateTime,
+                    EndPointAssessmentPrice = 500,
+                    TrainingPrice = 6000
+                }
+            })
+            .Create();
+
+        await _testContext.TestInnerApi.Post<CreateDraftApprenticeship, CreateDraftApprenticeshipLearningCommandResult>(
+            $"/{historicEvent.ProviderId}/apprenticeships", historicEvent.BuildUpdateLearnerRequest());
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learnerKey = dbConnection.GetLearner(uln).Key;
+
+        // reuses the existing "no apprenticeship" setup for the draft the "When" step will create - same learner,
+        // fresh Ukprn/TrainingCode/dates, so it's created as a separate draft rather than updating the one seeded above
+        GivenNoApprenticeshipExistsForLearnerWithUln(uln);
+
+        return (historicEvent, learnerKey);
+    }
+
     [Given(@"There is an apprenticeship with the following details")]
     public async Task GivenAnApprenticeshipHasBeenCreatedAsPartOfTheApprovalsJourney(Table table)
     {
@@ -145,8 +203,7 @@ public class ApprovalCreatedStepDefinitions
         episode.EmployerAccountId.Should().Be(ApprovalCreatedEvent.AccountId);
         episode.FundingEmployerAccountId.Should().Be(ApprovalCreatedEvent.TransferSenderId);
         episode.LegalEntityName.Should().Be(ApprovalCreatedEvent.LegalEntityName);
-        episode.FundingPlatform.Should().Be(ApprovalCreatedEvent.IsOnFlexiPaymentPilot.HasValue ? (ApprovalCreatedEvent.IsOnFlexiPaymentPilot.Value ? FundingPlatform.DAS : FundingPlatform.SLD) : null);
-        int.Parse(episode.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
+        int.Parse(apprenticeship.TrainingCode).Should().Be(int.Parse(ApprovalCreatedEvent.TrainingCode));
         episode.ApprovalsApprenticeshipId.Should().Be(ApprovalCreatedEvent.ApprenticeshipId);
 
         var episodePrice = (await dbConnection.GetAllAsync<EpisodePrice>()).Last(x => x.EpisodeKey == episode.Key);
@@ -173,49 +230,6 @@ public class ApprovalCreatedStepDefinitions
         var apprenticeship = dbConnection.GetLearning(ApprovalCreatedEvent.Uln);
         
         return apprenticeship != null;
-    }
-
-    [Then(@"an ApprenticeshipCreatedEvent event is published")]
-    public async Task ThenAnApprenticeshipCreatedEventEventIsPublished()
-    {
-        await WaitHelper.WaitForIt(() => _testContext.MessageSession.ReceivedEvents<LearningCreatedEvent>().Any(EventMatchesExpectation), $"Failed to find published {nameof(LearningCreatedEvent)} event");
-
-        var publishedEvent = _testContext.MessageSession.ReceivedEvents<LearningCreatedEvent>().Single(EventMatchesExpectation);
-
-        await using var dbConnection = new SqlConnection(_testContext.SqlDatabase?.DatabaseInfo.ConnectionString);
-
-        var learner = dbConnection.GetLearner(ApprovalCreatedEvent.Uln);
-        var apprenticeship = dbConnection.GetLearningByLearnerKey(learner.Key);
-
-        publishedEvent.Uln.Should().Be(learner.Uln);
-        publishedEvent.LearningKey.Should().Be(Apprenticeship.Key);
-        int.Parse(publishedEvent.Episode.TrainingCode).Should().Be(int.Parse(LatestEpisode.TrainingCode));
-        publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.StartDate.Should().BeSameDateAs(LatestEpisodePrice.StartDate);
-        publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.EndDate.Should().BeSameDateAs(LatestEpisodePrice.EndDate);
-        publishedEvent.Episode.Prices.MaxBy(x => x.StartDate)?.TotalPrice.Should().Be(LatestEpisodePrice.TotalPrice);
-        publishedEvent.ApprovalsApprenticeshipId.Should().Be(LatestEpisode.ApprovalsApprenticeshipId);
-        publishedEvent.Episode.EmployerAccountId.Should().Be(LatestEpisode.EmployerAccountId);
-        publishedEvent.Episode.FundingEmployerAccountId.Should().Be(LatestEpisode.FundingEmployerAccountId);
-        publishedEvent.Episode.EmployerType.Should().Be(LatestEpisode.EmployerType);
-        publishedEvent.Episode.LegalEntityName.Should().Be(LatestEpisode.LegalEntityName);
-        publishedEvent.Episode.Ukprn.Should().Be(LatestEpisode.Ukprn);
-        publishedEvent.FirstName.Should().Be(learner.FirstName);
-        publishedEvent.LastName.Should().Be(learner.LastName);
-        publishedEvent.Episode.FundingPlatform.ToString().Should().Be(LatestEpisode.FundingPlatform.ToString());
-
-        _scenarioContext["publishedEvent"] = publishedEvent;
-    }
-
-    [Then(@"an ApprenticeshipCreatedEvent event is not published")]
-    public async Task ThenAnApprenticeshipCreatedEventEventIsNotPublished()
-    {
-        await WaitHelper.WaitForUnexpected(() => _testContext.MessageSession.ReceivedEvents<LearningCreatedEvent>().Any(EventMatchesExpectation), $"Found unexpected {nameof(LearningCreatedEvent)} event");
-    }
-
-
-    private bool EventMatchesExpectation(LearningCreatedEvent learningCreatedEvent)
-    {
-        return learningCreatedEvent.Uln == ApprovalCreatedEvent.Uln;
     }
 
     public CommitmentsV2.Messages.Events.ApprenticeshipCreatedEvent ApprovalCreatedEvent => _scenarioContext.GetApprenticeshipCreatedEvent();

@@ -40,6 +40,10 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key, ukprn: command.Ukprn, courseCode: command.TrainingCode);
 
+        var historicLearnings = await _apprenticeshipLearningRepository.GetAllByLearnerKey(learner.Key);
+        var isNewApprenticeshipLearner = historicLearnings.All(l => l.Episodes.All(e => e.IsRemoved || !e.IsApproved));
+        
+
         var existingLearning = SelectExistingLearningToUpdate(learnings);
 
         // no unapproved draft and no single unambiguous reinstatement candidate - create a new one
@@ -47,6 +51,9 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         {
             var createResult = await CreateDraftLearning(command, learner);
             createResult.RemovedLearningKey = removedLearningKey;
+
+            if (isNewApprenticeshipLearner) createResult.Changes.Add(LearningUpdateChanges.NewApprenticeshipLearner);
+
             _logger.LogInformation("Successfully created draft learning with key {LearningKey}", createResult.LearningKey);
             return createResult;
         }
@@ -56,11 +63,14 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var learningChanges = existingLearning.Update(updateModel);
         var learnerChanges = learner.Update(updateModel);
-        var changes = learningChanges.Concat(learnerChanges).ToArray();
+        var changes = learningChanges.Concat(learnerChanges).ToList();
+        if (isNewApprenticeshipLearner) changes.Add(LearningUpdateChanges.NewApprenticeshipLearner);
 
         _logger.LogInformation("Updating repository for learner with key {LearningKey} with changes: {Changes}", existingLearning.Key, changes);
 
-        existingLearning.AddEvent(LearnerUpdatedEvent.From(learner, existingLearning));
+        if (changes.Any(x => x != LearningUpdateChanges.NewApprenticeshipLearner))
+            existingLearning.AddEvent(ApprenticeshipLearningChangedEvent.From(existingLearning, command.AcademicYear, ApprenticeshipLearningOperation.Updated, changes));
+
         if (changes.Any(x => x == LearningUpdateChanges.PersonalDetails))
         {
             var episode = existingLearning.Episodes.Single(x => x.Ukprn == command.Ukprn);
@@ -74,7 +84,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         return new CreateDraftApprenticeshipLearningCommandResult
         {
-            Changes = changes.ToList(),
+            Changes = changes,
             LearningKey = existingLearning.Key,
             LearningEpisodeKey = existingLearning.LatestEpisode.Key,
             Prices = existingLearning.LatestEpisode.EpisodePrices
@@ -127,9 +137,10 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         _logger.LogInformation(
             "Marking missing apprenticeship course as removed for learner {LearnerKey}: learning {LearningKey}, TrainingCode {TrainingCode} - learner switched to TrainingCode {NewTrainingCode}",
-            learner.Key, missingLearning.Key, missingLearning.LatestEpisode.TrainingCode, command.TrainingCode);
+            learner.Key, missingLearning.Key, missingLearning.TrainingCode, command.TrainingCode);
 
         missingLearning.RemoveLearner();
+        missingLearning.AddEvent(ApprenticeshipLearningChangedEvent.From(missingLearning, command.AcademicYear, ApprenticeshipLearningOperation.Removed));
 
         await _apprenticeshipLearningRepository.Update(missingLearning);
 
@@ -176,7 +187,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         var trainingCode = command.TrainingCode;
 
-        var learning = _learningFactory.CreateNew(learner.Key, updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship));
+        var learning = _learningFactory.CreateNew(learner.Key, trainingCode, trainingCourseVersion: null, updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship));
         learning.AddEpisode(
             updateModel.ApprovalsApprenticeshipId,
             command.Ukprn,
@@ -187,12 +198,9 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             trainingPrice: cost.TrainingPrice,
             endpointAssessmentPrice: cost.EpaoPrice,
             employerType: EmployerType.Levy,
-            fundingPlatform: FundingPlatform.SLD,
             transferSenderId: null,
             legalEntityName: string.Empty,
             accountLegalEntityId: null,
-            trainingCode: trainingCode,
-            trainingCourseVersion: null,
             isApproved: false);
 
         var learningChanges = learning.Update(updateModel);
@@ -203,6 +211,8 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         {
             await _learnerRepository.Update(learner);
         }
+
+        learning.AddEvent(ApprenticeshipLearningChangedEvent.From(learning, command.AcademicYear, ApprenticeshipLearningOperation.Created));
 
         await _apprenticeshipLearningRepository.Add(learning);
 
