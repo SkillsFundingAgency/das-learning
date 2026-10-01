@@ -226,6 +226,8 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
             LearnerRef = episode.LearnerRef,
             EmployerType = employerType
         });
+
+        AddEvent(ShortCourseLearningChangedEvent.From(this, academicYear: null, ShortCourseLearningOperation.Approved));
     }
 
     public ShortCourseEpisodeDomainModel LatestEpisodeForProvider(long ukprn)

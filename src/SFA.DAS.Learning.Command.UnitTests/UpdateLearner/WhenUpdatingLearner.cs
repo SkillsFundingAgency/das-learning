@@ -68,6 +68,59 @@ public class WhenUpdatingLearner
     }
 
     [Test]
+    public async Task ThenAnApprenticeshipLearningChangedEventIsRaisedWithUpdatedOperationAndChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        learningDomainModel.FlushEvents()
+            .OfType<Domain.Events.ApprenticeshipLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == learningDomainModel.Key
+                                 && e.AcademicYear == null
+                                 && e.Operation == ApprenticeshipLearningOperation.Updated
+                                 && e.Changes.SequenceEqual(result.Changes));
+    }
+
+    [Test]
+    public async Task ThenAnApprenticeshipLearningChangedEventIsNotRaisedWhenThereAreNoChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.LearningSupport.Clear();
+        command.UpdateModel.EnglishAndMathsCourses.Clear();
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
+        TestHelper.SetEpisode(learningDomainModel, singleEpisode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        learningDomainModel.FlushEvents().OfType<Domain.Events.ApprenticeshipLearningChangedEvent>().Should().BeEmpty();
+    }
+
+    [Test]
     public async Task ThenNoUpdateOccursIfThereAreNoChanges()
     {
         // Arrange

@@ -118,6 +118,32 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         _learningService.Verify(x => x.AddLearning(It.Is<ApprenticeshipLearningDomainModel>(y => y.GetEntity().Episodes.Single().Prices.Single().StartDate == command.PlannedStartDate)));
     }
+	
+	[Test]
+    public async Task ThenAnApprenticeshipLearningChangedEventIsRaisedWithCreatedOperation()
+    {
+        // Arrange
+        var command = _fixture.Create<AddLearningCommand>();
+        var trainingCodeInt = _fixture.Create<int>();
+        command.TrainingCode = trainingCodeInt.ToString();
+        var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var learner = _fixture.Create<LearnerDomainModel>();
+
+        _learnerFactory.Setup(x => x.CreateNew(command.Uln, command.DateOfBirth, command.FirstName, command.LastName, null)).Returns(learner);
+        _apprenticeshipFactory.Setup(x => x.CreateNew(learner.Key, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<LearningType>())).Returns(apprenticeship);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        apprenticeship.FlushEvents()
+            .OfType<Domain.Events.ApprenticeshipLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == apprenticeship.Key
+                                 && e.AcademicYear == null
+                                 && e.Operation == ApprenticeshipLearningOperation.Created);
+    }
+	
 
     [Test]
     public async Task WhenAnUnapprovedShortCourseExistsThenItIsApproved()

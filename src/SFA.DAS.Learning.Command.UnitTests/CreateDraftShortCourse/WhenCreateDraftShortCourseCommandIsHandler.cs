@@ -137,6 +137,126 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenShortCourseLearningChangedEventRaisedWithCreatedOperationForBrandNewLearning()
+    {
+        // Arrange
+        var command = CreateSingleItemCommand(out var model);
+        var learningEntity = _fixture.Create<ShortCourseLearning>();
+        learningEntity.Episodes = new List<ShortCourseEpisode>();
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var domainModel = ShortCourseLearningDomainModel.Get(learningEntity);
+
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learnerDomainModel);
+        _learningFactory.Setup(x => x.CreateNew(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<LearningType>())).Returns(domainModel);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        domainModel.FlushEvents()
+            .OfType<ShortCourseLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == domainModel.Key
+                                 && e.AcademicYear == command.AcademicYear
+                                 && e.Operation == ShortCourseLearningOperation.Created);
+    }
+
+    [Test]
+    public async Task ThenShortCourseLearningChangedEventRaisedWithCreatedOperationForNewEpisodeOnExistingLearning()
+    {
+        // Arrange - CoP: a new episode is added to an existing learning for a different provider
+        var command = CreateSingleItemCommand(out var model);
+        var learner = _fixture.Create<LearnerDomainModel>();
+
+        _learnerFactory.Setup(x => x.CreateNew(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>())).Returns(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: true, ukprn: model.OnProgramme.Ukprn + 1);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        existingLearning.FlushEvents()
+            .OfType<ShortCourseLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == existingLearning.Key
+                                 && e.AcademicYear == command.AcademicYear
+                                 && e.Operation == ShortCourseLearningOperation.Created);
+    }
+
+    [Test]
+    public async Task ThenShortCourseLearningChangedEventRaisedWithUpdatedOperationAndChangesWhenExistingEpisodeChanges()
+    {
+        // Arrange - same provider, same course, but the payload differs from the stored episode (e.g. StartDate)
+        var command = CreateSingleItemCommand(out var model);
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var existingLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn, courseCode: model.OnProgramme.CourseCode);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([existingLearning]);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        var raisedEvent = existingLearning.FlushEvents().OfType<ShortCourseLearningChangedEvent>().SingleOrDefault();
+        raisedEvent.Should().NotBeNull();
+        raisedEvent!.LearningKey.Should().Be(existingLearning.Key);
+        raisedEvent.AcademicYear.Should().Be(command.AcademicYear);
+        raisedEvent.Operation.Should().Be(ShortCourseLearningOperation.Updated);
+        raisedEvent.Changes.Should().NotBeEmpty();
+    }
+
+    [Test]
+    public async Task ThenShortCourseLearningChangedEventNotRaisedWhenRepostOfUnchangedEpisodeIsANoOp()
+    {
+        // Arrange - re-POSTing a course (same provider) with a payload identical to the stored episode
+        // must not raise a history event, since UpdateEpisode detects no field-level changes.
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        const string learnerRef = "UNCHANGED-REF";
+        var startDate = new DateTime(2025, 9, 1);
+        var expectedEndDate = new DateTime(2025, 12, 31);
+
+        var existingLearning = BuildLearningWithEpisode(
+            isApproved: false, ukprn: 12345678, courseCode: "SC001", startDate: startDate, learnerRef: learnerRef);
+
+        var identicalModel = new ShortCourseUpdateContext
+        {
+            LearnerRef = learnerRef,
+            Learner = _fixture.Create<Models.UpdateModels.Shared.LearnerModel>(),
+            LearningSupport = new List<Models.UpdateModels.Shared.LearningSupportDetails>(),
+            OnProgramme = new Models.UpdateModels.OnProgramme
+            {
+                CourseCode = "SC001",
+                Ukprn = 12345678,
+                StartDate = startDate,
+                ExpectedEndDate = expectedEndDate,
+                WithdrawalDate = null,
+                WithdrawalReasonCode = null,
+                CompletionDate = null,
+                Milestones = new List<Milestone>(),
+                Price = 1000,
+                LearningType = LearningType.Apprenticeship
+            }
+        };
+        var command = new CreateDraftShortCourseCommand(identicalModel.OnProgramme.Ukprn, 2526, [identicalModel]);
+
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, "SC001")).ReturnsAsync(existingLearning);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([existingLearning]);
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        existingLearning.FlushEvents().OfType<ShortCourseLearningChangedEvent>().Should().BeEmpty();
+    }
+
+    [Test]
     public async Task ThenShortCircuitsIfApprovedEpisodeExistsWithSameProvider()
     {
         // Arrange
@@ -497,6 +617,33 @@ public class WhenCreateDraftShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenShortCourseLearningChangedEventRaisedWithRemovedOperationForOmittedLearning()
+    {
+        // Arrange
+        var command = CreateSingleItemCommand(out var model);
+        var learner = LearnerDomainModel.Get(_fixture.Create<Learner>());
+        _learnerRepository.Setup(x => x.GetByUln(It.IsAny<string>())).ReturnsAsync(learner);
+
+        var includedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
+        var omittedLearning = BuildLearningWithEpisode(isApproved: false, ukprn: model.OnProgramme.Ukprn);
+        _learningRepository.Setup(x => x.GetByLearnerKeyAndCourseCode(learner.Key, model.OnProgramme.CourseCode)).ReturnsAsync(includedLearning);
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(learner.Key)).ReturnsAsync([includedLearning, omittedLearning]);
+        _mapper.Setup(x => x.Map<CreateDraftShortCourseItemResult>(includedLearning, learner, model.OnProgramme.Ukprn))
+            .Returns(new CreateDraftShortCourseItemResult { LearningKey = includedLearning.Key, LearnerKey = learner.Key });
+
+        // Act
+        await _commandHandler.Handle(command);
+
+        // Assert
+        omittedLearning.FlushEvents()
+            .OfType<ShortCourseLearningChangedEvent>()
+            .Should()
+            .ContainSingle(e => e.LearningKey == omittedLearning.Key
+                                 && e.AcademicYear == command.AcademicYear
+                                 && e.Operation == ShortCourseLearningOperation.Removed);
+    }
+
+    [Test]
     public async Task ThenPriorAYCompletedLearningIsNotRemovedByOmissionInSubsequentAY()
     {
         // Arrange: learner completed a course in AY 2425, now starts a different course in AY 2526.
@@ -532,7 +679,8 @@ public class WhenCreateDraftShortCourseCommandIsHandled
         bool isRemoved = false,
         string courseCode = "SC001",
         DateTime? startDate = null,
-        DateTime? completionDate = null)
+        DateTime? completionDate = null,
+        string? learnerRef = null)
     {
         var learningKey = Guid.NewGuid();
         var entity = new ShortCourseLearning
@@ -551,7 +699,7 @@ public class WhenCreateDraftShortCourseCommandIsHandled
                     Ukprn = ukprn,
                     EmployerAccountId = _fixture.Create<long>(),
                     TrainingCode = _fixture.Create<string>(),
-                    LearnerRef = _fixture.Create<string>(),
+                    LearnerRef = learnerRef ?? _fixture.Create<string>(),
                     IsApproved = isApproved,
                     IsRemoved = isRemoved,
                     StartDate = startDate ?? new DateTime(2025, 9, 1),

@@ -50,6 +50,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
                 AccountLegalEntityId = command.AccountLegalEntityId,
                 TrainingCourseVersion = command.TrainingCourseVersion
             });
+
             await _learningService.UpdateLearning(existingLearning);
             return;
         }
@@ -81,7 +82,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
             command.EmployerType,
             isApproved: true);
 
-        learning.AddEvent(LearnerUpdatedEvent.From(learner, learning));
+        learning.AddEvent(ApprenticeshipLearningChangedEvent.From(learning, academicYear: null, ApprenticeshipLearningOperation.Created));
 
         await _learningService.AddLearning(learning);
     }

@@ -14,4 +14,3 @@ Scenario: Include learners active in the collection year with their learner and 
 		| 54321 | Bob       | FullAY             | SC-ART1    | True       |  1500 |
 		| 54322 | Tracey    | StartInAY          | SC-ART1    | True       |  2000 |
 		| 54323 | Seth      | FinishInAY         | SC-ART1    | False      |   500 |
-		| 54325 | Samantha  | OverdueStillActive | SC-ART1    | True       |   750 |

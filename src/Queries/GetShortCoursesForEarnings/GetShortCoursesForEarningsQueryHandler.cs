@@ -13,13 +13,15 @@ public class GetShortCoursesForEarningsQueryHandler(LearningDataContext dbContex
 
         var baseQuery = dbContext.ShortCourseLearnings
             .Include(x => x.Episodes.Where(e => !e.IsRemoved))
-            .Where(x => x.Episodes.Any(e => e.Ukprn == query.UkPrn && !e.IsRemoved))
             .Where(x => x.Episodes.Any(e => 
                 e.Ukprn == query.UkPrn &&
                 !e.IsRemoved &&
                 e.StartDate <= dates.End &&
-                (!e.WithdrawalDate.HasValue || e.WithdrawalDate.Value >= dates.Start) &&
-                (!e.CompletionDate.HasValue || e.CompletionDate.Value >= dates.Start)))
+                (
+                    (e.WithdrawalDate.HasValue && e.WithdrawalDate.Value >= dates.Start) ||
+                    (e.CompletionDate.HasValue && e.CompletionDate.Value >= dates.Start) ||
+                    (!e.WithdrawalDate.HasValue && !e.CompletionDate.HasValue && e.ExpectedEndDate >= dates.Start)
+                )))
             .AsNoTracking();
 
         var learnerKeysQuery = baseQuery.Select(x => x.LearnerKey).Distinct();

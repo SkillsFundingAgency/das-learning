@@ -131,6 +131,24 @@ public class WhenRemoveShortCourseCommandIsHandled
     }
 
     [Test]
+    public async Task ThenAShortCourseLearningChangedEventIsRaisedWithRemovedOperationWhenDeleted()
+    {
+        var learnerKey = Guid.NewGuid();
+        var learningKey = Guid.NewGuid();
+        var learning = CreateDomainModel(learningKey, isApproved: true);
+        _repository.Setup(r => r.GetAllByLearnerKey(learnerKey)).ReturnsAsync([learning]);
+
+        await _commandHandler.Handle(new RemoveShortCourseCommand(learnerKey, Ukprn, 2526));
+
+        learning.FlushEvents()
+            .OfType<Domain.Events.ShortCourseLearningChangedEvent>()
+            .Should().ContainSingle(e =>
+                e.LearningKey == learningKey &&
+                e.AcademicYear == 2526 &&
+                e.Operation == ShortCourseLearningOperation.Removed);
+    }
+
+    [Test]
     public async Task ThenNotFoundExceptionThrownWhenNoLearningsFound()
     {
         var learnerKey = Guid.NewGuid();
