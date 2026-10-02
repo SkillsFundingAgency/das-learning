@@ -82,6 +82,7 @@ public class WhenAddingAnApprenticeship
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
+            episode.LearnerRef,
             episode.EmployerType,
             episode.IsApproved);
 

@@ -7,6 +7,7 @@ namespace SFA.DAS.Learning.Models.UpdateModels;
 public class LearningUpdateContext
 {
     public long ApprovalsApprenticeshipId { get; set; }
+    public string LearnerRef { get; set; } = string.Empty;
     public LearnerModel Learner { get; set; }
     public CareDetails Care { get; set; }
     public DeliveryDetails Delivery { get; set; }

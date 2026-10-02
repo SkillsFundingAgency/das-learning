@@ -32,7 +32,7 @@ public static class ApprenticeshipDomainModelTestHelper
         return apprenticeship;
     }
 
-    public static void AddEpisode(ApprenticeshipLearningDomainModel learning, DateTime? startDate = null, DateTime? endDate = null, long? ukprn = null)
+    public static void AddEpisode(ApprenticeshipLearningDomainModel learning, DateTime? startDate = null, DateTime? endDate = null, long? ukprn = null, string? learnerRef = null)
     {
         var start = startDate ?? _fixture.Create<DateTime>();
         var end = endDate ?? (start.AddDays(_fixture.Create<int>()));
@@ -50,6 +50,7 @@ public static class ApprenticeshipDomainModelTestHelper
             _fixture.Create<long?>(),
             _fixture.Create<string>(),
             _fixture.Create<long>(),
+            learnerRef ?? _fixture.Create<string>(),
             _fixture.Create<EmployerType>());
     }
 
