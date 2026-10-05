@@ -33,6 +33,26 @@ Scenario: Learner exists with a Short Course but no Apprenticeship, creates appr
 	And the draft apprenticeship should be created
 	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
 
+Scenario: Draft apprenticeship created with a withdrawal date is withdrawn but no LearningWithdrawnEvent is sent
+	Given No apprenticeship exists
+	And a withdrawn date of currentAY-11-25 is set
+	When CreateDraftApprenticeship is called with apprenticeship details
+	Then the CreateDraftApprenticeship endpoint should return a 200
+	And the draft apprenticeship should be created
+	And the draft apprenticeship should be withdrawn on currentAY-11-25
+	And an LearningWithdrawnEvent is not sent
+	And the CreateDraftApprenticeship response should not include a Withdrawal change
+
+Scenario: Withdrawal date added to an existing draft apprenticeship is stored but no LearningWithdrawnEvent is sent
+	Given No apprenticeship exists
+	And CreateDraftApprenticeship is called with apprenticeship details
+	And a withdrawn date of currentAY-11-25 is set
+	When CreateDraftApprenticeship is called with apprenticeship details
+	Then the CreateDraftApprenticeship endpoint should return a 200
+	And the draft apprenticeship should be withdrawn on currentAY-11-25
+	And an LearningWithdrawnEvent is not sent
+	And the CreateDraftApprenticeship response should include a Withdrawal change
+
 Scenario: Apprenticeship history only contains apprenticeships with removed episodes, creates and returns 200
 	Given A historic apprenticeship exists with only removed episodes
 	When CreateDraftApprenticeship is called with apprenticeship details

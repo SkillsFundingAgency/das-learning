@@ -11,20 +11,17 @@ namespace SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<CreateDraftApprenticeshipLearningCommand, CreateDraftApprenticeshipLearningCommandResult?>
 {
     private readonly ILearnerFactory _learnerFactory;
-    private readonly IApprenticeshipLearningFactory _learningFactory;
     private readonly ILearnerRepository _learnerRepository;
     private readonly IApprenticeshipLearningRepository _apprenticeshipLearningRepository;
     private readonly ILogger<CreateDraftApprenticeshipLearningCommandHandler> _logger;
 
     public CreateDraftApprenticeshipLearningCommandHandler(
         ILearnerFactory learnerFactory,
-        IApprenticeshipLearningFactory learningFactory,
         ILearnerRepository learnerRepository,
         IApprenticeshipLearningRepository apprenticeshipLearningRepository,
         ILogger<CreateDraftApprenticeshipLearningCommandHandler> logger)
     {
         _learnerFactory = learnerFactory;
-        _learningFactory = learningFactory;
         _learnerRepository = learnerRepository;
         _apprenticeshipLearningRepository = apprenticeshipLearningRepository;
         _logger = logger;
@@ -175,40 +172,32 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         LearnerDomainModel learner)
     {
         var updateModel = command.LearningUpdateContext;
-        var cost = updateModel.OnProgrammeDetails.Costs.OrderBy(c => c.FromDate).First(); // HACK, we could have multiple costs
-                                                                 // Approvals will only surface one cost at initial approval
-                                                                 // Once approved, on the next ILR submission the addtional costs will be added
-                                                                 // which will then require further approval
-                                                                 // This is a known limitation of the current implementation and will be addressed in future iterations
+        var cost = updateModel.OnProgrammeDetails.Costs.OrderBy(c => c.FromDate).First(); //one cost for initial draft creation
 
-        // learning.Update() below runs UpdatePricesIfChanged against ALL costs, so without this it would add a
-        // second EpisodePrice for any extra cost that doesn't match the one just created by AddEpisode
-        updateModel.OnProgrammeDetails.Costs = [cost];
-
-        var trainingCode = command.TrainingCode;
-
-        var learning = _learningFactory.CreateNew(learner.Key, trainingCode, trainingCourseVersion: null, updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship));
-        learning.AddEpisode(
-            updateModel.ApprovalsApprenticeshipId,
+        var learning = ApprenticeshipLearningDomainModel.CreateDraft(
+            learner.Key,
             command.Ukprn,
-            employerAccountId: null,
-            startDate: cost.FromDate,
-            endDate: updateModel.OnProgrammeDetails.ExpectedEndDate,
-            totalPrice: cost.TotalPrice,
-            trainingPrice: cost.TrainingPrice,
-            endpointAssessmentPrice: cost.EpaoPrice,
-            employerType: EmployerType.Levy,
-            transferSenderId: null,
-            legalEntityName: string.Empty,
-            accountLegalEntityId: null,
-            learnerRef: updateModel.LearnerRef,
-            isApproved: false);
+            command.TrainingCode,
+            new DraftApprenticeshipDetails
+            {
+                ApprovalsApprenticeshipId = updateModel.ApprovalsApprenticeshipId,
+                LearnerRef = updateModel.LearnerRef,
+                LearningType = updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship),
+                Cost = cost,
+                ExpectedEndDate = updateModel.OnProgrammeDetails.ExpectedEndDate,
+                WithdrawalDate = updateModel.Delivery.WithdrawalDate,
+                CompletionDate = updateModel.Learning.CompletionDate?.Date,
+                AchievementDate = updateModel.OnProgrammeDetails.AchievementDate,
+                PauseDate = updateModel.OnProgrammeDetails.PauseDate,
+                BreaksInLearning = updateModel.OnProgrammeDetails.BreaksInLearning,
+                LearningSupport = updateModel.LearningSupport,
+                EnglishAndMathsCourses = updateModel.EnglishAndMathsCourses
+            });
 
-        var learningChanges = learning.Update(updateModel);
-        var learnerChanges = learner.Update(updateModel);
-        var changes = learningChanges.Concat(learnerChanges).ToArray();
+        // creating is not a change - only the learner side can report changes (e.g. personal details) here
+        var changes = learner.Update(updateModel);
 
-        if (learnerChanges.Any())
+        if (changes.Any())
         {
             await _learnerRepository.Update(learner);
         }
