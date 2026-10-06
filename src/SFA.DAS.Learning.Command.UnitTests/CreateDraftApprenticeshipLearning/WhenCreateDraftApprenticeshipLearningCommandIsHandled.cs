@@ -29,7 +29,6 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     private Mock<IApprenticeshipLearningRepository> _learningRepository = null!;
     private Mock<ILogger<CreateDraftApprenticeshipLearningCommandHandler>> _logger = null!;
     private ILearnerFactory _learnerFactory = null!;
-    private IApprenticeshipLearningFactory _apprenticeshipLearningFactory = null!;
 
     private CreateDraftApprenticeshipLearningCommandHandler _handler = null!;
 
@@ -41,11 +40,9 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         _learningRepository = new Mock<IApprenticeshipLearningRepository>();
         _logger = new Mock<ILogger<CreateDraftApprenticeshipLearningCommandHandler>>();
         _learnerFactory = new LearnerFactory();
-        _apprenticeshipLearningFactory = new ApprenticeshipLearningFactory();
 
         _handler = new CreateDraftApprenticeshipLearningCommandHandler(
             _learnerFactory,
-            _apprenticeshipLearningFactory,
             _learnerRepository.Object,
             _learningRepository.Object,
             _logger.Object);
@@ -507,6 +504,67 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_A_Draft_Created_With_A_WithdrawalDate_Is_Withdrawn_But_No_Withdrawn_Event_Is_Raised()
+    {
+        // Arrange - creating a draft is not a change: the episode is created already withdrawn, and Approvals
+        // (which has no ApprovalsApprenticeshipId for a draft) must not be sent a LearningWithdrawnEvent
+        var withdrawalDate = new DateTime(2025, 10, 1);
+        var command = CreateCommand();
+        command.LearningUpdateContext.Delivery.WithdrawalDate = withdrawalDate;
+        var learner = CreateLearner();
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        addedLearning.Should().NotBeNull();
+        addedLearning!.LatestEpisode.WithdrawalDate.Should().Be(withdrawalDate);
+        addedLearning.FlushEvents().OfType<Domain.Events.LearningWithdrawnEvent>().Should().BeEmpty();
+        result!.Changes.Should().NotContain(LearningUpdateChanges.Withdrawal);
+    }
+
+    [Test]
+    public async Task Then_A_WithdrawalDate_Added_To_An_Existing_Draft_Is_Stored_But_No_Withdrawn_Event_Is_Raised()
+    {
+        // Arrange - repeat POST of an unapproved draft: Approvals has no record of it yet (ApprovalsApprenticeshipId would be 0)
+        var withdrawalDate = new DateTime(2025, 10, 1);
+        var command = CreateCommand();
+        command.LearningUpdateContext.Delivery.WithdrawalDate = withdrawalDate;
+        var learner = CreateLearner();
+        var unapprovedLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        unapprovedLearning.LatestEpisode.WithdrawalDate.Should().Be(withdrawalDate);
+        unapprovedLearning.FlushEvents().OfType<Domain.Events.LearningWithdrawnEvent>().Should().BeEmpty();
+        result!.Changes.Should().Contain(LearningUpdateChanges.Withdrawal);
+    }
+
+    [Test]
     public async Task Then_A_Learning_Changed_Event_Is_Raised_With_Removed_Operation_For_The_Omitted_Course()
     {
         // Arrange
@@ -536,6 +594,34 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
             .ContainSingle(e => e.LearningKey == missingLearning.Key
                                  && e.AcademicYear == AcademicYear
                                  && e.Operation == ApprenticeshipLearningOperation.Removed);
+    }
+
+    [Test]
+    public async Task Then_No_Learning_Removed_Event_Is_Raised_For_The_Omitted_Unapproved_Course()
+    {
+        // Arrange - the omitted course is an unapproved draft: Approvals has no record of it, so is not told it was removed
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var missingLearning = CreateLearning(isApproved: false);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.GetOtherUnapprovedCourseLearnings(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { missingLearning });
+
+        // Act
+        await _handler.Handle(command);
+
+        // Assert
+        missingLearning.LatestEpisode.IsRemoved.Should().BeTrue();
+        missingLearning.FlushEvents().OfType<Domain.Events.LearningRemovedEvent>().Should().BeEmpty();
     }
 
     [Test]

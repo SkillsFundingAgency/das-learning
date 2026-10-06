@@ -106,6 +106,7 @@ public class WhenUpdatingWithdrawalDate
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
 
         episode.WithdrawalDate = withdrawalDate;
+        episode.IsApproved = true;
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
         return ApprenticeshipLearningDomainModel.Get(entity);

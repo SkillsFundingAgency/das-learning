@@ -86,6 +86,24 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         });
     }
 
+    /// <summary>
+    /// Creates an unapproved draft apprenticeship learning directly in its final state.
+    /// Creating is not a change: no change events (withdrawn, end date changed...) are raised.
+    /// </summary>
+    public static ApprenticeshipLearningDomainModel CreateDraft(Guid learnerKey, long ukprn, string trainingCode, DraftApprenticeshipDetails details)
+    {
+        var learning = New(learnerKey, trainingCode, trainingCourseVersion: null, details.LearningType);
+
+        learning.AddEpisode(ApprenticeshipEpisodeDomainModel.NewDraft(learning.Key, ukprn, details));
+
+        foreach (var course in details.EnglishAndMathsCourses)
+        {
+            learning._entity.EnglishAndMathsCourses.Add(new EnglishAndMathsDomainModel(course, learning.Key).GetEntity());
+        }
+
+        return learning;
+    }
+
     public static ApprenticeshipLearningDomainModel Get(ApprenticeshipLearningEntity entity)
     {
         return new ApprenticeshipLearningDomainModel(entity);
@@ -132,6 +150,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             trainingPrice,
             endpointAssessmentPrice);
 
+        AddEpisode(episode);
+    }
+
+    private void AddEpisode(ApprenticeshipEpisodeDomainModel episode)
+    {
         _episodes.Add(episode);
         _entity.Episodes.Add(episode.GetEntity());
     }
@@ -179,6 +202,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         latestEpisode.UpdateBreaksInLearningIfChanged([]);
         _entity.EnglishAndMathsCourses.Clear();
 
+        if (!latestEpisode.IsApproved) return;
+
         AddEvent(new LearningRemovedEvent
         {
             LearningKey = Key,
@@ -189,8 +214,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     private void ReinstateIfRemoved(List<LearningUpdateChanges> changes)
     {
         var latestEpisode = LatestEpisode;
-        if (!latestEpisode.IsRemoved)
-            return;
+        
+        if (!latestEpisode.IsRemoved) return;
 
         latestEpisode.Reinstate();
 
@@ -333,6 +358,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         {
             changes.Add(LearningUpdateChanges.ExpectedEndDate);
 
+            if (!LatestEpisode.IsApproved) return;
+
             var @event = new EndDateChangedEvent
             {
                 ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
@@ -355,6 +382,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             latestEpisode.Withdraw(updateModel.OnProgrammeDetails.WithdrawalDate.Value);
             changes.Add(LearningUpdateChanges.Withdrawal);
 
+            if (!latestEpisode.IsApproved) return;
+
             var @event = new LearningWithdrawnEvent
             {
                 LearningKey = Key,
@@ -373,6 +402,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
             latestEpisode.ReverseWithdrawal();
             changes.Add(LearningUpdateChanges.ReverseWithdrawal);
+
+            if (!latestEpisode.IsApproved) return;
 
             var @event = new WithdrawalRevertedEvent
             {
