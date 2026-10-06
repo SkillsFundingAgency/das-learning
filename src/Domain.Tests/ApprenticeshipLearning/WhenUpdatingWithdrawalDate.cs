@@ -115,7 +115,7 @@ public class WhenUpdatingWithdrawalDate
     {
         var learnerDomainModel = GetLearnerDomainModel();
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(domainModel.GetEntity(), learnerDomainModel.GetEntity());
-        updateModel.Delivery.WithdrawalDate = withdrawalDate;
+        updateModel.OnProgrammeDetails.WithdrawalDate = withdrawalDate;
         return updateModel;
     }
 }

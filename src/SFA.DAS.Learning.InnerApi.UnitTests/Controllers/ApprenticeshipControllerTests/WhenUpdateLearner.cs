@@ -79,7 +79,7 @@ public class WhenUpdateLearner
             It.Is<UpdateLearnerCommand>(c =>
                 c.LearnerKey == learnerKey &&
                 c.Ukprn == ukprn &&
-                c.TrainingCode == request.Delivery.TrainingCode),
+                c.TrainingCode == request.OnProgramme.TrainingCode),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 }

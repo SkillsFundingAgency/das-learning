@@ -36,3 +36,22 @@ public class ShortCourseLearningSupportDomainModel : LearningSupportDomainModel<
         return new ShortCourseLearningSupportDomainModel(entity);
     }
 }
+
+public class EnglishAndMathsLearningSupportDomainModel
+{
+    private readonly EnglishAndMathsLearningSupport _entity;
+    public Guid Key => _entity.Key;
+    public Guid EnglishAndMathsKey => _entity.EnglishAndMathsKey;
+    public DateTime StartDate => _entity.StartDate;
+    public DateTime EndDate => _entity.EndDate;
+
+    internal EnglishAndMathsLearningSupportDomainModel(EnglishAndMathsLearningSupport entity)
+    {
+        _entity = entity;
+    }
+
+    public static EnglishAndMathsLearningSupportDomainModel Get(EnglishAndMathsLearningSupport entity)
+    {
+        return new EnglishAndMathsLearningSupportDomainModel(entity);
+    }
+}
