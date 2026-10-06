@@ -280,6 +280,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         bool hasChanges = false;
         bool hasWithdrawalChanges = false;
         bool hasBreaksInLearningChanges = false;
+        bool hasLearningSupportChanges = false;
 
         var existingCourses = EnglishAndMathsCourses;
         var courseKeysToKeep = new List<Guid>();
@@ -294,6 +295,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 hasChanges |= existingCourse.Update(incomingCourse);
                 hasWithdrawalChanges |= existingCourse.UpdateWithdrawalDate(incomingCourse);
                 hasBreaksInLearningChanges |= existingCourse.UpdateBreaksInLearningIfChanged(incomingCourse.BreaksInLearning);
+                hasLearningSupportChanges |= existingCourse.UpdateLearningSupportIfChanged(incomingCourse.LearningSupport);
             }
             else
             {
@@ -301,6 +303,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 var newCourse = new EnglishAndMathsDomainModel(incomingCourse, _entity.Key);
                 _entity.EnglishAndMathsCourses.Add(newCourse.GetEntity());
                 if (newCourse.WithdrawalDate.HasValue) hasWithdrawalChanges = true;
+                if (newCourse.LearningSupport.Any()) hasLearningSupportChanges = true;
                 courseKeysToKeep.Add(newCourse.Key);
             }
         }
@@ -323,14 +326,17 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         if (hasBreaksInLearningChanges)
             changes.Add(LearningUpdateChanges.EnglishAndMathsBreaksInLearningUpdated);
+
+        if (hasLearningSupportChanges)
+            changes.Add(LearningUpdateChanges.EnglishAndMathsLearningSupport);
     }
 
     private void UpdateLearningSupport(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
     {
-        var learningSupportHasChanged = LatestEpisode.UpdateLearningSupportIfChanged(updateModel.LearningSupport);
+        var learningSupportHasChanged = LatestEpisode.UpdateLearningSupportIfChanged(updateModel.OnProgrammeDetails.LearningSupport);
         if (learningSupportHasChanged)
         {
-            changes.Add(LearningUpdateChanges.LearningSupport);
+            changes.Add(LearningUpdateChanges.OnprogrammeLearningSupport);
         }
     }
 
@@ -369,11 +375,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
     {
         var latestEpisode = LatestEpisode;
 
-        if (updateModel.Delivery.WithdrawalDate.HasValue)
+        if (updateModel.OnProgrammeDetails.WithdrawalDate.HasValue)
         {
-            if (updateModel.Delivery.WithdrawalDate == latestEpisode.WithdrawalDate) return;
+            if (updateModel.OnProgrammeDetails.WithdrawalDate == latestEpisode.WithdrawalDate) return;
 
-            latestEpisode.Withdraw(updateModel.Delivery.WithdrawalDate.Value);
+            latestEpisode.Withdraw(updateModel.OnProgrammeDetails.WithdrawalDate.Value);
             changes.Add(LearningUpdateChanges.Withdrawal);
 
             if (!latestEpisode.IsApproved) return;
@@ -382,7 +388,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             {
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
-                LastDayOfLearning = updateModel.Delivery.WithdrawalDate.Value,
+                LastDayOfLearning = updateModel.OnProgrammeDetails.WithdrawalDate.Value,
                 WithdrawalReasonCode = 0, //to be populated in a future story (FLP-1881)
                 Created = DateTime.UtcNow,
                 EmployerAccountId = LatestEpisode.EmployerAccountId ?? 0

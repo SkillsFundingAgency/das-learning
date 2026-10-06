@@ -1,6 +1,7 @@
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System.Collections.ObjectModel;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -21,6 +22,7 @@ public class EnglishAndMathsDomainModel
     public decimal? CombinedFundingAdjustmentPercentage => _entity.CombinedFundingAdjustmentPercentage;
     public decimal Amount => _entity.Amount;
     public IReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel> BreaksInLearning => new ReadOnlyCollection<EnglishAndMathsBreakInLearningDomainModel>(_entity.BreaksInLearning.Select(EnglishAndMathsBreakInLearningDomainModel.Get).ToList());
+    public IReadOnlyCollection<EnglishAndMathsLearningSupportDomainModel> LearningSupport => new ReadOnlyCollection<EnglishAndMathsLearningSupportDomainModel>(_entity.LearningSupport.Select(EnglishAndMathsLearningSupportDomainModel.Get).ToList());
 
 
     internal EnglishAndMathsDomainModel(EnglishAndMaths entity)
@@ -52,6 +54,14 @@ public class EnglishAndMathsDomainModel
             StartDate = b.StartDate,
             EndDate = b.EndDate,
             PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+        }).ToList();
+
+        _entity.LearningSupport = incomingCourse.LearningSupport.Select(ls => new EnglishAndMathsLearningSupport
+        {
+            Key = Guid.NewGuid(),
+            EnglishAndMathsKey = _entity.Key,
+            StartDate = ls.StartDate,
+            EndDate = ls.EndDate
         }).ToList();
     }
 
@@ -98,6 +108,38 @@ public class EnglishAndMathsDomainModel
     internal EnglishAndMaths GetEntity()
     {
         return _entity;
+    }
+
+    /// <summary>
+    /// Updates the learning support if there are differences and returns true; if no differences returns false.
+    /// </summary>
+    /// <param name="newLearningSupportDetails">The new learning support</param>
+    /// <returns>True if differences, otherwise false</returns>
+    internal bool UpdateLearningSupportIfChanged(List<LearningSupportDetails> newLearningSupportDetails)
+    {
+        var newLearningSupportRecordsAdded = false;
+
+        _entity.LearningSupport.RemoveWhere(x =>
+                !newLearningSupportDetails.Any(y => y.StartDate == x.StartDate && y.EndDate == x.EndDate),
+            out var removedItems);
+
+        foreach (var newLearningSupport in newLearningSupportDetails)
+        {
+            if (_entity.LearningSupport.All(x => x.StartDate != newLearningSupport.StartDate || x.EndDate != newLearningSupport.EndDate))
+            {
+                newLearningSupportRecordsAdded = true;
+
+                _entity.LearningSupport.Add(new EnglishAndMathsLearningSupport
+                {
+                    StartDate = newLearningSupport.StartDate,
+                    EndDate = newLearningSupport.EndDate,
+                    EnglishAndMathsKey = _entity.Key,
+                    Key = Guid.NewGuid()
+                });
+            }
+        }
+
+        return newLearningSupportRecordsAdded || removedItems.Count > 0;
     }
 
     /// <summary>
