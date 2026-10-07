@@ -510,7 +510,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         // (which has no ApprovalsApprenticeshipId for a draft) must not be sent a LearningWithdrawnEvent
         var withdrawalDate = new DateTime(2025, 10, 1);
         var command = CreateCommand();
-        command.LearningUpdateContext.Delivery.WithdrawalDate = withdrawalDate;
+        command.LearningUpdateContext.OnProgrammeDetails.WithdrawalDate = withdrawalDate;
         var learner = CreateLearner();
         ApprenticeshipLearningDomainModel? addedLearning = null;
 
@@ -543,7 +543,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         // Arrange - repeat POST of an unapproved draft: Approvals has no record of it yet (ApprovalsApprenticeshipId would be 0)
         var withdrawalDate = new DateTime(2025, 10, 1);
         var command = CreateCommand();
-        command.LearningUpdateContext.Delivery.WithdrawalDate = withdrawalDate;
+        command.LearningUpdateContext.OnProgrammeDetails.WithdrawalDate = withdrawalDate;
         var learner = CreateLearner();
         var unapprovedLearning = CreateLearning(isApproved: false);
 

@@ -185,12 +185,12 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
                 LearningType = updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship),
                 Cost = cost,
                 ExpectedEndDate = updateModel.OnProgrammeDetails.ExpectedEndDate,
-                WithdrawalDate = updateModel.Delivery.WithdrawalDate,
+                WithdrawalDate = updateModel.OnProgrammeDetails.WithdrawalDate,
                 CompletionDate = updateModel.Learning.CompletionDate?.Date,
                 AchievementDate = updateModel.OnProgrammeDetails.AchievementDate,
                 PauseDate = updateModel.OnProgrammeDetails.PauseDate,
                 BreaksInLearning = updateModel.OnProgrammeDetails.BreaksInLearning,
-                LearningSupport = updateModel.LearningSupport,
+                LearningSupport = updateModel.OnProgrammeDetails.LearningSupport,
                 EnglishAndMathsCourses = updateModel.EnglishAndMathsCourses
             });
 
