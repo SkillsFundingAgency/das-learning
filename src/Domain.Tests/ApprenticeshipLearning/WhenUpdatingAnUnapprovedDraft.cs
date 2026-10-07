@@ -42,7 +42,7 @@ public class WhenUpdatingAnUnapprovedDraft
     {
         var draft = CreateDraft();
         var updateModel = UpdateModelMatching(draft);
-        updateModel.Delivery.WithdrawalDate = new DateTime(2025, 10, 1);
+        updateModel.OnProgrammeDetails.WithdrawalDate = new DateTime(2025, 10, 1);
 
         var changes = draft.Update(updateModel);
 
@@ -56,7 +56,7 @@ public class WhenUpdatingAnUnapprovedDraft
     {
         var draft = CreateDraft(withdrawalDate: new DateTime(2025, 10, 1));
         var updateModel = UpdateModelMatching(draft);
-        updateModel.Delivery.WithdrawalDate = null;
+        updateModel.OnProgrammeDetails.WithdrawalDate = null;
 
         var changes = draft.Update(updateModel);
 
