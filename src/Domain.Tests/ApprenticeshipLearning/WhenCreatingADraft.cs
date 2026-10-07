@@ -128,7 +128,8 @@ public class WhenCreatingADraft
                 PlannedEndDate = new DateTime(2026, 7, 31),
                 WithdrawalDate = new DateTime(2026, 1, 1),
                 Amount = 100,
-                BreaksInLearning = []
+                BreaksInLearning = [],
+                LearningSupport = []
             }
         ]));
 
