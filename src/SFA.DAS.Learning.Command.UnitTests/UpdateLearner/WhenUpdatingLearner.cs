@@ -219,6 +219,80 @@ public class WhenUpdatingLearner
     }
 
     [Test]
+    public async Task ThenTheResultIncludesTheLearningTypeSuppliedOnTheUpdateWhenThereAreChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.Delivery.LearningType = LearningType.FoundationApprenticeship;
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().NotBeEmpty();
+        result.LearningType.Should().Be(LearningType.FoundationApprenticeship);
+    }
+
+    [Test]
+    public async Task ThenTheResultIncludesTheStoredLearningTypeWhenTheUpdateDoesNotSupplyOne()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.Delivery.LearningType = null;
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var storedLearningType = learningDomainModel.LearningType;
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.LearningType.Should().Be(storedLearningType);
+    }
+
+    [Test]
+    public async Task ThenTheResultIncludesTheLearningTypeWhenThereAreNoChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.OnProgrammeDetails.LearningSupport.Clear();
+        command.UpdateModel.EnglishAndMathsCourses.Clear();
+        command.UpdateModel.Delivery.LearningType = LearningType.FoundationApprenticeship;
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x => x.IsRemoved = false);
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().BeEmpty();
+        result.LearningType.Should().Be(LearningType.FoundationApprenticeship);
+    }
+
+    [Test]
     public async Task ThenARemovedApprenticeshipIsReinstatedOnUpdate()
     {
         // Arrange
