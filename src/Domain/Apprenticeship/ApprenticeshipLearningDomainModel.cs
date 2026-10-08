@@ -342,7 +342,16 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     private void UpdatePrices(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
     {
-        var hasChanged = LatestEpisode.UpdatePricesIfChanged(updateModel.OnProgrammeDetails.Costs);
+        var costs = updateModel.OnProgrammeDetails.Costs;
+
+        // A start date change is reported in addition to Prices
+        // This check must be done before the actual Price update is performed
+        if (costs.Count > 0 && costs.Min(x => x.FromDate) != StartDate)
+        {
+            changes.Add(LearningUpdateChanges.StartDate);
+        }
+
+        var hasChanged = LatestEpisode.UpdatePricesIfChanged(costs);
 
         if (hasChanged)
         {
