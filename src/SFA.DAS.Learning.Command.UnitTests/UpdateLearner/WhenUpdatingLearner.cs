@@ -152,6 +152,72 @@ public class WhenUpdatingLearner
         // the first call is to make sure the data in the domain model is up to date before the update, that way there should be no changes detected
     }
 
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenTheResultIncludesTheApprovalsApprenticeshipIdAndApprovalStateWhenThereAreChanges(bool isApproved)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = isApproved;
+            x.ApprovalsApprenticeshipId = 12345;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().NotBeEmpty();
+        result.ApprovalsApprenticeshipId.Should().Be(12345);
+        result.IsApproved.Should().Be(isApproved);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenTheResultIncludesTheApprovalsApprenticeshipIdAndApprovalStateWhenThereAreNoChanges(bool isApproved)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.OnProgrammeDetails.LearningSupport.Clear();
+        command.UpdateModel.EnglishAndMathsCourses.Clear();
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = isApproved;
+            x.ApprovalsApprenticeshipId = 12345;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().BeEmpty();
+        result.ApprovalsApprenticeshipId.Should().Be(12345);
+        result.IsApproved.Should().Be(isApproved);
+    }
+
     [Test]
     public async Task ThenARemovedApprenticeshipIsReinstatedOnUpdate()
     {

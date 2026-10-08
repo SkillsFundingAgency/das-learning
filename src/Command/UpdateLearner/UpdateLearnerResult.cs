@@ -8,6 +8,8 @@ namespace SFA.DAS.Learning.Command.UpdateLearner
         public List<LearningUpdateChanges> Changes { get; set; } = [];
         public Guid LearningKey { get; set; }
         public Guid LearningEpisodeKey { get; set; }
+        public long ApprovalsApprenticeshipId { get; set; }
+        public bool IsApproved { get; set; }
         public int AgeAtStartOfLearning { get; set; }
         public List<EpisodePrice> Prices { get; set; } = [];
 

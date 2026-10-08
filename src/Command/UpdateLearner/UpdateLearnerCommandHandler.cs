@@ -54,6 +54,8 @@ public class UpdateLearnerCommandHandler(
                 AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
                 LearningKey = learning.Key,
                 LearningEpisodeKey = learning.LatestEpisode.Key,
+                ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
+                IsApproved = learning.LatestEpisode.IsApproved,
                 Prices = learning.LatestEpisode.EpisodePrices
                     .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                     .ToList()
@@ -80,6 +82,8 @@ public class UpdateLearnerCommandHandler(
             AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
             LearningKey = learning.Key,
             LearningEpisodeKey = learning.LatestEpisode.Key,
+            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
+            IsApproved = learning.LatestEpisode.IsApproved,
             Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                 .ToList()
