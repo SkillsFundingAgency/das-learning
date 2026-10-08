@@ -32,6 +32,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public DateTime? AchievementDate => _entity.AchievementDate;
     public bool PaymentsFrozen => _entity.PaymentsFrozen;
     public bool IsRemoved => _entity.IsRemoved;
+    public bool FurtherApprovalNeeded => _entity.FurtherApprovalNeeded;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
     public DateTime? PauseDate => _entity.PauseDate;
     public IReadOnlyCollection<ApprenticeshipLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ApprenticeshipLearningSupportDomainModel.Get);
@@ -169,6 +170,11 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     internal void UpdateCompletionDate(DateTime? completionDate)
     {
         _entity.CompletionDate = completionDate;
+    }
+
+    internal void SetFurtherApprovalNeeded(bool furtherApprovalNeeded)
+    {
+        _entity.FurtherApprovalNeeded = furtherApprovalNeeded;
     }
 
     internal void UpdateAchievementDate(DateTime? achievementDate)

@@ -71,6 +71,55 @@ public class WhenStartDateIsUpdated
     }
 
     [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenFurtherApprovalIsNeeded()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndStartDateChangesOnUnapprovedEpisodeThenFurtherApprovalIsNotNeeded()
+    {
+        //Arrange
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts([new Cost { FromDate = new DateTime(2024, 08, 01), TrainingPrice = 10000, EpaoPrice = 1000 }])
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithIsApproved(false)
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        var result = _learning.Update(updateModel);
+
+        //Assert
+        result.Should().Contain(LearningUpdateChanges.StartDate);
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeFalse();
+    }
+
+    [Test]
+    public void AndStartDateIsNotChangedThenFurtherApprovalIsNotNeeded()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeFalse();
+    }
+
+    [Test]
     public void AndCostsAreUnchangedThenStartDateChangeIsNotReported()
     {
         //Arrange

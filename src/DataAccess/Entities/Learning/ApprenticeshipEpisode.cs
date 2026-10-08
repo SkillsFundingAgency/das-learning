@@ -21,6 +21,7 @@ public class ApprenticeshipEpisode : Episode
     public string? TrainingCourseVersion { get; set; }
     public bool PaymentsFrozen { get; set; }
     public bool IsRemoved { get; set; }
+    public bool FurtherApprovalNeeded { get; set; }
     public List<EpisodePrice> Prices { get; set; }
     public DateTime? WithdrawalDate { get; set; }
     public DateTime? PauseDate { get; set; }

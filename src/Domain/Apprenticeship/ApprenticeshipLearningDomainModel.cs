@@ -349,6 +349,11 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         if (costs.Count > 0 && costs.Min(x => x.FromDate) != StartDate)
         {
             changes.Add(LearningUpdateChanges.StartDate);
+
+            if (LatestEpisode.IsApproved)
+            {
+                LatestEpisode.SetFurtherApprovalNeeded(true);
+            }
         }
 
         var hasChanged = LatestEpisode.UpdatePricesIfChanged(costs);

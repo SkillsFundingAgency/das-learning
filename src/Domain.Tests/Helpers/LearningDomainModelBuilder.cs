@@ -15,6 +15,13 @@ public class LearningDomainModelBuilder
     private DateTime _plannedEndDate;
     private string _learnerRef;
     private bool _learnerRefSet;
+    private bool _isApproved = true;
+
+    public LearningDomainModelBuilder WithIsApproved(bool isApproved)
+    {
+        _isApproved = isApproved;
+        return this;
+    }
 
     public LearningDomainModelBuilder WithCosts(List<Cost> costs)
     {
@@ -54,7 +61,8 @@ public class LearningDomainModelBuilder
         episode.Prices.Clear();
         episode.LearningSupport.Clear();
         episode.IsRemoved = false;
-        episode.IsApproved = true;
+        episode.IsApproved = _isApproved;
+        episode.FurtherApprovalNeeded = false;
         episode.CompletionDate = episode.CompletionDate?.Date;
         episode.AchievementDate = null;
 
