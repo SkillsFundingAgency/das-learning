@@ -21,12 +21,17 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
         try
         {
             var activeOnDate = query.CollectionYear.GetLastDay(query.CollectionPeriod);
+            var startOfAcademicYear = activeOnDate.StartOfCurrentAcademicYear();
 
             var baseQuery = dbContext.ApprenticeshipLearningDbSet
                 .Include(x => x.Episodes.Where(e => !e.IsRemoved))
                 .ThenInclude(x => x.Prices)
                 .Where(x => x.Episodes.Any(e => e.Ukprn == query.Ukprn && !e.IsRemoved))
-                .IsActiveInYear(activeOnDate.StartOfCurrentAcademicYear(), activeOnDate.EndOfCurrentAcademicYear())
+                .IsActiveInYear(startOfAcademicYear, activeOnDate.EndOfCurrentAcademicYear())
+                // With no actual end date recorded, the planned end date must not be before the start of the year
+                .Where(x => x.Episodes.Any(e =>
+                    !e.IsRemoved &&
+                    (e.CompletionDate.HasValue || e.WithdrawalDate.HasValue || e.Prices.Any(p => p.EndDate >= startOfAcademicYear))))
                 .OrderBy(x => x.LearnerKey)
                 .AsNoTracking();
 

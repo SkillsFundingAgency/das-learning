@@ -14,7 +14,7 @@ Scenario: Correct learners returned when actual end date is derived from Withdra
 	| currentAY-09-25  | currentAY-07-31  | null             | Included |
 	| currentAY-11-25  | currentAY-07-31  | null             | Included |
 	| currentAY-09-25  | currentAY-07-31  | currentAY-06-30  | Included |
-	| previousAY-09-25 | previousAY-07-31 | null             | Included |
+	| previousAY-09-25 | previousAY-07-31 | null             | Excluded |
 	| previousAY-09-25 | previousAY-07-31 | previousAY-06-30 | Excluded |
 	| previousAY-09-25 | currentAY-07-31  | previousAY-06-30 | Excluded |
 	| previousAY-09-25 | previousAY-07-31 | currentAY-06-30  | Included |
@@ -33,7 +33,7 @@ Scenario: Correct learners returned when actual end date is derived from Complet
 	| currentAY-09-25  | currentAY-07-31  | null             | Included |
 	| currentAY-11-25  | currentAY-07-31  | null             | Included |
 	| currentAY-09-25  | currentAY-07-31  | currentAY-06-30  | Included |
-	| previousAY-09-25 | previousAY-07-31 | null             | Included |
+	| previousAY-09-25 | previousAY-07-31 | null             | Excluded |
 	| previousAY-09-25 | previousAY-07-31 | previousAY-06-30 | Excluded |
 	| previousAY-09-25 | currentAY-07-31  | previousAY-06-30 | Excluded |
 	| previousAY-09-25 | previousAY-07-31 | currentAY-06-30  | Included |
