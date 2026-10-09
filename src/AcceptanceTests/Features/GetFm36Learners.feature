@@ -1,48 +1,16 @@
-﻿Feature: GetFm36Learners
+Feature: GetFm36Learners
 
-Tests that learners are correctly returned from GetLearningsForFm36 [HttpGet("{ukprn}/{collectionYear}/{collectionPeriod}")]
+Tests that learnings are correctly looked up by key from GetLearningsForFm36 [HttpPost("{ukprn}/learnings/by-keys")].
+Which learners are returned for FM36 (opt-in, academic year date rules and paging) is decided by the Earnings inner api, this endpoint only looks up the keys it is given.
 
 
-Scenario: Correct learners returned when actual end date is derived from Withdrawn Date
-	Given The learner starts on <StartDate> and has a plannedEndDate of <EndDate>
-	And a withdrawn date of <WithdrawnDate> is set
-	And the update request is sent
-	When the GetLearningsForFm36 endpoint is called for currentAY-10-15
-	Then the fm36 learner should be <Result>
-	Examples: 
-	| StartDate        | EndDate          | WithdrawnDate    | Result   |
-	| currentAY-09-25  | currentAY-07-31  | null             | Included |
-	| currentAY-11-25  | currentAY-07-31  | null             | Included |
-	| currentAY-09-25  | currentAY-07-31  | currentAY-06-30  | Included |
-	| previousAY-09-25 | previousAY-07-31 | null             | Excluded |
-	| previousAY-09-25 | previousAY-07-31 | previousAY-06-30 | Excluded |
-	| previousAY-09-25 | currentAY-07-31  | previousAY-06-30 | Excluded |
-	| previousAY-09-25 | previousAY-07-31 | currentAY-06-30  | Included |
-	| previousAY-09-25 | currentAY-07-31  | currentAY-06-30  | Included |
-	| previousAY-09-25 | currentAY-07-31  | null             | Included |
-	| nextAY-09-25     | nextAY-07-31     | null             | Excluded |
-
-Scenario: Correct learners returned when actual end date is derived from Completion Date
-	Given The learner starts on <StartDate> and has a plannedEndDate of <EndDate>
-	And a completion date of <CompletionDate> is set
-	And the update request is sent
-	When the GetLearningsForFm36 endpoint is called for currentAY-10-15
-	Then the fm36 learner should be <Result>
-	Examples: 
-	| StartDate        | EndDate          | CompletionDate   | Result   |
-	| currentAY-09-25  | currentAY-07-31  | null             | Included |
-	| currentAY-11-25  | currentAY-07-31  | null             | Included |
-	| currentAY-09-25  | currentAY-07-31  | currentAY-06-30  | Included |
-	| previousAY-09-25 | previousAY-07-31 | null             | Excluded |
-	| previousAY-09-25 | previousAY-07-31 | previousAY-06-30 | Excluded |
-	| previousAY-09-25 | currentAY-07-31  | previousAY-06-30 | Excluded |
-	| previousAY-09-25 | previousAY-07-31 | currentAY-06-30  | Included |
-	| previousAY-09-25 | currentAY-07-31  | currentAY-06-30  | Included |
-	| previousAY-09-25 | currentAY-07-31  | null             | Included |
-	| nextAY-09-25     | nextAY-07-31     | null             | Excluded |
+Scenario: Only the requested learnings are returned
+	Given The learner starts on currentAY-09-25 and has a plannedEndDate of currentAY-07-31
+	When the GetLearningsForFm36 endpoint is called for the learner
+	Then the fm36 learner should be Included
 
 Scenario: Removed learners are excluded
 	Given The learner starts on currentAY-09-25 and has a plannedEndDate of currentAY-07-31
 	And SLD have previously informed us that the learner is to be removed
-	When the GetLearningsForFm36 endpoint is called for currentAY-10-15
+	When the GetLearningsForFm36 endpoint is called for the learner
 	Then the fm36 learner should be Excluded

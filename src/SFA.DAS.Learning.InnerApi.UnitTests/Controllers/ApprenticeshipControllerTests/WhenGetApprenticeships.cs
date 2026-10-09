@@ -32,8 +32,7 @@ public class WhenGetApprenticeships
     {
         // Arrange
         var ukprn = _fixture.Create<long>();
-        var collectionYear = _fixture.Create<short>();
-        var collectionPeriod = _fixture.Create<byte>();
+        var learningKeys = _fixture.CreateMany<Guid>().ToList();
         var expectedResponse = _fixture.Create<GetLearningsWithEpisodesResponse>();
 
         _queryDispatcher
@@ -41,7 +40,7 @@ public class WhenGetApprenticeships
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _sut.GetLearningsForFm36(ukprn, collectionYear, collectionPeriod);
+        var result = await _sut.GetLearningsForFm36(ukprn, learningKeys);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -54,39 +53,36 @@ public class WhenGetApprenticeships
     {
         // Arrange
         var ukprn = _fixture.Create<long>();
-        var collectionYear = _fixture.Create<short>();
-        var collectionPeriod = _fixture.Create<byte>();
+        var learningKeys = _fixture.CreateMany<Guid>().ToList();
 
         _queryDispatcher
             .Setup(x => x.Send<GetLearningsWithEpisodesRequest, GetLearningsWithEpisodesResponse?>(It.Is<GetLearningsWithEpisodesRequest>(r => r.Ukprn == ukprn)))
             .ReturnsAsync((GetLearningsWithEpisodesResponse?)null);
 
         // Act
-        var result = await _sut.GetLearningsForFm36(ukprn, collectionYear, collectionPeriod);
+        var result = await _sut.GetLearningsForFm36(ukprn, learningKeys);
 
         // Assert
         result.Should().BeOfType<NotFoundResult>();
     }
 
     [Test]
-    public async Task ThenPagedApprenticeshipsAreReturnedWhenPaginationSpecified()
+    public async Task ThenTheRequestedLearningKeysArePassedToTheQuery()
     {
         // Arrange
         var ukprn = _fixture.Create<long>();
-        var collectionYear = _fixture.Create<short>();
-        var collectionPeriod = _fixture.Create<byte>();
+        var learningKeys = _fixture.CreateMany<Guid>().ToList();
         var expectedResponse = _fixture.Create<GetLearningsWithEpisodesResponse>();
 
         _queryDispatcher
-            .Setup(x => x.Send<GetLearningsWithEpisodesRequest, GetLearningsWithEpisodesResponse?>(It.Is<GetLearningsWithEpisodesRequest>(r => r.Ukprn == ukprn)))
+            .Setup(x => x.Send<GetLearningsWithEpisodesRequest, GetLearningsWithEpisodesResponse?>(It.IsAny<GetLearningsWithEpisodesRequest>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _sut.GetLearningsForFm36(ukprn, collectionYear, collectionPeriod, 1, 2);
+        await _sut.GetLearningsForFm36(ukprn, learningKeys);
 
         // Assert
-        result.Should().BeOfType<OkObjectResult>();
-        var okResult = (OkObjectResult)result;
-        okResult.Value.Should().Be(expectedResponse);
+        _queryDispatcher.Verify(x => x.Send<GetLearningsWithEpisodesRequest, GetLearningsWithEpisodesResponse?>(
+            It.Is<GetLearningsWithEpisodesRequest>(r => r.Ukprn == ukprn && r.LearningKeys.SequenceEqual(learningKeys))), Times.Once);
     }
 }
