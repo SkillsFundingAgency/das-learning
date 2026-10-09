@@ -228,6 +228,12 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         changes.Add(LearningUpdateChanges.Reinstated);
     }
 
+    public override void ClearFurtherApprovalNeeded(Guid episodeKey)
+    {
+        var episode = _episodes.Single(x => x.Key == episodeKey);
+        episode.SetFurtherApprovalNeeded(false);
+    }
+
     public override void Approve(ApproveLearningContext context)
         => Approve(context.EmployerAccountId, context.EmployerType, context.TransferSenderId, context.LegalEntityName, context.ApprovalsApprenticeshipId, context.AccountLegalEntityId, context.TrainingCourseVersion);
 
