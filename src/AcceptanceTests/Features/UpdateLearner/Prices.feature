@@ -14,8 +14,9 @@ Scenario: Prices are updated
 		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
 		| currentAY-11-25 | nextAY-07-31 | 5500          | 400      |
 	And the following changes are returned
-		| Change          |
-		| Prices |
+		| Change    |
+		| Prices    |
+		| StartDate |
 	And the EpisodePrices are returned
 		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
 		| currentAY-11-25 | nextAY-07-31 | 5500          | 400      |

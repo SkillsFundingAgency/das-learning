@@ -54,6 +54,7 @@ public class TestInnerApi : IDisposable
             })
             .Configure(app =>
             {
+                app.UseMiddleware<SFA.DAS.Learning.InnerApi.Middleware.ExceptionHandlingMiddleware>();
                 app.UseRouting();
                 app.UseAuthorization();
                 app.UseEndpoints(endpoints =>
