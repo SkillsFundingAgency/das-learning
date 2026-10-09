@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
+using SFA.DAS.Learning.Enums;
 using System.Net;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
@@ -13,7 +14,7 @@ public class ClearFurtherApprovalNeededStepDefinitions(ScenarioContext scenarioC
     [Then(@"the update result says further approval is needed")]
     public void ThenTheUpdateResultSaysFurtherApprovalIsNeeded()
     {
-        scenarioContext.GetUpdateLearnerResult().NeedsFurtherApproval.Should().BeTrue();
+        scenarioContext.GetUpdateLearnerResult().ChangesNeedingApproval.Should().Contain(LearningUpdateChanges.StartDate);
     }
 
     [Then(@"further approval needed is set on the apprenticeship episode")]

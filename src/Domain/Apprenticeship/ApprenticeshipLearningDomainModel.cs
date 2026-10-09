@@ -166,14 +166,15 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
 
     /// <summary>
-    /// True when the last call to <see cref="Update"/> raised a need for further approval (not persisted).
+    /// The changes from the last call to <see cref="Update"/> that need further approval (not persisted).
     /// Distinct from the persisted FurtherApprovalNeeded flag on the episode, which stays set until it is cleared.
     /// </summary>
-    public bool NeedsFurtherApproval { get; private set; }
+    public IReadOnlyList<LearningUpdateChanges> ChangesNeedingApproval => _changesNeedingApproval;
+    private readonly List<LearningUpdateChanges> _changesNeedingApproval = [];
 
     public LearningUpdateChanges[] Update(LearningUpdateContext updateContext)
     {
-        NeedsFurtherApproval = false;
+        _changesNeedingApproval.Clear();
 
         var changes = new List<LearningUpdateChanges>();
 
@@ -370,7 +371,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             if (LatestEpisode.IsApproved)
             {
                 LatestEpisode.SetFurtherApprovalNeeded(true);
-                NeedsFurtherApproval = true;
+                _changesNeedingApproval.Add(LearningUpdateChanges.StartDate);
             }
         }
 

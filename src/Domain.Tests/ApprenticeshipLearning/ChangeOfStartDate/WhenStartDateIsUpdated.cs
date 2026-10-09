@@ -95,7 +95,7 @@ public class WhenStartDateIsUpdated
         _learning.Update(updateModel);
 
         //Assert
-        _learning.NeedsFurtherApproval.Should().BeTrue();
+        _learning.ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
     }
 
     [Test]
@@ -115,7 +115,7 @@ public class WhenStartDateIsUpdated
         _learning.Update(updateModel);
 
         //Assert
-        _learning.NeedsFurtherApproval.Should().BeFalse();
+        _learning.ChangesNeedingApproval.Should().BeEmpty();
     }
 
     [Test]
@@ -129,7 +129,7 @@ public class WhenStartDateIsUpdated
         _learning.Update(updateModel);
 
         //Assert
-        _learning.NeedsFurtherApproval.Should().BeFalse();
+        _learning.ChangesNeedingApproval.Should().BeEmpty();
     }
 
     [Test]
@@ -139,13 +139,13 @@ public class WhenStartDateIsUpdated
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
         _learning.Update(updateModel);
-        _learning.NeedsFurtherApproval.Should().BeTrue();
+        _learning.ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
 
         //Act
         _learning.Update(updateModel);
 
         //Assert
-        _learning.NeedsFurtherApproval.Should().BeFalse();
+        _learning.ChangesNeedingApproval.Should().BeEmpty();
         _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeTrue("the persisted flag stays set until it is cleared");
     }
 

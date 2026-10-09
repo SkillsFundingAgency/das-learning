@@ -184,7 +184,7 @@ public class WhenUpdatingLearner
 
     [TestCase(true)]
     [TestCase(false)]
-    public async Task ThenTheResultReportsWhetherTheUpdateNeedsFurtherApprovalWhenTheStartDateChanges(bool isApproved)
+    public async Task ThenTheResultReportsTheStartDateChangeAsNeedingApprovalOnlyForAnApprovedEpisode(bool isApproved)
     {
         // Arrange
         var command = _fixture.Create<UpdateLearnerCommand>();
@@ -207,7 +207,7 @@ public class WhenUpdatingLearner
 
         // Assert
         result.Changes.Should().Contain(LearningUpdateChanges.StartDate);
-        result.NeedsFurtherApproval.Should().Be(isApproved);
+        result.ChangesNeedingApproval.Should().BeEquivalentTo(isApproved ? new[] { LearningUpdateChanges.StartDate } : Array.Empty<LearningUpdateChanges>());
     }
 
     [TestCase(true)]
@@ -244,7 +244,7 @@ public class WhenUpdatingLearner
         result.Changes.Should().BeEmpty();
         result.ApprovalsApprenticeshipId.Should().Be(12345);
         result.IsApproved.Should().Be(isApproved);
-        result.NeedsFurtherApproval.Should().BeFalse();
+        result.ChangesNeedingApproval.Should().BeEmpty();
     }
 
     [Test]
