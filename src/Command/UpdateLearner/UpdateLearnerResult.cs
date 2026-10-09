@@ -10,6 +10,7 @@ namespace SFA.DAS.Learning.Command.UpdateLearner
         public Guid LearningEpisodeKey { get; set; }
         public long ApprovalsApprenticeshipId { get; set; }
         public bool IsApproved { get; set; }
+        public bool NeedsFurtherApproval { get; set; }
         public LearningType LearningType { get; set; }
         public int AgeAtStartOfLearning { get; set; }
         public List<EpisodePrice> Prices { get; set; } = [];

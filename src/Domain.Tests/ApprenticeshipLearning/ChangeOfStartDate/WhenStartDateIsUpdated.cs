@@ -85,6 +85,71 @@ public class WhenStartDateIsUpdated
     }
 
     [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenTheUpdateNeedsFurtherApproval()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.NeedsFurtherApproval.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndStartDateChangesOnUnapprovedEpisodeThenTheUpdateDoesNotNeedFurtherApproval()
+    {
+        //Arrange
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts([new Cost { FromDate = new DateTime(2024, 08, 01), TrainingPrice = 10000, EpaoPrice = 1000 }])
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithIsApproved(false)
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.NeedsFurtherApproval.Should().BeFalse();
+    }
+
+    [Test]
+    public void AndStartDateIsNotChangedThenTheUpdateDoesNotNeedFurtherApproval()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.NeedsFurtherApproval.Should().BeFalse();
+    }
+
+    [Test]
+    public void AndAnEarlierUpdateNeededFurtherApprovalThenALaterUpdateWithoutAStartDateChangeDoesNot()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+        _learning.Update(updateModel);
+        _learning.NeedsFurtherApproval.Should().BeTrue();
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.NeedsFurtherApproval.Should().BeFalse();
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeTrue("the persisted flag stays set until it is cleared");
+    }
+
+    [Test]
     public void AndStartDateChangesOnUnapprovedEpisodeThenFurtherApprovalIsNotNeeded()
     {
         //Arrange

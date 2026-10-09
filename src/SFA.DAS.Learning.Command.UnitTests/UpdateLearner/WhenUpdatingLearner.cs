@@ -184,6 +184,34 @@ public class WhenUpdatingLearner
 
     [TestCase(true)]
     [TestCase(false)]
+    public async Task ThenTheResultReportsWhetherTheUpdateNeedsFurtherApprovalWhenTheStartDateChanges(bool isApproved)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = isApproved;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().Contain(LearningUpdateChanges.StartDate);
+        result.NeedsFurtherApproval.Should().Be(isApproved);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
     public async Task ThenTheResultIncludesTheApprovalsApprenticeshipIdAndApprovalStateWhenThereAreNoChanges(bool isApproved)
     {
         // Arrange
@@ -216,6 +244,7 @@ public class WhenUpdatingLearner
         result.Changes.Should().BeEmpty();
         result.ApprovalsApprenticeshipId.Should().Be(12345);
         result.IsApproved.Should().Be(isApproved);
+        result.NeedsFurtherApproval.Should().BeFalse();
     }
 
     [Test]
