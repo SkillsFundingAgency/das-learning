@@ -8,5 +8,6 @@ public enum ApprenticeshipLearningOperation
     Created = 0,
     Updated = 1,
     Removed = 2,
-    Approved = 3
+    Approved = 3,
+    FurtherApproved = 4
 }

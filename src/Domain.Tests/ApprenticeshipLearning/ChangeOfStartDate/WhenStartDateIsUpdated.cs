@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
@@ -96,6 +97,21 @@ public class WhenStartDateIsUpdated
 
         //Assert
         _learning.ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
+    }
+
+    [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenTheHistorySnapshotRecordsFurtherApprovalNeeded()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+        var snapshot = ApprenticeshipLearningChangedEvent.From(_learning, null, ApprenticeshipLearningOperation.Updated).Snapshot;
+
+        //Assert
+        snapshot.Episodes.Single().FurtherApprovalNeeded.Should().BeTrue();
     }
 
     [Test]

@@ -242,7 +242,10 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         var episode = _episodes.SingleOrDefault(x => x.Key == episodeKey);
         if (episode == null) return false;
 
+        if (!episode.FurtherApprovalNeeded) return true;
+
         episode.SetFurtherApprovalNeeded(false);
+        AddEvent(ApprenticeshipLearningChangedEvent.From(this, academicYear: null, ApprenticeshipLearningOperation.FurtherApproved));
         return true;
     }
 

@@ -84,4 +84,28 @@ public class ApprenticeshipLearningChangedEventHandlerTests
         Assert.That(capturedHistory, Is.Not.Null);
         Assert.That(capturedHistory!.Changes, Is.Null);
     }
+
+    [Test]
+    public async Task Handle_WhenFurtherApprovalIsCleared_RecordsTheOperationAndTheSnapshotFlag()
+    {
+        // Arrange
+        var domainEvent = _fixture.Build<ApprenticeshipLearningChangedEvent>()
+            .With(x => x.Operation, ApprenticeshipLearningOperation.FurtherApproved)
+            .With(x => x.Changes, new List<LearningUpdateChanges>())
+            .Create();
+        domainEvent.Snapshot.Episodes.ForEach(e => e.FurtherApprovalNeeded = false);
+
+        ApprenticeshipLearningHistory? capturedHistory = null;
+        _repository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningHistory>()))
+            .Callback<ApprenticeshipLearningHistory>(h => capturedHistory = h)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _handler.Handle(domainEvent, default);
+
+        // Assert
+        Assert.That(capturedHistory!.Operation, Is.EqualTo("FurtherApproved"));
+        Assert.That(capturedHistory.State, Does.Contain("\"FurtherApprovalNeeded\": false"));
+    }
 }

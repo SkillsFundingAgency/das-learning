@@ -12,9 +12,12 @@ Scenario: A start date change flags the episode and the flag can then be cleared
 	And the update request is sent
 	Then the update result says further approval is needed
 	And further approval needed is set on the apprenticeship episode
+	And the latest "Updated" history row records further approval needed as true
 	When further approval needed is cleared for the apprenticeship episode
 	Then the clear request returns 204
 	And further approval needed is not set on the apprenticeship episode
+	And there is 1 "FurtherApproved" history row
+	And the latest "FurtherApproved" history row records further approval needed as false
 
 Scenario: Clearing the flag twice is harmless
 	Given There is an apprenticeship with the following details
@@ -24,6 +27,7 @@ Scenario: Clearing the flag twice is harmless
 	And further approval needed is cleared for the apprenticeship episode
 	Then the clear request returns 204
 	And further approval needed is not set on the apprenticeship episode
+	And there is 0 "FurtherApproved" history row
 
 Scenario: Clearing the flag for a learning that does not exist
 	When further approval needed is cleared for a learning that does not exist

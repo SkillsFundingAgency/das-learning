@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.Enums;
 using System.Net;
+using System.Text.Json;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
 
@@ -53,6 +54,30 @@ public class ClearFurtherApprovalNeededStepDefinitions(ScenarioContext scenarioC
     public void ThenTheClearRequestReturns(int expectedStatusCode)
     {
         ((int)scenarioContext.Get<HttpStatusCode>(StatusCodeKey)).Should().Be(expectedStatusCode);
+    }
+
+    [Then(@"there is (\d+) ""(.*)"" history row")]
+    public void ThenThereAreHistoryRows(int expectedCount, string operation)
+    {
+        GetHistories().Count(x => x.Operation == operation).Should().Be(expectedCount);
+    }
+
+    [Then(@"the latest ""(.*)"" history row records further approval needed as (true|false)")]
+    public void ThenTheLatestHistoryRowRecordsFurtherApprovalNeeded(string operation, bool expected)
+    {
+        var history = GetHistories().Where(x => x.Operation == operation).OrderBy(x => x.CreatedOn).LastOrDefault();
+        history.Should().NotBeNull($"a {operation} history row should exist");
+
+        using var state = JsonDocument.Parse(history!.State);
+        var episode = state.RootElement.GetProperty("Episodes").EnumerateArray().Single();
+        episode.GetProperty("FurtherApprovalNeeded").GetBoolean().Should().Be(expected);
+    }
+
+    private List<DataAccess.Entities.Learning.ApprenticeshipLearningHistory> GetHistories()
+    {
+        using var dbConnection = new SqlConnection(scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        return dbConnection.GetHistories(learning.Key);
     }
 
     private async Task Clear(Guid learningKey, Guid episodeKey)
