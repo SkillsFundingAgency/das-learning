@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.Learning.Command;
+using SFA.DAS.Learning.Command.ClearFurtherApprovalNeeded;
 using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 using SFA.DAS.Learning.Command.RemoveLearnerCommand;
 using SFA.DAS.Learning.Command.UpdateLearner;
@@ -182,5 +183,28 @@ public class LearningController : ControllerBase
         var removedLearningKeys = await _commandDispatcher.Send<RemoveLearnerCommand, List<Guid>>(command);
 
         return new OkObjectResult(removedLearningKeys);
+    }
+
+    /// <summary>
+    /// Clears the FurtherApprovalNeeded marker on an episode, once the change that required further approval has been approved.
+    /// </summary>
+    /// <param name="learningKey">The unique identifier of the learning.</param>
+    /// <param name="episodeKey">The unique identifier of the episode whose marker is cleared.</param>
+    /// <param name="learningType">The type of the learning, which determines where it is stored.</param>
+    [HttpPost("learning/{learningKey}/episodes/{episodeKey}/clear-further-approval-needed")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> ClearFurtherApprovalNeeded(Guid learningKey, Guid episodeKey, [FromQuery] LearningType learningType)
+    {
+        _logger.LogInformation("Clearing FurtherApprovalNeeded for {LearningType} learning {LearningKey}, episode {EpisodeKey}", learningType, learningKey, episodeKey);
+
+        await _commandDispatcher.Send(new ClearFurtherApprovalNeededCommand
+        {
+            LearningType = learningType,
+            LearningKey = learningKey,
+            EpisodeKey = episodeKey
+        });
+
+        return NoContent();
     }
 }

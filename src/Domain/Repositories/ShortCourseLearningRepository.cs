@@ -138,6 +138,15 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return Update(domainModel);
     }
 
+    async Task<LearningDomainModel?> ILearningRepository.GetLearning(Guid learningKey)
+    {
+        var shortCourseLearning = await DbContext.ShortCourseLearnings
+            .IncludeAllChildren()
+            .SingleOrDefaultAsync(x => x.Key == learningKey);
+
+        return shortCourseLearning == null ? null : _learningFactory.GetExisting(shortCourseLearning);
+    }
+
     async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null)
     {
         return await Get(uln, unapprovedOnly: true, trainingCode: trainingCode);

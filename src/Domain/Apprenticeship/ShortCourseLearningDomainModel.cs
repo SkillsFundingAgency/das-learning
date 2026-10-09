@@ -207,7 +207,7 @@ public class ShortCourseLearningDomainModel : LearningDomainModel<ShortCourseLea
         return episode.Key;
     }
 
-    public override void ClearFurtherApprovalNeeded(Guid episodeKey)
+    public override bool ClearFurtherApprovalNeeded(Guid episodeKey)
         => throw new NotImplementedException("FurtherApprovalNeeded is not supported for short courses yet");
 
     public override void Approve(ApproveLearningContext context)

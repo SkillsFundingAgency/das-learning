@@ -5,7 +5,8 @@ namespace SFA.DAS.Learning.Domain.Apprenticeship;
 public abstract class LearningDomainModel : AggregateRoot
 {
     public abstract void Approve(ApproveLearningContext context);
-    public abstract void ClearFurtherApprovalNeeded(Guid episodeKey);
+    /// <summary>Clears the FurtherApprovalNeeded marker on the episode. Returns false if the learning has no such episode.</summary>
+    public abstract bool ClearFurtherApprovalNeeded(Guid episodeKey);
 }
 
 public abstract class LearningDomainModel<T> : LearningDomainModel where T : Learning.DataAccess.Entities.Learning.Learning

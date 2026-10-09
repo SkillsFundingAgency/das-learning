@@ -29,15 +29,19 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
 
     public async Task<ApprenticeshipLearningDomainModel> Get(Guid key)
     {
-        var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
+        var apprenticeship = await IncludeAllChildren().SingleAsync(x => x.Key == key);
+
+        return _learningFactory.GetExisting(apprenticeship);
+    }
+
+    private IQueryable<DataAccess.Entities.Learning.ApprenticeshipLearning> IncludeAllChildren()
+    {
+        return DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
-            .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
-            .SingleAsync(x => x.Key == key);
-
-        return _learningFactory.GetExisting(apprenticeship);
+            .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning);
     }
 
     public async Task<ApprenticeshipLearningDomainModel?> GetByLearnerKey(Guid key)
@@ -164,6 +168,13 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     {
         if (model is not ApprenticeshipLearningDomainModel domainModel) throw new InvalidOperationException();
         return Update(domainModel);
+    }
+
+    async Task<LearningDomainModel?> ILearningRepository.GetLearning(Guid learningKey)
+    {
+        var apprenticeship = await IncludeAllChildren().SingleOrDefaultAsync(x => x.Key == learningKey);
+
+        return apprenticeship == null ? null : _learningFactory.GetExisting(apprenticeship);
     }
 
     async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null)

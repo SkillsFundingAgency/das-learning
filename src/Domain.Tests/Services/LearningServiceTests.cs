@@ -56,6 +56,31 @@ public class LearningServiceTests
     }
 
     [Test]
+    public async Task GetLearning_UsesRepositoryForLearningType()
+    {
+        // Arrange
+        var learningKey = Guid.NewGuid();
+
+        _provider
+            .Setup(p => p.GetRepository(LearningType.Apprenticeship))
+            .Returns(_repo.Object);
+
+        var expected = new ApprenticeshipLearningFactory().CreateNew(Guid.NewGuid(), "TC001");
+
+        _repo
+            .Setup(r => r.GetLearning(learningKey))
+            .ReturnsAsync(expected);
+
+        // Act
+        var result = await _service.GetLearning(learningKey, LearningType.Apprenticeship);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(expected));
+        _provider.Verify(p => p.GetRepository(LearningType.Apprenticeship), Times.Once);
+        _repo.Verify(r => r.GetLearning(learningKey), Times.Once);
+    }
+
+    [Test]
     public async Task AddLearning_UsesRepositoryBasedOnModelType()
     {
         // Arrange

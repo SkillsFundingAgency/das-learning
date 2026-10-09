@@ -47,12 +47,22 @@ public class WhenClearingFurtherApprovalNeeded
     }
 
     [Test]
-    public void AndEpisodeKeyIsNotFoundThenAnExceptionIsThrown()
+    public void AndFlagIsClearedThenTrueIsReturned()
     {
         //Act
-        var act = () => ((LearningDomainModel)_learning).ClearFurtherApprovalNeeded(Guid.NewGuid());
+        var result = ((LearningDomainModel)_learning).ClearFurtherApprovalNeeded(_learning.GetEntity().Episodes.Single().Key);
 
         //Assert
-        act.Should().Throw<InvalidOperationException>();
+        result.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndEpisodeKeyIsNotFoundThenFalseIsReturned()
+    {
+        //Act
+        var result = ((LearningDomainModel)_learning).ClearFurtherApprovalNeeded(Guid.NewGuid());
+
+        //Assert
+        result.Should().BeFalse();
     }
 }
