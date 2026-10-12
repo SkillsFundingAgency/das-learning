@@ -55,6 +55,7 @@ public class UpdateLearnerCommandHandler(
                 LearningEpisodeKey = learning.LatestEpisode.Key,
                 ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
                 IsApproved = learning.LatestEpisode.IsApproved,
+                FurtherApprovalNeeded = learning.LatestEpisode.FurtherApprovalNeeded,
                 LearningType = learning.LearningType,
                 Prices = learning.LatestEpisode.EpisodePrices
                     .Select(x => (UpdateLearnerResult.EpisodePrice)x)
@@ -87,6 +88,7 @@ public class UpdateLearnerCommandHandler(
             LearningEpisodeKey = learning.LatestEpisode.Key,
             ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
             IsApproved = learning.LatestEpisode.IsApproved,
+            FurtherApprovalNeeded = learning.LatestEpisode.FurtherApprovalNeeded,
             LearningType = learning.LearningType,
             Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
