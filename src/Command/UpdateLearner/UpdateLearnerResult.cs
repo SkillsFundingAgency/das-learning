@@ -15,7 +15,7 @@ namespace SFA.DAS.Learning.Command.UpdateLearner
         /// The change types of <see cref="ChangeDetails"/>, whether or not they require approval.
         /// Retained for consumers that only need to know what changed.
         /// </summary>
-        public List<LearningUpdateChanges> Changes => ChangeDetails.Select(x => x.ChangeType).ToList();
+        public IEnumerable<LearningUpdateChanges> Changes => ChangeDetails.Select(x => x.ChangeType);
 
         public Guid LearningKey { get; set; }
         public Guid LearningEpisodeKey { get; set; }
