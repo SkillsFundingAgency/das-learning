@@ -18,6 +18,9 @@ public class WhenStartDateIsUpdated
     private ApprenticeshipLearningDomainModel _learning;
     private LearningUpdateChanges[] _result;
 
+    private IEnumerable<LearningUpdateChanges> ChangesNeedingApproval =>
+        _learning.ChangeDetails.Where(x => x.RequiresApproval).Select(x => x.ChangeType);
+
     [SetUp]
     public void SetUp()
     {
@@ -96,7 +99,52 @@ public class WhenStartDateIsUpdated
         _learning.Update(updateModel);
 
         //Assert
-        _learning.ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
+        ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
+    }
+
+    [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenTheChangeDetailCarriesOldNewAndRequiresApproval()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        var detail = _learning.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.StartDate);
+        detail.Old!.GetValue<string>().Should().Be("2024-08-01");
+        detail.New!.GetValue<string>().Should().Be("2024-08-15");
+        detail.RequiresApproval.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndPricesChangeThenThePricesChangeDetailCarriesTheOldAndNewPriceEpisodes()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice = 11000;
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        var detail = _learning.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.Prices);
+        detail.RequiresApproval.Should().BeFalse("prices do not yet require approval");
+
+        var oldPrice = detail.Old!.AsArray().Single()!.AsObject();
+        oldPrice["startDate"]!.GetValue<string>().Should().Be("2024-08-01");
+        oldPrice["endDate"]!.GetValue<string>().Should().Be("2025-07-31");
+        oldPrice["trainingPrice"]!.GetValue<decimal>().Should().Be(10000);
+        oldPrice["endPointAssessmentPrice"]!.GetValue<decimal>().Should().Be(1000);
+        oldPrice["totalPrice"]!.GetValue<decimal>().Should().Be(11000);
+
+        var newPrice = detail.New!.AsArray().Single()!.AsObject();
+        newPrice["startDate"]!.GetValue<string>().Should().Be("2024-08-15");
+        newPrice["trainingPrice"]!.GetValue<decimal>().Should().Be(11000);
+        newPrice["totalPrice"]!.GetValue<decimal>().Should().Be(12000);
     }
 
     [Test]
@@ -131,7 +179,7 @@ public class WhenStartDateIsUpdated
         _learning.Update(updateModel);
 
         //Assert
-        _learning.ChangesNeedingApproval.Should().BeEmpty();
+        ChangesNeedingApproval.Should().BeEmpty();
     }
 
     [Test]
@@ -145,7 +193,7 @@ public class WhenStartDateIsUpdated
         _learning.Update(updateModel);
 
         //Assert
-        _learning.ChangesNeedingApproval.Should().BeEmpty();
+        ChangesNeedingApproval.Should().BeEmpty();
     }
 
     [Test]
@@ -155,13 +203,13 @@ public class WhenStartDateIsUpdated
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
         updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
         _learning.Update(updateModel);
-        _learning.ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
+        ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
 
         //Act
         _learning.Update(updateModel);
 
         //Assert
-        _learning.ChangesNeedingApproval.Should().BeEmpty();
+        ChangesNeedingApproval.Should().BeEmpty();
         _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeTrue("the persisted flag stays set until it is cleared");
     }
 

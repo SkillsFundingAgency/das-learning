@@ -15,7 +15,8 @@ public class ClearFurtherApprovalNeededStepDefinitions(ScenarioContext scenarioC
     [Then(@"the update result says further approval is needed")]
     public void ThenTheUpdateResultSaysFurtherApprovalIsNeeded()
     {
-        scenarioContext.GetUpdateLearnerResult().ChangesNeedingApproval.Should().Contain(LearningUpdateChanges.StartDate);
+        scenarioContext.GetUpdateLearnerResult().ChangeDetails
+            .Should().Contain(x => x.ChangeType == LearningUpdateChanges.StartDate && x.RequiresApproval);
     }
 
     [Then(@"further approval needed is set on the apprenticeship episode")]

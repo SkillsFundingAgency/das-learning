@@ -207,7 +207,32 @@ public class WhenUpdatingLearner
 
         // Assert
         result.Changes.Should().Contain(LearningUpdateChanges.StartDate);
-        result.ChangesNeedingApproval.Should().BeEquivalentTo(isApproved ? new[] { LearningUpdateChanges.StartDate } : Array.Empty<LearningUpdateChanges>());
+        result.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.StartDate)
+            .RequiresApproval.Should().Be(isApproved);
+        result.ChangeDetails.Where(x => x.ChangeType != LearningUpdateChanges.StartDate)
+            .Should().OnlyContain(x => !x.RequiresApproval);
+    }
+
+    [Test]
+    public async Task ThenTheResultChangesAreTheChangeTypesOfTheChangeDetailsIncludingTheLearnersChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.ChangeDetails.Should().NotBeEmpty();
+        result.Changes.Should().Equal(result.ChangeDetails.Select(x => x.ChangeType));
+        result.ChangeDetails.Select(x => x.ChangeType)
+            .Should().Contain(learningDomainModel.ChangeDetails.Select(x => x.ChangeType));
     }
 
     [TestCase(true)]
@@ -244,7 +269,7 @@ public class WhenUpdatingLearner
         result.Changes.Should().BeEmpty();
         result.ApprovalsApprenticeshipId.Should().Be(12345);
         result.IsApproved.Should().Be(isApproved);
-        result.ChangesNeedingApproval.Should().BeEmpty();
+        result.ChangeDetails.Should().BeEmpty();
     }
 
     [Test]

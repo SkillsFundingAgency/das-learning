@@ -5,6 +5,8 @@ using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text.Json.Nodes;
 using ApprenticeshipLearningEntity = SFA.DAS.Learning.DataAccess.Entities.Learning.ApprenticeshipLearning;
 
 namespace SFA.DAS.Learning.Domain.Apprenticeship;
@@ -166,17 +168,16 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
 
     /// <summary>
-    /// The changes from the last call to <see cref="Update"/> that need further approval (not persisted).
+    /// Every change made by the last call to <see cref="Update"/>, with old/new values and whether it requires approval
+    /// where they apply (not persisted). The array returned by <see cref="Update"/> is the change types of this list.
     /// Distinct from the persisted FurtherApprovalNeeded flag on the episode, which stays set until it is cleared.
     /// </summary>
-    public IReadOnlyList<LearningUpdateChanges> ChangesNeedingApproval => _changesNeedingApproval;
-    private readonly List<LearningUpdateChanges> _changesNeedingApproval = [];
+    public IReadOnlyList<LearningChange> ChangeDetails => _changeDetails;
+    private List<LearningChange> _changeDetails = [];
 
     public LearningUpdateChanges[] Update(LearningUpdateContext updateContext)
     {
-        _changesNeedingApproval.Clear();
-
-        var changes = new List<LearningUpdateChanges>();
+        var changes = new List<LearningChange>();
 
         ReinstateIfRemoved(changes);
 
@@ -200,7 +201,9 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateAchievementDate(updateContext, changes);
 
-        return changes.ToArray();
+        _changeDetails = changes;
+
+        return changes.Select(x => x.ChangeType).ToArray();
     }
 
     public void RemoveLearner()
@@ -220,7 +223,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         });
     }
 
-    private void ReinstateIfRemoved(List<LearningUpdateChanges> changes)
+    private void ReinstateIfRemoved(List<LearningChange> changes)
     {
         var latestEpisode = LatestEpisode;
         
@@ -285,7 +288,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         _entity.LearningType = updateModel.Delivery.LearningType.Value;
     }
 
-    private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdateLearningDetails(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         var latestEpisode = LatestEpisode;
 
@@ -296,7 +299,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdateEnglishAndMathsDetails(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdateEnglishAndMathsDetails(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         bool hasChanges = false;
         bool hasWithdrawalChanges = false;
@@ -352,7 +355,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             changes.Add(LearningUpdateChanges.EnglishAndMathsLearningSupport);
     }
 
-    private void UpdateLearningSupport(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdateLearningSupport(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         var learningSupportHasChanged = LatestEpisode.UpdateLearningSupportIfChanged(updateModel.OnProgrammeDetails.LearningSupport);
         if (learningSupportHasChanged)
@@ -361,7 +364,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdatePrices(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdatePrices(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         var costs = updateModel.OnProgrammeDetails.Costs;
 
@@ -369,24 +372,49 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         // This check must be done before the actual Price update is performed
         if (costs.Count > 0 && costs.Min(x => x.FromDate) != StartDate)
         {
-            changes.Add(LearningUpdateChanges.StartDate);
+            var requiresApproval = LatestEpisode.IsApproved;
 
-            if (LatestEpisode.IsApproved)
+            changes.Add(new LearningChange(
+                LearningUpdateChanges.StartDate,
+                old: FormatDate(StartDate),
+                @new: FormatDate(costs.Min(x => x.FromDate)),
+                requiresApproval));
+
+            if (requiresApproval)
             {
                 LatestEpisode.SetFurtherApprovalNeeded(true);
-                _changesNeedingApproval.Add(LearningUpdateChanges.StartDate);
             }
         }
+
+        // Snapshot as values: existing price rows are updated in place
+        var previousPrices = PricesAsJson();
 
         var hasChanged = LatestEpisode.UpdatePricesIfChanged(costs);
 
         if (hasChanged)
         {
-            changes.Add(LearningUpdateChanges.Prices);
+            changes.Add(new LearningChange(LearningUpdateChanges.Prices, old: previousPrices, @new: PricesAsJson()));
         }
     }
 
-    private void UpdateExpectedEndDate(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private JsonArray PricesAsJson() =>
+        new(LatestEpisode.EpisodePrices
+            .OrderBy(x => x.StartDate)
+            .Select(price => (JsonNode)new JsonObject
+            {
+                ["startDate"] = FormatDate(price.StartDate),
+                ["endDate"] = FormatDate(price.EndDate),
+                ["trainingPrice"] = price.TrainingPrice,
+                ["endPointAssessmentPrice"] = price.EndPointAssessmentPrice,
+                ["totalPrice"] = price.TotalPrice
+            })
+            .ToArray());
+
+    // Dates are held in change details as yyyy-MM-dd strings, the format Approvals expects
+    private static JsonValue FormatDate(DateTime date) =>
+        JsonValue.Create(date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+
+    private void UpdateExpectedEndDate(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         var hasChanged = LatestEpisode.UpdateExpectedEndDateIfChanged(updateModel.OnProgrammeDetails.ExpectedEndDate);
 
@@ -407,7 +435,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdateWithdrawalDate(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdateWithdrawalDate(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         var latestEpisode = LatestEpisode;
 
@@ -451,7 +479,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdatePauseDate(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdatePauseDate(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         var latestEpisode = LatestEpisode;
 
@@ -469,7 +497,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdateBreaksInLearning(LearningUpdateContext updateModel, List<LearningUpdateChanges> changes)
+    private void UpdateBreaksInLearning(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
         var breaksInLearningHaveChanged = LatestEpisode.UpdateBreaksInLearningIfChanged(updateModel.OnProgrammeDetails.BreaksInLearning);
         if (breaksInLearningHaveChanged)
@@ -478,7 +506,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
     }
 
-    private void UpdateAchievementDate(LearningUpdateContext updateContext, List<LearningUpdateChanges> changes)
+    private void UpdateAchievementDate(LearningUpdateContext updateContext, List<LearningChange> changes)
     {
         var latestEpisode = LatestEpisode;
 
