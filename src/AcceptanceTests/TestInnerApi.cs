@@ -119,7 +119,7 @@ public class TestInnerApi : IDisposable
     {
         var content = new StringContent(JsonConvert.SerializeObject(body), System.Text.Encoding.UTF8, "application/json");
         var response = await _httpClient.PutAsync(route, content);
-        return JsonConvert.DeserializeObject<T2>(await response.Content.ReadAsStringAsync())!;
+        return JsonConvert.DeserializeObject<T2>(await response.Content.ReadAsStringAsync(), new JsonNodeNewtonsoftConverter())!;
     }
 
     internal async Task<HttpStatusCode> Head(string route)
