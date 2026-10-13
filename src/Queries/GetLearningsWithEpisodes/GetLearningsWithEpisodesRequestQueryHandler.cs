@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Extensions;
-using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 
@@ -14,32 +12,26 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
 {
     public async Task<GetLearningsWithEpisodesResponse?> Handle(GetLearningsWithEpisodesRequest query, CancellationToken cancellationToken = default)
     {
+        var keyCount = query.LearningKeys.Count;
+
         logger.LogInformation(
-            "Handling GetLearningsWithEpisodesRequest for Ukprn: {ukprn} CollectionYear: {collectionYear} CollectionPeriod: {collectionPeriod} Pagination Limit: {limit} Pagination Offset: {offset}",
-            query.Ukprn, query.CollectionYear, query.CollectionPeriod, query.Limit, query.Offset);
+            "Handling GetLearningsWithEpisodesRequest for Ukprn: {Ukprn} with {KeyCount} learning keys",
+            query.Ukprn, keyCount);
 
         try
         {
-            var activeOnDate = query.CollectionYear.GetLastDay(query.CollectionPeriod);
-
-            var baseQuery = dbContext.ApprenticeshipLearningDbSet
+            var apprenticeships = await dbContext.ApprenticeshipLearningDbSet
                 .Include(x => x.Episodes.Where(e => !e.IsRemoved))
                 .ThenInclude(x => x.Prices)
+                .Where(x => query.LearningKeys.Contains(x.Key))
                 .Where(x => x.Episodes.Any(e => e.Ukprn == query.Ukprn && !e.IsRemoved))
-                .IsActiveInYear(activeOnDate.StartOfCurrentAcademicYear(), activeOnDate.EndOfCurrentAcademicYear())
-                .OrderBy(x => x.LearnerKey)
-                .AsNoTracking();
-
-            var totalItems = await baseQuery.CountAsync(cancellationToken);
-
-            var apprenticeships = await baseQuery
-                .Skip(query.Offset)
-                .Take(query.Limit)
+                .OrderBy(x => x.Key)
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             if (!apprenticeships.Any())
             {
-                logger.LogInformation("No learnings found for {ukprn} (Pagination Limit: {limit} Pagination Offset: {offset})", query.Ukprn, query.Limit, query.Offset);
+                logger.LogInformation("No learnings found for {Ukprn} from {KeyCount} learning keys", query.Ukprn, keyCount);
                 return null;
             }
 
@@ -60,15 +52,9 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
                     apprenticeship.GetEpisode().CompletionDate);
             }).ToList();
 
-            logger.LogInformation("{numberFound} apprenticeships found for {ukprn} (Pagination Limit: {limit} Pagination Offset: {offset})", data.Count, query.Ukprn, query.Limit, query.Offset);
+            logger.LogInformation("{NumberFound} apprenticeships found for {Ukprn} from {KeyCount} learning keys", data.Count, query.Ukprn, keyCount);
 
-            return new GetLearningsWithEpisodesResponse
-            {
-                Items = data,
-                PageSize = query.Limit,
-                Page = query.Page,
-                TotalItems = totalItems
-            };
+            return new GetLearningsWithEpisodesResponse { Items = data };
         }
         catch (Exception e)
         {

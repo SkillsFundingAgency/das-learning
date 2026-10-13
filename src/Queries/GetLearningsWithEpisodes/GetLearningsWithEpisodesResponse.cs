@@ -3,7 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 
-public class GetLearningsWithEpisodesResponse : PagedQueryResult<LearningWithEpisodes> {}
+public class GetLearningsWithEpisodesResponse
+{
+    public List<LearningWithEpisodes> Items { get; set; } = [];
+}
 
 [ExcludeFromCodeCoverage]
 public class LearningWithEpisodes(
