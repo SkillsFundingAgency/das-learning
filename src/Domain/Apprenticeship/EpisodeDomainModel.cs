@@ -26,6 +26,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public long? FundingEmployerAccountId => _entity.FundingEmployerAccountId;
     public string LegalEntityName => _entity.LegalEntityName;
     public long? AccountLegalEntityId => _entity.AccountLegalEntityId;
+    public string LearnerRef => _entity.LearnerRef;
     public override bool IsApproved => _entity.IsApproved;
     public DateTime? CompletionDate => _entity.CompletionDate;
     public DateTime? AchievementDate => _entity.AchievementDate;
@@ -75,6 +76,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         long? fundingEmployerAccountId,
         string legalEntityName,
         long? accountLegalEntityId,
+        string learnerRef,
         EmployerType employerType,
         bool isApproved = false)
     {
@@ -88,9 +90,63 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             FundingEmployerAccountId = fundingEmployerAccountId,
             LegalEntityName = legalEntityName,
             AccountLegalEntityId = accountLegalEntityId,
+            LearnerRef = learnerRef,
             PaymentsFrozen = false,
             EmployerType = employerType,
             IsApproved = isApproved
+        });
+    }
+
+    /// <summary>
+    /// Creates an unapproved draft episode directly in its final state (no employer yet, so Levy by default).
+    /// </summary>
+    internal static ApprenticeshipEpisodeDomainModel NewDraft(Guid learningKey, long ukprn, DraftApprenticeshipDetails details)
+    {
+        var episodeKey = Guid.NewGuid();
+
+        var price = EpisodePriceDomainModel.New(
+            details.Cost.FromDate,
+            details.ExpectedEndDate,
+            details.Cost.TotalPrice,
+            details.Cost.TrainingPrice,
+            details.Cost.EpaoPrice,
+            episodeKey);
+
+        return new ApprenticeshipEpisodeDomainModel(new ApprenticeshipEpisode
+        {
+            Key = episodeKey,
+            LearningKey = learningKey,
+            ApprovalsApprenticeshipId = details.ApprovalsApprenticeshipId,
+            Ukprn = ukprn,
+            EmployerAccountId = null,
+            FundingEmployerAccountId = null,
+            LegalEntityName = string.Empty,
+            AccountLegalEntityId = null,
+            LearnerRef = details.LearnerRef,
+            PaymentsFrozen = false,
+            EmployerType = EmployerType.Levy,
+            IsApproved = false,
+            WithdrawalDate = details.WithdrawalDate,
+            CompletionDate = details.CompletionDate,
+            AchievementDate = details.AchievementDate,
+            PauseDate = details.PauseDate,
+            Prices = [price.GetEntity()],
+            BreaksInLearning = details.BreaksInLearning.Select(b => new EpisodeBreakInLearning
+            {
+                Key = Guid.NewGuid(),
+                EpisodeKey = episodeKey,
+                StartDate = b.StartDate,
+                EndDate = b.EndDate,
+                PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+            }).ToList(),
+            LearningSupport = details.LearningSupport.Select(s => new ApprenticeshipLearningSupport
+            {
+                Key = Guid.NewGuid(),
+                LearningKey = learningKey,
+                EpisodeKey = episodeKey,
+                StartDate = s.StartDate,
+                EndDate = s.EndDate
+            }).ToList()
         });
     }
 

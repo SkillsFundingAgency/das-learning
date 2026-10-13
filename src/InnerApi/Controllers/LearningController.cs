@@ -52,7 +52,7 @@ public class LearningController : ControllerBase
     {
         _logger.LogInformation("Creating learning with ukprn {ukprn} uln {uln}", ukprn, request.Learner.Uln);
 
-        var command = new CreateDraftApprenticeshipLearningCommand(ukprn, request.ToUpdateModel(), request.Delivery.TrainingCode, request.AcademicYear);
+        var command = new CreateDraftApprenticeshipLearningCommand(ukprn, request.ToUpdateModel(), request.OnProgramme.TrainingCode, request.AcademicYear);
 
         var result = await _commandDispatcher.Send<CreateDraftApprenticeshipLearningCommand, CreateDraftApprenticeshipLearningCommandResult>(command);
 
@@ -157,7 +157,7 @@ public class LearningController : ControllerBase
     {
         _logger.LogInformation("Updating learning for learner with key {LearnerKey}", learnerKey);
 
-        var command = new UpdateLearnerCommand(learnerKey, ukprn, request.Delivery.TrainingCode, request.ToUpdateModel());
+        var command = new UpdateLearnerCommand(learnerKey, ukprn, request.OnProgramme.TrainingCode, request.ToUpdateModel());
 
         var result = await _commandDispatcher.Send<UpdateLearnerCommand, UpdateLearnerResult>(command);
 

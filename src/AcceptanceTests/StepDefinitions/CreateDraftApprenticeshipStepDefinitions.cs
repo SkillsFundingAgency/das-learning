@@ -27,6 +27,7 @@ public class CreateDraftApprenticeshipStepDefinitions
         _fixture = new Fixture();
     }
 
+    [Given(@"CreateDraftApprenticeship is called with apprenticeship details")]
     [When(@"CreateDraftApprenticeship is called with apprenticeship details")]
     public async Task WhenCreateDraftApprenticeshipIsCalledWithApprenticeshipDetails()
     {
@@ -58,6 +59,26 @@ public class CreateDraftApprenticeshipStepDefinitions
 
         createdEpisode.Should().NotBeNull();
         createdEpisode!.IsApproved.Should().BeFalse();
+    }
+
+    [Then(@"the draft apprenticeship should be withdrawn on (.*)")]
+    public async Task ThenTheDraftApprenticeshipShouldBeWithdrawnOn(TokenisableDateTime expectedWithdrawalDate)
+    {
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearningByKey(result!.LearningKey);
+
+        learning.Episodes.Single().WithdrawalDate.Should().Be(expectedWithdrawalDate.DateTime);
+    }
+
+    [Then(@"the CreateDraftApprenticeship response should (not )?include a Withdrawal change")]
+    public void ThenTheCreateDraftApprenticeshipResponseShouldIncludeAWithdrawalChange(string not)
+    {
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
+
+        if (string.IsNullOrEmpty(not)) result!.Changes.Should().Contain(LearningUpdateChanges.Withdrawal);
+        else result!.Changes.Should().NotContain(LearningUpdateChanges.Withdrawal);
     }
 
     [Then(@"the CreateDraftApprenticeship response should (not )?include a NewApprenticeshipLearner change")]

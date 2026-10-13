@@ -47,6 +47,7 @@ public class WhenAnEpisodeIsAdded
             episode.FundingEmployerAccountId,
             episode.LegalEntityName,
             episode.AccountLegalEntityId,
+            episode.LearnerRef,
             episode.EmployerType,
             episode.IsApproved);
 

@@ -35,11 +35,6 @@ public class CreateDraftApprenticeship
     public List<EnglishAndMaths> EnglishAndMathsCourses { get; set; }
 
     /// <summary>
-    /// Learning support details
-    /// </summary>
-    public List<LearningSupportDetails> LearningSupport { get; set; }
-
-    /// <summary>
     /// OnProgramme details
     /// </summary>
     public OnProgrammeDetails OnProgramme { get; set; }
@@ -50,17 +45,6 @@ public class CreateDraftApprenticeship
 /// </summary>
 public class Delivery
 {
-    /// <summary>
-    /// Withdrawal during learning date
-    /// </summary>
-    public DateTime? WithdrawalDate { get; set; }
-
-    /// <summary>
-    /// Training code for the apprenticeship's course
-    /// </summary>
-    public string TrainingCode { get; set; }
-
-
     /// <summary>
     /// Learning type for the apprenticeship
     /// </summary>
@@ -81,6 +65,9 @@ public class ApprenticeshipLearnerUpdateDetails : LearnerUpdateDetails
     /// Date the learning completes, this will be null until completion is confirmed
     /// </summary>
     public DateTime? CompletionDate { get; set; }
+
+    /// <summary> Learner Reference </summary>
+    public string? LearnerRef { get; set; }
 }
 
 /// <summary>
@@ -112,6 +99,21 @@ public class OnProgrammeDetails
     /// Breaks in learning for the OnProgramme delivery
     /// </summary>
     public List<BreakInLearning> BreaksInLearning { get; set; }
+
+    /// <summary>
+    /// Learning support details for the OnProgramme delivery
+    /// </summary>
+    public List<LearningSupportDetails> LearningSupport { get; set; }
+
+    /// <summary>
+    /// Withdrawal during learning date
+    /// </summary>
+    public DateTime? WithdrawalDate { get; set; }
+
+    /// <summary>
+    /// Training code for the apprenticeship's course
+    /// </summary>
+    public string TrainingCode { get; set; }
 }
 
 /// <summary>
@@ -189,6 +191,11 @@ public class EnglishAndMaths
     /// Breaks in learning for the english or maths course
     /// </summary>
     public List<BreakInLearning> BreaksInLearning { get; set; }
+
+    /// <summary>
+    /// Learning support details for the english or maths course
+    /// </summary>
+    public List<LearningSupportDetails> LearningSupport { get; set; }
 }
 
 /// <summary>
@@ -241,6 +248,7 @@ public static class CreateDraftApprenticeshipExtensions
     {
         return new LearningUpdateContext
         {
+            LearnerRef = request.Learner.LearnerRef ?? string.Empty,
             Learner = new LearnerModel
             {
                 FirstName = request.Learner.FirstName,
@@ -257,7 +265,6 @@ public static class CreateDraftApprenticeshipExtensions
             },
             Delivery = new DeliveryDetails
             {
-                WithdrawalDate = request.Delivery.WithdrawalDate,
                 LearningType = request.Delivery.LearningType
             },
             Learning = new LearningUpdateDetails
@@ -283,13 +290,13 @@ public static class CreateDraftApprenticeshipExtensions
                             StartDate = b.StartDate,
                             EndDate = b.EndDate,
                             PriorPeriodExpectedEndDate = b.PriorPeriodExpectedEndDate
+                        }),
+                    LearningSupport = x.LearningSupport.SelectOrEmptyList(ls =>
+                        new Models.UpdateModels.Shared.LearningSupportDetails
+                        {
+                            StartDate = ls.StartDate,
+                            EndDate = ls.EndDate
                         })
-                }),
-            LearningSupport = request.LearningSupport.SelectOrEmptyList(x =>
-                new Models.UpdateModels.Shared.LearningSupportDetails
-                {
-                    StartDate = x.StartDate,
-                    EndDate = x.EndDate
                 }),
             OnProgrammeDetails = new Models.UpdateModels.OnProgrammeDetails
             {
@@ -308,7 +315,14 @@ public static class CreateDraftApprenticeshipExtensions
                         StartDate = x.StartDate,
                         EndDate = x.EndDate,
                         PriorPeriodExpectedEndDate = x.PriorPeriodExpectedEndDate
-                    })
+                    }),
+                LearningSupport = request.OnProgramme.LearningSupport.SelectOrEmptyList(x =>
+                    new Models.UpdateModels.Shared.LearningSupportDetails
+                    {
+                        StartDate = x.StartDate,
+                        EndDate = x.EndDate
+                    }),
+                WithdrawalDate = request.OnProgramme.WithdrawalDate
             }
         };
     }

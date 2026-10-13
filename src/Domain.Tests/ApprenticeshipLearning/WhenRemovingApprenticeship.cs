@@ -6,7 +6,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
-using SFA.DAS.Learning.Domain.UnitTests.Helpers;
+using LearningRemovedEvent = SFA.DAS.Learning.Domain.Events.LearningRemovedEvent;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
 
@@ -32,6 +32,35 @@ public class WhenRemovingApprenticeship
 
         // Assert
         learning.LatestEpisode.IsRemoved.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndTheEpisodeIsApproved_ThenALearningRemovedEventIsRaised()
+    {
+        // Arrange
+        (var learning, _) = CreateLearner(new List<ApprenticeshipLearningSupport>(), new List<EpisodeBreakInLearning>(), isApproved: true);
+
+        // Act
+        learning.RemoveLearner();
+
+        // Assert
+        var removedEvent = learning.FlushEvents().OfType<LearningRemovedEvent>().Should().ContainSingle().Subject;
+        removedEvent.LearningKey.Should().Be(learning.Key);
+        removedEvent.ApprenticeshipId.Should().Be(learning.LatestEpisode.ApprovalsApprenticeshipId);
+    }
+
+    [Test]
+    public void AndTheEpisodeIsAnUnapprovedDraft_ThenItIsRemovedButNoLearningRemovedEventIsRaised()
+    {
+        // Arrange - Approvals has no record of a draft (ApprovalsApprenticeshipId is 0), so must not be told about its removal
+        (var learning, _) = CreateLearner(new List<ApprenticeshipLearningSupport>(), new List<EpisodeBreakInLearning>(), isApproved: false);
+
+        // Act
+        learning.RemoveLearner();
+
+        // Assert
+        learning.LatestEpisode.IsRemoved.Should().BeTrue();
+        learning.FlushEvents().OfType<LearningRemovedEvent>().Should().BeEmpty();
     }
 
     [Test]
@@ -135,7 +164,8 @@ public class WhenRemovingApprenticeship
 
     private (ApprenticeshipLearningDomainModel, LearnerDomainModel) CreateLearner(
         List<ApprenticeshipLearningSupport> learningSupport,
-        List<EpisodeBreakInLearning> breaks)
+        List<EpisodeBreakInLearning> breaks,
+        bool isApproved = true)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
 
@@ -143,6 +173,7 @@ public class WhenRemovingApprenticeship
         episode.LearningKey = entity.Key;
         episode.PauseDate = null;
         episode.WithdrawalDate = null;
+        episode.IsApproved = isApproved;
 
         episode.LearningSupport = new List<ApprenticeshipLearningSupport>();
         foreach (var support in learningSupport)

@@ -31,6 +31,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     {
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
+            .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
@@ -43,6 +44,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     {
         var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
+            .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
@@ -58,6 +60,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     {
         var query = DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
+            .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
@@ -78,6 +81,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
     {
         var apprenticeships = await DbContext.ApprenticeshipLearningDbSet
             .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.BreaksInLearning)
+            .Include(x => x.EnglishAndMathsCourses).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
