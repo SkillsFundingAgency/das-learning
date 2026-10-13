@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.DataAccess;
 using SFA.DAS.Learning.DataAccess.Extensions;
-using SFA.DAS.Learning.Domain.Extensions;
-using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Queries.GetLearningsWithEpisodes;
 
@@ -14,9 +12,11 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
 {
     public async Task<GetLearningsWithEpisodesResponse?> Handle(GetLearningsWithEpisodesRequest query, CancellationToken cancellationToken = default)
     {
+        var keyCount = query.LearningKeys.Count;
+
         logger.LogInformation(
-            "Handling GetLearningsWithEpisodesRequest for Ukprn: {ukprn} with {keyCount} learning keys",
-            query.Ukprn, query.LearningKeys.Count);
+            "Handling GetLearningsWithEpisodesRequest for Ukprn: {Ukprn} with {KeyCount} learning keys",
+            query.Ukprn, keyCount);
 
         try
         {
@@ -31,7 +31,7 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
 
             if (!apprenticeships.Any())
             {
-                logger.LogInformation("No learnings found for {ukprn} from {keyCount} learning keys", query.Ukprn, query.LearningKeys.Count);
+                logger.LogInformation("No learnings found for {Ukprn} from {KeyCount} learning keys", query.Ukprn, keyCount);
                 return null;
             }
 
@@ -52,7 +52,7 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
                     apprenticeship.GetEpisode().CompletionDate);
             }).ToList();
 
-            logger.LogInformation("{numberFound} apprenticeships found for {ukprn} from {keyCount} learning keys", data.Count, query.Ukprn, query.LearningKeys.Count);
+            logger.LogInformation("{NumberFound} apprenticeships found for {Ukprn} from {KeyCount} learning keys", data.Count, query.Ukprn, keyCount);
 
             return new GetLearningsWithEpisodesResponse { Items = data };
         }
