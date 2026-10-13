@@ -386,8 +386,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             }
         }
 
-        // Snapshot as values: existing price rows are updated in place
-        var previousPrices = PricesAsJson();
+        var previousPrices = PricesAsJson(); // Snapshot values before update
 
         var hasChanged = LatestEpisode.UpdatePricesIfChanged(costs);
 
