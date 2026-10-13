@@ -11,7 +11,6 @@ using SFA.DAS.Learning.Domain.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SFA.DAS.Learning.Command.UnitTests.RemoveLearning;
@@ -59,6 +58,7 @@ public class WhenRemovingLearner
         {
             x.WithdrawalDate = null;
             x.IsRemoved = false;
+            x.IsApproved = true;
             x.CompletionDate = null;
             x.Prices = [new DataAccess.Entities.Learning.EpisodePrice { Key = Guid.NewGuid(), StartDate = InAcademicYearStartDate, EndDate = InAcademicYearEndDate, TotalPrice = 1000 }];
             configureEpisode?.Invoke(x);

@@ -56,7 +56,7 @@ public class GetFm36LearnersStepDefinitions
         if (withdrawalDate.DateTime.HasValue)
         {
             var updateRequest = _scenarioContext.GetUpdateLearnerRequest();
-            updateRequest.Delivery.WithdrawalDate = withdrawalDate.DateTime;
+            updateRequest.OnProgramme.WithdrawalDate = withdrawalDate.DateTime;
         }
     }
 

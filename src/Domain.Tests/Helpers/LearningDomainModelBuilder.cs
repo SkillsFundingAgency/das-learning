@@ -54,6 +54,7 @@ public class LearningDomainModelBuilder
         episode.Prices.Clear();
         episode.LearningSupport.Clear();
         episode.IsRemoved = false;
+        episode.IsApproved = true;
         episode.CompletionDate = episode.CompletionDate?.Date;
         episode.AchievementDate = null;
 

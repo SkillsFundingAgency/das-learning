@@ -12,11 +12,7 @@ internal static class ApprenticeshipCreatedEventExtensions
 
         var request = new UpdateLearnerRequest
         {
-            Delivery = new Delivery
-            {
-                WithdrawalDate = null,
-                TrainingCode = apprenticeshipCreatedEvent.TrainingCode
-            },
+            Delivery = new Delivery(),
             Learner = new ApprenticeshipLearnerUpdateDetails
             {
                 FirstName = apprenticeshipCreatedEvent.FirstName,
@@ -27,10 +23,12 @@ internal static class ApprenticeshipCreatedEventExtensions
                 Care = new CareDetails(),
                 Uln = long.Parse(apprenticeshipCreatedEvent.Uln)
             },
-            LearningSupport = new List<LearningSupportDetails>(),
             EnglishAndMathsCourses = new List<EnglishAndMaths>(),
             OnProgramme = new OnProgrammeDetails
             {
+                WithdrawalDate = null,
+                TrainingCode = apprenticeshipCreatedEvent.TrainingCode,
+                LearningSupport = new List<LearningSupportDetails>(),
                 Costs = new List<Cost>
                 {
                     new Cost
