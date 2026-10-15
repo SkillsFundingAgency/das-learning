@@ -377,10 +377,15 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         if (updateModel.OnProgrammeDetails.WithdrawalDate.HasValue)
         {
-            if (updateModel.OnProgrammeDetails.WithdrawalDate == latestEpisode.WithdrawalDate) return;
+            var withdrawalDateUnchanged = updateModel.OnProgrammeDetails.WithdrawalDate == latestEpisode.WithdrawalDate;
+            var withdrawalReasonUnchanged = updateModel.OnProgrammeDetails.WithdrawalReasonCode == latestEpisode.WithdrawalReason;
 
-            latestEpisode.Withdraw(updateModel.OnProgrammeDetails.WithdrawalDate.Value);
-            changes.Add(LearningUpdateChanges.Withdrawal);
+            if (withdrawalDateUnchanged && withdrawalReasonUnchanged) return;
+
+            latestEpisode.Withdraw(updateModel.OnProgrammeDetails.WithdrawalDate.Value, updateModel.OnProgrammeDetails.WithdrawalReasonCode);
+
+            // a reason-only change must still update Approvals, but doesn't affect earnings, so it is reported separately
+            changes.Add(withdrawalDateUnchanged ? LearningUpdateChanges.WithdrawalReasonChanged : LearningUpdateChanges.Withdrawal);
 
             if (!latestEpisode.IsApproved) return;
 
@@ -389,7 +394,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 LastDayOfLearning = updateModel.OnProgrammeDetails.WithdrawalDate.Value,
-                WithdrawalReasonCode = 0, //to be populated in a future story (FLP-1881)
+                WithdrawalReasonCode = updateModel.OnProgrammeDetails.WithdrawalReasonCode ?? 0,
                 Created = DateTime.UtcNow,
                 EmployerAccountId = LatestEpisode.EmployerAccountId ?? 0
             };

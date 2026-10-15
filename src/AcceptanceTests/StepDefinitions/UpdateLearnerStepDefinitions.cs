@@ -43,6 +43,11 @@ public class UpdateLearnerStepDefinitions
                 case "WithdrawalDate":
                     updateRequest.OnProgramme.WithdrawalDate = TokenisableDateTime.FromString(valueString).DateTime;
                     break;
+                case "WithdrawalReasonCode":
+                    updateRequest.OnProgramme.WithdrawalReasonCode = valueString.Equals("null", StringComparison.OrdinalIgnoreCase)
+                        ? null
+                        : short.Parse(valueString);
+                    break;
                 case "EnglishAndMaths":
                     updateRequest.EnglishAndMathsCourses = GetEnglishAndMathsFromString(valueString);
                     break;
@@ -103,7 +108,10 @@ public class UpdateLearnerStepDefinitions
     {
         await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
         var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
-        learning.Episodes.First().WithdrawalDate = withdrawDate.DateTime;
+        var episode = learning.Episodes.First();
+
+        episode.WithdrawalDate.Should().Be(withdrawDate.DateTime);
+        episode.WithdrawalReason.Should().Be(_scenarioContext.GetUpdateLearnerRequest().OnProgramme.WithdrawalReasonCode);
     }
 
     [Then(@"the Earnings for the Learning are recalculated")]
@@ -329,6 +337,16 @@ public class UpdateLearnerStepDefinitions
         await WaitHelper.WaitForIt(() =>
             _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Any(),
             $"Failed to find published {nameof(LearningWithdrawnEvent)} event");
+
+        var onProgramme = _scenarioContext.GetUpdateLearnerRequest().OnProgramme;
+        var withdrawnEvent = _testContext.MessageSession.ReceivedEvents<LearningWithdrawnEvent>().Last();
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        withdrawnEvent.LearningKey.Should().Be(dbConnection.GetLearningKey(_scenarioContext.GetApprenticeshipCreatedEvent().Uln));
+        withdrawnEvent.WithdrawalDate.Should().Be(onProgramme.WithdrawalDate);
+        // the event uses 0 when no reason code was supplied
+        withdrawnEvent.WithdrawalReasonCode.Should().Be(onProgramme.WithdrawalReasonCode ?? 0);
+        withdrawnEvent.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(1));
     }
 
     [Then(@"an LearningWithdrawnEvent is not sent")]
