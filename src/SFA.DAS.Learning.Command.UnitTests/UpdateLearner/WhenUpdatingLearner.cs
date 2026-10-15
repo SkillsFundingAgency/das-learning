@@ -152,6 +152,265 @@ public class WhenUpdatingLearner
         // the first call is to make sure the data in the domain model is up to date before the update, that way there should be no changes detected
     }
 
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenTheResultIncludesTheApprovalsApprenticeshipIdAndApprovalStateWhenThereAreChanges(bool isApproved)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = isApproved;
+            x.ApprovalsApprenticeshipId = 12345;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().NotBeEmpty();
+        result.ApprovalsApprenticeshipId.Should().Be(12345);
+        result.IsApproved.Should().Be(isApproved);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenTheResultReportsTheStartDateChangeAsNeedingApprovalOnlyForAnApprovedEpisode(bool isApproved)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = isApproved;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().Contain(LearningUpdateChanges.StartDate);
+        result.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.StartDate)
+            .RequiresApproval.Should().Be(isApproved);
+        result.ChangeDetails.Where(x => x.ChangeType != LearningUpdateChanges.StartDate)
+            .Should().OnlyContain(x => !x.RequiresApproval);
+    }
+
+    [Test]
+    public async Task ThenTheResultChangesAreTheChangeTypesOfTheChangeDetailsIncludingTheLearnersChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.ChangeDetails.Should().NotBeEmpty();
+        result.Changes.Should().Equal(result.ChangeDetails.Select(x => x.ChangeType));
+        result.ChangeDetails.Select(x => x.ChangeType)
+            .Should().Contain(learningDomainModel.ChangeDetails.Select(x => x.ChangeType));
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenTheResultIncludesTheApprovalsApprenticeshipIdAndApprovalStateWhenThereAreNoChanges(bool isApproved)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.OnProgrammeDetails.LearningSupport.Clear();
+        command.UpdateModel.EnglishAndMathsCourses.Clear();
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = isApproved;
+            x.ApprovalsApprenticeshipId = 12345;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().BeEmpty();
+        result.ApprovalsApprenticeshipId.Should().Be(12345);
+        result.IsApproved.Should().Be(isApproved);
+        result.ChangeDetails.Should().BeEmpty();
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenTheResultIncludesWhetherTheEpisodeStillNeedsFurtherApprovalWhenThereAreNoChanges(bool furtherApprovalNeeded)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.OnProgrammeDetails.LearningSupport.Clear();
+        command.UpdateModel.EnglishAndMathsCourses.Clear();
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        // Unapproved, so that bringing the model up to date below does not itself set the flag
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = false;
+            x.FurtherApprovalNeeded = furtherApprovalNeeded;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().BeEmpty();
+        result.FurtherApprovalNeeded.Should().Be(furtherApprovalNeeded);
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task ThenTheResultIncludesWhetherTheEpisodeNeedsFurtherApprovalWhenThereAreChanges(bool isApproved)
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x =>
+        {
+            x.IsRemoved = false;
+            x.IsApproved = isApproved;
+            x.FurtherApprovalNeeded = false;
+        });
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert: the start date change sets the flag on an approved episode only
+        result.Changes.Should().Contain(LearningUpdateChanges.StartDate);
+        result.FurtherApprovalNeeded.Should().Be(isApproved);
+    }
+
+    [Test]
+    public async Task ThenTheResultIncludesTheLearningTypeSuppliedOnTheUpdateWhenThereAreChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.Delivery.LearningType = LearningType.FoundationApprenticeship;
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().NotBeEmpty();
+        result.LearningType.Should().Be(LearningType.FoundationApprenticeship);
+    }
+
+    [Test]
+    public async Task ThenTheResultIncludesTheStoredLearningTypeWhenTheUpdateDoesNotSupplyOne()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.Delivery.LearningType = null;
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+        var storedLearningType = learningDomainModel.LearningType;
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.LearningType.Should().Be(storedLearningType);
+    }
+
+    [Test]
+    public async Task ThenTheResultIncludesTheLearningTypeWhenThereAreNoChanges()
+    {
+        // Arrange
+        var command = _fixture.Create<UpdateLearnerCommand>();
+        command.UpdateModel.OnProgrammeDetails.LearningSupport.Clear();
+        command.UpdateModel.EnglishAndMathsCourses.Clear();
+        command.UpdateModel.Delivery.LearningType = LearningType.FoundationApprenticeship;
+
+        var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
+        var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
+
+        var episode = _fixture.CreateEpisodeDomainModel(x => x.IsRemoved = false);
+        TestHelper.SetEpisode(learningDomainModel, episode);
+
+        _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
+            .ReturnsAsync(learnerDomainModel);
+        SetupLearningLookup(command, learningDomainModel);
+
+        _ = learningDomainModel.Update(command.UpdateModel);
+        _ = learnerDomainModel.Update(command.UpdateModel);
+
+        // Act
+        var result = await _commandHandler.Handle(command);
+
+        // Assert
+        result.Changes.Should().BeEmpty();
+        result.LearningType.Should().Be(LearningType.FoundationApprenticeship);
+    }
+
     [Test]
     public async Task ThenARemovedApprenticeshipIsReinstatedOnUpdate()
     {

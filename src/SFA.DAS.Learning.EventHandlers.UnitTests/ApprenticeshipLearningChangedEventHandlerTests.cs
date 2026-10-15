@@ -1,4 +1,6 @@
 using AutoFixture;
+using FluentAssertions;
+using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
@@ -44,22 +46,23 @@ public class ApprenticeshipLearningChangedEventHandlerTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _handler.Handle(domainEvent, default);
+        await _handler.Handle(domainEvent, CancellationToken.None);
 
         // Assert
         _repository.Verify(x => x.Add(It.IsAny<ApprenticeshipLearningHistory>()), Times.Once);
 
-        Assert.That(capturedHistory, Is.Not.Null);
-        Assert.That(capturedHistory!.LearningKey, Is.EqualTo(domainEvent.LearningKey));
-        Assert.That(capturedHistory.AcademicYear, Is.EqualTo(domainEvent.AcademicYear));
-        Assert.That(capturedHistory.Operation, Is.EqualTo(nameof(ApprenticeshipLearningOperation.Updated)));
-        Assert.That(capturedHistory.Changes, Does.Contain("PersonalDetails").And.Contain("Reinstated"));
+        capturedHistory.Should().NotBeNull();
 
-        // State is the aggregate Snapshot only — never the envelope fields (AcademicYear/Operation/Changes),
-        // so a diff across two history rows shows the apprenticeship's own evolution, not request-context noise.
-        Assert.That(capturedHistory.State, Does.Contain(domainEvent.Snapshot.LearningKey.ToString()));
-        Assert.That(capturedHistory.State, Does.Not.Contain(nameof(ApprenticeshipLearningChangedEvent.AcademicYear)));
-        Assert.That(capturedHistory.State, Does.Not.Contain(nameof(ApprenticeshipLearningChangedEvent.Operation)));
+        using (new AssertionScope())
+        {
+            capturedHistory!.LearningKey.Should().Be(domainEvent.LearningKey);
+            capturedHistory.AcademicYear.Should().Be(domainEvent.AcademicYear);
+            capturedHistory.Operation.Should().Be(nameof(ApprenticeshipLearningOperation.Updated));
+            capturedHistory.Changes.Should().Contain("PersonalDetails").And.Contain("Reinstated");
+            capturedHistory.State.Should().Contain(domainEvent.Snapshot.LearningKey.ToString());
+            capturedHistory.State.Should().NotContain(nameof(ApprenticeshipLearningChangedEvent.AcademicYear));
+            capturedHistory.State.Should().NotContain(nameof(ApprenticeshipLearningChangedEvent.Operation));
+        }
     }
 
     [Test]
@@ -78,10 +81,39 @@ public class ApprenticeshipLearningChangedEventHandlerTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _handler.Handle(domainEvent, default);
+        await _handler.Handle(domainEvent, CancellationToken.None);
 
         // Assert
-        Assert.That(capturedHistory, Is.Not.Null);
-        Assert.That(capturedHistory!.Changes, Is.Null);
+        capturedHistory.Should().NotBeNull();
+        capturedHistory!.Changes.Should().BeNull();
+    }
+
+    [Test]
+    public async Task Handle_WhenFurtherApprovalIsCleared_RecordsTheOperationAndTheSnapshotFlag()
+    {
+        // Arrange
+        var domainEvent = _fixture.Build<ApprenticeshipLearningChangedEvent>()
+            .With(x => x.Operation, ApprenticeshipLearningOperation.FurtherApproved)
+            .With(x => x.Changes, new List<LearningUpdateChanges>())
+            .Create();
+        domainEvent.Snapshot.Episodes.ForEach(e => e.FurtherApprovalNeeded = false);
+
+        ApprenticeshipLearningHistory? capturedHistory = null;
+        _repository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningHistory>()))
+            .Callback<ApprenticeshipLearningHistory>(h => capturedHistory = h)
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _handler.Handle(domainEvent, CancellationToken.None);
+
+        // Assert
+        capturedHistory.Should().NotBeNull();
+
+        using (new AssertionScope())
+        {
+            capturedHistory!.Operation.Should().Be("FurtherApproved");
+            capturedHistory.State.Should().Contain("\"FurtherApprovalNeeded\": false");
+        }
     }
 }
