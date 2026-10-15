@@ -67,6 +67,7 @@ public class WhenUpdatingWithdrawalDate
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.ReverseWithdrawal);
         domainModel.Episodes.First().WithdrawalDate.Should().Be(null);
+        domainModel.Episodes.First().WithdrawalReason.Should().BeNull();
         domainModel.FlushEvents().Should().ContainEquivalentOf(new WithdrawalRevertedEvent
         {
             ApprovalsApprenticeshipId = domainModel.LatestEpisode.ApprovalsApprenticeshipId,
@@ -79,8 +80,9 @@ public class WhenUpdatingWithdrawalDate
     {
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
+        var withdrawalReasonCode = _fixture.Create<short>();
         var domainModel = GetLearningDomainModel(withdrawalDate.AddDays(30));
-        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
+        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate, withdrawalReasonCode);
 
         //Act
         var result = domainModel.Update(updateModel);
@@ -88,10 +90,44 @@ public class WhenUpdatingWithdrawalDate
         //Assert
         result.Should().Contain(x => x == LearningUpdateChanges.Withdrawal);
         domainModel.Episodes.First().WithdrawalDate.Should().Be(withdrawalDate);
+        domainModel.Episodes.First().WithdrawalReason.Should().Be(withdrawalReasonCode);
 
         var withdrawnEvent = domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Single();
-        withdrawnEvent.WithdrawalReasonCode.Should().Be(0);
+        withdrawnEvent.WithdrawalReasonCode.Should().Be(withdrawalReasonCode);
         withdrawnEvent.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
+    }
+
+    [Test]
+    public void AndWithdrawalDateProvidedWithoutReason_ThenReasonIsNullAndEventReasonIsZero()
+    {
+        //Arrange
+        var withdrawalDate = _fixture.Create<DateTime>();
+        var domainModel = GetLearningDomainModel(withdrawalDate.AddDays(30));
+        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate, null);
+
+        //Act
+        domainModel.Update(updateModel);
+
+        //Assert
+        domainModel.Episodes.First().WithdrawalReason.Should().BeNull();
+        domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Single().WithdrawalReasonCode.Should().Be(0);
+    }
+
+    [Test]
+    public void AndEpisodeIsNotApproved_ThenReasonIsStoredAndNoEventRaised()
+    {
+        //Arrange
+        var withdrawalDate = _fixture.Create<DateTime>();
+        var withdrawalReasonCode = _fixture.Create<short>();
+        var domainModel = GetLearningDomainModel(null, isApproved: false);
+        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate, withdrawalReasonCode);
+
+        //Act
+        domainModel.Update(updateModel);
+
+        //Assert
+        domainModel.Episodes.First().WithdrawalReason.Should().Be(withdrawalReasonCode);
+        domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Should().BeEmpty();
     }
 
     private LearnerDomainModel GetLearnerDomainModel()
@@ -100,23 +136,25 @@ public class WhenUpdatingWithdrawalDate
         return LearnerDomainModel.Get(entity);
     }
 
-    private ApprenticeshipLearningDomainModel GetLearningDomainModel(DateTime? withdrawalDate)
+    private ApprenticeshipLearningDomainModel GetLearningDomainModel(DateTime? withdrawalDate, bool isApproved = true)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
 
         episode.WithdrawalDate = withdrawalDate;
-        episode.IsApproved = true;
+        episode.WithdrawalReason = withdrawalDate.HasValue ? _fixture.Create<short>() : null;
+        episode.IsApproved = isApproved;
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
         return ApprenticeshipLearningDomainModel.Get(entity);
     }
 
-    private LearningUpdateContext GetLearnerUpdateModel(ApprenticeshipLearningDomainModel domainModel, DateTime? withdrawalDate)
+    private LearningUpdateContext GetLearnerUpdateModel(ApprenticeshipLearningDomainModel domainModel, DateTime? withdrawalDate, short? withdrawalReasonCode = null)
     {
         var learnerDomainModel = GetLearnerDomainModel();
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(domainModel.GetEntity(), learnerDomainModel.GetEntity());
         updateModel.OnProgrammeDetails.WithdrawalDate = withdrawalDate;
+        updateModel.OnProgrammeDetails.WithdrawalReasonCode = withdrawalReasonCode;
         return updateModel;
     }
 }

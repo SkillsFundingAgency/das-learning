@@ -111,6 +111,11 @@ public class OnProgrammeDetails
     public DateTime? WithdrawalDate { get; set; }
 
     /// <summary>
+    /// Reason code for the withdrawal, only relevant when a WithdrawalDate is supplied
+    /// </summary>
+    public short? WithdrawalReasonCode { get; set; }
+
+    /// <summary>
     /// Training code for the apprenticeship's course
     /// </summary>
     public string TrainingCode { get; set; }
@@ -322,7 +327,8 @@ public static class CreateDraftApprenticeshipExtensions
                         StartDate = x.StartDate,
                         EndDate = x.EndDate
                     }),
-                WithdrawalDate = request.OnProgramme.WithdrawalDate
+                WithdrawalDate = request.OnProgramme.WithdrawalDate,
+                WithdrawalReasonCode = request.OnProgramme.WithdrawalReasonCode
             }
         };
     }

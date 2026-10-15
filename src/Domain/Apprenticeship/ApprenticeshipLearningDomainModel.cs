@@ -379,7 +379,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         {
             if (updateModel.OnProgrammeDetails.WithdrawalDate == latestEpisode.WithdrawalDate) return;
 
-            latestEpisode.Withdraw(updateModel.OnProgrammeDetails.WithdrawalDate.Value);
+            latestEpisode.Withdraw(updateModel.OnProgrammeDetails.WithdrawalDate.Value, updateModel.OnProgrammeDetails.WithdrawalReasonCode);
             changes.Add(LearningUpdateChanges.Withdrawal);
 
             if (!latestEpisode.IsApproved) return;
@@ -389,7 +389,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
                 LearningKey = Key,
                 ApprovalsApprenticeshipId = LatestEpisode.ApprovalsApprenticeshipId,
                 LastDayOfLearning = updateModel.OnProgrammeDetails.WithdrawalDate.Value,
-                WithdrawalReasonCode = 0, //to be populated in a future story (FLP-1881)
+                WithdrawalReasonCode = updateModel.OnProgrammeDetails.WithdrawalReasonCode ?? 0,
                 Created = DateTime.UtcNow,
                 EmployerAccountId = LatestEpisode.EmployerAccountId ?? 0
             };

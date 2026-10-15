@@ -186,6 +186,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
                 Cost = cost,
                 ExpectedEndDate = updateModel.OnProgrammeDetails.ExpectedEndDate,
                 WithdrawalDate = updateModel.OnProgrammeDetails.WithdrawalDate,
+                WithdrawalReason = updateModel.OnProgrammeDetails.WithdrawalReasonCode,
                 CompletionDate = updateModel.Learning.CompletionDate?.Date,
                 AchievementDate = updateModel.OnProgrammeDetails.AchievementDate,
                 PauseDate = updateModel.OnProgrammeDetails.PauseDate,

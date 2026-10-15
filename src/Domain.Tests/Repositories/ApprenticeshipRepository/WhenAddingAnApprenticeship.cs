@@ -67,6 +67,7 @@ public class WhenAddingAnApprenticeship
             .With(x => x.Prices, new List<EpisodePrice>(){ episodePrice })
             .With(x => x.PaymentsFrozen, false)
             .With(x => x.WithdrawalDate, (DateTime?)null)
+            .With(x => x.WithdrawalReason, (short?)null)
             .With(x => x.PauseDate, (DateTime?)null)
             .Create());
 
