@@ -32,6 +32,25 @@ Scenario: Identical Withdrawal requests do not result in Earnings recalculation
 		| Change     |
 	And the learning history is maintained
 
+Scenario: Only the withdrawal reason changes on an existing withdrawal
+	Given There is an apprenticeship with the following details
+		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
+		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
+	And an update request has the following data
+		| Property             | Value           |
+		| WithdrawalReasonCode | 43              |
+	And SLD have previously informed us that the learner was withdrawn on currentAY-11-25
+	And an update request has the following data
+		| Property             | Value |
+		| WithdrawalReasonCode | 44    |
+	When the update request is sent
+	Then the “last day of learning” for the Learning is set to currentAY-11-25
+	And an LearningWithdrawnEvent is sent
+	And the following changes are returned
+		| Change                  |
+		| WithdrawalReasonChanged |
+	And the learning history is maintained
+
 Scenario: Apprentice Withdrawn following previous removal
 	Given There is an apprenticeship with the following details
 		| StartDate       | EndDate      | TrainingPrice | EpaPrice |

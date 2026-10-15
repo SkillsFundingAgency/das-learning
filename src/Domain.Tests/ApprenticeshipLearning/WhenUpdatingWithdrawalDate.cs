@@ -38,19 +38,61 @@ public class WhenUpdatingWithdrawalDate
     }
 
     [Test]
-    public void AndSameWithdrawalDateProvided_ThenNoChangeMade()
+    public void AndSameWithdrawalDateAndReasonProvided_ThenNoChangeMade()
     {
         //Arrange
         var withdrawalDate = _fixture.Create<DateTime>();
         var domainModel = GetLearningDomainModel(withdrawalDate);
-        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate);
+        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate, domainModel.LatestEpisode.WithdrawalReason);
 
         //Act
         var result = domainModel.Update(updateModel);
 
         //Assert
         result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
+        result.Should().NotContain(x => x == LearningUpdateChanges.WithdrawalReasonChanged);
         domainModel.Episodes.First().WithdrawalDate.Should().Be(withdrawalDate);
+        domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Should().BeEmpty();
+    }
+
+    [Test]
+    public void AndOnlyWithdrawalReasonChanged_ThenReasonUpdatedAndEventRaised()
+    {
+        //Arrange
+        var withdrawalDate = _fixture.Create<DateTime>();
+        var domainModel = GetLearningDomainModel(withdrawalDate);
+        var newReasonCode = (short)(domainModel.LatestEpisode.WithdrawalReason!.Value == 43 ? 44 : 43);
+        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate, newReasonCode);
+
+        //Act
+        var result = domainModel.Update(updateModel);
+
+        //Assert
+        result.Should().Contain(x => x == LearningUpdateChanges.WithdrawalReasonChanged);
+        result.Should().NotContain(x => x == LearningUpdateChanges.Withdrawal);
+        domainModel.Episodes.First().WithdrawalDate.Should().Be(withdrawalDate);
+        domainModel.Episodes.First().WithdrawalReason.Should().Be(newReasonCode);
+
+        var withdrawnEvent = domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Single();
+        withdrawnEvent.WithdrawalReasonCode.Should().Be(newReasonCode);
+        withdrawnEvent.LastDayOfLearning.Should().Be(withdrawalDate);
+    }
+
+    [Test]
+    public void AndOnlyWithdrawalReasonChangedOnUnapprovedEpisode_ThenReasonUpdatedAndNoEventRaised()
+    {
+        //Arrange
+        var withdrawalDate = _fixture.Create<DateTime>();
+        var domainModel = GetLearningDomainModel(withdrawalDate, isApproved: false);
+        var newReasonCode = (short)(domainModel.LatestEpisode.WithdrawalReason!.Value == 43 ? 44 : 43);
+        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate, newReasonCode);
+
+        //Act
+        domainModel.Update(updateModel);
+
+        //Assert
+        domainModel.Episodes.First().WithdrawalReason.Should().Be(newReasonCode);
+        domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Should().BeEmpty();
     }
 
     [Test]

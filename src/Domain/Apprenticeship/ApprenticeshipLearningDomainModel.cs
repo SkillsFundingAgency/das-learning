@@ -377,10 +377,15 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         if (updateModel.OnProgrammeDetails.WithdrawalDate.HasValue)
         {
-            if (updateModel.OnProgrammeDetails.WithdrawalDate == latestEpisode.WithdrawalDate) return;
+            var withdrawalDateUnchanged = updateModel.OnProgrammeDetails.WithdrawalDate == latestEpisode.WithdrawalDate;
+            var withdrawalReasonUnchanged = updateModel.OnProgrammeDetails.WithdrawalReasonCode == latestEpisode.WithdrawalReason;
+
+            if (withdrawalDateUnchanged && withdrawalReasonUnchanged) return;
 
             latestEpisode.Withdraw(updateModel.OnProgrammeDetails.WithdrawalDate.Value, updateModel.OnProgrammeDetails.WithdrawalReasonCode);
-            changes.Add(LearningUpdateChanges.Withdrawal);
+
+            // a reason-only change must still update Approvals, but doesn't affect earnings, so it is reported separately
+            changes.Add(withdrawalDateUnchanged ? LearningUpdateChanges.WithdrawalReasonChanged : LearningUpdateChanges.Withdrawal);
 
             if (!latestEpisode.IsApproved) return;
 
