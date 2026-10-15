@@ -34,6 +34,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public bool IsRemoved => _entity.IsRemoved;
     public bool FurtherApprovalNeeded => _entity.FurtherApprovalNeeded;
     public DateTime? WithdrawalDate => _entity.WithdrawalDate;
+    public short? WithdrawalReason => _entity.WithdrawalReason;
     public DateTime? PauseDate => _entity.PauseDate;
     public IReadOnlyCollection<ApprenticeshipLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ApprenticeshipLearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
@@ -128,6 +129,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             EmployerType = EmployerType.Levy,
             IsApproved = false,
             WithdrawalDate = details.WithdrawalDate,
+            WithdrawalReason = details.WithdrawalReason,
             CompletionDate = details.CompletionDate,
             AchievementDate = details.AchievementDate,
             PauseDate = details.PauseDate,
@@ -393,14 +395,16 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
         return new ApprenticeshipEpisodeDomainModel(entity);
     }
 
-    internal void Withdraw(DateTime withdrawalDate)
+    internal void Withdraw(DateTime withdrawalDate, short? withdrawalReason)
     {
         _entity.WithdrawalDate = withdrawalDate;
+        _entity.WithdrawalReason = withdrawalReason;
     }
 
     internal void ReverseWithdrawal()
     {
         _entity.WithdrawalDate = null;
+        _entity.WithdrawalReason = null;
     }
 
     public void Remove()

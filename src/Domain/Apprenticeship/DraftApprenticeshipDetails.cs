@@ -18,6 +18,7 @@ public class DraftApprenticeshipDetails
     public required DateTime ExpectedEndDate { get; init; }
 
     public DateTime? WithdrawalDate { get; init; }
+    public short? WithdrawalReason { get; init; }
     public DateTime? CompletionDate { get; init; }
     public DateTime? AchievementDate { get; init; }
     public DateTime? PauseDate { get; init; }

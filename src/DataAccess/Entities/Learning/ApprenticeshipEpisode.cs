@@ -24,6 +24,7 @@ public class ApprenticeshipEpisode : Episode
     public bool FurtherApprovalNeeded { get; set; }
     public List<EpisodePrice> Prices { get; set; }
     public DateTime? WithdrawalDate { get; set; }
+    public short? WithdrawalReason { get; set; }
     public DateTime? PauseDate { get; set; }
     public DateTime? CompletionDate { get; set; }
     public DateTime? AchievementDate { get; set; }
