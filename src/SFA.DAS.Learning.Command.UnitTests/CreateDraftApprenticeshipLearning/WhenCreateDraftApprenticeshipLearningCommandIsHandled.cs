@@ -444,6 +444,108 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_A_Reinstatement_With_A_Start_Date_Change_Returns_A_Change_Requiring_Approval()
+    {
+        // Arrange
+        var command = CreateCommand(); // costs start 2025-08-01
+        var learner = CreateLearner();
+        var removedLearning = CreateLearning(isApproved: true, isRemoved: true, startDate: new DateTime(2025, 9, 1));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { removedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        var startDateChange = result!.ChangeDetails.Should().ContainSingle(x => x.ChangeType == LearningUpdateChanges.StartDate).Subject;
+        startDateChange.RequiresApproval.Should().BeTrue();
+        startDateChange.Old!.GetValue<string>().Should().Be("2025-09-01");
+        startDateChange.New!.GetValue<string>().Should().Be("2025-08-01");
+        result.FurtherApprovalNeeded.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Then_A_Reinstatement_Returns_The_Episode_Details_Needed_To_Ask_Approvals()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var removedLearning = CreateLearning(isApproved: true, isRemoved: true, startDate: new DateTime(2025, 9, 1));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { removedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.ApprovalsApprenticeshipId.Should().Be(removedLearning.LatestEpisode.ApprovalsApprenticeshipId);
+        result.LearningType.Should().Be(removedLearning.LearningType);
+        result.IsApproved.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Then_A_Draft_Upsert_With_A_Start_Date_Change_Does_Not_Require_Approval()
+    {
+        // Arrange
+        var command = CreateCommand(); // costs start 2025-08-01
+        var learner = CreateLearner();
+        var unapprovedLearning = CreateLearning(isApproved: false, startDate: new DateTime(2025, 9, 1));
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { unapprovedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.ChangeDetails.Should().Contain(x => x.ChangeType == LearningUpdateChanges.StartDate);
+        result.ChangeDetails.Should().NotContain(x => x.RequiresApproval);
+        result.FurtherApprovalNeeded.Should().BeFalse();
+        result.IsApproved.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task Then_A_New_Draft_Does_Not_Require_Approval()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.ChangeDetails.Should().NotContain(x => x.RequiresApproval);
+        result.FurtherApprovalNeeded.Should().BeFalse();
+        result.IsApproved.Should().BeFalse();
+    }
+
+    [Test]
     public async Task Then_New_Learning_Is_Created_When_Multiple_Removed_And_Approved_Learnings_Exist()
     {
         // Arrange
