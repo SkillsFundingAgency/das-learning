@@ -2,6 +2,7 @@
 using SFA.DAS.Learning.Command.UpdateLearner;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
+using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
@@ -49,7 +50,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
             var createResult = await CreateDraftLearning(command, learner);
             createResult.RemovedLearningKey = removedLearningKey;
 
-            if (isNewApprenticeshipLearner) createResult.Changes.Add(LearningUpdateChanges.NewApprenticeshipLearner);
+            if (isNewApprenticeshipLearner) createResult.ChangeDetails.Add(LearningUpdateChanges.NewApprenticeshipLearner);
 
             _logger.LogInformation("Successfully created draft learning with key {LearningKey}", createResult.LearningKey);
             return createResult;
@@ -79,15 +80,36 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         _logger.LogInformation("Successfully updated learning with key {LearningKey}", existingLearning.Key);
 
+        // a reinstatement can carry changes that need further approval, so the change details and flag go back to the caller
+        var changeDetails = existingLearning.ChangeDetails
+            .Select(x => (UpdateLearnerResult.Change)x)
+            .Concat(learnerChanges.Select(x => (UpdateLearnerResult.Change)x))
+            .ToList();
+        if (isNewApprenticeshipLearner) changeDetails.Add(LearningUpdateChanges.NewApprenticeshipLearner);
+
+        var result = BuildResult(existingLearning, learner, changeDetails);
+        result.RemovedLearningKey = removedLearningKey;
+        return result;
+    }
+
+    private static CreateDraftApprenticeshipLearningCommandResult BuildResult(
+        ApprenticeshipLearningDomainModel learning,
+        LearnerDomainModel learner,
+        List<UpdateLearnerResult.Change> changeDetails)
+    {
         return new CreateDraftApprenticeshipLearningCommandResult
         {
-            Changes = changes,
-            LearningKey = existingLearning.Key,
-            LearningEpisodeKey = existingLearning.LatestEpisode.Key,
-            Prices = existingLearning.LatestEpisode.EpisodePrices
+            ChangeDetails = changeDetails,
+            AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
+            LearningKey = learning.Key,
+            LearningEpisodeKey = learning.LatestEpisode.Key,
+            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
+            IsApproved = learning.LatestEpisode.IsApproved,
+            FurtherApprovalNeeded = learning.LatestEpisode.FurtherApprovalNeeded,
+            LearningType = learning.LearningType,
+            Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
-                .ToList(),
-            RemovedLearningKey = removedLearningKey
+                .ToList()
         };
     }
 
@@ -207,14 +229,6 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
 
         await _apprenticeshipLearningRepository.Add(learning);
 
-        return new CreateDraftApprenticeshipLearningCommandResult
-        {
-            Changes = changes.ToList(),
-            LearningKey = learning.Key,
-            LearningEpisodeKey = learning.LatestEpisode.Key,
-            Prices = learning.LatestEpisode.EpisodePrices
-                .Select(x => (UpdateLearnerResult.EpisodePrice)x)
-                .ToList()
-        };
+        return BuildResult(learning, learner, changes.Select(x => (UpdateLearnerResult.Change)x).ToList());
     }
 }
