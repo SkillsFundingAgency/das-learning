@@ -35,6 +35,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
+            .AsSplitQuery()
             .SingleAsync(x => x.Key == key);
 
         return _learningFactory.GetExisting(apprenticeship);
@@ -48,6 +49,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.LearnerKey == key);
 
         if(apprenticeship == null)
@@ -64,7 +66,8 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
             .Include(x => x.Episodes).ThenInclude(y => y.Prices)
             .Include(x => x.Episodes).ThenInclude(y => y.LearningSupport)
             .Include(x => x.Episodes).ThenInclude(y => y.BreaksInLearning)
-            .Where(x => x.LearnerKey == learnerKey);
+            .Where(x => x.LearnerKey == learnerKey)
+            .AsSplitQuery();
 
         if (ukprn.HasValue)
             query = query.Where(x => x.Episodes.Any(e => e.Ukprn == ukprn.Value));
@@ -91,6 +94,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
                             e.Ukprn == ukprn &&
                             !e.IsApproved &&
                             !e.IsRemoved))
+            .AsSplitQuery()
             .ToListAsync();
 
         return apprenticeships.Select(_learningFactory.GetExisting).ToList();
