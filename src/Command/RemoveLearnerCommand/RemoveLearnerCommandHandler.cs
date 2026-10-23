@@ -8,9 +8,9 @@ namespace SFA.DAS.Learning.Command.RemoveLearnerCommand;
 public class RemoveLearnerCommandHandler(
     IApprenticeshipLearningRepository learningRepository,
     ILogger<RemoveLearnerCommandHandler> logger)
-    : ICommandHandler<RemoveLearnerCommand, List<Guid>>
+    : ICommandHandler<RemoveLearnerCommand, List<RemovedLearning>>
 {
-    public async Task<List<Guid>> Handle(RemoveLearnerCommand command, CancellationToken cancellationToken = default)
+    public async Task<List<RemovedLearning>> Handle(RemoveLearnerCommand command, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Handling RemoveLearnerCommandHandler for learner key {LearnerKey}", command.LearnerKey);
 
@@ -23,16 +23,16 @@ public class RemoveLearnerCommandHandler(
             throw new KeyNotFoundException($"Learning for learner key {command.LearnerKey} in {command.AcademicYear} AY not found.");
         }
 
-        var removedLearningKeys = new List<Guid>();
+        var removedLearnings = new List<RemovedLearning>();
 
         foreach (var learning in learningsInScope)
         {
             learning.RemoveLearner();
             learning.AddEvent(ApprenticeshipLearningChangedEvent.From(learning, command.AcademicYear, ApprenticeshipLearningOperation.Removed));
             await learningRepository.Update(learning);
-            removedLearningKeys.Add(learning.Key);
+            removedLearnings.Add(new RemovedLearning { LearningKey = learning.Key, LearnerRef = learning.LatestEpisode.LearnerRef });
         }
 
-        return removedLearningKeys;
+        return removedLearnings;
     }
 }

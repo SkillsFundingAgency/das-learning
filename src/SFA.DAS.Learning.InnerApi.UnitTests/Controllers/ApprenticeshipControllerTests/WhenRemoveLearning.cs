@@ -36,17 +36,17 @@ public class WhenRemoveLearning
     }
 
     [Test]
-    public async Task ThenReturnsRemovedLearningKeys()
+    public async Task ThenReturnsRemovedLearnings()
     {
         // Arrange
         var ukprn = _fixture.Create<long>();
         var learnerKey = _fixture.Create<Guid>();
         var academicYear = _fixture.Create<int>();
-        var removedLearningKeys = _fixture.CreateMany<Guid>(2).ToList();
+        var removedLearnings = _fixture.CreateMany<RemovedLearning>(2).ToList();
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<RemoveLearnerCommand, List<Guid>>(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(removedLearningKeys);
+            .Setup(x => x.Send<RemoveLearnerCommand, List<RemovedLearning>>(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(removedLearnings);
 
         // Act
         var result = await _sut.RemoveLearning(ukprn, learnerKey, academicYear);
@@ -54,7 +54,7 @@ public class WhenRemoveLearning
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
-        okResult.Value.Should().BeEquivalentTo(removedLearningKeys);
+        okResult.Value.Should().BeEquivalentTo(removedLearnings);
     }
 
     [Test]
@@ -66,14 +66,14 @@ public class WhenRemoveLearning
         var academicYear = _fixture.Create<int>();
 
         _mockCommandDispatcher
-            .Setup(x => x.Send<RemoveLearnerCommand, List<Guid>>(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send<RemoveLearnerCommand, List<RemovedLearning>>(It.IsAny<RemoveLearnerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         // Act
         await _sut.RemoveLearning(ukprn, learnerKey, academicYear);
 
         // Assert
-        _mockCommandDispatcher.Verify(x => x.Send<RemoveLearnerCommand, List<Guid>>(
+        _mockCommandDispatcher.Verify(x => x.Send<RemoveLearnerCommand, List<RemovedLearning>>(
             It.Is<RemoveLearnerCommand>(c => c.LearnerKey == learnerKey && c.Ukprn == ukprn && c.AcademicYear == academicYear),
             It.IsAny<CancellationToken>()), Times.Once);
     }

@@ -77,7 +77,8 @@ public static class LearningUpdateModelHelper
                     StartDate = x.StartDate,
                     EndDate = x.EndDate
                 }).ToList(),
-                WithdrawalDate = learning.GetEpisode().WithdrawalDate
+                WithdrawalDate = learning.GetEpisode().WithdrawalDate,
+                WithdrawalReasonCode = learning.GetEpisode().WithdrawalReason
             },
             Delivery = new DeliveryDetails()
         };

@@ -52,6 +52,7 @@ public class OnProgrammeDetails
     public List<BreakInLearningUpdateDetails> BreaksInLearning { get; set; }
     public List<LearningSupportDetails> LearningSupport { get; set; }
     public DateTime? WithdrawalDate { get; set; }
+    public short? WithdrawalReasonCode { get; set; }
 }
 
 public class Cost

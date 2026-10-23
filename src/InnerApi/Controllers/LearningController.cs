@@ -164,17 +164,17 @@ public class LearningController : ControllerBase
     /// <param name="ukprn">UK provider reference number. Scopes removal to learnings at this provider.</param>
     /// <param name="learnerKey">The unique identifier for the learner record to remove.</param>
     /// <param name="academicYear">Academic year in yyyy format (e.g. 2425). Scopes removal to learnings overlapping this academic year.</param>
-    /// <returns>The learning keys that were removed for the learner.</returns>
+    /// <returns>The learning keys, with the LearnerRef of each, that were removed for the learner.</returns>
     [HttpDelete("{ukprn}/{learnerKey}")]
-    [ProducesResponseType(typeof(List<Guid>), 200)]
+    [ProducesResponseType(typeof(List<RemovedLearning>), 200)]
     public async Task<IActionResult> RemoveLearning(long ukprn, Guid learnerKey, [FromQuery] int academicYear)
     {
         _logger.LogInformation("Deleting learner with key {LearnerKey}", learnerKey);
 
         var command = new RemoveLearnerCommand(learnerKey, ukprn, academicYear);
 
-        var removedLearningKeys = await _commandDispatcher.Send<RemoveLearnerCommand, List<Guid>>(command);
+        var removedLearnings = await _commandDispatcher.Send<RemoveLearnerCommand, List<RemovedLearning>>(command);
 
-        return new OkObjectResult(removedLearningKeys);
+        return new OkObjectResult(removedLearnings);
     }
 }
