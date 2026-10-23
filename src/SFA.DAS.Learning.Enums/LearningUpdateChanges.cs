@@ -24,5 +24,6 @@ public enum LearningUpdateChanges
     Reinstated = 16,
     NewApprenticeshipLearner = 17,
     EnglishAndMathsLearningSupport = 18,
-    WithdrawalReasonChanged = 19
+    WithdrawalReasonChanged = 19,
+	StartDate = 20
 }
