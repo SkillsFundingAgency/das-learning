@@ -21,6 +21,7 @@ public class WhenApplyingEmployerApproval
         (_learning, _) = new LearningDomainModelBuilder().Build();
         _episode = _learning.GetEntity().Episodes.Single();
         _episode.FurtherApprovalNeeded = true;
+        _episode.LearnerRef = "LEARNER-REF";
         _changes = [new ApprovedChange("StartDate", "2025-07-01", "2025-08-01")];
     }
 
@@ -45,6 +46,7 @@ public class WhenApplyingEmployerApproval
         raisedEvent.LearnerKey.Should().Be(_learning.LearnerKey);
         raisedEvent.LearningKey.Should().Be(_learning.Key);
         raisedEvent.EpisodeKey.Should().Be(_episode.Key);
+        raisedEvent.LearnerRef.Should().Be("LEARNER-REF");
         raisedEvent.ApprenticeshipId.Should().Be(_episode.ApprovalsApprenticeshipId);
         raisedEvent.LearningType.Should().Be(_learning.LearningType);
         raisedEvent.Changes.Should().BeEquivalentTo(_changes);

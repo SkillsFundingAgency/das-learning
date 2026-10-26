@@ -30,7 +30,8 @@ public class EmployerApprovalAppliedEventHandler(IMessageSession messageSession,
         {
             LearnerKey = @event.LearnerKey,
             LearningKey = @event.LearningKey,
-            EpisodeKey = @event.EpisodeKey
+            EpisodeKey = @event.EpisodeKey,
+            LearnerRef = @event.LearnerRef
         }, cancellationToken);
     }
 }

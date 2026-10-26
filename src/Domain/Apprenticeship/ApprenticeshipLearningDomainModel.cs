@@ -263,6 +263,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             LearnerKey = LearnerKey,
             LearningKey = Key,
             EpisodeKey = episodeKey,
+            LearnerRef = episode.LearnerRef,
             ApprenticeshipId = episode.ApprovalsApprenticeshipId,
             LearningType = LearningType,
             Changes = changes.ToList()

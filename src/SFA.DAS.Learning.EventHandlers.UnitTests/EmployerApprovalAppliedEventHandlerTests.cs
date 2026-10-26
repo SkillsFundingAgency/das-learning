@@ -23,6 +23,7 @@ public class EmployerApprovalAppliedEventHandlerTests
             LearnerKey = Guid.NewGuid(),
             LearningKey = Guid.NewGuid(),
             EpisodeKey = Guid.NewGuid(),
+            LearnerRef = "LEARNER-REF",
             ApprenticeshipId = 12345,
             LearningType = LearningType.FoundationApprenticeship,
             Changes = [new ApprovedChange("StartDate", "2025-07-01", "2025-08-01")]
@@ -58,7 +59,8 @@ public class EmployerApprovalAppliedEventHandlerTests
                 It.Is<Types.EpisodeApprovedEvent>(msg =>
                     msg.LearnerKey == _domainEvent.LearnerKey &&
                     msg.LearningKey == _domainEvent.LearningKey &&
-                    msg.EpisodeKey == _domainEvent.EpisodeKey),
+                    msg.EpisodeKey == _domainEvent.EpisodeKey &&
+                    msg.LearnerRef == _domainEvent.LearnerRef),
                 It.IsAny<PublishOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
