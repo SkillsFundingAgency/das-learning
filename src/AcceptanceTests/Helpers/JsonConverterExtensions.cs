@@ -9,7 +9,7 @@ internal static class JsonConverterExtensions
     {
         try
         {
-            return JsonConvert.DeserializeObject<T>(json);
+            return JsonConvert.DeserializeObject<T>(json, new JsonNodeNewtonsoftConverter());
         }
         catch
         {

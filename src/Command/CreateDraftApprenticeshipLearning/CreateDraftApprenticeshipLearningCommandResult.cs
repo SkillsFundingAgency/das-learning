@@ -1,15 +1,12 @@
 ﻿using SFA.DAS.Learning.Command.UpdateLearner;
-using SFA.DAS.Learning.Enums;
 
 namespace SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 
-#pragma warning disable CS8618 // Required properties must be set in the constructor
-public class CreateDraftApprenticeshipLearningCommandResult
+/// <summary>
+/// Inherits from the PUT result because a POST that reinstates a removed learning goes through the same
+/// update as a PUT, so it can make changes that need further approval.
+/// </summary>
+public class CreateDraftApprenticeshipLearningCommandResult : UpdateLearnerResult
 {
-    public List<LearningUpdateChanges> Changes { get; set; }
-    public Guid LearningKey { get; set; }
-    public Guid LearningEpisodeKey { get; set; }
-    public List<UpdateLearnerResult.EpisodePrice> Prices { get; set; }
     public Guid? RemovedLearningKey { get; set; }
 }
-#pragma warning restore CS8618 // Required properties must be set in the constructor
