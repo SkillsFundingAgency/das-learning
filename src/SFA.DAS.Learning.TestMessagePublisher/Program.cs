@@ -16,7 +16,7 @@ var fullyQualifiedNamespace = config["fullyQualifiedNamespace"];
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((_, services) =>
     {
-        services.ConfigureNServiceBusForSend(fullyQualifiedNamespace!);
+        services.ConfigureNServiceBusForSend(fullyQualifiedNamespace!, false);
     })
     .Build();
 
@@ -24,7 +24,7 @@ Console.WriteLine("Select an option...");
 Console.WriteLine("1. ApprovalCreatedEvent");
 Console.WriteLine("X. Exit");
 var choice = Console.ReadLine();
-if (choice == "1")
+if (choice == "1")              
 {
     await PublishCreatedEvent(host.Services);
 }
