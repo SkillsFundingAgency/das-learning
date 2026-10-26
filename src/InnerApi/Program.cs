@@ -62,7 +62,7 @@ public static class Program
         builder.Services.AddSingleton(x => applicationSettings);
         builder.Services.AddQueryServices();
         builder.Services.AddScoped<IPagedLinkHeaderService, PagedLinkHeaderService>();
-        builder.Services.ConfigureNServiceBusForSend(applicationSettings.NServiceBusConnectionString.GetFullyQualifiedNamespace());
+        builder.Services.ConfigureNServiceBusForSend(applicationSettings.NServiceBusConnectionString.GetFullyQualifiedNamespace(), applicationSettings.UseWebSockets);
         builder.Services.AddCommandServices(builder.Configuration).AddEventServices();
         builder.Services.AddDasHealthChecks(applicationSettings);
 

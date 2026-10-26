@@ -1,11 +1,12 @@
-﻿using Azure.Identity;
+﻿using System.Net;
+using Azure.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SFA.DAS.Learning.Infrastructure.Extensions;
 
 public static class NServiceBusExtensions
 {
-    public static void ConfigureNServiceBusForSend(this IServiceCollection services, string fullyQualifiedNamespace)
+    public static void ConfigureNServiceBusForSend(this IServiceCollection services, string fullyQualifiedNamespace, bool useWebSockets)
     {
         var endpointConfiguration = new EndpointConfiguration("SFA.DAS.Learning");
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
@@ -13,6 +14,12 @@ public static class NServiceBusExtensions
 
         var transport = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
         transport.CustomTokenCredential(fullyQualifiedNamespace, new DefaultAzureCredential());
+
+        if (useWebSockets)
+        {
+            transport.UseWebSockets();
+        }
+
         endpointConfiguration.Conventions().SetConventions();
 
         endpointConfiguration.AssemblyScanner().ScanFileSystemAssemblies = false;
