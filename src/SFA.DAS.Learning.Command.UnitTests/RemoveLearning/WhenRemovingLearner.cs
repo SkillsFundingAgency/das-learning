@@ -102,14 +102,14 @@ public class WhenRemovingLearner
             .Callback<ApprenticeshipLearningDomainModel>(m => updatedModel = m);
 
         // Act
-        var removedLearningKeys = await _commandHandler.Handle(command);
+        var removedLearnings = await _commandHandler.Handle(command);
 
         // Assert
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Once);
         updatedModel.Should().NotBeNull();
         updatedModel!.LatestEpisode.IsRemoved.Should().BeTrue();
         updatedModel.FlushEvents().OfType<LearningRemovedEvent>().Should().ContainSingle();
-        removedLearningKeys.Should().ContainSingle().Which.Should().Be(domainModel.Key);
+        removedLearnings.Should().ContainSingle().Which.LearningKey.Should().Be(domainModel.Key);
     }
 
     [Test]
@@ -232,10 +232,10 @@ public class WhenRemovingLearner
             .ReturnsAsync([inScopeLearning, outOfScopeLearning]);
 
         // Act
-        var removedLearningKeys = await _commandHandler.Handle(command);
+        var removedLearnings = await _commandHandler.Handle(command);
 
         // Assert
-        removedLearningKeys.Should().ContainSingle().Which.Should().Be(inScopeLearning.Key);
+        removedLearnings.Should().ContainSingle().Which.LearningKey.Should().Be(inScopeLearning.Key);
         inScopeLearning.LatestEpisode.IsRemoved.Should().BeTrue();
         outOfScopeLearning.LatestEpisode.IsRemoved.Should().BeFalse();
         _learningRepository.Verify(x => x.Update(inScopeLearning), Times.Once);
@@ -296,13 +296,33 @@ public class WhenRemovingLearner
             .ReturnsAsync([firstLearning, secondLearning]);
 
         // Act
-        var removedLearningKeys = await _commandHandler.Handle(command);
+        var removedLearnings = await _commandHandler.Handle(command);
 
         // Assert
         _learningRepository.Verify(x => x.Update(It.IsAny<ApprenticeshipLearningDomainModel>()), Times.Exactly(2));
-        removedLearningKeys.Should().BeEquivalentTo([firstLearning.Key, secondLearning.Key]);
+        removedLearnings.Select(x => x.LearningKey).Should().BeEquivalentTo([firstLearning.Key, secondLearning.Key]);
         firstLearning.LatestEpisode.IsRemoved.Should().BeTrue();
         secondLearning.LatestEpisode.IsRemoved.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task ThenTheLearnerRefOfTheRemovedEpisodeIsReturned()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learnerRef = _fixture.Create<string>();
+        var domainModel = CreateLearningInAcademicYear(x => x.LearnerRef = learnerRef);
+
+        _learningRepository.Setup(x => x.GetAllByLearnerKey(command.LearnerKey, command.Ukprn))
+            .ReturnsAsync([domainModel]);
+
+        // Act
+        var removedLearnings = await _commandHandler.Handle(command);
+
+        // Assert
+        var removedLearning = removedLearnings.Should().ContainSingle().Subject;
+        removedLearning.LearningKey.Should().Be(domainModel.Key);
+        removedLearning.LearnerRef.Should().Be(learnerRef);
     }
 
     [Test]
