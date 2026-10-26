@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Services;
@@ -30,8 +31,34 @@ public class ApproveLearningChangeCommandHandler(
             return;
         }
 
+        if (!episode.FurtherApprovalNeeded)
+        {
+            logger.LogInformation("Episode {EpisodeKey} on learning {LearningKey} needs no further approval; approval for apprenticeship {ApprenticeshipId} ignored",
+                episode.Key, command.LearningKey, command.ApprenticeshipId);
+            return;
+        }
+
+        foreach (var change in command.Changes)
+        {
+            var current = CurrentValueOf(change.ChangeType, episode);
+            if (change.New != current)
+            {
+                logger.LogWarning("Approved {ChangeType} {ApprovedValue} does not match current value {CurrentValue} on episode {EpisodeKey}, learning {LearningKey}; approval for apprenticeship {ApprenticeshipId} dropped",
+                    change.ChangeType, change.New, current, episode.Key, command.LearningKey, command.ApprenticeshipId);
+                return;
+            }
+        }
+
         learning.ClearFurtherApprovalNeeded(episode.Key);
 
         await learningService.UpdateLearning(learning);
     }
+
+    private static string? CurrentValueOf(string changeType, ApprenticeshipEpisodeDomainModel episode) => changeType switch
+    {
+        nameof(CocChangeField.StartDate) => FormatDate(episode.FirstPrice.StartDate),
+        _ => null
+    };
+
+    private static string FormatDate(DateTime date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 }

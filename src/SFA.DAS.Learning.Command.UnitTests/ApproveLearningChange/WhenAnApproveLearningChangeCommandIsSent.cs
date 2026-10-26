@@ -50,6 +50,54 @@ public class WhenAnApproveLearningChangeCommandIsSent
         _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
     }
 
+    [TestCase("2025-08-20", Description = "Stale: a newer start date has since been saved")]
+    [TestCase("not-a-date", Description = "Unparseable")]
+    [TestCase("2025-08-01T00:00:00", Description = "Not ISO yyyy-MM-dd")]
+    public async Task AndTheStartDateChangeDoesNotMatchThenNothingIsUpdated(string newStartDate)
+    {
+        var command = CreateCommand(newStartDate);
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task AndAnyChangeDoesNotMatchThenNothingIsUpdated()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes.Add(new ApprovedChange("StartDate", "2025-07-01", "2025-08-20"));
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task AndTheChangeTypeIsNotRecognisedThenNothingIsUpdated()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes.Add(new ApprovedChange("Firstname", "Old", "New"));
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task AndTheFlagIsAlreadyClearThenNothingIsUpdated()
+    {
+        _episode.FurtherApprovalNeeded = false;
+        var command = CreateCommand(newStartDate: "2025-08-01");
+
+        await _handler.Handle(command);
+
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
     [Test]
     public async Task AndTheLearningIsNotFoundThenNothingIsUpdated()
     {
