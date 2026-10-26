@@ -1,4 +1,4 @@
-namespace SFA.DAS.Learning.Command.ApproveLearningChange;
+namespace SFA.DAS.Learning.Domain.Enums;
 
 // Mirrors Approvals' CocChangeField (das-commitments); only the names matter, and they must match theirs exactly.
 public enum CocChangeField

@@ -7,6 +7,7 @@ using NUnit.Framework;
 using SFA.DAS.CommitmentsV2.Messages.Events;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.ApproveLearningChange;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Functions.Handlers;
 using System.Linq;
 using System.Threading;

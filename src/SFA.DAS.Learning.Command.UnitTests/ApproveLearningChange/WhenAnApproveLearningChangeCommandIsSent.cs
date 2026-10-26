@@ -5,10 +5,12 @@ using NUnit.Framework;
 using SFA.DAS.Learning.Command.ApproveLearningChange;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using EmployerApprovalAppliedEvent = SFA.DAS.Learning.Domain.Events.EmployerApprovalAppliedEvent;
 using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SFA.DAS.Learning.Command.UnitTests.ApproveLearningChange;
@@ -48,6 +50,18 @@ public class WhenAnApproveLearningChangeCommandIsSent
 
         _episode.FurtherApprovalNeeded.Should().BeFalse();
         _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
+    }
+
+    [Test]
+    public async Task AndTheStartDateChangeMatchesThenAnEmployerApprovalAppliedEventIsRaised()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+
+        await _handler.Handle(command);
+
+        var raisedEvent = _learning.FlushEvents().OfType<EmployerApprovalAppliedEvent>().Single();
+        raisedEvent.EpisodeKey.Should().Be(_episode.Key);
+        raisedEvent.Changes.Should().BeEquivalentTo(command.Changes);
     }
 
     [TestCase("2025-08-20", Description = "Stale: a newer start date has since been saved")]

@@ -6,6 +6,7 @@ using NServiceBus;
 using SFA.DAS.CommitmentsV2.Messages.Events;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.ApproveLearningChange;
+using SFA.DAS.Learning.Domain.Apprenticeship;
 
 namespace SFA.DAS.Learning.Functions.Handlers;
 

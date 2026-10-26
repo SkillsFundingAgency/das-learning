@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Enums;
 using SFA.DAS.Learning.Domain.Services;
 using SFA.DAS.Learning.Enums;
 
@@ -49,7 +50,7 @@ public class ApproveLearningChangeCommandHandler(
             }
         }
 
-        learning.ClearFurtherApprovalNeeded(episode.Key);
+        learning.ApplyEmployerApproval(episode.Key, command.Changes);
 
         await learningService.UpdateLearning(learning);
     }

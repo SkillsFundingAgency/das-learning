@@ -1,3 +1,5 @@
+using SFA.DAS.Learning.Domain.Apprenticeship;
+
 namespace SFA.DAS.Learning.Command.ApproveLearningChange;
 
 public class ApproveLearningChangeCommand : ICommand
@@ -6,5 +8,3 @@ public class ApproveLearningChangeCommand : ICommand
     public long ApprenticeshipId { get; set; }
     public List<ApprovedChange> Changes { get; set; } = new();
 }
-
-public record ApprovedChange(string ChangeType, string Old, string New);
