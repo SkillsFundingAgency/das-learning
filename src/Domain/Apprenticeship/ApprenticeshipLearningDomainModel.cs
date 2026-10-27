@@ -252,6 +252,24 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         return true;
     }
 
+    public void ApplyEmployerApproval(Guid episodeKey, IReadOnlyCollection<ApprovedChange> changes)
+    {
+        var episode = _episodes.Single(x => x.Key == episodeKey);
+
+        ClearFurtherApprovalNeeded(episodeKey);
+
+        AddEvent(new EmployerApprovalAppliedEvent
+        {
+            LearnerKey = LearnerKey,
+            LearningKey = Key,
+            EpisodeKey = episodeKey,
+            LearnerRef = episode.LearnerRef,
+            ApprenticeshipId = episode.ApprovalsApprenticeshipId,
+            LearningType = LearningType,
+            Changes = changes.ToList()
+        });
+    }
+
     public override void Approve(ApproveLearningContext context)
         => Approve(context.EmployerAccountId, context.EmployerType, context.TransferSenderId, context.LegalEntityName, context.ApprovalsApprenticeshipId, context.AccountLegalEntityId, context.TrainingCourseVersion);
 
