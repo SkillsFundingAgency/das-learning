@@ -44,7 +44,7 @@ public class GetLearningsWithEpisodesRequestQueryHandler(
                     apprenticeship.GetStartDate(),
                     apprenticeship.GetPlannedEndDate(),
                     apprenticeship.Episodes.Select(ep =>
-                            new LearningWithEpisodes.Episode(ep.Key, apprenticeship.TrainingCode, ep.WithdrawalDate, ep.Prices.Select(p =>
+                            new LearningWithEpisodes.Episode(ep.Key, apprenticeship.TrainingCode, ep.WithdrawalDate, ep.EmployerAccountId, ep.Prices.Select(p =>
                                 new LearningWithEpisodes.EpisodePrice(p.Key, p.StartDate, p.EndDate, p.TrainingPrice, p.EndPointAssessmentPrice, p.TotalPrice)).ToList()))
                         .ToList(),
                     apprenticeship.GetAgeAtStartOfApprenticeship(learner.DateOfBirth),

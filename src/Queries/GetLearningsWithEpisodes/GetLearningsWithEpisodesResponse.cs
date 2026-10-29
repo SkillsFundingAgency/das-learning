@@ -33,11 +33,12 @@ public class LearningWithEpisodes(
     public DateTime? CompletionDate { get; set; } = completionDate;
 
     [ExcludeFromCodeCoverage]
-    public class Episode(Guid key, string trainingCode, DateTime? lastDayOfLearning, List<EpisodePrice> prices)
+    public class Episode(Guid key, string trainingCode, DateTime? lastDayOfLearning, long? employerAccountId, List<EpisodePrice> prices)
     {
         public Guid Key { get; set; } = key;
         public string TrainingCode { get; set; } = trainingCode;
         public DateTime? LastDayOfLearning { get; set; } = lastDayOfLearning;
+        public long? EmployerAccountId { get; set; } = employerAccountId;
         public List<EpisodePrice> Prices { get; set; } = prices;
     }
 

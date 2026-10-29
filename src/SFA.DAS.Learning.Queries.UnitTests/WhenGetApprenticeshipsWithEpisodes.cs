@@ -76,6 +76,22 @@ public class WhenGetApprenticeshipsWithEpisodes
     }
 
     [Test]
+    public async Task ThenEpisodeEmployerAccountIdIsReturned()
+    {
+        // Arrange
+        var learning = await AddLearning("1111111111", approvalsId: 1);
+        learning.Episodes.First().EmployerAccountId = 123456;
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _sut.Handle(QueryFor(learning));
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Items.Single().Episodes.Single().EmployerAccountId.Should().Be(123456);
+    }
+
+    [Test]
     public async Task ThenApprenticeshipsAreNotReturnedWhenAllEpisodesAreRemoved()
     {
         // Arrange
