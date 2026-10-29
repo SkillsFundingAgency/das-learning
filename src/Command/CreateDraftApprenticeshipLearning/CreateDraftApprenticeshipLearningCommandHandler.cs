@@ -82,6 +82,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         return new CreateDraftApprenticeshipLearningCommandResult
         {
             Changes = changes,
+            LearnerKey = learner.Key,
             LearningKey = existingLearning.Key,
             LearningEpisodeKey = existingLearning.LatestEpisode.Key,
             Prices = existingLearning.LatestEpisode.EpisodePrices
@@ -210,6 +211,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         return new CreateDraftApprenticeshipLearningCommandResult
         {
             Changes = changes.ToList(),
+            LearnerKey = learner.Key,
             LearningKey = learning.Key,
             LearningEpisodeKey = learning.LatestEpisode.Key,
             Prices = learning.LatestEpisode.EpisodePrices

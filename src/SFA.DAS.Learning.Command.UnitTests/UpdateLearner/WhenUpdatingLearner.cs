@@ -103,7 +103,7 @@ public class WhenUpdatingLearner
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
+        var singleEpisode = _fixture.CreateEpisodeDomainModel(x => x.ForceEarningsSync = false);
         TestHelper.SetEpisode(learningDomainModel, singleEpisode);
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
@@ -132,7 +132,7 @@ public class WhenUpdatingLearner
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         // Create a single episode
-        var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
+        var singleEpisode = _fixture.CreateEpisodeDomainModel(x => x.ForceEarningsSync = false);
 
         TestHelper.SetEpisode(learningDomainModel, singleEpisode);
 
