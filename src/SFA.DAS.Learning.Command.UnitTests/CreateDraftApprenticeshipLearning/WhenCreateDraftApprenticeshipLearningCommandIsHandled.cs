@@ -444,6 +444,57 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     }
 
     [Test]
+    public async Task Then_Result_Contains_The_LearnerKey_When_An_Existing_Learning_Is_Updated()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var removedLearning = CreateLearning(isApproved: true, isRemoved: true);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { removedLearning });
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        result!.LearnerKey.Should().Be(learner.Key);
+    }
+
+    [Test]
+    public async Task Then_Result_Contains_The_LearnerKey_When_A_New_Learning_Is_Created()
+    {
+        // Arrange
+        var command = CreateCommand();
+        LearnerDomainModel? addedLearner = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync((LearnerDomainModel?)null);
+
+        _learnerRepository
+            .Setup(x => x.Add(It.IsAny<LearnerDomainModel>()))
+            .Callback<LearnerDomainModel>(l => addedLearner = l)
+            .Returns(Task.CompletedTask);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(It.IsAny<Guid>(), It.IsAny<long?>(), It.IsAny<string?>()))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        addedLearner.Should().NotBeNull();
+        result!.LearnerKey.Should().Be(addedLearner!.Key);
+    }
+
+    [Test]
     public async Task Then_New_Learning_Is_Created_When_Multiple_Removed_And_Approved_Learnings_Exist()
     {
         // Arrange

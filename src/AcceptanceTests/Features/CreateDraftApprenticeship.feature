@@ -8,6 +8,7 @@ Scenario: Apprenticeship does not exist, creates and returns 200
 	Then the CreateDraftApprenticeship endpoint should return a 200
 	And the draft apprenticeship should be created
 	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
+	And the CreateDraftApprenticeship response should include the LearnerKey
 
 # Reinstatement functionality todo in later ticket
 # Scenario: Apprenticeship exists and is active, returns 204
@@ -31,6 +32,7 @@ Scenario: Apprenticeship exists but is removed and ForceEarningsSync is set, rei
 	Then the CreateDraftApprenticeship endpoint should return a 200
 	And the apprenticeship should be reinstated
 	And the CreateDraftApprenticeship response should include a ForceEarningsSync change
+	And the CreateDraftApprenticeship response should include the LearnerKey
 
 Scenario: Learner exists with a Short Course but no Apprenticeship, creates apprenticeship and flags a new apprenticeship learner
 	Given SLD call the create short course endpoint with the following information
