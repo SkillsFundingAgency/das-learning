@@ -94,6 +94,25 @@ public class UpdateLearnerStepDefinitions
         _scenarioContext.SetUpdateLearnerResult(updateResponse);
     }
 
+    [Given(@"the apprenticeship episode ForceEarningsSync is set to (True|False)")]
+    public async Task GivenTheApprenticeshipEpisodeForceEarningsSyncIsSetTo(bool forceEarningsSync)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        await dbConnection.OpenAsync();
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+
+        await using var command = new SqlCommand(
+            "UPDATE dbo.ApprenticeshipEpisode SET ForceEarningsSync = @ForceEarningsSync WHERE LearningKey = @LearningKey;",
+            dbConnection);
+        command.Parameters.AddWithValue("@ForceEarningsSync", forceEarningsSync);
+        command.Parameters.AddWithValue("@LearningKey", learning.Key);
+
+        await command.ExecuteNonQueryAsync();
+
+        var updatedLearning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        updatedLearning.Episodes.Single().ForceEarningsSync.Should().Be(forceEarningsSync);
+    }
+
     [When(@"an update request is sent again with the same data")]
     public async Task WhenAnUpdateRequestIsSentWithTheSameData()
     {

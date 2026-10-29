@@ -21,7 +21,8 @@
     [CompletionDate] DATETIME NULL,
     [AchievementDate] DATETIME NULL,
     [LearnerRef] VARCHAR(12) NOT NULL DEFAULT '',
-    [WithdrawalReason] SMALLINT NULL
+    [WithdrawalReason] SMALLINT NULL,
+    [ForceEarningsSync] BIT NOT NULL DEFAULT 0
 )
 GO
 ALTER TABLE dbo.ApprenticeshipEpisode

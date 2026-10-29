@@ -23,6 +23,15 @@ Scenario: Apprenticeship exists but is removed, returns 200 and reinstates appre
 	And the apprenticeship should be reinstated
 	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
 
+Scenario: Apprenticeship exists but is removed and ForceEarningsSync is set, reinstates and includes a ForceEarningsSync change
+	Given An apprenticeship has been created as part of the approvals journey
+	And SLD inform us that a learner is to be removed
+	And the apprenticeship episode ForceEarningsSync is set to True
+	When CreateDraftApprenticeship is called with apprenticeship details
+	Then the CreateDraftApprenticeship endpoint should return a 200
+	And the apprenticeship should be reinstated
+	And the CreateDraftApprenticeship response should include a ForceEarningsSync change
+
 Scenario: Learner exists with a Short Course but no Apprenticeship, creates apprenticeship and flags a new apprenticeship learner
 	Given SLD call the create short course endpoint with the following information
 		| Uln      |

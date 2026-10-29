@@ -90,4 +90,13 @@ public class CreateDraftApprenticeshipStepDefinitions
         else result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
     }
 
+    [Then(@"the CreateDraftApprenticeship response should (not )?include a ForceEarningsSync change")]
+    public void ThenTheCreateDraftApprenticeshipResponseShouldIncludeAForceEarningsSyncChange(string not)
+    {
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
+
+        if (string.IsNullOrEmpty(not)) result!.Changes.Should().Contain(LearningUpdateChanges.ForceEarningsSync);
+        else result!.Changes.Should().NotContain(LearningUpdateChanges.ForceEarningsSync);
+    }
+
 }
