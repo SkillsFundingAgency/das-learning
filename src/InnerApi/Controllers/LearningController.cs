@@ -122,26 +122,20 @@ public class LearningController : ControllerBase
     }
 
     /// <summary>
-    /// Gets all fm36 learnings data for a given provider with episode and price data
+    /// Gets fm36 learnings data (with episode and price data) for the given learning keys belonging to a provider
     /// </summary>
     /// <param name="ukprn">Ukprn</param>
-    /// <param name="collectionYear">Collection Year</param>
-    /// <param name="collectionPeriod">Collection Period</param>
-    /// <param name="page">Page number</param>
-    /// <param name="pageSize">Number of items per page</param>
-    /// <returns>GetLearningsWithEpisodesResponse containing learning, episode, and price data</returns>
-    [HttpGet("{ukprn}/{collectionYear}/{collectionPeriod}")]
-    [ProducesResponseType(200)]
-    public async Task<IActionResult> GetLearningsForFm36(long ukprn, short collectionYear, byte collectionPeriod, [FromQuery] int? page = null, [FromQuery] int? pageSize = null)
+    /// <param name="learningKeys">Keys of the learnings to retrieve</param>
+    /// <returns>List of learnings containing episode and price data. 404 if none of the keys match a learning for the provider.</returns>
+    [HttpPost("{ukprn}/learnings/by-keys")]
+    [ProducesResponseType(typeof(IEnumerable<LearningWithEpisodes>), 200)]
+    public async Task<IActionResult> GetLearningsForFm36(long ukprn, [FromBody] List<Guid> learningKeys)
     {
-        var request = new GetLearningsWithEpisodesRequest { Ukprn = ukprn, CollectionYear = collectionYear, CollectionPeriod = collectionPeriod, Page = page ?? -1, PageSize = pageSize};
+        var request = new GetLearningsWithEpisodesRequest { Ukprn = ukprn, LearningKeys = learningKeys ?? [] };
         var response = await _queryDispatcher.Send<GetLearningsWithEpisodesRequest, GetLearningsWithEpisodesResponse?>(request);
         if (response == null) return NotFound();
 
-        if (page != null && pageSize != null)
-            return Ok(response);
-        else
-            return Ok(response.Items);
+        return Ok(response.Items);
     }
 
     /// <summary>
