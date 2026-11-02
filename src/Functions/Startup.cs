@@ -50,7 +50,7 @@ public class Startup
             .ConfigureServices((c, s) =>
             {
                 SetupServices(s);
-                s.ConfigureNServiceBusForSend(ApplicationSettings.NServiceBusConnectionString.GetFullyQualifiedNamespace());
+                s.ConfigureNServiceBusForSend(ApplicationSettings.NServiceBusConnectionString.GetFullyQualifiedNamespace(), ApplicationSettings.UseWebSockets);
             });
     }
 

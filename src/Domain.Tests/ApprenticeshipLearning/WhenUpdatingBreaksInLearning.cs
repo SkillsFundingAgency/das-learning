@@ -162,6 +162,7 @@ public class WhenUpdatingBreaksInLearning
         episode.LearningKey = entity.Key;
         episode.PauseDate = null;
         episode.IsRemoved = false;
+        episode.ForceEarningsSync = false;
         episode.CompletionDate = episode.CompletionDate?.Date;
         episode.AchievementDate = null;
 
