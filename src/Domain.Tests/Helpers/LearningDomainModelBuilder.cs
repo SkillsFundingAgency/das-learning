@@ -63,6 +63,7 @@ public class LearningDomainModelBuilder
         episode.IsRemoved = false;
         episode.IsApproved = _isApproved;
         episode.FurtherApprovalNeeded = false;
+        episode.ForceEarningsSync = false;
         episode.CompletionDate = episode.CompletionDate?.Date;
         episode.AchievementDate = null;
 

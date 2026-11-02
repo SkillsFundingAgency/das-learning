@@ -201,6 +201,9 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         UpdateAchievementDate(updateContext, changes);
 
+        if (LatestEpisode.ForceEarningsSync)
+            changes.Add(LearningUpdateChanges.ForceEarningsSync);
+
         _changeDetails = changes;
 
         return changes.Select(x => x.ChangeType).ToArray();

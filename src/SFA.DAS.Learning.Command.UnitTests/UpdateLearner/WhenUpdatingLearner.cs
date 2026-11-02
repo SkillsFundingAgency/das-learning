@@ -103,7 +103,7 @@ public class WhenUpdatingLearner
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
+        var singleEpisode = _fixture.CreateEpisodeDomainModel(x => x.ForceEarningsSync = false);
         TestHelper.SetEpisode(learningDomainModel, singleEpisode);
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))
@@ -132,7 +132,7 @@ public class WhenUpdatingLearner
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
         // Create a single episode
-        var singleEpisode = _fixture.Create<ApprenticeshipEpisodeDomainModel>();
+        var singleEpisode = _fixture.CreateEpisodeDomainModel(x => x.ForceEarningsSync = false);
 
         TestHelper.SetEpisode(learningDomainModel, singleEpisode);
 
@@ -252,6 +252,7 @@ public class WhenUpdatingLearner
             x.IsRemoved = false;
             x.IsApproved = isApproved;
             x.ApprovalsApprenticeshipId = 12345;
+            x.ForceEarningsSync = false;
         });
         TestHelper.SetEpisode(learningDomainModel, episode);
 
@@ -290,6 +291,7 @@ public class WhenUpdatingLearner
             x.IsRemoved = false;
             x.IsApproved = false;
             x.FurtherApprovalNeeded = furtherApprovalNeeded;
+            x.ForceEarningsSync = false;
         });
         TestHelper.SetEpisode(learningDomainModel, episode);
 
@@ -393,7 +395,7 @@ public class WhenUpdatingLearner
         var learnerDomainModel = _fixture.Create<LearnerDomainModel>();
         var learningDomainModel = _fixture.Create<ApprenticeshipLearningDomainModel>();
 
-        var episode = _fixture.CreateEpisodeDomainModel(x => x.IsRemoved = false);
+        var episode = _fixture.CreateEpisodeDomainModel(x => { x.IsRemoved = false; x.ForceEarningsSync = false; });
         TestHelper.SetEpisode(learningDomainModel, episode);
 
         _learnerRepository.Setup(x => x.Get(learningDomainModel.LearnerKey))

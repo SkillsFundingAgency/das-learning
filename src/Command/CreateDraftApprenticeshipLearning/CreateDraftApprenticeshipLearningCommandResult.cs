@@ -8,5 +8,6 @@ namespace SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 /// </summary>
 public class CreateDraftApprenticeshipLearningCommandResult : UpdateLearnerResult
 {
+    public Guid LearnerKey { get; set; }
     public Guid? RemovedLearningKey { get; set; }
 }

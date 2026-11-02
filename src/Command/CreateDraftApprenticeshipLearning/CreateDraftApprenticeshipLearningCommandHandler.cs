@@ -100,6 +100,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         return new CreateDraftApprenticeshipLearningCommandResult
         {
             ChangeDetails = changeDetails,
+            LearnerKey = learner.Key,
             AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
             LearningKey = learning.Key,
             LearningEpisodeKey = learning.LatestEpisode.Key,
