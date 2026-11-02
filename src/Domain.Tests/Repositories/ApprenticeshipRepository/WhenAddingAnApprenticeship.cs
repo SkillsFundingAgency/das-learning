@@ -69,6 +69,8 @@ public class WhenAddingAnApprenticeship
             .With(x => x.WithdrawalDate, (DateTime?)null)
             .With(x => x.WithdrawalReason, (short?)null)
             .With(x => x.PauseDate, (DateTime?)null)
+            .With(x => x.FurtherApprovalNeeded, false)
+            .With(x => x.ForceEarningsSync, false)
             .Create());
 
         apprenticeship.AddEpisode(

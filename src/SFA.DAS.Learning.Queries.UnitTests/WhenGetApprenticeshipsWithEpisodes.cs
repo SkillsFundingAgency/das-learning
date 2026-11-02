@@ -11,17 +11,10 @@ namespace SFA.DAS.Learning.Queries.UnitTests;
 
 public class WhenGetApprenticeshipsWithEpisodes
 {
+    private const long Ukprn = 1000;
+
     private LearningDataContext _dbContext;
     private GetLearningsWithEpisodesRequestQueryHandler _sut;
-
-    // Academic year 2021 period 1 = last day of Aug 2021 (Aug 31, 2021)
-    // Academic year start = Aug 1, 2021
-    private static readonly GetLearningsWithEpisodesRequest DefaultQuery = new()
-    {
-        Ukprn = 1000,
-        CollectionYear = 2021,
-        CollectionPeriod = 1
-    };
 
     [SetUp]
     public void Setup()
@@ -41,46 +34,55 @@ public class WhenGetApprenticeshipsWithEpisodes
     public async Task ThenApprenticeshipsWithEpisodesAreReturned()
     {
         // Arrange
-        var learnerKey = Guid.NewGuid();
-        _dbContext.LearnersDbSet.Add(new Learner
-        {
-            Key = learnerKey, Uln = "1111111111",
-            FirstName = "Jane", LastName = "Doe",
-            DateOfBirth = new DateTime(1990, 1, 1)
-        });
-
-        var learning = BuildActiveApprenticeship(DefaultQuery.Ukprn, learnerKey, approvalsId: 1);
-        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
-        await _dbContext.SaveChangesAsync();
+        var learning = await AddLearning("1111111111", approvalsId: 1);
 
         // Act
-        var result = await _sut.Handle(DefaultQuery);
+        var result = await _sut.Handle(QueryFor(learning));
 
         // Assert
         result.Should().NotBeNull();
         result!.Items.Should().HaveCount(1);
+        result.Items.Single().Key.Should().Be(learning.Key);
         result.Items.Single().Uln.Should().Be("1111111111");
+    }
+
+    [Test]
+    public async Task ThenOnlyApprenticeshipsForTheRequestedKeysAreReturned()
+    {
+        // Arrange
+        var requested1 = await AddLearning("1111111111", approvalsId: 1);
+        var requested2 = await AddLearning("1111111112", approvalsId: 2);
+        await AddLearning("1111111113", approvalsId: 3);
+
+        // Act
+        var result = await _sut.Handle(QueryFor(requested1, requested2));
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Items.Select(x => x.Key).Should().BeEquivalentTo(new[] { requested1.Key, requested2.Key });
+    }
+
+    [Test]
+    public async Task ThenApprenticeshipsForADifferentProviderAreNotReturned()
+    {
+        // Arrange
+        var learning = await AddLearning("1111111111", approvalsId: 1, ukprn: Ukprn + 1);
+
+        // Act
+        var result = await _sut.Handle(QueryFor(learning));
+
+        // Assert
+        result.Should().BeNull();
     }
 
     [Test]
     public async Task ThenApprenticeshipsAreNotReturnedWhenAllEpisodesAreRemoved()
     {
         // Arrange
-        var learnerKey = Guid.NewGuid();
-        _dbContext.LearnersDbSet.Add(new Learner
-        {
-            Key = learnerKey, Uln = "1111111111",
-            FirstName = "Jane", LastName = "Doe",
-            DateOfBirth = new DateTime(1990, 1, 1)
-        });
-
-        var learning = BuildActiveApprenticeship(DefaultQuery.Ukprn, learnerKey, approvalsId: 1);
-        learning.Episodes.First().IsRemoved = true;
-        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
-        await _dbContext.SaveChangesAsync();
+        var learning = await AddLearning("1111111111", approvalsId: 1, isRemoved: true);
 
         // Act
-        var result = await _sut.Handle(DefaultQuery);
+        var result = await _sut.Handle(QueryFor(learning));
 
         // Assert
         result.Should().BeNull();
@@ -98,12 +100,12 @@ public class WhenGetApprenticeshipsWithEpisodes
             DateOfBirth = new DateTime(1990, 1, 1)
         });
 
-        var learning = BuildActiveApprenticeship(DefaultQuery.Ukprn, learnerKey, approvalsId: 1);
-        
+        var learning = BuildActiveApprenticeship(Ukprn, learnerKey, approvalsId: 1);
+
         var removedEpisode = new ApprenticeshipEpisode
         {
             Key = Guid.NewGuid(),
-            Ukprn = DefaultQuery.Ukprn,
+            Ukprn = Ukprn,
             TrainingCode = "ST0001",
             LegalEntityName = "Test Employer",
             IsRemoved = true
@@ -114,7 +116,7 @@ public class WhenGetApprenticeshipsWithEpisodes
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var result = await _sut.Handle(DefaultQuery);
+        var result = await _sut.Handle(QueryFor(learning));
 
         // Assert
         result.Should().NotBeNull();
@@ -127,36 +129,45 @@ public class WhenGetApprenticeshipsWithEpisodes
     public async Task ThenNullIsReturnedWhenNoApprenticeshipsExist()
     {
         // Act
-        var result = await _sut.Handle(DefaultQuery);
+        var result = await _sut.Handle(new GetLearningsWithEpisodesRequest { Ukprn = Ukprn, LearningKeys = [Guid.NewGuid()] });
 
         // Assert
         result.Should().BeNull();
     }
 
     [Test]
-    public async Task ThenPagedApprenticeshipsAreReturnedWhenPaginationSpecified()
+    public async Task ThenNullIsReturnedWhenNoKeysAreRequested()
     {
         // Arrange
-        const int pageSize = 2;
-        var query = new GetLearningsWithEpisodesRequest { Ukprn = 1000, CollectionYear = 2021, CollectionPeriod = 1, Page = 1, PageSize = pageSize };
-
-        for (var i = 1; i <= 3; i++)
-        {
-            var learnerKey = Guid.NewGuid();
-            _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = $"111111111{i}", FirstName = "A", LastName = "B", DateOfBirth = new DateTime(1990, 1, 1) });
-            _dbContext.ApprenticeshipLearningDbSet.Add(BuildActiveApprenticeship(query.Ukprn, learnerKey, approvalsId: i));
-        }
-        await _dbContext.SaveChangesAsync();
+        await AddLearning("1111111111", approvalsId: 1);
 
         // Act
-        var result = await _sut.Handle(query);
+        var result = await _sut.Handle(new GetLearningsWithEpisodesRequest { Ukprn = Ukprn, LearningKeys = [] });
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Items.Should().HaveCount(pageSize);
-        result.TotalItems.Should().Be(3);
-        result.PageSize.Should().Be(pageSize);
-        result.Page.Should().Be(1);
+        result.Should().BeNull();
+    }
+
+    private static GetLearningsWithEpisodesRequest QueryFor(params ApprenticeshipLearning[] learnings)
+    {
+        return new GetLearningsWithEpisodesRequest { Ukprn = Ukprn, LearningKeys = learnings.Select(x => x.Key).ToList() };
+    }
+
+    private async Task<ApprenticeshipLearning> AddLearning(string uln, int approvalsId, long ukprn = Ukprn, bool isRemoved = false)
+    {
+        var learnerKey = Guid.NewGuid();
+        _dbContext.LearnersDbSet.Add(new Learner
+        {
+            Key = learnerKey, Uln = uln,
+            FirstName = "Jane", LastName = "Doe",
+            DateOfBirth = new DateTime(1990, 1, 1)
+        });
+
+        var learning = BuildActiveApprenticeship(ukprn, learnerKey, approvalsId);
+        learning.Episodes.First().IsRemoved = isRemoved;
+        _dbContext.ApprenticeshipLearningDbSet.Add(learning);
+        await _dbContext.SaveChangesAsync();
+        return learning;
     }
 
     private static ApprenticeshipLearning BuildActiveApprenticeship(long ukPrn, Guid learnerKey, int approvalsId)
@@ -171,7 +182,7 @@ public class WhenGetApprenticeshipsWithEpisodes
             LegalEntityName = "Test Employer",
             ApprovalsApprenticeshipId = approvalsId
         };
-        // Price active during academic year 2020/21 (period 1 = Aug 31, 2020)
+        // Price active during academic year 2020/21
         episode.Prices.Add(new EpisodePrice
         {
             Key = Guid.NewGuid(),

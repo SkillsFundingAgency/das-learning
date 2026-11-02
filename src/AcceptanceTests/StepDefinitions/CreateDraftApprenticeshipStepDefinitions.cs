@@ -90,4 +90,25 @@ public class CreateDraftApprenticeshipStepDefinitions
         else result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
     }
 
+    [Then(@"the CreateDraftApprenticeship response should (not )?include a ForceEarningsSync change")]
+    public void ThenTheCreateDraftApprenticeshipResponseShouldIncludeAForceEarningsSyncChange(string not)
+    {
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
+
+        if (string.IsNullOrEmpty(not)) result!.Changes.Should().Contain(LearningUpdateChanges.ForceEarningsSync);
+        else result!.Changes.Should().NotContain(LearningUpdateChanges.ForceEarningsSync);
+    }
+
+    [Then(@"the CreateDraftApprenticeship response should include the LearnerKey")]
+    public async Task ThenTheCreateDraftApprenticeshipResponseShouldIncludeTheLearnerKey()
+    {
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearningByKey(result!.LearningKey);
+
+        learning.LearnerKey.Should().NotBeEmpty();
+        result.LearnerKey.Should().Be(learning.LearnerKey);
+    }
+
 }

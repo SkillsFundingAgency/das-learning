@@ -25,5 +25,6 @@ public enum LearningUpdateChanges
     NewApprenticeshipLearner = 17,
     EnglishAndMathsLearningSupport = 18,
     WithdrawalReasonChanged = 19,
-	StartDate = 20
+    ForceEarningsSync = 20,
+    StartDate = 21
 }

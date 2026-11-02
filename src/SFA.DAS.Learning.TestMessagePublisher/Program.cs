@@ -16,7 +16,7 @@ var fullyQualifiedNamespace = config["fullyQualifiedNamespace"];
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((_, services) =>
     {
-        services.ConfigureNServiceBusForSend(fullyQualifiedNamespace!);
+        services.ConfigureNServiceBusForSend(fullyQualifiedNamespace!, false);
     })
     .Build();
 

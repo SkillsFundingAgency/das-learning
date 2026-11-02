@@ -7,6 +7,7 @@ namespace SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 public class CreateDraftApprenticeshipLearningCommandResult
 {
     public List<LearningUpdateChanges> Changes { get; set; }
+    public Guid LearnerKey { get; set; }
     public Guid LearningKey { get; set; }
     public Guid LearningEpisodeKey { get; set; }
     public List<UpdateLearnerResult.EpisodePrice> Prices { get; set; }
