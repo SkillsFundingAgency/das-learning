@@ -24,6 +24,20 @@ Scenario: Apprenticeship exists but is removed, returns 200 and reinstates appre
 	And the apprenticeship should be reinstated
 	And the CreateDraftApprenticeship response should include a NewApprenticeshipLearner change
 
+Scenario: Apprenticeship is reinstated with a start date change, which needs further approval
+	Given There is an apprenticeship with the following details
+		| StartDate       | EndDate      | TrainingPrice | EpaPrice |
+		| currentAY-09-25 | nextAY-07-31 | 6000          | 500      |
+	And SLD inform us that a learner is to be removed
+	And an update request has the following data
+		| Property | Value                                                     |
+		| Prices   | fromDate:currentAY-11-25 trainingPrice:6000 epaoPrice:500 |
+	When CreateDraftApprenticeship is called with apprenticeship details
+	Then the CreateDraftApprenticeship endpoint should return a 200
+	And the apprenticeship should be reinstated
+	And the CreateDraftApprenticeship response says the start date change needs further approval
+	And further approval needed is set on the apprenticeship episode
+
 Scenario: Apprenticeship exists but is removed and ForceEarningsSync is set, reinstates and includes a ForceEarningsSync change
 	Given An apprenticeship has been created as part of the approvals journey
 	And SLD inform us that a learner is to be removed

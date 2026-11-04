@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Text.Json.Nodes;
 using SFA.DAS.Learning.Command;
 using SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 using SFA.DAS.Learning.InnerApi.Controllers;
@@ -25,6 +26,8 @@ public class WhenCreateDraftLearning
     public void Arrange()
     {
         _fixture = new Fixture();
+        // JsonNode is abstract, which AutoFixture cannot build (UpdateLearnerResult.Change.Old/New)
+        _fixture.Register<JsonNode>(() => JsonValue.Create(_fixture.Create<string>()));
         _mockQueryDispatcher = new Mock<IQueryDispatcher>();
         _mockCommandDispatcher = new Mock<ICommandDispatcher>();
         _mockLogger = new Mock<ILogger<LearningController>>();
