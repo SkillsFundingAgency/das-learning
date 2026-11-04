@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using System.Text.Json.Nodes;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,8 @@ public class WhenUpdateLearner
     public WhenUpdateLearner()
     {
         _fixture = new Fixture();
+        // JsonNode is abstract, which AutoFixture cannot build (UpdateLearnerResult.Change.Old/New)
+        _fixture.Register<JsonNode>(() => JsonValue.Create(_fixture.Create<string>()));
         _mockQueryDispatcher = new Mock<IQueryDispatcher>();
         _mockCommandDispatcher = new Mock<ICommandDispatcher>();
         _mockLogger = new Mock<ILogger<LearningController>>();

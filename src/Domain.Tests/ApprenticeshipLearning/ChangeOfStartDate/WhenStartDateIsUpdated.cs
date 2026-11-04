@@ -1,0 +1,304 @@
+using FluentAssertions;
+using NUnit.Framework;
+using SFA.DAS.Learning.Domain.Apprenticeship;
+using SFA.DAS.Learning.Domain.Events;
+using SFA.DAS.Learning.Domain.UnitTests.Helpers;
+using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Models.UpdateModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning.ChangeOfStartDate;
+
+[TestFixture]
+public class WhenStartDateIsUpdated
+{
+    private LearnerDomainModel _learner;
+    private ApprenticeshipLearningDomainModel _learning;
+    private LearningUpdateChanges[] _result;
+
+    private IEnumerable<LearningUpdateChanges> ChangesNeedingApproval =>
+        _learning.ChangeDetails.Where(x => x.RequiresApproval).Select(x => x.ChangeType);
+
+    [SetUp]
+    public void SetUp()
+    {
+        var existingCosts = new List<Cost>
+        {
+            new()
+            {
+                FromDate = new DateTime(2024, 08, 01),
+                TrainingPrice = 10000,
+                EpaoPrice = 1000
+            }
+        };
+
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts(existingCosts)
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .Build();
+    }
+
+    [Test]
+    public void AndEarliestCostFromDateIsChangedThenStartDateChangeIsReported()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _result = _learning.Update(updateModel);
+
+        //Assert
+        _result.Should().Contain(LearningUpdateChanges.StartDate);
+        _result.Should().Contain(LearningUpdateChanges.Prices);
+    }
+
+    [Test]
+    public void AndEarlierCostIsAddedThenStartDateChangeIsReported()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Add(new Cost
+        {
+            FromDate = new DateTime(2024, 07, 01),
+            TrainingPrice = 9000,
+            EpaoPrice = 1000
+        });
+
+        //Act
+        _result = _learning.Update(updateModel);
+
+        //Assert
+        _result.Should().Contain(LearningUpdateChanges.StartDate);
+    }
+
+    [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenFurtherApprovalIsNeeded()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenTheUpdateNeedsFurtherApproval()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
+    }
+
+    [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenTheChangeDetailCarriesOldNewAndRequiresApproval()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        var detail = _learning.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.StartDate);
+        detail.Old!.GetValue<string>().Should().Be("2024-08-01");
+        detail.New!.GetValue<string>().Should().Be("2024-08-15");
+        detail.RequiresApproval.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndPricesChangeThenThePricesChangeDetailCarriesTheOldAndNewPriceEpisodes()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice = 11000;
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        var detail = _learning.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.Prices);
+        detail.RequiresApproval.Should().BeFalse("prices do not yet require approval");
+
+        var oldPrice = detail.Old!.AsArray().Single()!.AsObject();
+        oldPrice["startDate"]!.GetValue<string>().Should().Be("2024-08-01");
+        oldPrice["endDate"]!.GetValue<string>().Should().Be("2025-07-31");
+        oldPrice["trainingPrice"]!.GetValue<decimal>().Should().Be(10000);
+        oldPrice["endPointAssessmentPrice"]!.GetValue<decimal>().Should().Be(1000);
+        oldPrice["totalPrice"]!.GetValue<decimal>().Should().Be(11000);
+
+        var newPrice = detail.New!.AsArray().Single()!.AsObject();
+        newPrice["startDate"]!.GetValue<string>().Should().Be("2024-08-15");
+        newPrice["trainingPrice"]!.GetValue<decimal>().Should().Be(11000);
+        newPrice["totalPrice"]!.GetValue<decimal>().Should().Be(12000);
+    }
+
+    [Test]
+    public void AndStartDateChangesOnApprovedEpisodeThenTheHistorySnapshotRecordsFurtherApprovalNeeded()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+        var snapshot = ApprenticeshipLearningChangedEvent.From(_learning, null, ApprenticeshipLearningOperation.Updated).Snapshot;
+
+        //Assert
+        snapshot.Episodes.Single().FurtherApprovalNeeded.Should().BeTrue();
+    }
+
+    [Test]
+    public void AndStartDateChangesOnUnapprovedEpisodeThenTheUpdateDoesNotNeedFurtherApproval()
+    {
+        //Arrange
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts([new Cost { FromDate = new DateTime(2024, 08, 01), TrainingPrice = 10000, EpaoPrice = 1000 }])
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithIsApproved(false)
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        ChangesNeedingApproval.Should().BeEmpty();
+    }
+
+    [Test]
+    public void AndStartDateIsNotChangedThenTheUpdateDoesNotNeedFurtherApproval()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        ChangesNeedingApproval.Should().BeEmpty();
+    }
+
+    [Test]
+    public void AndAnEarlierUpdateNeededFurtherApprovalThenALaterUpdateWithoutAStartDateChangeDoesNot()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+        _learning.Update(updateModel);
+        ChangesNeedingApproval.Should().BeEquivalentTo([LearningUpdateChanges.StartDate]);
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        ChangesNeedingApproval.Should().BeEmpty();
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeTrue("the persisted flag stays set until it is cleared");
+    }
+
+    [Test]
+    public void AndStartDateChangesOnUnapprovedEpisodeThenFurtherApprovalIsNotNeeded()
+    {
+        //Arrange
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts([new Cost { FromDate = new DateTime(2024, 08, 01), TrainingPrice = 10000, EpaoPrice = 1000 }])
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithIsApproved(false)
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        var result = _learning.Update(updateModel);
+
+        //Assert
+        result.Should().Contain(LearningUpdateChanges.StartDate);
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeFalse();
+    }
+
+    [Test]
+    public void AndStartDateIsNotChangedThenFurtherApprovalIsNotNeeded()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+
+        //Act
+        _learning.Update(updateModel);
+
+        //Assert
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeFalse();
+    }
+
+    [Test]
+    public void AndCostsAreUnchangedThenStartDateChangeIsNotReported()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+
+        //Act
+        _result = _learning.Update(updateModel);
+
+        //Assert
+        _result.Should().NotContain(LearningUpdateChanges.StartDate);
+    }
+
+    [Test]
+    public void AndOnlyPriceAmountIsChangedThenStartDateChangeIsNotReported()
+    {
+        //Arrange
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+
+        //Act
+        _result = _learning.Update(updateModel);
+
+        //Assert
+        _result.Should().Contain(LearningUpdateChanges.Prices);
+        _result.Should().NotContain(LearningUpdateChanges.StartDate);
+    }
+
+    [Test]
+    public void AndOnlyALaterCostFromDateIsChangedThenStartDateChangeIsNotReported()
+    {
+        //Arrange
+        var costs = new List<Cost>
+        {
+            new() { FromDate = new DateTime(2024, 08, 01), TrainingPrice = 10000, EpaoPrice = 1000 },
+            new() { FromDate = new DateTime(2025, 01, 01), TrainingPrice = 11000, EpaoPrice = 1000 }
+        };
+
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts(costs)
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Last().FromDate = new DateTime(2025, 02, 01);
+
+        //Act
+        _result = _learning.Update(updateModel);
+
+        //Assert
+        _result.Should().Contain(LearningUpdateChanges.Prices);
+        _result.Should().NotContain(LearningUpdateChanges.StartDate);
+    }
+}

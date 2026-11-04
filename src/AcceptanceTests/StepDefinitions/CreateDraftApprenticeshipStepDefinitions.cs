@@ -90,6 +90,18 @@ public class CreateDraftApprenticeshipStepDefinitions
         else result!.Changes.Should().NotContain(LearningUpdateChanges.NewApprenticeshipLearner);
     }
 
+    [Then(@"the CreateDraftApprenticeship response says the start date change needs further approval")]
+    public void ThenTheCreateDraftApprenticeshipResponseSaysTheStartDateChangeNeedsFurtherApproval()
+    {
+        var (result, _) = _scenarioContext.GetCreateDraftApprenticeshipLearningResult();
+        var createdEvent = _scenarioContext.GetApprenticeshipCreatedEvent();
+
+        result!.ChangeDetails.Should().Contain(x => x.ChangeType == LearningUpdateChanges.StartDate && x.RequiresApproval);
+        result.FurtherApprovalNeeded.Should().BeTrue();
+        result.IsApproved.Should().BeTrue();
+        result.ApprovalsApprenticeshipId.Should().Be(createdEvent.ApprenticeshipId);
+    }
+
     [Then(@"the CreateDraftApprenticeship response should (not )?include a ForceEarningsSync change")]
     public void ThenTheCreateDraftApprenticeshipResponseShouldIncludeAForceEarningsSyncChange(string not)
     {

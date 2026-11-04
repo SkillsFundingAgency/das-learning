@@ -50,10 +50,13 @@ public class UpdateLearnerCommandHandler(
             logger.LogInformation("No changes detected for learner with key {LearnerKey}", command.LearnerKey);
             return new UpdateLearnerResult
             {
-                Changes = [],
                 AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
                 LearningKey = learning.Key,
                 LearningEpisodeKey = learning.LatestEpisode.Key,
+                ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
+                IsApproved = learning.LatestEpisode.IsApproved,
+                FurtherApprovalNeeded = learning.LatestEpisode.FurtherApprovalNeeded,
+                LearningType = learning.LearningType,
                 Prices = learning.LatestEpisode.EpisodePrices
                     .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                     .ToList()
@@ -76,10 +79,17 @@ public class UpdateLearnerCommandHandler(
 
         return new UpdateLearnerResult
         {
-            Changes = changes.ToList(),
+            ChangeDetails = learning.ChangeDetails
+                .Select(x => (UpdateLearnerResult.Change)x)
+                .Concat(learnerChanges.Select(x => (UpdateLearnerResult.Change)x))
+                .ToList(),
             AgeAtStartOfLearning = learning.AgeAtStartOfLearning(learner.ToModel()),
             LearningKey = learning.Key,
             LearningEpisodeKey = learning.LatestEpisode.Key,
+            ApprovalsApprenticeshipId = learning.LatestEpisode.ApprovalsApprenticeshipId,
+            IsApproved = learning.LatestEpisode.IsApproved,
+            FurtherApprovalNeeded = learning.LatestEpisode.FurtherApprovalNeeded,
+            LearningType = learning.LearningType,
             Prices = learning.LatestEpisode.EpisodePrices
                 .Select(x => (UpdateLearnerResult.EpisodePrice)x)
                 .ToList()

@@ -52,6 +52,19 @@ public class WhenGettingAnApprenticeship
         actualApprenticeship.Should().BeEquivalentTo(expectedApprenticeship);
     }
 
+    [Test]
+    public async Task AndLearningIsRequestedViaTheBaseRepositoryAndDoesNotExistThenNullIsReturned()
+    {
+        // Arrange
+        SetUpApprenticeshipRepository();
+
+        // Act
+        var result = await ((ILearningRepository)_sut).GetLearning(Guid.NewGuid());
+
+        // Assert
+        result.Should().BeNull();
+    }
+
     private void SetUpApprenticeshipRepository()
     {
         _apprenticeshipFactory = new Mock<IApprenticeshipLearningFactory>();

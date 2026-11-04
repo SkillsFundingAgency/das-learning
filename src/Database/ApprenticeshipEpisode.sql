@@ -22,6 +22,7 @@
     [AchievementDate] DATETIME NULL,
     [LearnerRef] VARCHAR(12) NOT NULL DEFAULT '',
     [WithdrawalReason] SMALLINT NULL,
+    [FurtherApprovalNeeded] BIT NOT NULL DEFAULT (0),
     [ForceEarningsSync] BIT NOT NULL DEFAULT 0
 )
 GO

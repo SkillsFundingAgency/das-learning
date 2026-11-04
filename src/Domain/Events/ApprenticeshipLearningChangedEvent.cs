@@ -59,6 +59,7 @@ public class ApprenticeshipLearningSnapshot
                 PauseDate = e.PauseDate,
                 EmployerType = e.EmployerType,
                 ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
+                FurtherApprovalNeeded = e.FurtherApprovalNeeded,
                 ForceEarningsSync = e.ForceEarningsSync,
 
                 LearningSupport = e.LearningSupport.Select(ls => new ApprenticeshipLearningSupportSnapshot
@@ -128,6 +129,7 @@ public class ApprenticeshipEpisodeSnapshot
     public DateTime? PauseDate { get; set; }
     public EmployerType EmployerType { get; set; }
     public long ApprovalsApprenticeshipId { get; set; }
+    public bool FurtherApprovalNeeded { get; set; }
     public bool ForceEarningsSync { get; set; }
     public List<ApprenticeshipLearningSupportSnapshot> LearningSupport { get; set; }
     public List<EpisodeBreakInLearningSnapshot> EpisodeBreaksInLearning { get; set; }

@@ -11,6 +11,8 @@ public interface ILearningService
         long approvalsApprenticeshipId,
         string? trainingCode = null);
 
+    Task<LearningDomainModel?> GetLearning(Guid learningKey, LearningType type);
+
     Task AddLearning(LearningDomainModel model);
 
     Task UpdateLearning(LearningDomainModel model);

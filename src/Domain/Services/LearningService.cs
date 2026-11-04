@@ -15,6 +15,12 @@ public class LearningService(ILearningRepositoryProvider provider) : ILearningSe
         return repo.GetUnapprovedLearning(uln, approvalsApprenticeshipId, trainingCode);
     }
 
+    public Task<LearningDomainModel?> GetLearning(Guid learningKey, LearningType type)
+    {
+        var repo = provider.GetRepository(type);
+        return repo.GetLearning(learningKey);
+    }
+
     public Task AddLearning(LearningDomainModel model)
     {
         var repo = provider.GetRepository(model);
