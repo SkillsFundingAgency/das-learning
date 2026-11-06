@@ -41,7 +41,13 @@ public class ApproveLearningChangeCommandHandler(
 
         foreach (var change in command.Changes)
         {
-            var current = CurrentValueOf(change.ChangeType, episode);
+            if (!TryGetCurrentValue(change.ChangeType, episode, out var current))
+            {
+                logger.LogWarning("Unrecognised change type {ChangeType} in approval for apprenticeship {ApprenticeshipId} on episode {EpisodeKey}, learning {LearningKey}; not checked, approval still applied",
+                    change.ChangeType, command.ApprenticeshipId, episode.Key, command.LearningKey);
+                continue;
+            }
+
             if (change.New != current)
             {
                 logger.LogWarning("Approved {ChangeType} {ApprovedValue} does not match current value {CurrentValue} on episode {EpisodeKey}, learning {LearningKey}; approval for apprenticeship {ApprenticeshipId} dropped",
@@ -55,11 +61,16 @@ public class ApproveLearningChangeCommandHandler(
         await learningService.UpdateLearning(learning);
     }
 
-    private static string? CurrentValueOf(string changeType, ApprenticeshipEpisodeDomainModel episode) => changeType switch
+    private static bool TryGetCurrentValue(string changeType, ApprenticeshipEpisodeDomainModel episode, out string? current)
     {
-        nameof(CocChangeField.StartDate) => FormatDate(episode.FirstPrice.StartDate),
-        _ => null
-    };
+        current = changeType switch
+        {
+            nameof(CocChangeField.StartDate) => FormatDate(episode.FirstPrice.StartDate),
+            _ => null
+        };
+
+        return current != null;
+    }
 
     private static string FormatDate(DateTime date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 }
