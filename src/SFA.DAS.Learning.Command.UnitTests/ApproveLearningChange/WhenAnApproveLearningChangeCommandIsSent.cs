@@ -22,6 +22,7 @@ public class WhenAnApproveLearningChangeCommandIsSent
 
     private ApproveLearningChangeCommandHandler _handler = null!;
     private Mock<ILearningService> _learningService = null!;
+    private Mock<ILogger<ApproveLearningChangeCommandHandler>> _logger = null!;
     private ApprenticeshipEpisode _episode = null!;
     private ApprenticeshipLearningDomainModel _learning = null!;
 
@@ -29,9 +30,10 @@ public class WhenAnApproveLearningChangeCommandIsSent
     public void SetUp()
     {
         _learningService = new Mock<ILearningService>();
+        _logger = new Mock<ILogger<ApproveLearningChangeCommandHandler>>();
         _handler = new ApproveLearningChangeCommandHandler(
             _learningService.Object,
-            Mock.Of<ILogger<ApproveLearningChangeCommandHandler>>());
+            _logger.Object);
 
         _episode = CreateEpisode(furtherApprovalNeeded: true);
         _learning = CreateLearning(_episode);
@@ -89,16 +91,82 @@ public class WhenAnApproveLearningChangeCommandIsSent
         _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
     }
 
+    [TestCase("Firstname")]
+    [TestCase("Prices")]
+    [TestCase("startDate", Description = "Wrong case is not recognised")]
+    public async Task AndTheChangeTypeIsNotRecognisedThenTheFlagIsClearedAndTheLearningIsUpdated(string changeType)
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes.Add(new ApprovedChange(changeType, "Old", "New"));
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeFalse();
+        _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
+    }
+
     [Test]
-    public async Task AndTheChangeTypeIsNotRecognisedThenNothingIsUpdated()
+    public async Task AndTheChangeTypeIsNotRecognisedThenAWarningIsLogged()
     {
         var command = CreateCommand(newStartDate: "2025-08-01");
         command.Changes.Add(new ApprovedChange("Firstname", "Old", "New"));
 
         await _handler.Handle(command);
 
+        _logger.Verify(x => x.Log(
+            LogLevel.Warning,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((state, _) => state.ToString()!.Contains("Unrecognised change type Firstname")),
+            It.IsAny<Exception?>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+    }
+
+    [Test]
+    public async Task AndTheChangeTypeIsNotRecognisedAndTheStartDateChangeDoesNotMatchThenNothingIsUpdated()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-20");
+        command.Changes.Insert(0, new ApprovedChange("Firstname", "Old", "New"));
+
+        await _handler.Handle(command);
+
         _episode.FurtherApprovalNeeded.Should().BeTrue();
         _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task AndTheStartDateChangeMatchesAndAPricesChangeIsIncludedThenTheFlagIsClearedAndTheLearningIsUpdated()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes.Add(PricesChange());
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeFalse();
+        _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
+    }
+
+    [Test]
+    public async Task AndTheStartDateChangeDoesNotMatchAndAPricesChangeIsIncludedThenNothingIsUpdated()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-20");
+        command.Changes.Add(PricesChange());
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
+    [Test]
+    public async Task AndOnlyAPricesChangeIsApprovedThenTheFlagIsClearedAndTheLearningIsUpdated()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes = [PricesChange()];
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeFalse();
+        _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
     }
 
     [Test]
@@ -141,6 +209,11 @@ public class WhenAnApproveLearningChangeCommandIsSent
         ApprenticeshipId = _episode.ApprovalsApprenticeshipId,
         Changes = [new ApprovedChange("StartDate", "2025-07-01", newStartDate)]
     };
+
+    private static ApprovedChange PricesChange() => new(
+        "Prices",
+        """[{"effectiveFrom":"2025-07-01","cost":1200,"trainingPrice":1000,"assessmentPrice":200}]""",
+        """[{"effectiveFrom":"2025-08-01","cost":1200,"trainingPrice":1000,"assessmentPrice":200}]""");
 
     private static ApprenticeshipEpisode CreateEpisode(bool furtherApprovalNeeded)
     {
