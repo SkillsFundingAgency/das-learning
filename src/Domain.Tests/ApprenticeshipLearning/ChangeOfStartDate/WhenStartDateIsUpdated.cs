@@ -132,7 +132,7 @@ public class WhenStartDateIsUpdated
 
         //Assert
         var detail = _learning.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.Prices);
-        detail.RequiresApproval.Should().BeFalse("prices do not yet require approval");
+        detail.RequiresApproval.Should().BeTrue("the training price changed as well as the start date");
 
         var oldPrice = detail.Old!.AsArray().Single()!.AsObject();
         oldPrice["startDate"]!.GetValue<string>().Should().Be("2024-08-01");
@@ -187,7 +187,7 @@ public class WhenStartDateIsUpdated
     {
         //Arrange
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
-        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+        updateModel.Learning.CompletionDate = new DateTime(2025, 07, 01);
 
         //Act
         _learning.Update(updateModel);
@@ -239,7 +239,7 @@ public class WhenStartDateIsUpdated
     {
         //Arrange
         var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
-        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+        updateModel.Learning.CompletionDate = new DateTime(2025, 07, 01);
 
         //Act
         _learning.Update(updateModel);

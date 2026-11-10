@@ -408,13 +408,48 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         }
 
         var previousPrices = PricesAsJson(); // Snapshot values before update
+        var pricesBefore = LatestEpisode.EpisodePrices
+            .Select(x => (x.StartDate, x.TrainingPrice, x.EndPointAssessmentPrice))
+            .ToList();
 
         var hasChanged = LatestEpisode.UpdatePricesIfChanged(costs);
 
         if (hasChanged)
         {
-            changes.Add(new LearningChange(LearningUpdateChanges.Prices, old: previousPrices, @new: PricesAsJson()));
+            var requiresApproval = LatestEpisode.IsApproved && PricesDifferIgnoringStartDate(pricesBefore, costs);
+
+            changes.Add(new LearningChange(LearningUpdateChanges.Prices, old: previousPrices, @new: PricesAsJson(), requiresApproval));
+
+            if (requiresApproval)
+            {
+                LatestEpisode.SetFurtherApprovalNeeded(true);
+            }
         }
+    }
+
+    // The first price's FromDate is the start date, which is approved as a StartDate change instead
+    private static bool PricesDifferIgnoringStartDate(
+        List<(DateTime StartDate, decimal? TrainingPrice, decimal? EndPointAssessmentPrice)> before,
+        List<Cost> after)
+    {
+        var beforeOrdered = before.OrderBy(x => x.StartDate).ToList();
+        var afterOrdered = after.OrderBy(x => x.FromDate).ToList();
+
+        if (beforeOrdered.Count != afterOrdered.Count) return true;
+
+        for (var i = 0; i < beforeOrdered.Count; i++)
+        {
+            var previous = beforeOrdered[i];
+            var current = afterOrdered[i];
+
+            if (previous.TrainingPrice != current.TrainingPrice) return true;
+            if (previous.EndPointAssessmentPrice != current.EpaoPrice) return true;
+
+            var isFirstPrice = i == 0;
+            if (!isFirstPrice && previous.StartDate != current.FromDate) return true;
+        }
+
+        return false;
     }
 
     private JsonArray PricesAsJson() =>
