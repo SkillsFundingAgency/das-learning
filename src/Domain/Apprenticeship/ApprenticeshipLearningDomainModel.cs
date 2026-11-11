@@ -444,9 +444,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
             if (previous.TrainingPrice != current.TrainingPrice) return true;
             if (previous.EndPointAssessmentPrice != current.EpaoPrice) return true;
-
-            var isFirstPrice = i == 0;
-            if (!isFirstPrice && previous.StartDate != current.FromDate) return true;
+            if (i != 0 && previous.StartDate != current.FromDate) return true;
         }
 
         return false;
