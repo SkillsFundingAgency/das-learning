@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ public class WhenGettingUnapprovedApprenticeshipLearning
     private ApprenticeshipLearningRepository _sut;
     private const string Uln = "44444444";
     private const string TrainingCode = "21";
+    private readonly Guid LearnerKey = Guid.NewGuid();
 
     [SetUp]
     public void SetUp()
@@ -31,11 +33,10 @@ public class WhenGettingUnapprovedApprenticeshipLearning
 
         _dbContext = new LearningDataContext(options);
 
-        var learnerKey = Guid.NewGuid();
-        _dbContext.LearnersDbSet.Add(new Learner { Key = learnerKey, Uln = Uln, FirstName = "Alex", LastName = "Jones" });
+        _dbContext.LearnersDbSet.Add(new Learner { Key = LearnerKey, Uln = Uln, FirstName = "Alex", LastName = "Jones" });
 
         var episodeKey = Guid.NewGuid();
-        var learning = new DataAccess.Entities.Learning.ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = learnerKey, TrainingCode = TrainingCode };
+        var learning = new DataAccess.Entities.Learning.ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = LearnerKey, TrainingCode = TrainingCode };
         learning.Episodes.Add(new ApprenticeshipEpisode
         {
             Key = episodeKey,
@@ -73,9 +74,49 @@ public class WhenGettingUnapprovedApprenticeshipLearning
     [Test]
     public async Task ThenTheDraftIsFoundByUlnAndTrainingCode_EvenThoughTheRealApprovalsApprenticeshipIdDiffersFromTheDraftsZero()
     {
+        var learning = new DataAccess.Entities.Learning.ApprenticeshipLearning { Key = Guid.NewGuid(), LearnerKey = LearnerKey, TrainingCode = TrainingCode };
+        var episodeKey = Guid.NewGuid();
+
+        // Adding a second draft learning with the same learner key and training code, but a different provider (ukprn) to ensure that the repository correctly filters by ukprn when provided.
+        learning.Episodes.Add(new ApprenticeshipEpisode
+        {
+            Key = episodeKey,
+            Ukprn = 10005078,
+            IsApproved = false,
+            ApprovalsApprenticeshipId = 0,
+            LegalEntityName = string.Empty,
+            EmployerType = EmployerType.NonLevy,
+            Prices =
+            [
+                new EpisodePrice
+                {
+                    Key = Guid.NewGuid(),
+                    EpisodeKey = episodeKey,
+                    StartDate = new DateTime(2026, 4, 1),
+                    EndDate = new DateTime(2028, 3, 31),
+                    TotalPrice = 8000,
+                    TrainingPrice = 6400,
+                    EndPointAssessmentPrice = 1600
+                }
+            ]
+        });
+
+        _dbContext.Set<DataAccess.Entities.Learning.ApprenticeshipLearning>().Add(learning);
+        await _dbContext.SaveChangesAsync();
+
         ILearningRepository repository = _sut;
 
-        var result = await repository.GetUnapprovedLearning(Uln, apprenticeshipId: 200003, trainingCode: TrainingCode);
+        var result = await repository.GetUnapprovedLearning(Uln, apprenticeshipId: 200003, trainingCode: TrainingCode, ukprn: 10005078);
+
+        result.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task ThenTheDraftIsFoundByUlnAndTrainingCodeAndUkprn_EvenThoughTheRealApprovalsApprenticeshipIdDiffersFromTheDraftsZero()
+    {
+        ILearningRepository repository = _sut;
+
+        var result = await repository.GetUnapprovedLearning(Uln, apprenticeshipId: 200003, trainingCode: TrainingCode, ukprn: 10005077);
 
         result.Should().NotBeNull();
     }
