@@ -188,12 +188,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         var query = DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.LearnerKey == learnerKey &&
                         x.TrainingCode == trainingCode &&
-                        x.Episodes.Any(e => !e.IsApproved));
-
-        if (ukprn.HasValue)
-        {
-            query = query.Where(o => o.Episodes.Any(e => e.Ukprn == ukprn.Value));
-        }
+                        x.Episodes.Any(e => !e.IsApproved && ukprn.HasValue && e.Ukprn == ukprn.Value));
 
         query = query
             .Include(x => x.EnglishAndMathsCourses)
