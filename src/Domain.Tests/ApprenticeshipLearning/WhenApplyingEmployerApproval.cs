@@ -4,6 +4,7 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Events;
 using SFA.DAS.Learning.Domain.UnitTests.Helpers;
 using SFA.DAS.Learning.Enums;
+using System;
 using System.Linq;
 
 namespace SFA.DAS.Learning.Domain.UnitTests.ApprenticeshipLearning;
@@ -29,7 +30,7 @@ public class WhenApplyingEmployerApproval
     public void ThenTheFlagIsCleared()
     {
         //Act
-        _learning.ApplyEmployerApproval(_episode.Key, _changes);
+        _learning.ApplyEmployerApproval(_episode.Key, _changes, null);
 
         //Assert
         _episode.FurtherApprovalNeeded.Should().BeFalse();
@@ -39,7 +40,7 @@ public class WhenApplyingEmployerApproval
     public void ThenAnEmployerApprovalAppliedEventIsRaised()
     {
         //Act
-        _learning.ApplyEmployerApproval(_episode.Key, _changes);
+        _learning.ApplyEmployerApproval(_episode.Key, _changes, null);
 
         //Assert
         var raisedEvent = _learning.FlushEvents().OfType<EmployerApprovalAppliedEvent>().Single();
@@ -53,10 +54,39 @@ public class WhenApplyingEmployerApproval
     }
 
     [Test]
+    public void ThenTheApprovedPricesAreOnTheEvent()
+    {
+        //Arrange
+        ApprovedPrice[] prices =
+        [
+            new(1000, 200, new DateTime(2025, 8, 1)),
+            new(1500, null, new DateTime(2026, 2, 1))
+        ];
+
+        //Act
+        _learning.ApplyEmployerApproval(_episode.Key, _changes, prices);
+
+        //Assert
+        _learning.FlushEvents().OfType<EmployerApprovalAppliedEvent>().Single()
+            .Prices.Should().Equal(prices);
+    }
+
+    [Test]
+    public void AndNoPricesWereApprovedThenTheEventHasNoPrices()
+    {
+        //Act
+        _learning.ApplyEmployerApproval(_episode.Key, _changes, null);
+
+        //Assert
+        _learning.FlushEvents().OfType<EmployerApprovalAppliedEvent>().Single()
+            .Prices.Should().BeEmpty();
+    }
+
+    [Test]
     public void ThenTheFurtherApprovedHistoryEventIsStillRaised()
     {
         //Act
-        _learning.ApplyEmployerApproval(_episode.Key, _changes);
+        _learning.ApplyEmployerApproval(_episode.Key, _changes, null);
 
         //Assert
         _learning.FlushEvents().OfType<ApprenticeshipLearningChangedEvent>().Single()

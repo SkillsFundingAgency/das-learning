@@ -39,6 +39,8 @@ public class ApproveLearningChangeCommandHandler(
             return;
         }
 
+        var anythingRecognised = false;
+
         foreach (var change in command.Changes)
         {
             if (!TryGetCurrentValue(change.ChangeType, episode, out var current))
@@ -54,9 +56,30 @@ public class ApproveLearningChangeCommandHandler(
                     change.ChangeType, change.New, current, episode.Key, command.LearningKey, command.ApprenticeshipId);
                 return;
             }
+
+            anythingRecognised = true;
         }
 
-        learning.ApplyEmployerApproval(episode.Key, command.Changes);
+        if (command.Prices != null)
+        {
+            if (!PricesMatch(command.Prices, episode))
+            {
+                logger.LogWarning("Approved prices do not match current prices on episode {EpisodeKey}, learning {LearningKey}; approval for apprenticeship {ApprenticeshipId} dropped",
+                    episode.Key, command.LearningKey, command.ApprenticeshipId);
+                return;
+            }
+
+            anythingRecognised = true;
+        }
+
+        if (!anythingRecognised)
+        {
+            logger.LogWarning("Approval for apprenticeship {ApprenticeshipId} on episode {EpisodeKey}, learning {LearningKey} has nothing recognised to apply; dropped",
+                command.ApprenticeshipId, episode.Key, command.LearningKey);
+            return;
+        }
+
+        learning.ApplyEmployerApproval(episode.Key, command.Changes, command.Prices);
 
         await learningService.UpdateLearning(learning);
     }
@@ -70,6 +93,19 @@ public class ApproveLearningChangeCommandHandler(
         };
 
         return current != null;
+    }
+
+    private static bool PricesMatch(IReadOnlyCollection<ApprovedPrice> approved, ApprenticeshipEpisodeDomainModel episode)
+    {
+        var approvedInOrder = approved
+            .OrderBy(x => x.EffectiveFrom)
+            .Select(x => (x.EffectiveFrom.Date, x.TrainingPrice ?? 0, x.AssessmentPrice ?? 0));
+
+        var currentInOrder = episode.EpisodePrices
+            .OrderBy(x => x.StartDate)
+            .Select(x => (x.StartDate.Date, x.TrainingPrice ?? 0, x.EndPointAssessmentPrice ?? 0));
+
+        return approvedInOrder.SequenceEqual(currentInOrder);
     }
 
     private static string FormatDate(DateTime date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);

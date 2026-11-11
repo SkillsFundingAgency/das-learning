@@ -255,7 +255,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         return true;
     }
 
-    public void ApplyEmployerApproval(Guid episodeKey, IReadOnlyCollection<ApprovedChange> changes)
+    public void ApplyEmployerApproval(Guid episodeKey, IReadOnlyCollection<ApprovedChange> changes, IReadOnlyCollection<ApprovedPrice>? prices)
     {
         var episode = _episodes.Single(x => x.Key == episodeKey);
 
@@ -269,7 +269,8 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             LearnerRef = episode.LearnerRef,
             ApprenticeshipId = episode.ApprovalsApprenticeshipId,
             LearningType = LearningType,
-            Changes = changes.ToList()
+            Changes = changes.ToList(),
+            Prices = prices?.ToList() ?? []
         });
     }
 
