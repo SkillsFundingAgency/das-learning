@@ -12,4 +12,5 @@ public class EmployerApprovalAppliedEvent : IDomainEvent
     public long ApprenticeshipId { get; set; }
     public LearningType LearningType { get; set; }
     public List<ApprovedChange> Changes { get; set; } = [];
+    public List<ApprovedPrice> Prices { get; set; } = [];
 }
