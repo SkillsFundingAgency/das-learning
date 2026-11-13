@@ -52,7 +52,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
         var apprenticeship = _fixture.Create<ApprenticeshipLearningDomainModel>();
         TestHelper.SetEpisode(apprenticeship, _fixture.CreateEpisodeDomainModel());
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.Apprenticeship, command.ApprovalsApprenticeshipId, It.IsAny<string>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.Apprenticeship, command.ApprovalsApprenticeshipId, It.IsAny<string>(), It.IsAny<long>()))
             .ReturnsAsync(apprenticeship);
 
         await _commandHandler.Handle(command);
@@ -154,7 +154,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>(), It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
@@ -186,7 +186,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>(), It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
@@ -204,7 +204,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>(), It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
@@ -222,7 +222,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>(), It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
@@ -240,7 +240,7 @@ public class WhenAnAddApprenticeshipCommandIsSent
 
         var shortCourseLearning = _fixture.Create<ShortCourseLearningDomainModel>();
 
-        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>()))
+        _learningService.Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), It.IsAny<string>(), It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
@@ -275,11 +275,11 @@ public class WhenAnAddApprenticeshipCommandIsSent
         command.UKPRN = shortCourseLearning.Episodes.First().Ukprn;
 
         _learningService
-            .Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), command.TrainingCode))
+            .Setup(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), command.TrainingCode, It.IsAny<long>()))
             .ReturnsAsync(shortCourseLearning);
 
         await _commandHandler.Handle(command);
 
-        _learningService.Verify(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), command.TrainingCode), Times.Once);
+        _learningService.Verify(x => x.GetUnapprovedLearning(command.Uln, LearningType.ApprenticeshipUnit, It.IsAny<long>(), command.TrainingCode, It.IsAny<long>()), Times.Once);
     }
 }

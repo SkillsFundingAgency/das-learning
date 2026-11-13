@@ -147,7 +147,7 @@ public class ShortCourseLearningRepository : IShortCourseLearningRepository
         return shortCourseLearning == null ? null : _learningFactory.GetExisting(shortCourseLearning);
     }
 
-    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null)
+    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null, long? ukprn = null)
     {
         return await Get(uln, unapprovedOnly: true, trainingCode: trainingCode);
     }
