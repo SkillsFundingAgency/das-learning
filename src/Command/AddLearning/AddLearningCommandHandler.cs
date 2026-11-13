@@ -33,7 +33,7 @@ public class AddLearningCommandHandler : ICommandHandler<AddLearningCommand>
 
     public async Task Handle(AddLearningCommand command, CancellationToken cancellationToken = default)
     {
-        var existingLearning = await _learningService.GetUnapprovedLearning(command.Uln, command.LearningType, command.ApprovalsApprenticeshipId, command.TrainingCode);
+        var existingLearning = await _learningService.GetUnapprovedLearning(command.Uln, command.LearningType, command.ApprovalsApprenticeshipId, trainingCode: command.TrainingCode, ukprn: command.UKPRN);
 
         if (existingLearning != null)
         {

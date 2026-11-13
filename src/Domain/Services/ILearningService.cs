@@ -9,7 +9,8 @@ public interface ILearningService
         string uln,
         LearningType type,
         long approvalsApprenticeshipId,
-        string? trainingCode = null);
+        string? trainingCode = null,
+        long? ukprn = null);
 
     Task<LearningDomainModel?> GetLearning(Guid learningKey, LearningType type);
 

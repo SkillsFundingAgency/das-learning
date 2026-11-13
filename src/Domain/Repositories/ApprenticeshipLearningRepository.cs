@@ -164,7 +164,7 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         return apprenticeship == null ? null : _learningFactory.GetExisting(apprenticeship);
     }
 
-    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null)
+    async Task<LearningDomainModel?> ILearningRepository.GetUnapprovedLearning(string uln, long apprenticeshipId, string? trainingCode = null, long? ukprn = null)
     {
         // Nb, cannot look this up by apprenticeshipId - a draft's ApprovalsApprenticeshipId is hard-coded to 0
         // until approval, so the real (incoming) apprenticeshipId never matches the draft it's meant to approve.
@@ -179,15 +179,18 @@ public class ApprenticeshipLearningRepository : IApprenticeshipLearningRepositor
         // Nb, not AsNoTracking - UnitOfWork.Track() just queues this aggregate for event dispatch,
         // it doesn't attach/re-track the entity. Persisting a later Approve() call depends on this
         // query leaving EF's change tracker holding the entity, same as ShortCourseLearningRepository.Get.
-        var apprenticeship = await DbContext.ApprenticeshipLearningDbSet
+        var query = DbContext.ApprenticeshipLearningDbSet
             .Where(x => x.LearnerKey == learnerKey &&
                         x.TrainingCode == trainingCode &&
-                        x.Episodes.Any(e => !e.IsApproved))
+                        x.Episodes.Any(e => !e.IsApproved && ukprn.HasValue && e.Ukprn == ukprn.Value));
+
+        query = query
             .Include(x => x.EnglishAndMathsCourses)
             .Include(x => x.Episodes)
                 .ThenInclude(e => e.Prices)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync();
+            .AsSplitQuery();
+
+        var apprenticeship = await query.SingleOrDefaultAsync();
 
         return apprenticeship == null
             ? null
