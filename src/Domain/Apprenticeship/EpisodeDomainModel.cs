@@ -135,6 +135,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             CompletionDate = details.CompletionDate,
             AchievementDate = details.AchievementDate,
             PauseDate = details.PauseDate,
+            FundingPlatform = details.FundingPlatform,
             Prices = [price.GetEntity()],
             BreaksInLearning = details.BreaksInLearning.Select(b => new EpisodeBreakInLearning
             {
