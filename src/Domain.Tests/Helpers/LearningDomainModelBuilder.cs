@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Models.UpdateModels;
+using SFA.DAS.Learning.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,6 +65,7 @@ public class LearningDomainModelBuilder
         episode.IsApproved = _isApproved;
         episode.FurtherApprovalNeeded = false;
         episode.ForceEarningsSync = false;
+        episode.FundingPlatform = FundingPlatform.SLD;
         episode.CompletionDate = episode.CompletionDate?.Date;
         episode.AchievementDate = null;
 

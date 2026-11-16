@@ -32,4 +32,5 @@ public class ApprenticeshipEpisode : Episode
     public List<EpisodeBreakInLearning> BreaksInLearning { get; set; }
     public string LearnerRef { get; set; } = string.Empty;
     public bool ForceEarningsSync { get; set; }
+    public FundingPlatform FundingPlatform { get; set; } = FundingPlatform.SLD;
 }
