@@ -106,6 +106,7 @@ public class WhenAddingAnApprenticeship
             .Excluding(y => y.FirstPrice)
             .Excluding(y => y.ActiveEpisodePrices)
             .Excluding(y => y.IsWithdrawnBackToStart)
+            .Excluding(y => y.IsApprovedAndPaidByDas)
             .Excluding(y => y.LearningSupport)
             .Excluding(y => y.IsRemoved)
             .Excluding(y => y.CompletionDate)

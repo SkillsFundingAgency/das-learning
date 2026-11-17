@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration.Memory;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using SFA.DAS.Encoding;
+using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.TestHelpers;
 
 [assembly: Parallelizable(ParallelScope.Fixtures)]
@@ -41,6 +42,8 @@ public class TestContext : IDisposable
                 new KeyValuePair<string, string?>("ApplicationSettings:LogLevel", "DEBUG"),
                 new KeyValuePair<string, string?>("ApplicationSettings:DbConnectionString", SqlDatabase?.DatabaseInfo.ConnectionString!),
                 new KeyValuePair<string, string?>("FeatureFlags:ShortCourseChangeOfProvider", "true"),
+                new KeyValuePair<string, string?>("ApprenticeshipOptInConfiguration:StartDate", TokenisableDateTime.FromString("currentAY-08-01").DateTime!.Value.ToString("yyyy-MM-dd")),
+                new KeyValuePair<string, string?>("ApprenticeshipOptInConfiguration:PaymentsOptedInProviders:0", Constants.UkPrn.ToString()),
                 new KeyValuePair<string, string?>("SFA.DAS.Encoding", MockEncodingConfig())
             }
         };

@@ -394,7 +394,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         // This check must be done before the actual Price update is performed
         if (costs.Count > 0 && costs.Min(x => x.FromDate) != StartDate)
         {
-            var requiresApproval = LatestEpisode.IsApproved;
+            var requiresApproval = LatestEpisode.IsApprovedAndPaidByDas;
 
             changes.Add(new LearningChange(
                 LearningUpdateChanges.StartDate,
@@ -417,7 +417,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
         if (hasChanged)
         {
-            var requiresApproval = LatestEpisode.IsApproved && PricesDifferIgnoringStartDate(pricesBefore, costs);
+            var requiresApproval = LatestEpisode.IsApprovedAndPaidByDas && PricesDifferIgnoringStartDate(pricesBefore, costs);
 
             changes.Add(new LearningChange(LearningUpdateChanges.Prices, old: previousPrices, @new: PricesAsJson(), requiresApproval));
 
@@ -476,7 +476,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
         {
             changes.Add(LearningUpdateChanges.ExpectedEndDate);
 
-            if (!LatestEpisode.IsApproved) return;
+            if (!LatestEpisode.IsApprovedAndPaidByDas) return;
 
             var @event = new EndDateChangedEvent
             {
@@ -505,7 +505,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             // a reason-only change must still update Approvals, but doesn't affect earnings, so it is reported separately
             changes.Add(withdrawalDateUnchanged ? LearningUpdateChanges.WithdrawalReasonChanged : LearningUpdateChanges.Withdrawal);
 
-            if (!latestEpisode.IsApproved) return;
+            if (!latestEpisode.IsApprovedAndPaidByDas) return;
 
             var @event = new LearningWithdrawnEvent
             {
@@ -526,7 +526,7 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
             latestEpisode.ReverseWithdrawal();
             changes.Add(LearningUpdateChanges.ReverseWithdrawal);
 
-            if (!latestEpisode.IsApproved) return;
+            if (!latestEpisode.IsApprovedAndPaidByDas) return;
 
             var @event = new WithdrawalRevertedEvent
             {

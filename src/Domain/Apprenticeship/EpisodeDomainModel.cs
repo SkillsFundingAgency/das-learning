@@ -38,6 +38,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public DateTime? PauseDate => _entity.PauseDate;
     public bool ForceEarningsSync => _entity.ForceEarningsSync;
     public FundingPlatform FundingPlatform => _entity.FundingPlatform;
+    public bool IsApprovedAndPaidByDas => IsApproved && FundingPlatform == FundingPlatform.DAS;
     public IReadOnlyCollection<ApprenticeshipLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ApprenticeshipLearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);

@@ -457,7 +457,9 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         // Arrange
         var command = CreateCommand(); // costs start 2025-08-01
         var learner = CreateLearner();
-        var removedLearning = CreateLearning(isApproved: true, isRemoved: true, startDate: new DateTime(2025, 9, 1));
+        var removedEpisode = CreateEpisode(isApproved: true, isRemoved: true, startDate: new DateTime(2025, 9, 1));
+        removedEpisode.FundingPlatform = FundingPlatform.DAS;
+        var removedLearning = CreateLearningWithEpisodes(removedEpisode);
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))

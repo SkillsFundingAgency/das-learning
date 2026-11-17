@@ -195,6 +195,7 @@ public class WhenUpdatingLearner
         {
             x.IsRemoved = false;
             x.IsApproved = isApproved;
+            x.FundingPlatform = FundingPlatform.DAS;
         });
         TestHelper.SetEpisode(learningDomainModel, episode);
 
@@ -321,6 +322,7 @@ public class WhenUpdatingLearner
         {
             x.IsRemoved = false;
             x.IsApproved = isApproved;
+            x.FundingPlatform = FundingPlatform.DAS;
             x.FurtherApprovalNeeded = false;
         });
         TestHelper.SetEpisode(learningDomainModel, episode);

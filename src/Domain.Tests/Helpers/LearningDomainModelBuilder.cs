@@ -17,10 +17,17 @@ public class LearningDomainModelBuilder
     private string _learnerRef;
     private bool _learnerRefSet;
     private bool _isApproved = true;
+    private FundingPlatform _fundingPlatform = FundingPlatform.DAS;
 
     public LearningDomainModelBuilder WithIsApproved(bool isApproved)
     {
         _isApproved = isApproved;
+        return this;
+    }
+
+    public LearningDomainModelBuilder WithFundingPlatform(FundingPlatform fundingPlatform)
+    {
+        _fundingPlatform = fundingPlatform;
         return this;
     }
 
@@ -65,7 +72,7 @@ public class LearningDomainModelBuilder
         episode.IsApproved = _isApproved;
         episode.FurtherApprovalNeeded = false;
         episode.ForceEarningsSync = false;
-        episode.FundingPlatform = FundingPlatform.SLD;
+        episode.FundingPlatform = _fundingPlatform;
         episode.CompletionDate = episode.CompletionDate?.Date;
         episode.AchievementDate = null;
 

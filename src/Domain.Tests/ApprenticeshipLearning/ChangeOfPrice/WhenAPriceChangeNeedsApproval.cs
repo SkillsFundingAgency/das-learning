@@ -53,6 +53,28 @@ public class WhenAPriceChangeNeedsApproval
         _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeTrue();
     }
 
+    [Test]
+    public void AndTrainingPriceChangesOnApprovedEpisodeNotPaidByDasThenTheChangeIsReportedButDoesNotNeedApproval()
+    {
+        //Arrange
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts([new Cost { FromDate = new DateTime(2024, 08, 01), TrainingPrice = 10000, EpaoPrice = 1000 }])
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithFundingPlatform(FundingPlatform.SLD)
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().TrainingPrice += 1000;
+
+        //Act
+        var result = _learning.Update(updateModel);
+
+        //Assert
+        result.Should().Contain(LearningUpdateChanges.Prices);
+        ChangesNeedingApproval.Should().BeEmpty();
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeFalse();
+    }
+
     [TestCase(1200)]
     [TestCase(null)]
     public void AndEpaoPriceChangesOnApprovedEpisodeThenPricesNeedApproval(int? newEpaoPrice)

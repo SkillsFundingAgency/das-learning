@@ -60,4 +60,23 @@ public class WhenExpectedEndDateIsUpdated
 
         events.Should().ContainEquivalentOf(expectedEvent);
     }
+
+    [Test]
+    public void AndTheEpisodeIsNotPaidByDasThenTheChangeIsMadeButNoEndDateChangedEventIsEmitted()
+    {
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithGeneratedCosts(1)
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithFundingPlatform(FundingPlatform.SLD)
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.ExpectedEndDate = new DateTime(2026, 07, 31);
+
+        var result = _learning.Update(updateModel);
+
+        result.Should().Contain(LearningUpdateChanges.ExpectedEndDate);
+        _learning.LatestEpisode.EpisodePrices.Single().EndDate.Should().Be(new DateTime(2026, 07, 31));
+        _learning.FlushEvents().OfType<EndDateChangedEvent>().Should().BeEmpty();
+    }
 }

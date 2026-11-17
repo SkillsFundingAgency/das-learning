@@ -2,6 +2,7 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using SFA.DAS.Learning.AcceptanceTests.Helpers;
 using SFA.DAS.Learning.DataAccess.Entities.Learning;
+using SFA.DAS.Learning.Enums;
 using SFA.DAS.Learning.Types;
 
 namespace SFA.DAS.Learning.AcceptanceTests.StepDefinitions;
@@ -22,6 +23,25 @@ public class DraftApprenticeshipApprovalStepDefinitions
     public async Task WhenTheDraftApprenticeshipIsApprovedByTheApprovalsJourney()
     {
         await _testContext.TestFunction!.PublishEvent(ApprovalCreatedEvent);
+    }
+
+    [Given(@"the draft apprenticeship has been approved")]
+    public async Task GivenTheDraftApprenticeshipHasBeenApproved()
+    {
+        await _testContext.TestFunction!.PublishEvent(ApprovalCreatedEvent);
+        await WaitHelper.WaitForIt(async () => await IsApprenticeshipApproved(), "Failed to find the approved apprenticeship record");
+
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        _scenarioContext.SetLearningKey(dbConnection.GetLearningKey(ApprovalCreatedEvent.Uln));
+        _scenarioContext.SetLearnerKey(dbConnection.GetLearner(ApprovalCreatedEvent.Uln).Key);
+    }
+
+    [Then(@"the apprenticeship episode FundingPlatform is (DAS|SLD)")]
+    public async Task ThenTheApprenticeshipEpisodeFundingPlatformIs(FundingPlatform fundingPlatform)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        var learning = dbConnection.GetLearning(ApprovalCreatedEvent.Uln);
+        learning.Episodes.Single().FundingPlatform.Should().Be(fundingPlatform);
     }
 
     [Then(@"the existing apprenticeship record is approved and not duplicated")]
