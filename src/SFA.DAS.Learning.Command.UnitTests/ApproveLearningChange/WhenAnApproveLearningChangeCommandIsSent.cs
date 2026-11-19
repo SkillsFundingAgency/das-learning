@@ -129,10 +129,36 @@ public class WhenAnApproveLearningChangeCommandIsSent
         _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
     }
 
+    [TestCase("startDate", "2025-08-01")]
+    [TestCase("STARTDATE", "2025-08-01")]
+    [TestCase("plannedEndDate", "2026-07-31")]
+    [TestCase("PLANNEDENDDATE", "2026-07-31")]
+    public async Task AndTheChangeTypeIsInADifferentCaseAndItMatchesThenTheFlagIsClearedAndTheLearningIsUpdated(string changeType, string newValue)
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes = [new ApprovedChange(changeType, "Old", newValue)];
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeFalse();
+        _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
+    }
+
+    [TestCase("startDate", "2025-08-20")]
+    [TestCase("plannedEndDate", "2026-09-30")]
+    public async Task AndTheChangeTypeIsInADifferentCaseAndItDoesNotMatchThenNothingIsUpdated(string changeType, string newValue)
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes.Add(new ApprovedChange(changeType, "Old", newValue));
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
     [TestCase("Firstname")]
     [TestCase("Prices")]
-    [TestCase("startDate", Description = "Wrong case is not recognised")]
-    [TestCase("plannedEndDate", Description = "Wrong case is not recognised")]
     public async Task AndTheChangeTypeIsNotRecognisedThenTheFlagIsClearedAndTheLearningIsUpdated(string changeType)
     {
         var command = CreateCommand(newStartDate: "2025-08-01");

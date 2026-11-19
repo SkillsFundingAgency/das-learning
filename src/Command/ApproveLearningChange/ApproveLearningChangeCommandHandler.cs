@@ -86,15 +86,18 @@ public class ApproveLearningChangeCommandHandler(
 
     private static bool TryGetCurrentValue(string changeType, ApprenticeshipEpisodeDomainModel episode, out string? current)
     {
-        current = changeType switch
-        {
-            nameof(CocChangeField.StartDate) => FormatDate(episode.FirstPrice.StartDate),
-            nameof(CocChangeField.PlannedEndDate) => FormatDate(episode.EpisodePrices.MaxBy(x => x.StartDate)!.EndDate),
-            _ => null
-        };
+        if (IsChangeType(changeType, CocChangeField.StartDate))
+            current = FormatDate(episode.FirstPrice.StartDate);
+        else if (IsChangeType(changeType, CocChangeField.PlannedEndDate))
+            current = FormatDate(episode.EpisodePrices.MaxBy(x => x.StartDate)!.EndDate);
+        else
+            current = null;
 
         return current != null;
     }
+
+    private static bool IsChangeType(string changeType, CocChangeField field) =>
+        string.Equals(changeType, field.ToString(), StringComparison.OrdinalIgnoreCase);
 
     private static bool PricesMatch(IReadOnlyCollection<ApprovedPrice> approved, ApprenticeshipEpisodeDomainModel episode)
     {
