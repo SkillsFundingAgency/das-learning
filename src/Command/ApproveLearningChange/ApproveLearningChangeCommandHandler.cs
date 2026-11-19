@@ -89,6 +89,7 @@ public class ApproveLearningChangeCommandHandler(
         current = changeType switch
         {
             nameof(CocChangeField.StartDate) => FormatDate(episode.FirstPrice.StartDate),
+            nameof(CocChangeField.PlannedEndDate) => FormatDate(episode.EpisodePrices.MaxBy(x => x.StartDate)!.EndDate),
             _ => null
         };
 

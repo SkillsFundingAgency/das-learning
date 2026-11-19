@@ -92,9 +92,47 @@ public class WhenAnApproveLearningChangeCommandIsSent
         _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
     }
 
+    [Test]
+    public async Task AndOnlyAPlannedEndDateChangeIsApprovedAndItMatchesThenTheFlagIsClearedAndTheLearningIsUpdated()
+    {
+        var command = CreatePlannedEndDateCommand(newPlannedEndDate: "2026-07-31");
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeFalse();
+        _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
+    }
+
+    [Test]
+    public async Task AndOnlyAPlannedEndDateChangeIsApprovedAndItMatchesThenAnEmployerApprovalAppliedEventIsRaised()
+    {
+        var command = CreatePlannedEndDateCommand(newPlannedEndDate: "2026-07-31");
+
+        await _handler.Handle(command);
+
+        var raisedEvent = _learning.FlushEvents().OfType<EmployerApprovalAppliedEvent>().Single();
+        raisedEvent.EpisodeKey.Should().Be(_episode.Key);
+        raisedEvent.Changes.Should().BeEquivalentTo(command.Changes);
+    }
+
+    [TestCase("2026-09-30", Description = "Stale: a newer planned end date has since been saved")]
+    [TestCase("not-a-date", Description = "Unparseable")]
+    [TestCase("2026-07-31T00:00:00", Description = "Not ISO yyyy-MM-dd")]
+    public async Task AndTheStartDateChangeMatchesButThePlannedEndDateChangeDoesNotThenNothingIsUpdated(string newPlannedEndDate)
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes.Add(new ApprovedChange("PlannedEndDate", "2026-06-30", newPlannedEndDate));
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
     [TestCase("Firstname")]
     [TestCase("Prices")]
     [TestCase("startDate", Description = "Wrong case is not recognised")]
+    [TestCase("plannedEndDate", Description = "Wrong case is not recognised")]
     public async Task AndTheChangeTypeIsNotRecognisedThenTheFlagIsClearedAndTheLearningIsUpdated(string changeType)
     {
         var command = CreateCommand(newStartDate: "2025-08-01");
@@ -278,6 +316,13 @@ public class WhenAnApproveLearningChangeCommandIsSent
         LearningKey = _learning.Key,
         ApprenticeshipId = _episode.ApprovalsApprenticeshipId,
         Changes = [new ApprovedChange("StartDate", "2025-07-01", newStartDate)]
+    };
+
+    private ApproveLearningChangeCommand CreatePlannedEndDateCommand(string newPlannedEndDate) => new()
+    {
+        LearningKey = _learning.Key,
+        ApprenticeshipId = _episode.ApprovalsApprenticeshipId,
+        Changes = [new ApprovedChange("PlannedEndDate", "2026-06-30", newPlannedEndDate)]
     };
 
     private static List<ApprovedPrice> MatchingPrices() =>
