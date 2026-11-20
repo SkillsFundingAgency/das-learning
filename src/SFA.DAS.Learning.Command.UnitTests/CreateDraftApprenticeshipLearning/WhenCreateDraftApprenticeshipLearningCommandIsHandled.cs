@@ -9,6 +9,7 @@ using SFA.DAS.Learning.Domain.Apprenticeship;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Infrastructure.Configuration;
 using SFA.DAS.Learning.Models.UpdateModels;
 using SFA.DAS.Learning.Models.UpdateModels.Shared;
 using System;
@@ -29,6 +30,7 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
     private Mock<IApprenticeshipLearningRepository> _learningRepository = null!;
     private Mock<ILogger<CreateDraftApprenticeshipLearningCommandHandler>> _logger = null!;
     private ILearnerFactory _learnerFactory = null!;
+    private ApprenticeshipOptInConfiguration _optInConfiguration = null!;
 
     private CreateDraftApprenticeshipLearningCommandHandler _handler = null!;
 
@@ -40,11 +42,17 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         _learningRepository = new Mock<IApprenticeshipLearningRepository>();
         _logger = new Mock<ILogger<CreateDraftApprenticeshipLearningCommandHandler>>();
         _learnerFactory = new LearnerFactory();
+        _optInConfiguration = new ApprenticeshipOptInConfiguration
+        {
+            StartDate = new DateTime(2025, 8, 1),
+            PaymentsOptedInProviders = [Ukprn]
+        };
 
         _handler = new CreateDraftApprenticeshipLearningCommandHandler(
             _learnerFactory,
             _learnerRepository.Object,
             _learningRepository.Object,
+            _optInConfiguration,
             _logger.Object);
 
         _learningRepository
@@ -449,7 +457,9 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         // Arrange
         var command = CreateCommand(); // costs start 2025-08-01
         var learner = CreateLearner();
-        var removedLearning = CreateLearning(isApproved: true, isRemoved: true, startDate: new DateTime(2025, 9, 1));
+        var removedEpisode = CreateEpisode(isApproved: true, isRemoved: true, startDate: new DateTime(2025, 9, 1));
+        removedEpisode.FundingPlatform = FundingPlatform.DAS;
+        var removedLearning = CreateLearningWithEpisodes(removedEpisode);
 
         _learnerRepository
             .Setup(x => x.GetByUln(It.IsAny<string>()))
@@ -1069,6 +1079,117 @@ public class WhenCreateDraftApprenticeshipLearningCommandIsHandled
         // Assert
         result.Should().NotBeNull();
         result!.RemovedLearningKey.Should().BeNull();
+    }
+
+    [Test]
+    public async Task Then_A_New_Learner_At_A_Payments_Opted_In_Provider_Starting_On_The_Opt_In_Date_Is_Funded_By_DAS()
+    {
+        var command = CreateCommand();
+        var addedLearning = SetUpNewLearnerWithNoLearnings();
+
+        await _handler.Handle(command);
+
+        addedLearning().LatestEpisode.FundingPlatform.Should().Be(FundingPlatform.DAS);
+    }
+
+    [Test]
+    public async Task Then_A_New_Learner_At_A_Provider_Not_Opted_Into_Payments_Is_Funded_By_SLD()
+    {
+        _optInConfiguration.PaymentsOptedInProviders = [Ukprn + 1];
+        var command = CreateCommand();
+        var addedLearning = SetUpNewLearnerWithNoLearnings();
+
+        await _handler.Handle(command);
+
+        addedLearning().LatestEpisode.FundingPlatform.Should().Be(FundingPlatform.SLD);
+    }
+
+    [Test]
+    public async Task Then_A_New_Learner_Starting_Before_The_Opt_In_Date_Is_Funded_By_SLD()
+    {
+        _optInConfiguration.StartDate = new DateTime(2025, 8, 2);
+        var command = CreateCommand();
+        var addedLearning = SetUpNewLearnerWithNoLearnings();
+
+        await _handler.Handle(command);
+
+        addedLearning().LatestEpisode.FundingPlatform.Should().Be(FundingPlatform.SLD);
+    }
+
+    [Test]
+    public async Task Then_A_Learner_With_An_Approved_Learning_Elsewhere_Is_Funded_By_SLD()
+    {
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { CreateLearning(isApproved: true) });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        await _handler.Handle(command);
+
+        addedLearning!.LatestEpisode.FundingPlatform.Should().Be(FundingPlatform.SLD);
+    }
+
+    [Test]
+    public async Task Then_An_Existing_Draft_Keeps_Its_Funding_Platform_When_The_Provider_Is_No_Longer_Opted_In()
+    {
+        _optInConfiguration.PaymentsOptedInProviders = [];
+        var command = CreateCommand();
+        var learner = CreateLearner();
+        var episode = CreateEpisode(isApproved: false);
+        episode.FundingPlatform = FundingPlatform.DAS;
+        var existingDraft = CreateLearningWithEpisodes(episode);
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync(learner);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { existingDraft });
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(learner.Key, command.Ukprn, command.TrainingCode))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel> { existingDraft });
+
+        await _handler.Handle(command);
+
+        existingDraft.LatestEpisode.FundingPlatform.Should().Be(FundingPlatform.DAS);
+    }
+
+    private Func<ApprenticeshipLearningDomainModel> SetUpNewLearnerWithNoLearnings()
+    {
+        ApprenticeshipLearningDomainModel? addedLearning = null;
+
+        _learnerRepository
+            .Setup(x => x.GetByUln(It.IsAny<string>()))
+            .ReturnsAsync((LearnerDomainModel?)null);
+
+        _learningRepository
+            .Setup(x => x.GetAllByLearnerKey(It.IsAny<Guid>(), It.IsAny<long?>(), It.IsAny<string?>()))
+            .ReturnsAsync(new List<ApprenticeshipLearningDomainModel>());
+
+        _learningRepository
+            .Setup(x => x.Add(It.IsAny<ApprenticeshipLearningDomainModel>()))
+            .Callback<ApprenticeshipLearningDomainModel>(l => addedLearning = l)
+            .Returns(Task.CompletedTask);
+
+        return () => addedLearning!;
     }
 
     private void AssertPersonalDetailsEvent(

@@ -25,7 +25,8 @@ public class WhenCreatingADraft
         DateTime? pauseDate = null,
         List<BreakInLearningUpdateDetails>? breaks = null,
         List<LearningSupportDetails>? learningSupport = null,
-        List<EnglishAndMathsUpdateDetails>? englishAndMaths = null)
+        List<EnglishAndMathsUpdateDetails>? englishAndMaths = null,
+        FundingPlatform fundingPlatform = FundingPlatform.SLD)
         => new()
         {
             ApprovalsApprenticeshipId = 0,
@@ -38,11 +39,21 @@ public class WhenCreatingADraft
             PauseDate = pauseDate,
             BreaksInLearning = breaks ?? [],
             LearningSupport = learningSupport ?? [],
-            EnglishAndMathsCourses = englishAndMaths ?? []
+            EnglishAndMathsCourses = englishAndMaths ?? [],
+            FundingPlatform = fundingPlatform
         };
 
     private static ApprenticeshipLearningDomainModel Create(DraftApprenticeshipDetails details)
         => ApprenticeshipLearningDomainModel.CreateDraft(LearnerKey, Ukprn, TrainingCode, details);
+
+    [TestCase(FundingPlatform.DAS)]
+    [TestCase(FundingPlatform.SLD)]
+    public void Then_The_Episode_Has_The_Given_Funding_Platform(FundingPlatform fundingPlatform)
+    {
+        var learning = Create(CreateDetails(fundingPlatform: fundingPlatform));
+
+        learning.LatestEpisode.FundingPlatform.Should().Be(fundingPlatform);
+    }
 
     [Test]
     public void Then_The_Draft_Is_Unapproved_With_The_Given_Identity_And_Price()

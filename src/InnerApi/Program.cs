@@ -57,6 +57,9 @@ public static class Program
         builder.Configuration.Bind(nameof(FeatureFlags), featureFlags);
         builder.Services.AddSingleton(featureFlags);
 
+        var apprenticeshipOptInConfiguration = builder.Configuration.GetSection(nameof(ApprenticeshipOptInConfiguration)).Get<ApprenticeshipOptInConfiguration>() ?? new ApprenticeshipOptInConfiguration();
+        builder.Services.AddSingleton(apprenticeshipOptInConfiguration);
+
         builder.Configuration.Bind(nameof(ApplicationSettings), applicationSettings);
         builder.Services.AddEntityFrameworkForApprenticeships(applicationSettings, NotLocal(builder.Configuration));
         builder.Services.AddSingleton(x => applicationSettings);

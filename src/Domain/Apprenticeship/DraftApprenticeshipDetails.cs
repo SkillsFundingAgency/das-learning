@@ -12,6 +12,7 @@ public class DraftApprenticeshipDetails
     public long ApprovalsApprenticeshipId { get; init; }
     public string LearnerRef { get; init; } = string.Empty;
     public LearningType LearningType { get; init; } = LearningType.Apprenticeship;
+    public FundingPlatform FundingPlatform { get; init; } = FundingPlatform.SLD;
 
     /// <summary>The single (earliest) cost the draft is created with.</summary>
     public required Cost Cost { get; init; }

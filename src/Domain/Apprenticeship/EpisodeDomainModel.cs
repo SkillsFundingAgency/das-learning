@@ -37,6 +37,8 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
     public short? WithdrawalReason => _entity.WithdrawalReason;
     public DateTime? PauseDate => _entity.PauseDate;
     public bool ForceEarningsSync => _entity.ForceEarningsSync;
+    public FundingPlatform FundingPlatform => _entity.FundingPlatform;
+    public bool IsApprovedAndPaidByDas => IsApproved && FundingPlatform == FundingPlatform.DAS;
     public IReadOnlyCollection<ApprenticeshipLearningSupportDomainModel> LearningSupport => _entity.LearningSupport.SelectOrEmptyList(ApprenticeshipLearningSupportDomainModel.Get);
     public IReadOnlyCollection<EpisodeBreakInLearningDomainModel> EpisodeBreaksInLearning => _entity.BreaksInLearning.SelectOrEmptyList(EpisodeBreakInLearningDomainModel.Get);
     public IReadOnlyCollection<EpisodePriceDomainModel> EpisodePrices => new ReadOnlyCollection<EpisodePriceDomainModel>(_episodePrices);
@@ -134,6 +136,7 @@ public class ApprenticeshipEpisodeDomainModel : EpisodeDomainModel
             CompletionDate = details.CompletionDate,
             AchievementDate = details.AchievementDate,
             PauseDate = details.PauseDate,
+            FundingPlatform = details.FundingPlatform,
             Prices = [price.GetEntity()],
             BreaksInLearning = details.BreaksInLearning.Select(b => new EpisodeBreakInLearning
             {

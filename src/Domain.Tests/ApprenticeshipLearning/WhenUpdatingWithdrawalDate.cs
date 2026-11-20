@@ -172,13 +172,49 @@ public class WhenUpdatingWithdrawalDate
         domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Should().BeEmpty();
     }
 
+    [Test]
+    public void AndEpisodeIsNotPaidByDas_ThenWithdrawalIsStoredAndNoEventRaised()
+    {
+        //Arrange
+        var withdrawalDate = _fixture.Create<DateTime>();
+        var withdrawalReasonCode = _fixture.Create<short>();
+        var domainModel = GetLearningDomainModel(withdrawalDate.AddDays(30), fundingPlatform: FundingPlatform.SLD);
+        var updateModel = GetLearnerUpdateModel(domainModel, withdrawalDate, withdrawalReasonCode);
+
+        //Act
+        var result = domainModel.Update(updateModel);
+
+        //Assert
+        result.Should().Contain(x => x == LearningUpdateChanges.Withdrawal);
+        domainModel.Episodes.First().WithdrawalDate.Should().Be(withdrawalDate);
+        domainModel.Episodes.First().WithdrawalReason.Should().Be(withdrawalReasonCode);
+        domainModel.FlushEvents().OfType<LearningWithdrawnEvent>().Should().BeEmpty();
+    }
+
+    [Test]
+    public void AndWithdrawalReversedOnEpisodeNotPaidByDas_ThenChangeMadeAndNoEventRaised()
+    {
+        //Arrange
+        var withdrawalDate = _fixture.Create<DateTime>();
+        var domainModel = GetLearningDomainModel(withdrawalDate, fundingPlatform: FundingPlatform.SLD);
+        var updateModel = GetLearnerUpdateModel(domainModel, null);
+
+        //Act
+        var result = domainModel.Update(updateModel);
+
+        //Assert
+        result.Should().Contain(x => x == LearningUpdateChanges.ReverseWithdrawal);
+        domainModel.Episodes.First().WithdrawalDate.Should().BeNull();
+        domainModel.FlushEvents().OfType<WithdrawalRevertedEvent>().Should().BeEmpty();
+    }
+
     private LearnerDomainModel GetLearnerDomainModel()
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.Learner>();
         return LearnerDomainModel.Get(entity);
     }
 
-    private ApprenticeshipLearningDomainModel GetLearningDomainModel(DateTime? withdrawalDate, bool isApproved = true)
+    private ApprenticeshipLearningDomainModel GetLearningDomainModel(DateTime? withdrawalDate, bool isApproved = true, FundingPlatform fundingPlatform = FundingPlatform.DAS)
     {
         var entity = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipLearning>();
         var episode = _fixture.Create<DataAccess.Entities.Learning.ApprenticeshipEpisode>();
@@ -186,6 +222,7 @@ public class WhenUpdatingWithdrawalDate
         episode.WithdrawalDate = withdrawalDate;
         episode.WithdrawalReason = withdrawalDate.HasValue ? _fixture.Create<short>() : null;
         episode.IsApproved = isApproved;
+        episode.FundingPlatform = fundingPlatform;
 
         entity.Episodes = new List<DataAccess.Entities.Learning.ApprenticeshipEpisode> { episode };
         return ApprenticeshipLearningDomainModel.Get(entity);

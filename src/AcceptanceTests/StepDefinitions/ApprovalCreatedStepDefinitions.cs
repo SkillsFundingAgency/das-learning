@@ -31,6 +31,17 @@ public class ApprovalCreatedStepDefinitions
         GivenNoApprenticeshipExistsForLearnerWithUln(_fixture.Create<long>().ToString());
     }
 
+    [Given(@"No apprenticeship exists for a learner with the payments opted-in provider")]
+    public void GivenNoApprenticeshipExistsAtThePaymentsOptedInProvider()
+    {
+        GivenNoApprenticeshipExists();
+        var approvalCreatedEvent = _scenarioContext.GetApprenticeshipCreatedEvent();
+        approvalCreatedEvent.ProviderId = Constants.UkPrn;
+        approvalCreatedEvent.ActualStartDate = approvalCreatedEvent.PriceEpisodes.Single().FromDate;
+        approvalCreatedEvent.StartDate = approvalCreatedEvent.PriceEpisodes.Single().FromDate;
+        approvalCreatedEvent.EndDate = approvalCreatedEvent.PriceEpisodes.Single().ToDate!.Value;
+    }
+
     [Given(@"No apprenticeship exists for learner with Uln (.*)")]
     public void GivenNoApprenticeshipExistsForLearnerWithUln(string uln)
     {

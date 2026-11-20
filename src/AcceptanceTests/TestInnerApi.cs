@@ -50,6 +50,9 @@ public class TestInnerApi : IDisposable
                 _testContext.GenerateConfiguration().Bind("FeatureFlags", featureFlags);
                 services.AddSingleton(featureFlags);
 
+                var apprenticeshipOptInConfiguration = _testContext.GenerateConfiguration().GetSection(nameof(ApprenticeshipOptInConfiguration)).Get<ApprenticeshipOptInConfiguration>() ?? new ApprenticeshipOptInConfiguration();
+                services.AddSingleton(apprenticeshipOptInConfiguration);
+
                 AddEntityFrameworkForApprenticeships(services, testContext.SqlDatabase?.DatabaseInfo.ConnectionString!);
             })
             .Configure(app =>

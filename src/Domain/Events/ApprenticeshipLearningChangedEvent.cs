@@ -61,6 +61,7 @@ public class ApprenticeshipLearningSnapshot
                 ApprovalsApprenticeshipId = e.ApprovalsApprenticeshipId,
                 FurtherApprovalNeeded = e.FurtherApprovalNeeded,
                 ForceEarningsSync = e.ForceEarningsSync,
+                FundingPlatform = e.FundingPlatform,
 
                 LearningSupport = e.LearningSupport.Select(ls => new ApprenticeshipLearningSupportSnapshot
                 {
@@ -131,6 +132,7 @@ public class ApprenticeshipEpisodeSnapshot
     public long ApprovalsApprenticeshipId { get; set; }
     public bool FurtherApprovalNeeded { get; set; }
     public bool ForceEarningsSync { get; set; }
+    public FundingPlatform FundingPlatform { get; set; }
     public List<ApprenticeshipLearningSupportSnapshot> LearningSupport { get; set; }
     public List<EpisodeBreakInLearningSnapshot> EpisodeBreaksInLearning { get; set; }
     public List<EpisodePriceSnapshot> EpisodePrices { get; set; }

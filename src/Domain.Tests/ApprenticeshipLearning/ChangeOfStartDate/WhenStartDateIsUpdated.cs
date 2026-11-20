@@ -183,6 +183,28 @@ public class WhenStartDateIsUpdated
     }
 
     [Test]
+    public void AndStartDateChangesOnApprovedEpisodeNotPaidByDasThenTheChangeIsReportedButDoesNotNeedFurtherApproval()
+    {
+        //Arrange
+        (_learning, _learner) = new LearningDomainModelBuilder()
+            .WithCosts([new Cost { FromDate = new DateTime(2024, 08, 01), TrainingPrice = 10000, EpaoPrice = 1000 }])
+            .WithPlannedEndDate(new DateTime(2025, 07, 31))
+            .WithFundingPlatform(FundingPlatform.SLD)
+            .Build();
+
+        var updateModel = LearningUpdateModelHelper.CreateUpdateModel(_learning.GetEntity(), _learner.GetEntity());
+        updateModel.OnProgrammeDetails.Costs.Single().FromDate = new DateTime(2024, 08, 15);
+
+        //Act
+        _result = _learning.Update(updateModel);
+
+        //Assert
+        _result.Should().Contain(LearningUpdateChanges.StartDate);
+        ChangesNeedingApproval.Should().BeEmpty();
+        _learning.GetEntity().Episodes.Single().FurtherApprovalNeeded.Should().BeFalse();
+    }
+
+    [Test]
     public void AndStartDateIsNotChangedThenTheUpdateDoesNotNeedFurtherApproval()
     {
         //Arrange

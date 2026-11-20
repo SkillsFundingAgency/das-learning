@@ -6,6 +6,7 @@ using SFA.DAS.Learning.Domain.Extensions;
 using SFA.DAS.Learning.Domain.Factories;
 using SFA.DAS.Learning.Domain.Repositories;
 using SFA.DAS.Learning.Enums;
+using SFA.DAS.Learning.Infrastructure.Configuration;
 
 namespace SFA.DAS.Learning.Command.CreateDraftApprenticeshipLearning;
 
@@ -14,17 +15,20 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
     private readonly ILearnerFactory _learnerFactory;
     private readonly ILearnerRepository _learnerRepository;
     private readonly IApprenticeshipLearningRepository _apprenticeshipLearningRepository;
+    private readonly ApprenticeshipOptInConfiguration _optInConfiguration;
     private readonly ILogger<CreateDraftApprenticeshipLearningCommandHandler> _logger;
 
     public CreateDraftApprenticeshipLearningCommandHandler(
         ILearnerFactory learnerFactory,
         ILearnerRepository learnerRepository,
         IApprenticeshipLearningRepository apprenticeshipLearningRepository,
+        ApprenticeshipOptInConfiguration optInConfiguration,
         ILogger<CreateDraftApprenticeshipLearningCommandHandler> logger)
     {
         _learnerFactory = learnerFactory;
         _learnerRepository = learnerRepository;
         _apprenticeshipLearningRepository = apprenticeshipLearningRepository;
+        _optInConfiguration = optInConfiguration;
         _logger = logger;
     }
 
@@ -47,7 +51,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         // no unapproved draft and no single unambiguous reinstatement candidate - create a new one
         if (existingLearning == null)
         {
-            var createResult = await CreateDraftLearning(command, learner);
+            var createResult = await CreateDraftLearning(command, learner, isNewApprenticeshipLearner);
             createResult.RemovedLearningKey = removedLearningKey;
 
             if (isNewApprenticeshipLearner) createResult.ChangeDetails.Add(LearningUpdateChanges.NewApprenticeshipLearner);
@@ -190,9 +194,20 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
         return newLearner;
     }
 
+    // Copy of Earnings' opt-in rule (the payments opt-in list is a subset of the earnings opt-in list)
+    private FundingPlatform GetFundingPlatform(long ukprn, DateTime startDate, bool isNewApprenticeshipLearner)
+    {
+        var isPaidByDas = isNewApprenticeshipLearner
+            && startDate >= _optInConfiguration.StartDate
+            && _optInConfiguration.PaymentsOptedInProviders.Contains(ukprn);
+
+        return isPaidByDas ? FundingPlatform.DAS : FundingPlatform.SLD;
+    }
+
     private async Task<CreateDraftApprenticeshipLearningCommandResult> CreateDraftLearning(
         CreateDraftApprenticeshipLearningCommand command,
-        LearnerDomainModel learner)
+        LearnerDomainModel learner,
+        bool isNewApprenticeshipLearner)
     {
         var updateModel = command.LearningUpdateContext;
         var cost = updateModel.OnProgrammeDetails.Costs.OrderBy(c => c.FromDate).First(); //one cost for initial draft creation
@@ -206,6 +221,7 @@ public class CreateDraftApprenticeshipLearningCommandHandler : ICommandHandler<C
                 ApprovalsApprenticeshipId = updateModel.ApprovalsApprenticeshipId,
                 LearnerRef = updateModel.LearnerRef,
                 LearningType = updateModel.Delivery.LearningType.GetValueOrDefault(LearningType.Apprenticeship),
+                FundingPlatform = GetFundingPlatform(command.Ukprn, cost.FromDate, isNewApprenticeshipLearner),
                 Cost = cost,
                 ExpectedEndDate = updateModel.OnProgrammeDetails.ExpectedEndDate,
                 WithdrawalDate = updateModel.OnProgrammeDetails.WithdrawalDate,

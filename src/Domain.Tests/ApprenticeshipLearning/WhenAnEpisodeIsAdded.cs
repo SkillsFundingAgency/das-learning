@@ -1,3 +1,4 @@
+using SFA.DAS.Learning.Enums;
 using System;
 using System.Collections.Generic;
 using AutoFixture;
@@ -35,6 +36,7 @@ public class WhenAnEpisodeIsAdded
             .With(x => x.PauseDate, (DateTime?)null)
             .With(x => x.FurtherApprovalNeeded, false)
             .With(x => x.ForceEarningsSync, false)
+            .With(x => x.FundingPlatform, FundingPlatform.SLD)
             .Create());
 
         //Act

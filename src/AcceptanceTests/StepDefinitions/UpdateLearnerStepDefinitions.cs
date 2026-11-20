@@ -113,6 +113,25 @@ public class UpdateLearnerStepDefinitions
         updatedLearning.Episodes.Single().ForceEarningsSync.Should().Be(forceEarningsSync);
     }
 
+    [Given(@"the apprenticeship episode FundingPlatform is set to (DAS|SLD)")]
+    public async Task GivenTheApprenticeshipEpisodeFundingPlatformIsSetTo(FundingPlatform fundingPlatform)
+    {
+        await using var dbConnection = new SqlConnection(_scenarioContext.GetDbConnectionString());
+        await dbConnection.OpenAsync();
+        var learning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+
+        await using var command = new SqlCommand(
+            "UPDATE dbo.ApprenticeshipEpisode SET FundingPlatform = @FundingPlatform WHERE LearningKey = @LearningKey;",
+            dbConnection);
+        command.Parameters.AddWithValue("@FundingPlatform", (int)fundingPlatform);
+        command.Parameters.AddWithValue("@LearningKey", learning.Key);
+
+        await command.ExecuteNonQueryAsync();
+
+        var updatedLearning = dbConnection.GetLearning(_scenarioContext.GetApprenticeshipCreatedEvent().Uln);
+        updatedLearning.Episodes.Single().FundingPlatform.Should().Be(fundingPlatform);
+    }
+
     [When(@"an update request is sent again with the same data")]
     public async Task WhenAnUpdateRequestIsSentWithTheSameData()
     {
@@ -384,6 +403,15 @@ public class UpdateLearnerStepDefinitions
             _testContext.MessageSession.ReceivedEvents<LearningWithdrawalRevertedEvent>().Any(
                 x => x.LearningKey == learningKey),
             $"Failed to find published {nameof(LearningWithdrawalRevertedEvent)} event");
+    }
+
+    [Then(@"an LearningWithdrawalRevertedEvent is not sent")]
+    public async Task ThenALearningWithdrawalRevertedEventIsNotSent()
+    {
+        var learningKey = _scenarioContext.GetLearningKey();
+        await WaitHelper.WaitForUnexpected(() =>
+            _testContext.MessageSession.ReceivedEvents<LearningWithdrawalRevertedEvent>().Any(x => x.LearningKey == learningKey),
+            $"Unexpected {nameof(LearningWithdrawalRevertedEvent)} event was published.");
     }
 
     [Then(@"the PersonalDetailsChangedEvent is emitted")]
