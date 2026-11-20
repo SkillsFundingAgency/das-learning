@@ -6,6 +6,7 @@ public class ApprovedLearningUpdatedEvent
     public long ApprenticeshipId { get; set; }
     public string LearningType { get; set; } = null!;
     public List<ApprenticeshipFieldChange> Changes { get; set; } = new();
+    public List<PriceEpisode> Prices { get; set; } = new();
 }
 
 public class ApprenticeshipFieldChange
@@ -18,4 +19,11 @@ public class ApprenticeshipData
 {
     public string Old { get; set; } = string.Empty;
     public string New { get; set; } = string.Empty;
+}
+
+public class PriceEpisode
+{
+    public decimal TrainingPrice { get; set; }
+    public decimal AssessmentPrice { get; set; }
+    public DateTime EffectiveFrom { get; set; }
 }

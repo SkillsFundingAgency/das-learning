@@ -63,7 +63,7 @@ public static class LearningUpdateModelHelper
                 {
                     FromDate = x.StartDate,
                     TrainingPrice = Convert.ToInt32(x.TrainingPrice.Value),
-                    EpaoPrice = Convert.ToInt32(x.EndPointAssessmentPrice.Value)
+                    EpaoPrice = x.EndPointAssessmentPrice.HasValue ? Convert.ToInt32(x.EndPointAssessmentPrice.Value) : null
                 }).ToList(),
                 PauseDate = learning.GetEpisode().PauseDate,
                 BreaksInLearning = learning.GetEpisode().BreaksInLearning.Select(b => new BreakInLearningUpdateDetails

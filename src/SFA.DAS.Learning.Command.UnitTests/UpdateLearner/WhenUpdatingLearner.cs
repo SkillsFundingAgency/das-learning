@@ -209,8 +209,6 @@ public class WhenUpdatingLearner
         result.Changes.Should().Contain(LearningUpdateChanges.StartDate);
         result.ChangeDetails.Single(x => x.ChangeType == LearningUpdateChanges.StartDate)
             .RequiresApproval.Should().Be(isApproved);
-        result.ChangeDetails.Where(x => x.ChangeType != LearningUpdateChanges.StartDate)
-            .Should().OnlyContain(x => !x.RequiresApproval);
     }
 
     [Test]

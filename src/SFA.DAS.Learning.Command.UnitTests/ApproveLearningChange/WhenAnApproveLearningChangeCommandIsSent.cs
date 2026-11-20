@@ -19,6 +19,7 @@ namespace SFA.DAS.Learning.Command.UnitTests.ApproveLearningChange;
 public class WhenAnApproveLearningChangeCommandIsSent
 {
     private static readonly DateTime StartDate = new(2025, 8, 1);
+    private static readonly DateTime LaterPriceDate = new(2026, 2, 1);
 
     private ApproveLearningChangeCommandHandler _handler = null!;
     private Mock<ILearningService> _learningService = null!;
@@ -134,10 +135,10 @@ public class WhenAnApproveLearningChangeCommandIsSent
     }
 
     [Test]
-    public async Task AndTheStartDateChangeMatchesAndAPricesChangeIsIncludedThenTheFlagIsClearedAndTheLearningIsUpdated()
+    public async Task AndTheStartDateChangeMatchesAndThePricesMatchThenTheFlagIsClearedAndTheLearningIsUpdated()
     {
         var command = CreateCommand(newStartDate: "2025-08-01");
-        command.Changes.Add(PricesChange());
+        command.Prices = MatchingPrices();
 
         await _handler.Handle(command);
 
@@ -146,10 +147,10 @@ public class WhenAnApproveLearningChangeCommandIsSent
     }
 
     [Test]
-    public async Task AndTheStartDateChangeDoesNotMatchAndAPricesChangeIsIncludedThenNothingIsUpdated()
+    public async Task AndTheStartDateChangeDoesNotMatchAndThePricesMatchThenNothingIsUpdated()
     {
         var command = CreateCommand(newStartDate: "2025-08-20");
-        command.Changes.Add(PricesChange());
+        command.Prices = MatchingPrices();
 
         await _handler.Handle(command);
 
@@ -158,15 +159,84 @@ public class WhenAnApproveLearningChangeCommandIsSent
     }
 
     [Test]
-    public async Task AndOnlyAPricesChangeIsApprovedThenTheFlagIsClearedAndTheLearningIsUpdated()
+    public async Task AndThePricesMatchThenTheRaisedEventCarriesTheApprovedPrices()
     {
         var command = CreateCommand(newStartDate: "2025-08-01");
-        command.Changes = [PricesChange()];
+        command.Prices = MatchingPrices();
+
+        await _handler.Handle(command);
+
+        _learning.FlushEvents().OfType<EmployerApprovalAppliedEvent>().Single()
+            .Prices.Should().Equal(command.Prices);
+    }
+
+    [Test]
+    public async Task AndOnlyPricesAreApprovedAndTheyMatchThenTheFlagIsClearedAndTheLearningIsUpdated()
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes = [];
+        command.Prices = MatchingPrices();
 
         await _handler.Handle(command);
 
         _episode.FurtherApprovalNeeded.Should().BeFalse();
         _learningService.Verify(x => x.UpdateLearning(_learning), Times.Once);
+    }
+
+    [Test]
+    public async Task AndTheStoredEpaPriceIsUnknownAndTheApprovedEpaPriceIsZeroThenTheFlagIsCleared()
+    {
+        _episode.Prices.Last().EndPointAssessmentPrice = null;
+        _learning = CreateLearning(_episode);
+        _learningService.Setup(x => x.GetLearning(_learning.Key, LearningType.Apprenticeship)).ReturnsAsync(_learning);
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Prices = MatchingPrices();
+        command.Prices[1] = command.Prices[1] with { AssessmentPrice = 0 };
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeFalse();
+    }
+
+    [TestCase("training", Description = "A training price differs")]
+    [TestCase("epa", Description = "An EPA price differs")]
+    [TestCase("epaUnknown", Description = "An approved EPA price is unknown where ours is not zero")]
+    [TestCase("date", Description = "A later price's date differs")]
+    [TestCase("extra", Description = "An extra price was approved")]
+    [TestCase("missing", Description = "A price was not approved")]
+    public async Task AndThePricesDoNotMatchThenNothingIsUpdated(string difference)
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        var prices = MatchingPrices();
+        switch (difference)
+        {
+            case "training": prices[1] = prices[1] with { TrainingPrice = 1600 }; break;
+            case "epa": prices[1] = prices[1] with { AssessmentPrice = 400 }; break;
+            case "epaUnknown": prices[1] = prices[1] with { AssessmentPrice = null }; break;
+            case "date": prices[1] = prices[1] with { EffectiveFrom = new DateTime(2026, 3, 1) }; break;
+            case "extra": prices.Add(new ApprovedPrice(2000, 300, new DateTime(2026, 5, 1))); break;
+            case "missing": prices.RemoveAt(1); break;
+        }
+        command.Prices = prices;
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
+    }
+
+    [TestCase("Firstname")]
+    [TestCase("Prices", Description = "Approvals' old shape: prices as a change item")]
+    [TestCase(null, Description = "No changes at all")]
+    public async Task AndNothingRecognisedIsApprovedThenNothingIsUpdated(string? changeType)
+    {
+        var command = CreateCommand(newStartDate: "2025-08-01");
+        command.Changes = changeType == null ? [] : [new ApprovedChange(changeType, "Old", "New")];
+
+        await _handler.Handle(command);
+
+        _episode.FurtherApprovalNeeded.Should().BeTrue();
+        _learningService.Verify(x => x.UpdateLearning(It.IsAny<LearningDomainModel>()), Times.Never);
     }
 
     [Test]
@@ -210,10 +280,11 @@ public class WhenAnApproveLearningChangeCommandIsSent
         Changes = [new ApprovedChange("StartDate", "2025-07-01", newStartDate)]
     };
 
-    private static ApprovedChange PricesChange() => new(
-        "Prices",
-        """[{"effectiveFrom":"2025-07-01","cost":1200,"trainingPrice":1000,"assessmentPrice":200}]""",
-        """[{"effectiveFrom":"2025-08-01","cost":1200,"trainingPrice":1000,"assessmentPrice":200}]""");
+    private static List<ApprovedPrice> MatchingPrices() =>
+    [
+        new(1000, 200, StartDate),
+        new(1500, 300, LaterPriceDate)
+    ];
 
     private static ApprenticeshipEpisode CreateEpisode(bool furtherApprovalNeeded)
     {
@@ -235,10 +306,20 @@ public class WhenAnApproveLearningChangeCommandIsSent
                 Key = Guid.NewGuid(),
                 EpisodeKey = episode.Key,
                 StartDate = StartDate,
-                EndDate = new DateTime(2026, 7, 31),
+                EndDate = LaterPriceDate.AddDays(-1),
                 TrainingPrice = 1000,
                 EndPointAssessmentPrice = 200,
                 TotalPrice = 1200
+            },
+            new()
+            {
+                Key = Guid.NewGuid(),
+                EpisodeKey = episode.Key,
+                StartDate = LaterPriceDate,
+                EndDate = new DateTime(2026, 7, 31),
+                TrainingPrice = 1500,
+                EndPointAssessmentPrice = 300,
+                TotalPrice = 1800
             }
         };
 

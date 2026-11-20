@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,9 +23,14 @@ public class LearningChangeApprovedEventHandler(ICommandDispatcher commandDispat
         {
             LearningKey = @event.LearningKey,
             ApprenticeshipId = @event.ApprenticeshipId,
-            Changes = @event.Changes.Select(c => new ApprovedChange(c.ChangeType, c.Data.Old, c.Data.New)).ToList()
+            Changes = @event.Changes.Select(c => new ApprovedChange(c.ChangeType, c.Data.Old, c.Data.New)).ToList(),
+            Prices = @event.Prices?.Select(ToApprovedPrice).ToList()
         };
 
         await commandDispatcher.Send(command, CancellationToken.None);
     }
+
+    private static ApprovedPrice ToApprovedPrice(LearningChangeEvent.Price price) =>
+        new(price.TrainingPrice, price.AssessmentPrice,
+            DateTime.ParseExact(price.EffectiveFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture));
 }

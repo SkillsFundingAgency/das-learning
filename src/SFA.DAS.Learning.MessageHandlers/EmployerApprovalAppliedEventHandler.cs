@@ -23,6 +23,14 @@ public class EmployerApprovalAppliedEventHandler(IMessageSession messageSession,
                     ChangeType = x.ChangeType,
                     Data = new ApprenticeshipData { Old = x.Old, New = x.New }
                 })
+                .ToList(),
+            Prices = @event.Prices
+                .Select(x => new PriceEpisode
+                {
+                    TrainingPrice = x.TrainingPrice ?? 0,
+                    AssessmentPrice = x.AssessmentPrice ?? 0,
+                    EffectiveFrom = x.EffectiveFrom
+                })
                 .ToList()
         }, cancellationToken);
 

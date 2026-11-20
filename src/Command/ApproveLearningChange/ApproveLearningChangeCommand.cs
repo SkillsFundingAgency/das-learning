@@ -7,4 +7,5 @@ public class ApproveLearningChangeCommand : ICommand
     public Guid LearningKey { get; set; }
     public long ApprenticeshipId { get; set; }
     public List<ApprovedChange> Changes { get; set; } = new();
+    public List<ApprovedPrice>? Prices { get; set; }
 }
