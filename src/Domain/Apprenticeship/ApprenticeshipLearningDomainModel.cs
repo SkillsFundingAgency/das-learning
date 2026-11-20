@@ -470,13 +470,23 @@ public class ApprenticeshipLearningDomainModel : LearningDomainModel<Apprentices
 
     private void UpdateExpectedEndDate(LearningUpdateContext updateModel, List<LearningChange> changes)
     {
+        var previousExpectedEndDate = LatestEpisode.EpisodePrices.MaxBy(x => x.StartDate)!.EndDate;
+
         var hasChanged = LatestEpisode.UpdateExpectedEndDateIfChanged(updateModel.OnProgrammeDetails.ExpectedEndDate);
 
         if (hasChanged)
         {
-            changes.Add(LearningUpdateChanges.ExpectedEndDate);
+            var requiresApproval = LatestEpisode.IsApprovedAndPaidByDas;
 
-            if (!LatestEpisode.IsApprovedAndPaidByDas) return;
+            changes.Add(new LearningChange(
+                LearningUpdateChanges.ExpectedEndDate,
+                old: FormatDate(previousExpectedEndDate),
+                @new: FormatDate(updateModel.OnProgrammeDetails.ExpectedEndDate),
+                requiresApproval));
+
+            if (!requiresApproval) return;
+
+            LatestEpisode.SetFurtherApprovalNeeded(true);
 
             var @event = new EndDateChangedEvent
             {
